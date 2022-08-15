@@ -79,7 +79,7 @@ function runAnimation(area, ctx, game) {
     requestAnimationFrame(() => runAnimation(area, ctx, game))
 }
 
-function computePlayerPosition(game, mouse_y, canvas_y) {
+function computePlayerPosition(game, mouse_y) {
     // let the cursor be complete
     if (mouse_y < PLAYER_HEIGHT / 2) {
         game.player.y = 0;
