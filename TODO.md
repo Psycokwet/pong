@@ -3,7 +3,7 @@
 ## Features
 
 - *https
-- *Authentification
+- R1: *Authentification
   - *double authentification (send text message)
   - *securing passwords
 - *Player plays pong
@@ -33,3 +33,8 @@
 - visualisation of the win / lose rate
 - AI system
 - organize tournament
+
+## R1: Authentification
+
+Pong uses the Passport javascript library to handle users authentification.
+
