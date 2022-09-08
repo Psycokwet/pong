@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./reverse_proxy.conf:/etc/nginx/conf.d/default.conf:ro 
+    command: [nginx-debug, '-g', 'daemon off;']
+    ports:
+      - "0.0.0.0:80:80"
+    depends_on:
+      - frontend
+      - backend
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.local
+    volumes: 
+      - "./frontend/:/usr/src/app/"
+    restart: unless-stopped
+    env_file: .env
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.local
+    volumes: 
+      - "./backend/:/svr/app"
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - database
+
+  database:
+    image: bitnami/postgresql:14
+    restart: unless-stopped
+    environment:
+      - POSTGRESQL_USERNAME=dev
+      - POSTGRESQL_PASSWORD=local
+      - POSTGRESQL_DATABASE=db
+      - POSTGRESQL_POSTGRES_PASSWORD=localroot
+    volumes:
+      - db:/bitnami/postgresql
+    
+volumes:
+  db:
