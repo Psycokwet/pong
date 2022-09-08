@@ -1,0 +1,18 @@
+FROM node:alpine 
+# ATTENTION SI DEP QUI ON DES SOUCIS SOUS ALPINE
+
+RUN mkdir -p /svr/app
+
+WORKDIR /svr/app
+
+RUN npm i -g @nestjs/cli --silent
+
+COPY package*.json ./
+
+RUN npm i --silent
+
+COPY . .
+
+EXPOSE $BACKEND_PORT
+
+CMD ["npm", "start"]
