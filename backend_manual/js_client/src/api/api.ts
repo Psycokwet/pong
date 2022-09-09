@@ -4,7 +4,7 @@ import { AuthUserDto } from "@back/auth/auth-user.dto";
 type OnErrorFunction = (reason: any) => void
 type OnSuccess = (data? : object) => void
 
-export const PREFIX = 'http://localhost:3000'
+export const PREFIX = 'http://localhost:8080/api'
 export enum URL {
   CREATE_USER = '/user/',
   AUTH = '/auth/',
