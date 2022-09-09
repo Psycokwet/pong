@@ -40,6 +40,7 @@ services:
       - POSTGRESQL_PASSWORD=local
       - POSTGRESQL_DATABASE=db
       - POSTGRESQL_POSTGRES_PASSWORD=localroot
+      - POSTGRESQL_MASTER_PORT=5432
     volumes:
       - db:/bitnami/postgresql
     
