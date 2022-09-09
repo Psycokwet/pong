@@ -14,6 +14,7 @@ Though, please prefer separating commits if there truly need to be multiple type
 
 ### key words :
 - fix : bug fix, don't forget to explain the bug
+- wip : work in progress, this commit is not a stable commit
 - feat : adding new feature
 - tests : writing/editing tests
 - refactor : code organisation, refactoring
