@@ -1,6 +1,6 @@
 ### format
 
-<key word>* [scope] [context]
+<key word>* [scope] [context] : <short description>
 [body]
 
 <> = necessary
@@ -18,6 +18,9 @@ docs : writing/editing documentation
 ! : Breaking change, this commit is particularly important, and need to be paid attention
 
 You can add some as you go, if they make sense of course, please try to add them here then.
+
+### short description
+a few word to describe what really happened in this commit
 
 ### scope :
 - frontend
