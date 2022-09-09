@@ -1,12 +1,14 @@
-import React from 'react'
-import ReactDOM, { createRoot } from "react-dom/client";
-import App from "./components/App";
-import './components/index.css'
+
 import { Api, Bearer } from "./api/api";
 
-async function getAuthenticated() {
+export async function createUser() {
   let api: Api = new Api()
-  Api.auth("forgeronvirtuel", "$eR477688910")
+  return await Api.createUser("forgeronvirtuel", "fdfg453GFHFgfh", "socarboni@gmail.com")
+}
+
+export async function getAuthenticated() {
+  let api: Api = new Api()
+  Api.auth("forgeronvirtuel", "fdfg453GFHFgfh")
     .then<void | Bearer>(r => {
       if (!r) return;
       if (r.status === 201) return r.json()
@@ -68,11 +70,3 @@ async function getAuthenticated() {
     })
     .catch(console.error)
 }
-
-getAuthenticated()
-
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-)
