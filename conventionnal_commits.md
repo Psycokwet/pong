@@ -1,9 +1,9 @@
 ### format
 
-<key word>* [scope] [context] : <short description>
+{key word}* [scope] [context] : {short description}
 [body]
 
-<> = necessary
+{} = necessary
 [] = optional
 * = The previous token can be present 1 or more time (with different values for example)
 Though, please prefer separating commits if there truly need to be multiple type, unless it makes sense to group them together
