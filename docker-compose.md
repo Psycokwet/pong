@@ -24,6 +24,7 @@ You can access whatever you code in the frontend at localhost from your preferre
 Holy be the hot reloading, write code, save, enjoy the result.
 You can access whatever you code in the backend at localhost/api/ from your preferred browser.
 You can access any routes by using localhost/api/[ROUTE], the route will be cleansed from the /api/ part. Leaving you only what you need.
+Don't forget to refresh the page to do a new call to the route though ;) 
 
 ### containers manipulations
 #### interactive
