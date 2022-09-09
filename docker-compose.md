@@ -3,8 +3,15 @@
 First step, which is sadly, a default of the environnement, you have to run ```npm i``` in both ./backend/ and ./frontend/
 I didn't find how to fix this for the moment, but, appart from that, everything seem to be running smoot, so please indulge.
 
+You also have to create an .env file, following the example of ./env_sample.
+
+You may need to locally stop nginx, do
+```systemctl stop nginx```
+or any other command you prefer
+
 Then, you just have to
 ```docker-compose up``` to launch the whole thing.
+
 
 ### development
 #### frontend 
@@ -28,3 +35,6 @@ Or if bash is not availaible (depending on image base):
 #### Rebuilding container one to one
 Example for the backend :
 ```docker-compose build --no-cache backend```
+
+#### deleting all dockers
+```sudo docker system prune -fa```
