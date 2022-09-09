@@ -38,4 +38,4 @@ Example for the backend :
 ```docker-compose build --no-cache backend```
 
 #### deleting all dockers
-```sudo docker system prune -fa```
+```docker system prune -fa```
