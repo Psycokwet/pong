@@ -1,38 +1,16 @@
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  font-family: myFontPixel;
+  width: 100vw;
+  height: 100vh;;
+  background-image: url('./img/bg.png');
+  background-size: cover;
   color: white;
+  font-size: 3rem;
+  padding: 2rem;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Define a name to a font */
+@font-face { 
+  font-family: myFontPixel;
+  src: url('./font/Pixel-LCD-7.woff');
 }
