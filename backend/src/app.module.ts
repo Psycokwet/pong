@@ -9,8 +9,8 @@ import { AppService } from './app.service';
       type: 'postgres',
       host: 'database',
       port: 5432,
-      username: 'dev',
-      password: 'local',
+      username: 'postgres',
+      password: 'localroot',
       database: 'db',
       autoLoadEntities: true,
       synchronize: true, // to disable in prod

@@ -44,5 +44,19 @@ services:
     volumes:
       - db:/bitnami/postgresql
     
+  admin:
+    image: bitnami/phppgadmin
+    restart: unless-stopped
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_PORT_NUMBER=5432
+    volumes:
+      - db:/bitnami/postgresql
+    ports: 
+      - 5431:8080
+
+    depends_on:
+      - database
+    
 volumes:
   db:
