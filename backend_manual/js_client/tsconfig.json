@@ -16,7 +16,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@back/*": [ "../back/src/*" ],
+      "@back/*": [ "../../backend/srgfhhc/*" ],
     }
   },
   "include": ["src"],
