@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
+import { User } from './users/user.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AppService } from './app.service';
       database: 'db',
       autoLoadEntities: true,
       synchronize: true, // to disable in prod
+      entities: [User],
     }),
   ],
   controllers: [AppController],

@@ -7,7 +7,7 @@ import {
   Post,
   Request,
 } from '@nestjs/common';
-import { CreateUserDto } from './create-user.dto';
+import { UserDto } from './user.dto';
 import { UsersService } from './users.service';
 
 @Controller('/user/')
@@ -17,11 +17,21 @@ export class UserController {
 
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  async createUser(@Body() user: CreateUserDto) {
-    //not optimized, it to see a bit where we are on the logging, to change later or delete
+  @Post('signup')
+  async signup (@Body() dto: UserDto) { // dto: data transfert object
     const reqId = this.reqId++;
     this.logger.log(`reqId no. ${reqId}: trying to create user`);
-    await this.usersService.createUser(user);
+
+    return await this.usersService.signup(dto);
   }
+
+  @Post('signin')
+  async signin (@Body() dto: UserDto) {
+    return this.usersService.signin(dto);
+  }
+
+  // @Post('signout')
+  // async signout (@Body() dto: UserDto) {
+  //   return this.usersService.signout(dto);
+  // }
 }
