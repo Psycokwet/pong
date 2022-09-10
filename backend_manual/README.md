@@ -5,7 +5,7 @@
 run
 ```npm i```
 ```npm run dev```
-and update main.tsx using Api class like in the examples on the file, to call whatever route you want, add your own api manual tests here as well.
+and update src/main.tsx using Api class like in the examples on the file, to call whatever route you want, add your own api manual tests here as well.
 
 follow the link offered by the terminal (supposedly http://localhost:5173/)
 And refresh the page if you want to resend the request.
