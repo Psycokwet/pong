@@ -6,4 +6,4 @@ COPY package*.json ./
 
 RUN npm i --silent
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
