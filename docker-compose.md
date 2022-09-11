@@ -29,6 +29,8 @@ You can access whatever you code in the backend at http://localhost:8080/api/ fr
 You can access any routes by using http://localhost:8080/api/[ROUTE], the route will be cleansed from the /api/ part. Leaving you only what you need.
 Don't forget to refresh the page to do a new call to the route though ;) 
 
+There is some tools ready for your convenience to tests request. A light example with insomnia (similare to postman for those who knows), and a frontend minimal example, read the documentation attached in backend_manual.
+
 #### phpmyadmin 
 
 You can access phpmyadmin at http://localhost:5431 from your preferred browser.
