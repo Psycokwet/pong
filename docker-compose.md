@@ -12,6 +12,9 @@ or any other command you prefer
 Then, you just have to
 ```docker-compose up``` to launch the whole thing.
 
+#### What to do in case of a merge ? 
+
+Dockerfiles or configs or package may have changed. Take the reflex to build again your images before saying everything is broken ;) 
 
 ### development
 #### frontend 
