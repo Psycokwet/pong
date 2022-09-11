@@ -31,6 +31,8 @@ Don't forget to refresh the page to do a new call to the route though ;)
 
 There is some tools ready for your convenience to tests request. A light example with insomnia (similare to postman for those who knows), and a frontend minimal example, read the documentation attached in backend_manual.
 
+You can test the get routes directly on browser, but it's more complicated for other types of routes, hence the two tools offered.
+
 #### phpmyadmin 
 
 You can access phpmyadmin at http://localhost:5431 from your preferred browser.
