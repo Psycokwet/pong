@@ -43,5 +43,13 @@ Or if bash is not availaible (depending on image base):
 Example for the backend :
 ```docker-compose build --no-cache backend```
 
+#### acces container logs
+Example for the backend :
+```docker-compose logs backend```
+
+#### stopping all dockers
+```docker stop $(docker ps -qa)```
+
 #### deleting all dockers
+They must be already stopped beforehand.
 ```docker system prune -fa```
