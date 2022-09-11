@@ -38,6 +38,7 @@ You can test the get routes directly on browser, but it's more complicated for o
 If you need for some reasons, to simulate backend, with never failing datas, or easily deterministic answer, you can chose to simulate the backend with this simplified version of the backend.
 Just set the environnement variable in the front docker-compose to :
 ```VITE_CONTEXT=mockup```
+Don't forget to uncomment the mockup conteneur, as well as changing nginx configuration, for the one with the mockup. Follow the comment in the docker-compose :)
 
 Don't forget to npm i locally as well.
 
