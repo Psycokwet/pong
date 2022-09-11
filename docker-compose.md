@@ -26,6 +26,12 @@ You can access whatever you code in the backend at http://localhost:8080/api/ fr
 You can access any routes by using http://localhost:8080/api/[ROUTE], the route will be cleansed from the /api/ part. Leaving you only what you need.
 Don't forget to refresh the page to do a new call to the route though ;) 
 
+#### phpmyadmin 
+
+You can access phpmyadmin at http://localhost:5431 from your preferred browser.
+user : postgres
+password : the root password from docker-compose
+
 ### containers manipulations
 #### interactive
 If you need to enter a container, let's say, backend, you can do :
