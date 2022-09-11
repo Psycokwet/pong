@@ -18,6 +18,9 @@ services:
       dockerfile: Dockerfile.local
     volumes: 
       - "./frontend/:/usr/src/app/"
+    environment:
+      # - VITE_CONTEXT=DEV
+      - VITE_CONTEXT=MOCKUP
     restart: unless-stopped
     env_file: .env
 
@@ -29,6 +32,16 @@ services:
       - "./backend/:/svr/app"
     restart: unless-stopped
     env_file: .env
+    depends_on:
+      - database
+
+  backend_mockup:
+    build:
+      context: ./backend_mockup
+      dockerfile: Dockerfile.local
+    volumes: 
+      - "./backend_mockup/:/svr/app"
+    restart: unless-stopped
     depends_on:
       - database
 
