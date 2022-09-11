@@ -39,6 +39,11 @@ If you need for some reasons, to simulate backend, with never failing datas, or 
 Just set the environnement variable in the front docker-compose to :
 ```VITE_CONTEXT=mockup```
 
+Don't forget to npm i locally as well.
+
+There, you have the database available if you want to setup some base datas for testing, or you can send request result hard coded. It's as you prefer for your needs.
+The current available example only show a success in creating user (fake, obviously)
+
 #### phpmyadmin 
 
 You can access phpmyadmin at http://localhost:5431 from your preferred browser.

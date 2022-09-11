@@ -19,10 +19,22 @@ services:
     volumes: 
       - "./frontend/:/usr/src/app/"
     environment:
-      # - VITE_CONTEXT=DEV
-      - VITE_CONTEXT=MOCKUP
+      - VITE_CONTEXT=DEV
+      # - VITE_CONTEXT=MOCKUP
     restart: unless-stopped
     env_file: .env
+
+  # Don't forget to uncomment the following conteneur if you want to have the mockup available :) 
+
+  # backend_mockup:
+  #   build:
+  #     context: ./backend_mockup
+  #     dockerfile: Dockerfile.local
+  #   volumes: 
+  #     - "./backend_mockup/:/svr/app"
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - database
 
   backend:
     build:
@@ -32,16 +44,6 @@ services:
       - "./backend/:/svr/app"
     restart: unless-stopped
     env_file: .env
-    depends_on:
-      - database
-
-  backend_mockup:
-    build:
-      context: ./backend_mockup
-      dockerfile: Dockerfile.local
-    volumes: 
-      - "./backend_mockup/:/svr/app"
-    restart: unless-stopped
     depends_on:
       - database
 
