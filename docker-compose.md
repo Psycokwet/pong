@@ -33,6 +33,18 @@ There is some tools ready for your convenience to tests request. A light example
 
 You can test the get routes directly on browser, but it's more complicated for other types of routes, hence the two tools offered.
 
+#### backend_mockup
+
+If you need for some reasons, to simulate backend, with never failing datas, or easily deterministic answer, you can chose to simulate the backend with this simplified version of the backend.
+Just set the environnement variable in the front docker-compose to :
+```VITE_CONTEXT=mockup```
+Don't forget to uncomment the mockup conteneur, as well as changing nginx configuration, for the one with the mockup. Follow the comment in the docker-compose :)
+
+Don't forget to npm i locally as well.
+
+There, you have the database available if you want to setup some base datas for testing, or you can send request result hard coded. It's as you prefer for your needs.
+The current available example only show a success in creating user (fake, obviously)
+
 #### phpmyadmin 
 
 You can access phpmyadmin at http://localhost:5431 from your preferred browser.
