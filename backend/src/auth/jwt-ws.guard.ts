@@ -4,7 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
-import { jwtConstants } from './constants';
+import { JwtConstants } from './jwtConstants';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
@@ -25,7 +25,7 @@ export class WsGuard extends AuthGuard('jwt') {
     const bearerToken = req.handshake.headers.authorization;
     try {
       req.user = this.jwtService.verify(bearerToken, {
-        secret: jwtConstants.secret,
+        secret: JwtConstants.secret,
       });
     } catch (e: unknown) {
       if (e instanceof Error) {
