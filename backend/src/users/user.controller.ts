@@ -1,15 +1,22 @@
 import {
   Body,
   Controller,
+  Get,
   HttpException,
   HttpStatus,
   Logger,
   Post,
   Request,
+  UseGuards,
+  StreamableFile,
 } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { UserDto } from './user.dto';
 import { UsersService } from './users.service';
+import { AuthUserIdDto } from 'src/auth/auth-user.dto';
 
+import { createReadStream } from 'fs';
+import { join } from 'path';
 @Controller('/user/')
 export class UserController {
   private reqId = 1;
@@ -33,5 +40,16 @@ export class UserController {
   @Post('signout')
   async signout (@Body() dto: UserDto) {
     return this.usersService.signout();
+  }
+
+  @Get('get_picture')
+  @UseGuards(JwtAuthGuard)
+  async get_picture(@Request() req: { user: AuthUserIdDto }): Promise<StreamableFile> {
+    const picture_path = await this.usersService.get_picture(req.user);
+    const picture_folder = "pictures";
+
+    // https://docs.nestjs.com/techniques/streaming-files
+    const file = createReadStream(join(process.cwd(), `${picture_folder}/${picture_path}`));
+    return new StreamableFile(file);
   }
 }

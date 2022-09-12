@@ -92,4 +92,10 @@ export class UsersService {
   async signout() {
     // destroy session
   }
+
+  async get_picture(dto: AuthUserIdDto ) {
+    const user = await this.findOne(dto.username);
+
+    return user.picture;
+  }
 }
