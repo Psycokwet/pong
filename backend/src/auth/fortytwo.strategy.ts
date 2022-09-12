@@ -19,8 +19,6 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
     _refreshToken: string,
     profile: Profile,
   ) {
-      console.log(_accessToken, _refreshToken)
-
       const { id, name, emails } = profile;
 
     // Here a custom User object is returned. In the the repo I'm using a UsersService with repository pattern, learn more here: https://docs.nestjs.com/techniques/database
