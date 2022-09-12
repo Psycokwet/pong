@@ -10,18 +10,18 @@ import NotFound from './Pages-To-Change/NotFound'
 const NavBar = () => {
   return (
     <div>
-      <nav className='fixed w-full flex justify-between p-4 items-center'>
-        <ul className='md:flex gap-8 p-6 uppercase'>
-          <li><NavLink to="/" style={({isActive}) => ({color: isActive? "blue": "black"})}>Pong's Game</NavLink></li>
-          <li><NavLink to="/play" style={({isActive}) => ({color: isActive? "blue": "black"})}>Play</NavLink></li>
-          <li><NavLink to="/leaderboard" style={({isActive}) => ({color: isActive? "blue": "black"})}>Leader Board</NavLink></li>
-          <li><NavLink to="/community" style={({isActive}) => ({color: isActive? "blue": "black"})}>Comunity</NavLink></li>
-          <li><NavLink to="/user" style={({isActive}) => ({color: isActive? "blue": "black"})}>User</NavLink></li>
+      <nav>
+        <ul className='hidden md:flex gap-8 p-6 uppercase bg-slate-600'>
+          <li><NavLink to="/" style={({isActive}) => ({color: isActive? "yellow": "white"})}>Pong's Game</NavLink></li>
+          <li><NavLink to="/play" style={({isActive}) => ({color: isActive? "yellow": "white"})}>Play</NavLink></li>
+          <li><NavLink to="/leaderboard" style={({isActive}) => ({color: isActive? "yellow": "white"})}>Leader Board</NavLink></li>
+          <li><NavLink to="/community" style={({isActive}) => ({color: isActive? "yellow": "white"})}>Comunity</NavLink></li>
+          <li><NavLink to="/user" style={({isActive}) => ({color: isActive? "yellow": "white"})}>User</NavLink></li>
         </ul>
       </nav>
       <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/play" element={<Play />} /> // ? component Play will be render when we're at site.com/play
+          <Route path="/play" element={<Play />} /> // ? component Play will be rendered when we're at site.com/play
           <Route path="/leaderboard" element={<LeaderBoard />} />
           <Route path="/community" element={<Community />} />
           <Route path="/user" element={<User />} />
