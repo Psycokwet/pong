@@ -27,11 +27,11 @@ export class UserController {
 
   @Post('signin')
   async signin (@Body() dto: UserDto) {
-    return this.usersService.signin(dto);
+    return await this.usersService.signin(dto);
   }
 
-  // @Post('signout')
-  // async signout (@Body() dto: UserDto) {
-  //   return this.usersService.signout(dto);
-  // }
+  @Post('signout')
+  async signout (@Body() dto: UserDto) {
+    return this.usersService.signout();
+  }
 }

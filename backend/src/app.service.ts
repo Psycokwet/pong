@@ -11,4 +11,9 @@ export class AppService {
     this.logger.log('Hello');
     return 'Hello World!';
   }
+
+  getProtected(): string {
+    this.logger.log('Protected');
+    return 'Hello Protected!';
+  }
 }
