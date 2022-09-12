@@ -1,7 +1,21 @@
 import { useState } from "react";
+import {Routes, Route, Link } from "react-router-dom";
 import "./App.css";
+import "./Profile/Profile.tsx"
 
 function App() {
+  return (
+    <div className="App">
+      <h1>Welcome to React Router!</h1>
+      <Routes>
+        <Route path="/" element={<Index />} />
+      </Routes>
+    </div>
+    
+  );
+}
+
+function Index () {
   const [count, setCount] = useState(0);
   return (
     <div className="App">
@@ -40,8 +54,11 @@ function App() {
           </button>
         </div>
       </div>
+      <nav>
+        <Link to="/profile">Profile</Link>
+      </nav>
     </div>
-  );
+  )
 }
 
 export default App;
