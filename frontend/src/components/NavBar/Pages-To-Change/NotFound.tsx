@@ -6,7 +6,7 @@ const NotFound = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      navigate("/");
+      navigate("/"); // ? Wait for 3s, then go back to Homepage
     }, 3000);
   }, []);
 
