@@ -4,6 +4,8 @@ import { QueryFailedError, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from 'src/auth/jwt.strategy';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
@@ -23,10 +25,11 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private jwtService: JwtService
   ) {}
 
   async findOne(username: string): Promise<User | undefined> {
-    return this.usersRepository.findOneBy({
+    return await this.usersRepository.findOneBy({
       username: username,
     });
   }
@@ -62,19 +65,19 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
-
-
-    delete user.password; // password will not be shown
-    return user;
+    return;
   }
 
   async signin(dto: Omit<UserDto, 'email'>) {
     const user = await this.findOne(dto.username);
-    
+
     if (await passwordCompare(dto.password, user.password)) {
-      // password match
-      delete user.password; // password will not be shown
-      return user;
+      const user = await this.findOne(dto.username)
+      
+      const payload: JwtPayload = { username: user.username, sub: user.id };
+      return {
+        access_token: this.jwtService.sign(payload),
+      };
     }
     // password did not match
     throw new HttpException(
