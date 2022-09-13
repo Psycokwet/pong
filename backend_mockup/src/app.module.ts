@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
-import { UsersModule } from './users/users.module';
+import { UserController } from './users/user.controller';
 import { AppService } from './app.service';
 
 @Module({
   imports: [
-    UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'database',
@@ -18,7 +17,7 @@ import { AppService } from './app.service';
       synchronize: true, // to disable in prod
     }),
   ],
-  controllers: [AppController],
+  controllers: [AppController, UserController],
   providers: [AppService],
 })
 export class AppModule {}
