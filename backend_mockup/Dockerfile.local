@@ -1,0 +1,11 @@
+FROM node:slim 
+
+WORKDIR /svr/app
+
+RUN npm i -g @nestjs/cli --silent
+
+COPY package*.json ./
+
+RUN npm i --silent
+
+CMD ["npm", "run", "start:dev"]
