@@ -1,26 +1,28 @@
 #### How to use the development environnement
 
-First step, which is sadly, a default of the environnement, you have to run ```npm i``` in both ./backend/ and ./frontend/
-I didn't find how to fix this for the moment, but, appart from that, everything seem to be running smoot, so please indulge.
-
-You also have to create an .env file, following the example of ./env_sample.
+You have to create an .env file, following the example of ./env_sample.
 
 You may need to locally stop nginx, do
 ```systemctl stop nginx```
 or any other command you prefer
+You may also need to start docker if the daemon don't want to run at all.
+```systemctl start docker```
 
 Then, you just have to
 ```docker-compose up``` to launch the whole thing.
 
 #### What to do in case of a merge ? 
 
-Dockerfiles or configs or package may have changed. Take the reflex to build again your images before saying everything is broken ;) 
+Dockerfiles, configs or package may have changed. Take the reflex to build again your images before saying everything is broken ;) 
 
 ### development
 #### frontend 
 
 Holy be the hot reloading, write code, save, enjoy the result.
 You can access whatever you code in the frontend at localhost:8080 from your preferred browser.
+
+If you add some dependencies package, you have to rebuild the conteneur, you can rebuild only the conteneur using 
+```docker-compose build --no-cache frontend```
 
 #### backend 
 
@@ -33,6 +35,9 @@ There is some tools ready for your convenience to tests request. A light example
 
 You can test the get routes directly on browser, but it's more complicated for other types of routes, hence the two tools offered.
 
+If you add some dependencies package, you have to rebuild the conteneur, you can rebuild only the conteneur using 
+```docker-compose build --no-cache backend```
+
 #### backend_mockup
 
 If you need for some reasons, to simulate backend, with never failing datas, or easily deterministic answer, you can chose to simulate the backend with this simplified version of the backend.
@@ -40,10 +45,11 @@ Just set the environnement variable in the front docker-compose to :
 ```VITE_CONTEXT=mockup```
 Don't forget to uncomment the mockup conteneur, as well as changing nginx configuration, for the one with the mockup. Follow the comment in the docker-compose :)
 
-Don't forget to npm i locally as well.
-
 There, you have the database available if you want to setup some base datas for testing, or you can send request result hard coded. It's as you prefer for your needs.
 The current available example only show a success in creating user (fake, obviously)
+
+If you add some dependencies package, you have to rebuild the conteneur, you can rebuild only the conteneur using 
+```docker-compose build --no-cache backend```
 
 #### phpmyadmin 
 
