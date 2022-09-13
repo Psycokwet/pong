@@ -15,13 +15,13 @@ Explain any context related to the content of the PR : Why did you start working
 
 Is it to fulfill the specifications of the project ? Or to improve development in any way ? Or to fix an issue ? (You can mention the issues in the pr with a dash, and the issue number, for example : \#1.)
 
-If it's partial work, specify it as well.
+If it's partial work, specify it as well. It does not mean that you should do a PR for non working partial feature, but for working partial feature, you can.
 
 For example : "Authentification fully working, from the backend." suppose that nothing is done for the front.
 
 Please, if necessary, you can add some information about the use of said feature.
 
-You can directly add documentation in the project folder, but let a quick heads up, and where to look at for more, directly in the PR description.
+You can directly add documentation in the project folder, but leave a quick heads up, and where to look at for more, directly in the PR description.
 
 Don't forget to mention any pr that may be related to this one. And explain how they are related.
 
