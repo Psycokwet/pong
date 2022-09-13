@@ -17,6 +17,11 @@ async function crypt(pass: string): Promise<string> {
 }
 @Injectable()
 export class UsersService {
+
+  private nbV = 0;
+  private nbL = 0;
+  private history = `Victories: ${this.nbV} | Losses: ${this.nbL}`;
+
   private readonly logger = new Logger(UsersService.name);
   private static readonly passwordScheme = new PasswordValidator();
   static {
@@ -67,6 +72,7 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
+    userEntity.user_rank = user.user_rank;
     userEntity.password = await crypt(user.password);
 
     // TODO check constraint
@@ -85,5 +91,25 @@ export class UsersService {
       }
       throw e;
     }
+  }
+
+  async get_user_rank(dto: CreateUserDto) {
+    const user = await this.findOne(dto.username);
+    
+    return user.user_rank;
+  }
+
+  //Route pour inserer des games: play_game
+  async get_user_history(dto: CreateUserDto) {
+    //Get specific user's object if he has games
+    const user = await this.usersRepository.findOne({
+      relations: { games: true },
+      where: { username: dto.username }
+    })
+    console.log(user);
+    
+    //gamesByUsername
+    
+    return user;
   }
 }
