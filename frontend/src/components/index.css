@@ -17,10 +17,10 @@
     }
 
     .navbar-page-name {
-        @apply absolute w-auto p-2 m-2 min-w-max left-14
+        @apply absolute w-auto p-2 m-2 min-h-max left-2
         rounded-md shadow-md
         text-white bg-gray-900
         text-xs font-bold
-        transition-all duration-100 scale-0 origin-left;
+        transition-all duration-100 scale-0 origin-bottom-right;
     }
 }
