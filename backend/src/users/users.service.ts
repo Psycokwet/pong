@@ -6,6 +6,7 @@ import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'src/auth/jwt.strategy';
+import { AuthUserIdDto } from 'src/auth/auth-user.dto';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
