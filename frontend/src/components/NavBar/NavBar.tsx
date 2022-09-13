@@ -1,5 +1,9 @@
 import React from "react";
-import { NavLink, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+// Hooks
+import { useState } from "react";
+
+// Page Components
 import Home from "./Pages-To-Change/Home";
 import Play from "./Pages-To-Change/Play";
 import LeaderBoard from "./Pages-To-Change/LeaderBoard";
@@ -9,16 +13,13 @@ import NotFound from "./Pages-To-Change/NotFound";
 import APage from "./APage";
 
 // Icon
-import { Si42 } from 'react-icons/si'
-import { FaCog } from 'react-icons/fa'
-import { FaComments } from 'react-icons/fa'
-import { FaUser } from 'react-icons/fa'
-import { FaGamepad } from 'react-icons/fa'
-import { FaHome } from 'react-icons/fa'
-import { HiChartBar } from 'react-icons/hi'
-import { AiFillHome } from 'react-icons/ai'
-import { RiPingPongFill } from 'react-icons/ri'
+import { FaComments } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
+import { HiChartBar } from "react-icons/hi";
+import { AiFillHome } from "react-icons/ai";
+import { RiPingPongFill } from "react-icons/ri";
 
+/***************** List of Pages ******************************************/
 const webPages = [
   {
     url: "/",
@@ -30,40 +31,54 @@ const webPages = [
     url: "/play",
     pageName: "play",
     element: <Play />,
-    pageIcon: <RiPingPongFill size="32" />
+    pageIcon: <RiPingPongFill size="28" />,
   },
   {
     url: "/leaderboard",
     pageName: "leader board",
     element: <LeaderBoard />,
-    pageIcon: <HiChartBar size="28" />
+    pageIcon: <HiChartBar size="28" />,
   },
   {
     url: "/community",
     pageName: "community",
     element: <Community />,
-    pageIcon: <FaComments size="28" />
+    pageIcon: <FaComments size="28" />,
   },
   {
     url: "/user",
     pageName: "user",
     element: <User />,
-    pageIcon: <FaUser size="26" />
+    pageIcon: <FaUser size="26" />,
   },
 ];
 
+/***************** Component NavBar ******************************************/
 const NavBar = () => {
+  /******************************************************** 
+  Can be useful if we want to do NavBar for phone version 
+  ********************************************************/
+  // const [active, setActive] = useState(false);
+  // const showMenu = () => {
+  //   setActive(!active);
+  // };
+
   return (
     <div>
-      <div className="hidden md:flex justify-end gap-8 p-6 uppercase bg-slate-700">
-          {webPages.map((onePage, key) => {
-            return <APage url={onePage.url} pageName={onePage.pageName} pageIcon={onePage.pageIcon} />;
-          })}
-      </div>
+      <ul className="flex p-6 uppercase bg-slate-700">
+        {webPages.map((onePage) => {
+          return (
+            <APage
+              url={onePage.url}
+              pageName={onePage.pageName}
+              pageIcon={onePage.pageIcon}
+            />
+          );
+        })}
+      </ul>
 
       <Routes>
-        {/* Only component Play will be rendered when we're at url /play */}
-        {webPages.map((onePage, key) => {
+        {webPages.map((onePage) => {
           return <Route path={onePage.url} element={onePage.element} />;
         })}
         <Route path="*" element={<NotFound />} />
