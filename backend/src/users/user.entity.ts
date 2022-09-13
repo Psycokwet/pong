@@ -1,7 +1,10 @@
+import LocalFile from 'src/localFiles/localFile.entity';
 import {
   BaseEntity,
   Column,
   Entity,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -19,6 +22,15 @@ export class User extends BaseEntity {
   @Column({ length: 128, unique: true })
   email: string;
 
+  @JoinColumn({ name: 'avatarId' })
+  @OneToOne(
+    () => LocalFile,
+    {
+      nullable: true
+    }
+  )
+  public avatar?: LocalFile;
+
   @Column({ nullable: true })
-  picture: string;
+  public avatarId?: number;
 }
