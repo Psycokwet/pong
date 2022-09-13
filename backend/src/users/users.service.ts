@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'src/auth/jwt.strategy';
 import { AuthUserIdDto } from 'src/auth/auth-user.dto';
+import { LocalFilesService } from 'src/localFiles/localFiles.service';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
@@ -26,7 +27,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private localFilesService: LocalFilesService
   ) {}
 
   async findOne(username: string): Promise<User | undefined> {
@@ -95,8 +97,21 @@ export class UsersService {
   }
 
   async get_picture(dto: AuthUserIdDto ) {
-    const user = await this.findOne(dto.username);
+    // const user = await this.findOne(dto.username);
+    const user = await this.usersRepository.findOne(
+      {
+        where: { username: dto.username },
+        relations: { avatar: true }
+      }
+    )
 
-    return user.picture;
+    return user.avatar.path;
+  }
+  
+  async add_avatar(userId: number, fileData: LocalFileDto) {
+    const avatar = await this.localFilesService.saveLocalFileData(fileData);
+    await this.usersRepository.update(userId, {
+      avatarId: avatar.id
+    })
   }
 }

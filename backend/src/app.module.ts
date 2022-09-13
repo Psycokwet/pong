@@ -6,10 +6,15 @@ import { AppService } from './app.service';
 import { User } from './users/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
-
+import * as Joi from '@hapi/joi';
+ 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      validationSchema: Joi.object({
+        UPLOADED_FILES_DESTINATION: Joi.string().required(),
+      })
+    }),
     FortyTwoModule,
     UsersModule,
     TypeOrmModule.forRoot({
