@@ -4,18 +4,22 @@ import { IconType } from "react-icons";
 
 type Props = {
   url: string;
-  pageName: string;
+  pageName?: string;
   pageIcon: IconType;
 };
 
 const APage: React.FC<Props> = ({ url, pageName, pageIcon }) => {
   return (
-      <NavLink className="navbar-icon"
+    <li className="navbar-icon group">
+      <NavLink
         to={url}
         style={({ isActive }) => ({ color: isActive ? "green" : "white" })}
       >
-        {pageIcon}<span className="navbar-page-name">{pageName}</span>
+        {/* ! Why this does not work? */}
+        {pageIcon}
+         <span className="navbar-page-name group-hover:scale-100">{pageName}</span>
       </NavLink>
+    </li>
   );
 };
 
