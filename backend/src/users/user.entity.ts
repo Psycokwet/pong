@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Game } from 'src/game/game.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity()
 export class User {
@@ -13,4 +14,10 @@ export class User {
 
   @Column({ length: 128, unique: true })
   email: string;
+
+  @Column({ nullable: true})
+  user_rank: number;
+
+  @OneToMany(() => Game, (game) => game.user)
+  games: Game[];
 }
