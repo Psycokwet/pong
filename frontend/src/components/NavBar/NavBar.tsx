@@ -49,7 +49,7 @@ const webPages = [
     url: "/user",
     pageName: "user",
     element: <User />,
-    pageIcon: <FaUser size="26" />,
+    pageIcon : <FaUser size="26" />,
   },
 ];
 
@@ -66,20 +66,22 @@ const NavBar = () => {
   return (
     <div>
       <ul className="flex p-6 uppercase bg-slate-700">
-        {webPages.map((onePage) => {
+        {webPages.map((onePage, i) => {
           return (
-            <APage
-              url={onePage.url}
-              pageName={onePage.pageName}
-              pageIcon={onePage.pageIcon}
-            />
+            <li key={i} className="navbar-icon group">
+              <APage
+                url={onePage.url}
+                pageName={onePage.pageName}
+                pageIcon={onePage.pageIcon}
+              />
+            </li>
           );
         })}
       </ul>
 
       <Routes>
-        {webPages.map((onePage) => {
-          return <Route path={onePage.url} element={onePage.element} />;
+        {webPages.map((onePage, i) => {
+          return <Route key={i} path={onePage.url} element={onePage.element} />;
         })}
         <Route path="*" element={<NotFound />} />
       </Routes>
