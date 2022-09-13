@@ -29,6 +29,9 @@ If this pr add tests to the projects, specify how to treats them. Do we need to 
 
 In our case, the most likely, is that we can expect to get some mockup routes in backend_mockup.
 
+### Assigned
+If a person is assigned to the PR, let that person merge the pr after the reviewing, if not, the second reviewer can merge if everything is good
+
 ### Reviewers
 Once the PR is ready to be merged, not in "WIP", you can add reviewers to the pr. If you can, add at least one profane, and one person working on similar subject. There need to be at least two succesful review to merge one pr.
 
