@@ -1,7 +1,5 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-// Hooks
-import { useState } from "react";
 
 // Page Components
 import Home from "./Pages-To-Change/Home";
@@ -49,7 +47,7 @@ const webPages = [
     url: "/user",
     pageName: "user",
     element: <User />,
-    pageIcon : <FaUser size="26" />,
+    pageIcon: <FaUser size="26" />,
   },
 ];
 
