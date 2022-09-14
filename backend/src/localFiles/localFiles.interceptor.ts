@@ -15,8 +15,8 @@ function LocalFilesInterceptor (options: LocalFilesInterceptorOptions): Type<Nes
     constructor() {
       const filesDestination = process.env.UPLOADED_FILES_DESTINATION;
  
-      console.log(filesDestination)
-      const destination = `${filesDestination}`
+      console.log(`${filesDestination}${options.path}`)
+      const destination = `${filesDestination}${options.path}`;
  
       const multerOptions: MulterOptions = {
         storage: diskStorage({
