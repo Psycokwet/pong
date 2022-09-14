@@ -19,10 +19,6 @@ async function crypt(pass: string): Promise<string> {
 @Injectable()
 export class UsersService {
 
-  private nbV = 0;
-  private nbL = 0;
-  private history = `Victories: ${this.nbV} | Losses: ${this.nbL}`;
-
   private readonly logger = new Logger(UsersService.name);
   private static readonly passwordScheme = new PasswordValidator();
   static {

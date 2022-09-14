@@ -40,15 +40,16 @@ export class UserController {
   async get_user_history(@Body() user: CreateUserDto) {
     const userHistory = await this.usersService.get_user_history(user);  
 
-    console.log(userHistory);
     if (!userHistory)
       return {};
 
     /*  Manipulating userHistory array so we get exactly what we want */
+
+    const nbGames = userHistory.games.length;
+    const nbWins = userHistory.games.filter( (game) => { return game.winner == userHistory.user.id} ).length;
     return {
-      nbGames: userHistory.games.length,
-      nbWins: userHistory.games.filter( (game) => { return game.winner == userHistory.user.id} ).length, 
-      nbLosses: userHistory.games.length - userHistory.games.filter( (game) => { return game.winner == userHistory.user.id} ).length,
+      nbGames,
+      nbWins, 
       games: userHistory.games.map( (game) => { return {
         id: game.id,
         player1: game.player1.username,
