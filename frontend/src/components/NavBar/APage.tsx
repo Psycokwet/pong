@@ -3,8 +3,8 @@ import { NavLink } from "react-router-dom";
 
 type Props = {
   url: string;
-  pageName?: string;
-  pageIcon: JSX.Element;
+  pageName: string;
+  pageIcon?: JSX.Element;
 };
 
 const APage: React.FC<Props> = ({ url, pageName, pageIcon }) => {
