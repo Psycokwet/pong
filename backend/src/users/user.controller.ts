@@ -41,17 +41,22 @@ export class UserController {
   async get_user_history(@Body() user: CreateUserDto) {
     const userHistory = await this.usersService.get_user_history(user);  
 
-    this.logger.log(`${userHistory}`);
+    console.log(userHistory);
     if (!userHistory)
       return {};
-  
+
     return {
-      userHistory,
+      //userHistory,
       nbGames: userHistory.games.length,
       //nbWins: userHistory.games.filter(game => game.winner == userHistory.id).length
-      nbWins: userHistory.games.filter( (game) => {return game.winner == userHistory.id} ).length, 
-      nbLosses: userHistory.games.length - userHistory.games.filter( (game) => { return game.winner == userHistory.id} ).length,
-      games: userHistory.games
+      nbWins: userHistory.games.filter( (game) => { return game.winner == userHistory.user.id} ).length, 
+      nbLosses: userHistory.games.length - userHistory.games.filter( (game) => { return game.winner == userHistory.user.id} ).length,
+      games: userHistory.games.map( (game) => { return {
+        id: game.id,
+        player1: game.player1.username,
+        player2: game.player2.username,
+        winner: game.winner === game.player1.id ? game.player1.username : game.player2.username
+      } } )
     }
   }
 }

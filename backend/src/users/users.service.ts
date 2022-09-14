@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { User } from './user.entity';
+import { Game } from 'src/game/game.entity';
 import { CreateUserDto } from './create-user.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -39,6 +40,9 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+
+    @InjectRepository(Game)
+    private gameRepository: Repository<Game>,
   ) {}
 
   async findOne(username: string): Promise<User | undefined> {
@@ -100,16 +104,44 @@ export class UsersService {
   }
 
   //Route pour inserer des games: play_game
+
   async get_user_history(dto: CreateUserDto) {
-    //Get specific user's object if he has games
+    
+    /*  Get specific user's object if he has games, then check if object is 
+        undefined or not */
+    // const user = await this.usersRepository.findOne({
+    //   relations: { games: true },
+    //   where: { username: dto.username }
+    // })
+    // console.log(user);
+    
+    // if (!user)
+    //   return ;
+
+    // const userHistory = {
+    //   nbGames: user.games.length,
+    //   nbWins: user.games.filter( (game) => { return game.winner == user.id} ).length,
+    //   nbLosses: 
+    // }
+
     const user = await this.usersRepository.findOne({
-      relations: { games: true },
       where: { username: dto.username }
     })
-    console.log(user);
+
+    const games = await this.gameRepository.find( {
+      relations: {
+        player1: true,
+        player2: true,
+      },
+      where: [ 
+        {player1_id: user.id},
+        {player2_id: user.id},
+      ]
+    })
     
-    //gamesByUsername
-    
-    return user;
+    return {
+      user,
+      games,
+    };
   }
 }
