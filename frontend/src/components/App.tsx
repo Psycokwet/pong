@@ -1,17 +1,21 @@
 import { useState } from "react";
+import { ConnectionButton } from './ConnectionButton/ConnectionButton';
+import { DisconnectionButton } from './ConnectionButton/DisconnectionButton';
 import "./App.css";
+import Cookies from 'js-cookie';
 
 function App() {
   const [count, setCount] = useState(0);
   return (
-    <div className="App">
+    Cookies.get('jwt') ? <div className="App">
+      <DisconnectionButton/>
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src="https://seeklogo.com/images/V/vite-logo-BFD4283991-seeklogo.com.png" 
           className="block mx-auto h-24 rounded-full sm:mx-0 sm:shrink-0" alt="Vite logo" />
         </a>
-      </div>
+      </div>      
       <h1>Vite + React + Typescript</h1>
       <div className="card">
         <button className="border-solid" onClick={() => setCount((count) => count + 1)}>
@@ -40,7 +44,8 @@ function App() {
           </button>
         </div>
       </div>
-    </div>
+    </div> : <ConnectionButton/>
+
   );
 }
 
