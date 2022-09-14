@@ -97,20 +97,27 @@ export class UsersService {
   }
 
   async get_picture(dto: AuthUserIdDto ) {
-    // const user = await this.findOne(dto.username);
-    const user = await this.usersRepository.findOne(
-      {
-        where: { username: dto.username },
-        relations: { avatar: true }
-      }
-    )
+    const user = await this.usersRepository.findOne({
+      where: { username: dto.username },
+      relations: { avatar: true }
+    })
+
+    if (!user.avatar)
+      return null; // return null if avatar === null
 
     return user.avatar.path;
   }
   
-  async add_avatar(userId: number, fileData: LocalFileDto) {
+  async set_picture( user: AuthUserIdDto, fileData: LocalFileDto) {
+    // delete old file
+    const old_file_path = await this.get_picture(user);
+    if (old_file_path) { // delete file if path exists
+      this.localFilesService.delete_file(old_file_path);
+    }
+
+    // save in db oldfile
     const avatar = await this.localFilesService.saveLocalFileData(fileData);
-    await this.usersRepository.update(userId, {
+    await this.usersRepository.update(user.userId, {
       avatarId: avatar.id
     })
   }

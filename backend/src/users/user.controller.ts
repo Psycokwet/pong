@@ -56,7 +56,7 @@ export class UserController {
     return new StreamableFile(file);
   }
 
-  @Post('set_avatar')
+  @Post('set_picture')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(LocalFilesInterceptor({
     fieldName: 'file',
@@ -66,8 +66,9 @@ export class UserController {
     @Request() req: { user: AuthUserIdDto },
     @UploadedFile() file: Express.Multer.File
   ) {
-    console.log(req.user, file);
-    return this.usersService.add_avatar(req.user.userId, {
+    
+
+    return this.usersService.set_picture(req.user, {
       path: file.path,
       filename: file.originalname,
       mimetype: file.mimetype
