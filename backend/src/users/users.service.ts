@@ -36,26 +36,13 @@ export class UsersService {
 
 
   async signup (dto: UserDto) {
-    if (!UserDto.passwordScheme.validate(dto.password)) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Password should contains 8 character minimum, it should had uppercase, lowercase and minimum 2 digits to be valid',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const hash = await crypt(dto.password);
-
     // database operation
     const user = User.create({
         username: dto.username,
-        password: hash,
         email: dto.email,
     });
     try {
-      await user.save();
+      return await user.save();
     } catch (e) {
       throw new HttpException(
         {
@@ -65,31 +52,45 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return;
   }
 
   async signin(dto: Omit<UserDto, 'email'>) {
-    const user = await this.findOne(dto.username);
-
-    if (await passwordCompare(dto.password, user.password)) {
-      const user = await this.findOne(dto.username)
-      
-      const payload: JwtPayload = { username: user.username, sub: user.id };
-      return {
-        access_token: this.jwtService.sign(payload),
-      };
-    }
-    // password did not match
-    throw new HttpException(
-      {
-        status: HttpStatus.BAD_REQUEST,
-        error: 'Username and Password did not match',
-      },
-      HttpStatus.BAD_REQUEST,
-    );
+    return await this.findOne(dto.username);
   }
 
-  async signout() {
-    // destroy session
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    console.log(refreshToken, userId);
+    const currentHashedRefreshToken = await crypt(refreshToken);
+    await this.usersRepository.update(userId, {
+      currentHashedRefreshToken
+    });
+  }
+
+
+  async getById(id: number) {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (user) {
+      return user;
+    }
+    throw new HttpException('User with this id does not exist', HttpStatus.NOT_FOUND);
+  }
+ 
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
+    const user = await this.getById(userId);
+ 
+    const isRefreshTokenMatching = await passwordCompare(
+      refreshToken,
+      user.currentHashedRefreshToken
+    );
+ 
+    if (isRefreshTokenMatching) {
+      return user;
+    }
+  }
+
+  async removeRefreshToken(userId: number) {
+    return this.usersRepository.update(userId, {
+      currentHashedRefreshToken: null
+    });
   }
 }

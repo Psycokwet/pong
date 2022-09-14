@@ -5,14 +5,16 @@ import { JwtAuthService } from './jwt.service';
 import { JwtStrategy } from './jwt.strategy';
 import { jwtConstants } from './constants';
 import { PassportModule } from '@nestjs/passport';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
+    UsersModule,
     PassportModule,
     JwtModule.registerAsync({
       useFactory: async () => {
         return {
-          secret: jwtConstants.secret,
+          secret: jwtConstants.JWT_ACCESS_TOKEN_SECRET,
           signOptions: { expiresIn: '60s' },
         };
       },
