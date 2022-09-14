@@ -7,6 +7,7 @@ import {
   JoinTable 
 } from 'typeorm';
 import { Game } from 'src/game/game.entity';
+import { Friend } from 'src/friend_list/friend_list.entity';
 
 @Entity()
 export class User {
@@ -30,4 +31,7 @@ export class User {
   
   @OneToMany(() => Game, (game) => game.player2)
   games_player2!: Game[];
+
+  @OneToMany( () => Friend, (friend) => friend.friend_id)
+  friends: Friend[];
 }
