@@ -7,6 +7,7 @@ Also, try to commit files that have been linted. :) I recommend to start using p
 ### Title
 For a single commit, the title is the subject line of the commit message.
 Otherwise, the title should summarise the set of commits.
+You can add keyword like in commits for clarity, see conventional_commit.md for more.
 
 If the PR is still not ready to merge for whatever reasons, set "WIP :" a the begining of the title.
 
