@@ -99,13 +99,13 @@ export class UsersService {
   async get_picture(dto: AuthUserIdDto ) {
     const user = await this.usersRepository.findOne({
       where: { username: dto.username },
-      relations: { avatar: true }
+      relations: { picture: true }
     })
 
-    if (!user.avatar)
-      return null; // return null if avatar === null
+    if (!user.picture)
+      return null; // return null if picture === null
 
-    return user.avatar.path;
+    return user.picture.path;
   }
   
   async set_picture( user: AuthUserIdDto, fileData: LocalFileDto) {
@@ -116,9 +116,9 @@ export class UsersService {
     }
 
     // save in db oldfile
-    const avatar = await this.localFilesService.saveLocalFileData(fileData);
+    const picture = await this.localFilesService.saveLocalFileData(fileData);
     await this.usersRepository.update(user.userId, {
-      avatarId: avatar.id
+      pictureId: picture.id
     })
   }
 }
