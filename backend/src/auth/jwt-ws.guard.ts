@@ -25,7 +25,7 @@ export class WsGuard extends AuthGuard('jwt') {
     const bearerToken = req.handshake.headers.authorization;
     try {
       req.user = this.jwtService.verify(bearerToken, {
-        secret: jwtConstants.secret,
+        secret: jwtConstants.JWT_ACCESS_TOKEN_SECRET,
       });
     } catch (e: unknown) {
       if (e instanceof Error) {
