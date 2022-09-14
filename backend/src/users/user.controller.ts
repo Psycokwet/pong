@@ -37,7 +37,6 @@ export class UserController {
   }
 
   @Post('get_user_history')
-  //creer nouveau DTO GetUserHistoryDTO
   async get_user_history(@Body() user: CreateUserDto) {
     const userHistory = await this.usersService.get_user_history(user);  
 
@@ -45,10 +44,9 @@ export class UserController {
     if (!userHistory)
       return {};
 
+    /*  Manipulating userHistory array so we get exactly what we want */
     return {
-      //userHistory,
       nbGames: userHistory.games.length,
-      //nbWins: userHistory.games.filter(game => game.winner == userHistory.id).length
       nbWins: userHistory.games.filter( (game) => { return game.winner == userHistory.user.id} ).length, 
       nbLosses: userHistory.games.length - userHistory.games.filter( (game) => { return game.winner == userHistory.user.id} ).length,
       games: userHistory.games.map( (game) => { return {

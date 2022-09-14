@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
-import { ChannelModule } from './channel/channel.module';
 
 @Module({
   imports: [
@@ -18,7 +17,6 @@ import { ChannelModule } from './channel/channel.module';
       autoLoadEntities: true,
       synchronize: true, // to disable in prod
     }),
-    ChannelModule,
   ],
   controllers: [AppController],
   providers: [AppService],

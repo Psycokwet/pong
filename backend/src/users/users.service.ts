@@ -103,31 +103,15 @@ export class UsersService {
     return user.user_rank;
   }
 
-  //Route pour inserer des games: play_game
-
   async get_user_history(dto: CreateUserDto) {
     
-    /*  Get specific user's object if he has games, then check if object is 
-        undefined or not */
-    // const user = await this.usersRepository.findOne({
-    //   relations: { games: true },
-    //   where: { username: dto.username }
-    // })
-    // console.log(user);
-    
-    // if (!user)
-    //   return ;
-
-    // const userHistory = {
-    //   nbGames: user.games.length,
-    //   nbWins: user.games.filter( (game) => { return game.winner == user.id} ).length,
-    //   nbLosses: 
-    // }
-
+    /*  Get calling user's object */
     const user = await this.usersRepository.findOne({
       where: { username: dto.username }
     })
 
+    /*  Get a games object where player 1 and player 2 exist and the calling user
+        is either one or the other (where: ...) */
     const games = await this.gameRepository.find( {
       relations: {
         player1: true,
