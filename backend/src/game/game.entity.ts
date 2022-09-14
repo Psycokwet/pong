@@ -1,23 +1,30 @@
-import { PrimaryGeneratedColumn, Entity, Column, ManyToOne, ManyToMany, JoinTable} from "typeorm";
+import { 
+  PrimaryGeneratedColumn, 
+  Entity, 
+  Column, 
+  ManyToOne, 
+  ManyToMany, 
+  JoinTable 
+} from "typeorm";
 import { User } from "../users/user.entity"
 
 @Entity()
 export class Game {
     @PrimaryGeneratedColumn()
-    id!: number;
+    id: number;
 
     @Column()
-    player1_id!: number;
+    player1_id: number;
 
     @Column()
-    player2_id!: number;
+    player2_id: number;
 
     @Column()
-    winner!: number;
+    winner: number;
 
     @ManyToOne(() => User, (user) => user.games_player1)
-    player1!: User;
+    player1: User;
 
     @ManyToOne(() => User, (user) => user.games_player2)
-    player2!: User;
+    player2: User;
 }
