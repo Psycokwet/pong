@@ -10,8 +10,10 @@ import {
 } from '@nestjs/common';
 import { filter } from 'rxjs';
 import { Game } from 'src/game/game.entity';
+import { AddFriendDto } from './add-friend.dto';
 import { CreateUserDto } from './create-user.dto';
 import { UsersService } from './users.service';
+import { GetFriendsListDto } from './get-friends-list.dto';
 
 @Controller('/user/')
 export class UserController {
@@ -58,4 +60,14 @@ export class UserController {
       } } )
     }
   }
+
+  @Post('add_friend')
+  async add_friend(@Body() friend: AddFriendDto) {
+    await this.usersService.add_friend(friend);
+  }
+
+  // @Post('get_friends_list')
+  // async get_friends_list(@Body() friend: GetFriendsListDto) {
+  //   const friendList = await this.usersService.
+  // }
 }

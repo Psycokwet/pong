@@ -7,6 +7,9 @@ import { CreateUserDto } from './create-user.dto';
 import * as bcrypt from 'bcrypt';
 
 import * as PasswordValidator from 'password-validator';
+import { AddFriendDto } from './add-friend.dto';
+import { Friend } from 'src/friend_list/friend_list.entity';
+import { GetFriendsListDto } from './get-friends-list.dto';
 
 // const passwordValidator = require('password-validator');
 
@@ -39,6 +42,10 @@ export class UsersService {
 
     @InjectRepository(Game)
     private gameRepository: Repository<Game>,
+
+    @InjectRepository(Friend)
+    private friendRepository: Repository<Friend>,
+
   ) {}
 
   async findOne(username: string): Promise<User | undefined> {
@@ -124,4 +131,38 @@ export class UsersService {
       games,
     };
   }
+
+  async add_friend(dto: AddFriendDto) {
+    
+    //const friendEntity = new Friend();
+    const friend = await this.usersRepository.findOne({
+      where: {username: dto.friend_to_add}
+    })
+
+    if (!friend)
+      return "Username not found";
+
+    const addFriend = Friend.create( {
+        friend_id: friend.id,
+      } )
+    //friendEntity.friend_id = friend.id;
+
+      try {
+        await addFriend.save();
+        //friendEntity.save;
+      }
+      catch (e) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Friend is already in friends list',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+      }
+  }
+
+  // async get_friends_list(dto: GetFriendsListDto) {
+  //   const friends = await 
+  // }
 }
