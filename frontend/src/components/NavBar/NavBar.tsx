@@ -1,12 +1,13 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Link, Route, Routes } from "react-router-dom";
 
 // Page Components
 import Home from "./Pages-To-Change/Home";
 import Play from "./Pages-To-Change/Play";
 import LeaderBoard from "./Pages-To-Change/LeaderBoard";
 import Community from "./Pages-To-Change/Community";
-import User from "./Pages-To-Change/User";
+import Profile from "./Pages-To-Change/Profile";
+import Settings from "./Pages-To-Change/Settings";
 import NotFound from "./Pages-To-Change/NotFound";
 import APage from "./APage";
 
@@ -16,15 +17,17 @@ import { FaUser } from "react-icons/fa";
 import { HiChartBar } from "react-icons/hi";
 import { AiFillHome } from "react-icons/ai";
 import { RiPingPongFill } from "react-icons/ri";
+import { IoMdSettings } from "react-icons/io";
+import { GiPingPongBat } from "react-icons/gi";
 
 /***************** List of Pages ******************************************/
 const webPages = [
-  {
-    url: "/",
-    pageName: "Home",
-    element: <Home />,
-    pageIcon: <AiFillHome size="28" />,
-  },
+  // {
+  //   url: "/",
+  //   pageName: "Home",
+  //   element: <Home />,
+  //   pageIcon: <AiFillHome size="28" />,
+  // },
   {
     url: "/play",
     pageName: "play",
@@ -44,10 +47,16 @@ const webPages = [
     pageIcon: <FaComments size="28" />,
   },
   {
-    url: "/user",
-    pageName: "user",
-    element: <User />,
+    url: "/profile",
+    pageName: "profile",
+    element: <Profile />,
     pageIcon: <FaUser size="26" />,
+  },
+  {
+    url: "/settings",
+    pageName: "settings",
+    element: <Settings />,
+    pageIcon: <IoMdSettings size="26" />,
   },
 ];
 
@@ -63,25 +72,31 @@ const NavBar = () => {
 
   return (
     <div>
-      <ul className="flex p-6 uppercase bg-slate-700">
-        {webPages.map((onePage, i) => {
-          return (
-            <li key={i} className="navbar-icon group">
-              <APage
-                url={onePage.url}
-                pageName={onePage.pageName}
-                pageIcon={onePage.pageIcon}
-              />
-            </li>
-          );
-        })}
-      </ul>
+      <nav>
+        <ul className="flex p-6 uppercase bg-sky-600">
+          <li>
+            <Link to="/">Pinging Pong</Link>
+          </li>
+          {webPages.map((onePage, i) => {
+            return (
+              <li key={i} className="navbar-icon group">
+                <APage
+                  url={onePage.url}
+                  pageName={onePage.pageName}
+                  pageIcon={onePage.pageIcon}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
 
       <Routes>
         {webPages.map((onePage, i) => {
           return <Route key={i} path={onePage.url} element={onePage.element} />;
         })}
         <Route path="*" element={<NotFound />} />
+        <Route path="/" element={<Home />} />
       </Routes>
     </div>
   );
