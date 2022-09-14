@@ -22,15 +22,13 @@ export class User extends BaseEntity {
   @Column({ length: 128, unique: true })
   email: string;
 
-  @JoinColumn({ name: 'avatarId' })
+  @JoinColumn({ name: 'pictureId' })
   @OneToOne(
     () => LocalFile,
-    {
-      nullable: true
-    }
+    { nullable: true }
   )
-  public avatar?: LocalFile;
+  public picture?: LocalFile;
 
   @Column({ nullable: true })
-  public avatarId?: number;
+  public pictureId?: number;
 }
