@@ -4,6 +4,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -13,9 +14,12 @@ export class User extends BaseEntity {
   @Column({ length: 128, unique: true })
   username: string;
 
-  @Column()
-  password: string;
-
   @Column({ length: 128, unique: true })
   email: string;
+
+  @Column({
+    nullable: true
+  })
+  @Exclude()
+  public currentHashedRefreshToken?: string;
 }
