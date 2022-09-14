@@ -1,14 +1,16 @@
-import { CreateUserDto } from "@back/users/create-user.dto";
-import { AuthUserDto } from "@back/auth/auth-user.dto";
+import { AuthUserDto } from "./auth-user.dto";
 
 type OnErrorFunction = (reason: any) => void
 type OnSuccess = (data? : object) => void
 
 export const PREFIX = import.meta.env.VITE_CONTEXT == "MOCKUP" ? 'http://localhost:8080/api_mockup' : 'http://localhost:8080/api'
 export enum URL {
-  CREATE_USER = '/user/',
-  AUTH = '/auth/',
-  HELLO = '/'
+  HELLO = '/',
+  SIGNUP = '/user/signup',
+  SIGNIN = '/user/signin',
+  SIGNOUT = '/user/signout',
+  SET_PICTURE = '/user/set_picture',
+  GET_PICTURE = '/user/get_picture',
 }
 export enum HeadersFields {
   ContentType = 'Content-Type',
@@ -28,16 +30,14 @@ export class Api {
 
   private readonly _headers = new Headers()
 
-  constructor() {
-    this._headers.append(HeadersFields.ContentType, "application/json")
-  }
+  constructor() {}
 
   setToken(token: string) {
     this._headers.set(HeadersFields.Authorization, `Bearer ${token}`)
   }
 
-  private static async fetch(url: string, data: object): Promise<any> {
-    return fetch(url, {method: 'POST', body: JSON.stringify(data), headers: this.header})
+  private static async fetch(url: string, data: any): Promise<any> {
+    return fetch(url, {method: 'POST', body: data, headers: this.header})
   }
 
   private static fetchNoResponseBody(url: string, data: object, onSuccess: OnSuccess, onError: OnErrorFunction) {
@@ -59,16 +59,15 @@ export class Api {
       username: username,
       password: password,
     }
-    return this.fetch(`${PREFIX}${URL.AUTH}`, authUserDto)
+    return this.fetch(`${PREFIX}${URL.SIGNIN}`, authUserDto)
   }
 
   static createUser(username: string, password: string, email: string) {
-    const createUserDto : CreateUserDto = {
+    const createUserDto : AuthUserDto = {
       username: username,
       password: password,
-      email: email,
     }
-    this.fetchNoResponseBody(`${PREFIX}${URL.CREATE_USER}`, createUserDto, () => console.log("user created"), console.error)
+    this.fetchNoResponseBody(`${PREFIX}${URL.SIGNUP}`, createUserDto, () => console.log("user created"), console.error)
   }
 
   hello() {
@@ -76,7 +75,15 @@ export class Api {
   }
 
   logout() {
-    return fetch(`${PREFIX}${URL.AUTH}`, {method: 'DELETE', headers: this._headers})
+    return fetch(`${PREFIX}${URL.SIGNOUT}`, {method: 'POST', headers: this._headers})
+  }
+
+  setPicture(data: FormData) {
+    return fetch(`${PREFIX}${URL.SET_PICTURE}`, {method: 'POST', headers: this._headers, body: data})
+  }
+
+  getPicture() {
+    return fetch(`${PREFIX}${URL.GET_PICTURE}`, {method: 'GET', headers: this._headers})
   }
 }
 
