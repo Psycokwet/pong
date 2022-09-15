@@ -1,5 +1,4 @@
-import { CreateUserDto } from "@back/users/create-user.dto";
-import { AuthUserDto } from "@back/auth/auth-user.dto";
+import { AuthUserDto, AuthUserIdDto } from "./auth-user.dto";
 
 type OnErrorFunction = (reason: any) => void
 type OnSuccess = (data? : object) => void
@@ -8,7 +7,8 @@ export const PREFIX = import.meta.env.VITE_CONTEXT == "MOCKUP" ? 'http://localho
 export enum URL {
   CREATE_USER = '/user/',
   AUTH = '/auth/',
-  HELLO = '/'
+  HELLO = '/',
+  PROTECTED = '/protected'
 }
 export enum HeadersFields {
   ContentType = 'Content-Type',
@@ -41,7 +41,7 @@ export class Api {
   }
 
   private static fetchNoResponseBody(url: string, data: object, onSuccess: OnSuccess, onError: OnErrorFunction) {
-    fetch(url, {method: 'POST', body: JSON.stringify(data), headers: this.header})
+    const myVar = fetch(url, {method: 'POST', body: JSON.stringify(data), headers: this.header})
       .then(r => {
         if (r.status !== 201) {
           r.json().then(d => {
@@ -63,12 +63,12 @@ export class Api {
   }
 
   static createUser(username: string, password: string, email: string) {
-    const createUserDto : CreateUserDto = {
+    const AuthUserIdDto : AuthUserIdDto = {
       username: username,
       password: password,
       email: email,
     }
-    this.fetchNoResponseBody(`${PREFIX}${URL.CREATE_USER}`, createUserDto, () => console.log("user created"), console.error)
+    this.fetchNoResponseBody(`${PREFIX}${URL.CREATE_USER}`, AuthUserIdDto, () => console.log("user created"), console.error)
   }
 
   hello() {
@@ -77,6 +77,10 @@ export class Api {
 
   logout() {
     return fetch(`${PREFIX}${URL.AUTH}`, {method: 'DELETE', headers: this._headers})
+  }
+
+  ping() {
+    return fetch(`${PREFIX}${URL.PROTECTED}`, {method: 'GET', headers: this._headers})
   }
 }
 
