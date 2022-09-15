@@ -4,6 +4,8 @@ Try to do small pr if possible. Do pr often, to keep them consize and clear :) D
 
 Also, try to commit files that have been linted. :) I recommend to start using prettier. The base config of prettier is a good start, if needed, we will see later what config change we may choose.
 
+Retrieve the main branches changes in your branche whenever possible before the pr, or during the pr, if there is some update during the time your pr is opened.
+
 ### Title
 For a single commit, the title is the subject line of the commit message.
 Otherwise, the title should summarise the set of commits.
