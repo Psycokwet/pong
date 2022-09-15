@@ -9,6 +9,6 @@ export class AppService {
 
   getHello(): string {
     this.logger.log('Hello');
-    return 'Hello World!';
+    return 'Hallo mockup!';
   }
 }
