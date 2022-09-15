@@ -1,4 +1,5 @@
 import { 
+  BaseEntity,
   Entity, 
   Column, 
   PrimaryGeneratedColumn, 
@@ -8,8 +9,8 @@ import {
 } from 'typeorm';
 import { Game } from 'src/game/game.entity';
 
-@Entity()
-export class User {
+@Entity('user')
+export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
