@@ -1,4 +1,5 @@
-import { 
+import {
+  BaseEntity, 
   Entity, 
   Column, 
   PrimaryGeneratedColumn, 
@@ -9,8 +10,8 @@ import {
 import { Game } from 'src/game/game.entity';
 import { Friend } from 'src/friend_list/friend_list.entity';
 
-@Entity()
-export class User {
+@Entity('user')
+export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
