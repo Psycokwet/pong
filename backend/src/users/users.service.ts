@@ -143,32 +143,53 @@ export class UsersService {
 
   async add_friend(dto: AddFriendDto) {
     
-    //const friendEntity = new Friend();
+    const friendEntity = new Friend();
+    const caller = await this.usersRepository.findOne({
+      where: {username: dto.username}
+    })
     const friend = await this.usersRepository.findOne({
       where: {username: dto.friend_to_add}
     })
 
-    if (!friend)
-      return "Username not found";
+    /* Need to ask Clement if refacto is possible for Bad Requests... */
 
-    const addFriend = Friend.create( {
-        friend_id: friend.id,
-      } )
-    //friendEntity.friend_id = friend.id;
-
-      try {
-        await addFriend.save();
-        //friendEntity.save;
-      }
-      catch (e) {
+    if (!caller) {
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error: 'Friend is already in friends list',
+          error: 'User not found',
         },
         HttpStatus.BAD_REQUEST,
       );
-      }
+    }
+
+    if (!friend) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Did not find person you wanted to add',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    
+    const addFriend = Friend.create( {
+        friend_id: friend.id,
+        user_id: caller.id,
+      } )
+
+    try {
+      await addFriend.save();
+    }
+    catch (e) {
+    throw new HttpException(
+      {
+        status: HttpStatus.BAD_REQUEST,
+        error: 'Friend is already in friends list',
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+    }
   }
 
   // async get_friends_list(dto: GetFriendsListDto) {
