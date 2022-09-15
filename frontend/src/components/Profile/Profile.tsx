@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState, ComponentProps } from "react";
 import {Routes, Route, Link } from "react-router-dom";
 import User from "../NavBar/Pages-To-Change/User";
 import "./Profile.css";
 import UserPicture from "./User Picture/UserPicture";
+import { PieChart } from "react-minimal-pie-chart";
 
 export function ProfileName () {
 	return (
@@ -43,6 +44,55 @@ function MatchHistory () {
 	)
 }
 
+function Stats () {
+	let wins=10
+	let looses=2
+	let abandons=1
+	const [selected, setSelected] = useState<number | undefined>(undefined);
+	const [hovered, setHovered] = useState<number | undefined>(undefined);
+
+	const dataMock = [{ title: 'Wins', value: wins, color: '#158727' },
+				{ title: 'Looses', value: looses, color: '#8B0000' },
+				{ title: 'Abandons', value: abandons, color: '#4D1DD8' }]
+	const data = dataMock.map((entry, i) => {
+		if (hovered === i) {
+			return {
+				...entry,
+				color: 'grey',
+			};
+		}
+		return entry;
+	});
+
+	return (
+		<PieChart
+			data={data}
+			lineWidth={40}
+			startAngle={75}
+			paddingAngle={7}
+			segmentsStyle={{ transition: 'stroke .3s', cursor: 'pointer' }}
+			segmentsShift={(index) => (index === selected ? 3 : 1)}
+			label={({ dataEntry }) => dataEntry.value}
+			labelStyle={(index) => ({
+				fill: 'white',
+				fontSize: '5px',
+			})}
+			labelPosition={112}
+			radius={30}
+			onClick={(event, index) => {
+				console.log('CLICK', { event, index });
+				setSelected(index === selected ? undefined : index);
+			}}
+			onMouseOver={(_, index) => {
+				setHovered(index);
+			}}
+			onMouseOut={() => {
+				setHovered(undefined);
+			}}
+		/>
+	)
+}
+
 function Profile () {
 	let star = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Empty_Star.svg/800px-Empty_Star.svg.png';
 	return (
@@ -70,6 +120,12 @@ function Profile () {
 				</div>
 			</div>
 			<div className="col-span-10"/>
+			<div className="col-start-2 col-span-3 row-span-3">
+				<Stats />
+			</div>
+			<div className="col-start-6 col-span-3 row-start-5">
+				<ProfileName />
+			</div>
 			<div className="col-span-10"/>
 		</div>
 		)
