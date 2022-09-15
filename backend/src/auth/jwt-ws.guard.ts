@@ -39,7 +39,6 @@ export class WsGuard extends AuthGuard('jwt') {
 
 export const UserPayload = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
-    // console.log('data:', data);
     const request = ctx.switchToWs().getClient();
     return request.user;
   },
