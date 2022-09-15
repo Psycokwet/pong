@@ -39,7 +39,6 @@ export class UsersService {
     });
   }
 
-
   async signup (dto: UserDto) {
     if (!UserDto.passwordScheme.validate(dto.password)) {
       throw new HttpException(
@@ -102,8 +101,18 @@ export class UsersService {
   async get_user_rank( dto: Omit<UserDto, 'password'> ) {
     const user = await this.findOne(dto.username);
     
-    return user.user_rank;
-  }
+    if (user)
+      return user.user_rank;
+    
+    // User not found
+    throw new HttpException(
+      {
+        status: HttpStatus.BAD_REQUEST,
+        error: 'User not found',
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+}
 
   async get_user_history( dto: Omit<UserDto, 'password'> ) {
     
@@ -111,6 +120,16 @@ export class UsersService {
     const user = await this.usersRepository.findOne({
       where: { username: dto.username }
     })
+
+    if (!user) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'User not found',
+        },
+        HttpStatus.BAD_REQUEST,
+      );  
+    }
 
     /*  Get a games object where player 1 and player 2 exist and the calling user
         is either one or the other (where: ...) */
