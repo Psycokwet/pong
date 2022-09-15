@@ -2,88 +2,94 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { User } from './user.entity';
-import { CreateUserDto } from './create-user.dto';
+import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
-
-import * as PasswordValidator from 'password-validator';
-
-// const passwordValidator = require('password-validator');
+import { JwtService } from '@nestjs/jwt';
+import { JwtPayload } from 'src/auth/jwt.strategy';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
 
-async function crypt(pass: string): Promise<string> {
-  return bcrypt.genSalt(10).then((s) => bcrypt.hash(pass, s));
+async function crypt(password: string): Promise<string> {
+  return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
 }
+
+async function passwordCompare(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
-  private static readonly passwordScheme = new PasswordValidator();
-  static {
-    UsersService.passwordScheme
-      .is()
-      .min(8)
-      .has()
-      .uppercase()
-      .has()
-      .lowercase()
-      .has()
-      .digits(2);
-  }
 
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private jwtService: JwtService
   ) {}
 
   async findOne(username: string): Promise<User | undefined> {
-    return this.usersRepository.findOneBy({
+    return await this.usersRepository.findOneBy({
       username: username,
     });
   }
 
-  async createUser(user: CreateUserDto) {
-    const userEntity = new User();
-    userEntity.username = user.username;
-    //should validate email either by checking that it containt [anything]@[anything].[anything]
-    //or by trying to send email to it, hence, using this occasion to 2FA ?
-    // if (!validateEmail(user.email)) {
-    //   throw new HttpException(
-    //     {
-    //       status: HttpStatus.BAD_REQUEST,
-    //       error: 'Bad mail format',
-    //     },
-    //     HttpStatus.BAD_REQUEST,
-    //   );
-    // }
-    userEntity.email = user.email;
-    if (!UsersService.passwordScheme.validate(user.password)) {
+
+  async signup (dto: UserDto) {
+    if (!UserDto.passwordScheme.validate(dto.password)) {
       throw new HttpException(
         {
           status: HttpStatus.BAD_REQUEST,
-          error:
-            'Password should contains 8 character minimum, it should had uppercase, lowercase and minimum 2 digits to be valid',
+          error: 'Password should contains 8 character minimum, it should had uppercase, lowercase and minimum 2 digits to be valid',
         },
         HttpStatus.BAD_REQUEST,
       );
     }
-    userEntity.password = await crypt(user.password);
 
-    // TODO check constraint
+    const hash = await crypt(dto.password);
+
+    // database operation
+    const user = User.create({
+        username: dto.username,
+        password: hash,
+        email: dto.email,
+    });
     try {
-      await this.usersRepository.save(userEntity);
-    } catch (e: unknown) {
-      if (e instanceof QueryFailedError) {
-        this.logger.error(JSON.stringify(e));
-        throw new HttpException(
-          {
-            status: HttpStatus.BAD_REQUEST,
-            error: 'Username already exists', // most likely, but not necessarily (constraint)
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      throw e;
+      await user.save();
+    } catch (e) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'Username or Email already used',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
+    return;
+  }
+
+  async signin(dto: Omit<UserDto, 'email'>) {
+    const user = await this.findOne(dto.username);
+
+    if (await passwordCompare(dto.password, user.password)) {
+      const user = await this.findOne(dto.username)
+      
+      const payload: JwtPayload = { username: user.username, sub: user.id };
+      return {
+        access_token: this.jwtService.sign(payload),
+      };
+    }
+    // password did not match
+    throw new HttpException(
+      {
+        status: HttpStatus.BAD_REQUEST,
+        error: 'Username and Password did not match',
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  async signout() {
+    // destroy session
   }
 }
