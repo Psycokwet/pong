@@ -19,20 +19,20 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.local
     volumes: 
-      - "./frontend/:/usr/src/app/"
+      - "./frontend/src:/usr/src/app/src"
     environment:
       - VITE_CONTEXT=DEV
       # - VITE_CONTEXT=MOCKUP
     restart: unless-stopped
-    env_file: .env
 
-  # Don't forget to uncomment the following conteneur if you want to have the mockup available :) 
+  #  # Don't forget to uncomment the following conteneur if you want to have the mockup available :) 
   # backend_mockup:
   #   build:
   #     context: ./backend_mockup
   #     dockerfile: Dockerfile.local
   #   volumes: 
-  #     - "./backend_mockup/:/svr/app"
+  #     - "./backend_mockup/src:/svr/app/src"
+  #     - "./backend_mockup/test:/svr/app/test"
   #   restart: unless-stopped
   #   depends_on:
   #     - database
@@ -42,9 +42,10 @@ services:
       context: ./backend
       dockerfile: Dockerfile.local
     volumes: 
-      - "./backend/:/svr/app"
+      - "./backend/src:/svr/app/src"
+      - "./backend/test:/svr/app/test"
     restart: unless-stopped
-    env_file: .env
+    env_file: ./backend/.env
     depends_on:
       - database
 
