@@ -109,7 +109,3 @@ GET /user/get_user_rank
     "status": 400,
     "error": "User not found"
 }
-
-
-
-This should not happen and need proper handling.
