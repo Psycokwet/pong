@@ -1,14 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ConnectionButton } from './ConnectionButton/ConnectionButton';
 import { DisconnectionButton } from './ConnectionButton/DisconnectionButton';
 import "./App.css";
-import Cookies from 'js-cookie';
+import { Api } from "../api/api";
 
 function App() {
   const [count, setCount] = useState(0);
+
+  const [connected, setConnected] = useState(false);
+
+  const api = new Api()
+
+  useEffect(() => {
+    api.ping()
+      .then(res => {
+        if (res.status === 200)
+          setConnected(true)
+        // else
+        //   window.location.replace("http://localhost:8080/api/auth/42");
+        // please replace the url on login page different than root of main page
+      })
+    },
+    []
+  )
+
   return (
-    Cookies.get('jwt') ? <div className="App">
-      <DisconnectionButton/>
+    connected ? <div className="App">
+      <DisconnectionButton setConnected={setConnected} />
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
       <div>
         <a href="https://vitejs.dev" target="_blank">
