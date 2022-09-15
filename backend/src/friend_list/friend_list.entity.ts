@@ -1,4 +1,3 @@
-import { User } from "src/users/user.entity";
 import { 
   BaseEntity, 
   Column, 
@@ -6,6 +5,7 @@ import {
   ManyToOne, 
   PrimaryGeneratedColumn 
 } from "typeorm";
+import { User } from "src/users/user.entity";
 
 @Entity()
 export class Friend extends BaseEntity {
@@ -13,6 +13,9 @@ export class Friend extends BaseEntity {
   id: number;
 
   @Column()
+  user_id: number;
+
+  @Column( {unique: true} )
   friend_id: number;
 
   @ManyToOne( () => User, (user) => user.friends)
