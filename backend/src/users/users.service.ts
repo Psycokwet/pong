@@ -59,8 +59,8 @@ export class UsersService {
   }
 
   async setCurrentRefreshToken(refreshToken: string, userId: number) {
-    console.log(refreshToken, userId);
     const currentHashedRefreshToken = await crypt(refreshToken);
+
     await this.usersRepository.update(userId, {
       currentHashedRefreshToken
     });

@@ -60,11 +60,11 @@ export class FortyTwoController {
       });
     }
 
-
     const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(userFromDb.id);
-    const refreshTokenCookie = this.authService.getCookieWithJwtRefreshToken(userFromDb.id);
+    const refreshToken = this.authService.getJwtRefreshToken(userFromDb.id);
+    const refreshTokenCookie = this.authService.getCookieWithJwtRefreshToken(refreshToken);
  
-    await this.usersService.setCurrentRefreshToken(authInfo.refreshToken, userFromDb.id);
+    await this.usersService.setCurrentRefreshToken(refreshToken, userFromDb.id);
  
     req.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie])
   }
