@@ -1,6 +1,6 @@
 import React, { useState, ComponentProps } from "react";
 import {Routes, Route, Link } from "react-router-dom";
-import User from "../NavBar/Pages-To-Change/User";
+import NavBar from "../";
 import "./Profile.css";
 import UserPicture from "./User Picture/UserPicture";
 import { PieChart } from "react-minimal-pie-chart";
