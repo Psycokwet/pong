@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 
-
 const UserPicture = ({border_radius='50%', width='200px'}) => {
 	let imageURL = 'https://picsum.photos/400';
 	const Avatar = {
