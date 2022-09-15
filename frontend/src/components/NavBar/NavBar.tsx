@@ -15,19 +15,11 @@ import APage from "./APage";
 import { FaComments } from "react-icons/fa";
 import { FaUser } from "react-icons/fa";
 import { HiChartBar } from "react-icons/hi";
-import { AiFillHome } from "react-icons/ai";
 import { RiPingPongFill } from "react-icons/ri";
 import { IoMdSettings } from "react-icons/io";
-import { GiPingPongBat } from "react-icons/gi";
 
 /***************** List of Pages ******************************************/
 const webPages = [
-  // {
-  //   url: "/",
-  //   pageName: "Home",
-  //   element: <Home />,
-  //   pageIcon: <AiFillHome size="28" />,
-  // },
   {
     url: "/play",
     pageName: "play",
@@ -72,10 +64,10 @@ const NavBar = () => {
 
   return (
     <div>
-      <nav>
-        <ul className="flex p-6 uppercase bg-sky-600">
+      <nav className="border-b-8 border-sky-600 text-white">
+        <ul className="flex p-6 uppercase bg-neutral-900">
           <li>
-            <Link to="/">Pinging Pong</Link>
+            <Link to="/" className="text-3xl font-bold ">Pinging Pong</Link>
           </li>
           {webPages.map((onePage, i) => {
             return (
