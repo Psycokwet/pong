@@ -8,7 +8,6 @@ import {
   Post,
   Request,
 } from '@nestjs/common';
-import { filter } from 'rxjs';
 import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
 import { UsersService } from './users.service';
