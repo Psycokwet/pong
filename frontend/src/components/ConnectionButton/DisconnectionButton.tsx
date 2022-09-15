@@ -1,10 +1,12 @@
-import Cookies from 'js-cookie';
+type DisconnectionButtonProps = {
+  setConnected: CallableFunction;
+};
 
-export const DisconnectionButton = () => {
+export const DisconnectionButton = ({ setConnected }: DisconnectionButtonProps) => {
 
   const handleClick = () => {
-    Cookies.remove('jwt')
-    window.location.reload();
+    setConnected(false)
+    window.location.replace("http://localhost:8080/api/auth/42/logout");
   }
 
   return (

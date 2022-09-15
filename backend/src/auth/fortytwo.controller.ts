@@ -69,10 +69,10 @@ export class FortyTwoController {
     req.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie])
   }
 
+  @Get('logout')
   @UseGuards(JwtAuthGuard)
-  @Post('log-out')
-  @HttpCode(200)
-  async logOut(@Req() request: RequestWithUser) {
+  @Redirect('/', 302)
+  async logout(@Req() request: RequestWithUser) {
     await this.usersService.removeRefreshToken(request.user.id);
     request.res.setHeader('Set-Cookie', this.authService.getCookiesForLogOut());
   }
