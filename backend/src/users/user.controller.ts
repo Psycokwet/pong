@@ -8,10 +8,9 @@ import {
   Post,
   Request,
 } from '@nestjs/common';
-import { filter } from 'rxjs';
 import { Game } from 'src/game/game.entity';
 import { AddFriendDto } from './add-friend.dto';
-import { CreateUserDto } from './create-user.dto';
+import { UserDto } from './user.dto';
 import { UsersService } from './users.service';
 import { GetFriendsListDto } from './get-friends-list.dto';
 
@@ -23,23 +22,33 @@ export class UserController {
 
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  async createUser(@Body() user: CreateUserDto) {
-    //not optimized, it to see a bit where we are on the logging, to change later or delete
+  @Post('signup')
+  async signup (@Body() dto: UserDto) { // dto: data transfert object
     const reqId = this.reqId++;
     this.logger.log(`reqId no. ${reqId}: trying to create user`);
-    await this.usersService.createUser(user);
+
+    return await this.usersService.signup(dto);
+  }
+
+  @Post('signin')
+  async signin (@Body() dto: UserDto) {
+    return await this.usersService.signin(dto);
+  }
+
+  @Post('signout')
+  async signout (@Body() dto: UserDto) {
+    return this.usersService.signout();
   }
 
   @Get('get_user_rank')
-  async get_user_rank(@Body() user: CreateUserDto) {
+  async get_user_rank( @Body() user: Omit <UserDto, 'password'> ) {
     const user_rank = await this.usersService.get_user_rank(user);
     
     return user_rank;
   }
 
   @Post('get_user_history')
-  async get_user_history(@Body() user: CreateUserDto) {
+  async get_user_history(@Body() user: Omit <UserDto, 'password'> ) {
     const userHistory = await this.usersService.get_user_history(user);  
 
     if (!userHistory)
