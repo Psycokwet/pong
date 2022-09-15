@@ -32,20 +32,22 @@ export class AuthService {
   
   public getCookieWithJwtAccessToken(userId: number) {
     const payload: TokenPayload = { userId };
-    console.log(jwtConstants.JWT_ACCESS_TOKEN_EXPIRATION_TIME)
     const token = this.jwtService.sign(payload, {
       secret: jwtConstants.JWT_ACCESS_TOKEN_SECRET,
       expiresIn: jwtConstants.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
     });
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.JWT_ACCESS_TOKEN_EXPIRATION_TIME}`;
   }
- 
-  public getCookieWithJwtRefreshToken(userId: number) {
+
+  public getJwtRefreshToken(userId: number) {
     const payload: TokenPayload = { userId };
-    const token = this.jwtService.sign(payload, {
+    return this.jwtService.sign(payload, {
       secret: jwtConstants.JWT_REFRESH_TOKEN_SECRET,
       expiresIn: jwtConstants.JWT_REFRESH_TOKEN_EXPIRATION_TIME
     });
+  }
+ 
+  public getCookieWithJwtRefreshToken(token: string) {
     return `Refresh=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`;
   }
 
