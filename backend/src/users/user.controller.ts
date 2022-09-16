@@ -36,11 +36,6 @@ export class UserController {
     return await this.usersService.signin(dto);
   }
 
-  @Post('signout')
-  async signout(@Body() dto: UserDto) {
-    return this.usersService.signout();
-  }
-
   @Get('get_user_rank')
   async get_user_rank(@Body() user: Omit<UserDto, 'password'>) {
     const user_rank = await this.usersService.get_user_rank(user);

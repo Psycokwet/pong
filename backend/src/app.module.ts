@@ -1,19 +1,22 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
-import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
 import { User } from './users/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
+<<<<<<< HEAD
 import { Friend } from './friend_list/friend.entity';
 import { Game } from './game/game.entity';
 
+=======
+import { AuthModule } from './auth/auth.module';
+>>>>>>> main
 @Module({
   imports: [
     ConfigModule.forRoot(),
     FortyTwoModule,
-    UsersModule,
+    AuthModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'database',
