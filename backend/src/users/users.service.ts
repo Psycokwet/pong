@@ -1,11 +1,9 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from 'src/auth/jwt.strategy';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
@@ -14,7 +12,10 @@ async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
 }
 
-async function passwordCompare(password: string, hash: string): Promise<boolean> {
+async function passwordCompare(
+  password: string,
+  hash: string,
+): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
 
@@ -25,7 +26,6 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    private jwtService: JwtService
   ) {}
 
   async findOne(username: string): Promise<User | undefined> {
@@ -34,28 +34,14 @@ export class UsersService {
     });
   }
 
-
-  async signup (dto: UserDto) {
-    if (!UserDto.passwordScheme.validate(dto.password)) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Password should contains 8 character minimum, it should had uppercase, lowercase and minimum 2 digits to be valid',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const hash = await crypt(dto.password);
-
+  async signup(dto: UserDto) {
     // database operation
     const user = User.create({
-        username: dto.username,
-        password: hash,
-        email: dto.email,
+      username: dto.username,
+      email: dto.email,
     });
     try {
-      await user.save();
+      return await user.save();
     } catch (e) {
       throw new HttpException(
         {
@@ -65,31 +51,47 @@ export class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return;
   }
 
   async signin(dto: Omit<UserDto, 'email'>) {
-    const user = await this.findOne(dto.username);
+    return await this.findOne(dto.username);
+  }
 
-    if (await passwordCompare(dto.password, user.password)) {
-      const user = await this.findOne(dto.username)
-      
-      const payload: JwtPayload = { username: user.username, sub: user.id };
-      return {
-        access_token: this.jwtService.sign(payload),
-      };
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentHashedRefreshToken = await crypt(refreshToken);
+
+    await this.usersRepository.update(userId, {
+      currentHashedRefreshToken,
+    });
+  }
+
+  async getById(id: number) {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (user) {
+      return user;
     }
-    // password did not match
     throw new HttpException(
-      {
-        status: HttpStatus.BAD_REQUEST,
-        error: 'Username and Password did not match',
-      },
-      HttpStatus.BAD_REQUEST,
+      'User with this id does not exist',
+      HttpStatus.NOT_FOUND,
     );
   }
 
-  async signout() {
-    // destroy session
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
+    const user = await this.getById(userId);
+
+    const isRefreshTokenMatching = await passwordCompare(
+      refreshToken,
+      user.currentHashedRefreshToken,
+    );
+
+    if (isRefreshTokenMatching) {
+      return user;
+    }
+  }
+
+  async removeRefreshToken(userId: number) {
+    return this.usersRepository.update(userId, {
+      currentHashedRefreshToken: null,
+    });
   }
 }
