@@ -8,7 +8,8 @@ export enum URL {
   CREATE_USER = '/user/',
   AUTH = '/auth/',
   HELLO = '/',
-  PROTECTED = '/protected'
+  PROTECTED = '/protected',
+  REFRESH_TOKEN = '/auth/refresh',
 }
 export enum HeadersFields {
   ContentType = 'Content-Type',
@@ -79,8 +80,8 @@ export class Api {
     return fetch(`${PREFIX}${URL.AUTH}`, {method: 'DELETE', headers: this._headers})
   }
 
-  ping() {
-    return fetch(`${PREFIX}${URL.PROTECTED}`, {method: 'GET', headers: this._headers})
+  refreshToken() {
+    return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {method: 'GET', headers: this._headers})
   }
 }
 

@@ -3,7 +3,6 @@ import {
   ExecutionContext,
   Injectable,
 } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
 import { jwtConstants } from './constants';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
@@ -11,10 +10,7 @@ import { Observable } from 'rxjs';
 
 @Injectable()
 export class WsGuard extends AuthGuard('jwt') {
-  constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
-  ) {
+  constructor(private jwtService: JwtService) {
     super();
   }
 
