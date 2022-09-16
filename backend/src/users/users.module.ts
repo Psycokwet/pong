@@ -6,7 +6,7 @@ import { UserController } from './user.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from 'src/auth/constants';
 import { Game } from 'src/game/game.entity';
-import { Friend } from 'src/friend_list/friend_list.entity';
+import { Friend } from 'src/friend_list/friend.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Game, Friend]), 
