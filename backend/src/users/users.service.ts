@@ -152,6 +152,12 @@ export class UsersService {
 
     const friend = await this.findOne(dto.friend_to_add);
 
+    if (caller.id === friend.id) {
+      throw new BadRequestException({
+        error: 'You cannot add yourself',
+      });
+    }
+
     const doubleAddCheck = await this.friendRepository.findOne({
       relations: {
         user: true,
