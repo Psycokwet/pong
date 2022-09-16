@@ -7,12 +7,16 @@ import {
   Logger,
   Post,
   Request,
+  UseGuards,
 } from '@nestjs/common';
 import { Game } from 'src/game/game.entity';
 import { AddFriendDto } from './add-friend.dto';
+import { SetUsernameDto } from './set-username.dto';
 import { UserDto } from './user.dto';
 import { UsersService } from './users.service';
 import { GetFriendsListDto } from './get-friends-list.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('/user/')
 export class UserController {
@@ -22,21 +26,8 @@ export class UserController {
 
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('signup')
-  async signup(@Body() dto: UserDto) {
-    // dto: data transfert object
-    const reqId = this.reqId++;
-    this.logger.log(`reqId no. ${reqId}: trying to create user`);
-
-    return await this.usersService.signup(dto);
-  }
-
-  @Post('signin')
-  async signin(@Body() dto: UserDto) {
-    return await this.usersService.signin(dto);
-  }
-
   @Get('get_user_rank')
+  //@UseGuards(JwtAuthGuard)
   async get_user_rank(@Body() user: Omit<UserDto, 'password'>) {
     const user_rank = await this.usersService.get_user_rank(user);
 
@@ -44,6 +35,7 @@ export class UserController {
   }
 
   @Post('get_user_history')
+  @UseGuards(JwtAuthGuard)
   async get_user_history(@Body() user: Omit<UserDto, 'password'>) {
     const userHistory = await this.usersService.get_user_history(user);
 
@@ -73,12 +65,13 @@ export class UserController {
   }
 
   @Post('add_friend')
+  @UseGuards(JwtAuthGuard)
   async add_friend(@Body() friend: AddFriendDto) {
     await this.usersService.add_friend(friend);
   }
 
-  /*
   @Get('get_friends_list')
+  @UseGuards(JwtAuthGuard)
   async get_friends_list(@Body() friend: GetFriendsListDto) {
     const friendList = await this.usersService.get_friends_list(friend);
 
@@ -88,5 +81,16 @@ export class UserController {
       };
     });
   }
-*/
+
+  @Get('get_username')
+  @UseGuards(JwtAuthGuard)
+  async get_username(@Body() user: UserDto) {
+    return await this.usersService.get_username(user);
+  }
+
+  @Post('set_username')
+  @UseGuards(JwtAuthGuard)
+  async set_username(@Body() user: SetUsernameDto) {
+    await this.usersService.set_username(user);
+  }
 }

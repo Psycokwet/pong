@@ -22,10 +22,10 @@ import RequestWithUser from './requestWithUser.interface';
 @Controller('auth/42')
 export class FortyTwoController {
   private readonly logger = new Logger(FortyTwoController.name);
-  
+
   constructor(
     private readonly usersService: UsersService,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
   ) {}
 
   @Get()
@@ -49,24 +49,28 @@ export class FortyTwoController {
       };
     } = req.user;
 
-        
-    let userFromDb = await this.usersService.signin({ username: user.username });
-
-    if (!userFromDb)
-    {
+    let userFromDb;
+    try {
+      userFromDb = await this.usersService.signin({
+        username: user.username,
+      });
+    } catch (e) {
       userFromDb = await this.usersService.signup({
         username: user.username,
         email: user.email,
       });
     }
 
-    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(userFromDb.id);
+    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+      userFromDb.id,
+    );
     const refreshToken = this.authService.getJwtRefreshToken(userFromDb.id);
-    const refreshTokenCookie = this.authService.getCookieWithJwtRefreshToken(refreshToken);
- 
+    const refreshTokenCookie =
+      this.authService.getCookieWithJwtRefreshToken(refreshToken);
+
     await this.usersService.setCurrentRefreshToken(refreshToken, userFromDb.id);
- 
-    req.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie])
+
+    req.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
   }
 
   @Get('logout')
