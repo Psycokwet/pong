@@ -2,8 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/user.entity';
-import { compareCryptedPassword } from '../utils';
-import { AuthUserIdDto } from './auth-user.dto';
 import { jwtConstants } from './constants';
 export interface TokenPayload {
   userId: number;
