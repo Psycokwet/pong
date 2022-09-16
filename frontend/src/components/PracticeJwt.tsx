@@ -8,14 +8,36 @@ function PracticeJwt() {
   const [count, setCount] = useState(0);
 
   const [connected, setConnected] = useState(false);
+  const [loopValue, setLoopValue] = useState(0);
 
   const api = new Api()
 
+  const connectionLoop = () => {
+    setLoopValue(
+      setInterval(
+        () => api.refreshToken()
+          .then(res => {
+            if (res.status === 200)
+              setConnected(true)
+            else
+            {
+              clearInterval(loopValue)
+              window.location.replace("http://localhost:8080");
+            }
+        }),
+        600000
+      )
+    )
+  }
+
   useEffect(() => {
-    api.ping()
+    api.refreshToken()
       .then(res => {
         if (res.status === 200)
+        {
           setConnected(true)
+          connectionLoop()
+        }
         // else
         //   window.location.replace("http://localhost:8080/api/auth/42");
         // please replace the url on login page different than root of main page

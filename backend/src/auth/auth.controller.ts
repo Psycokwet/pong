@@ -1,13 +1,7 @@
-import {
-  Controller,
-  Get,
-  Logger,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Logger, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import RequestWithUser from './requestWithUser.interface';
-import JwtRefreshGuard from './jwtRefreshGuard';
+import JwtRefreshGuard from './jwtRefresh.guard';
 @Controller('/auth/')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
@@ -17,8 +11,10 @@ export class AuthController {
   @UseGuards(JwtRefreshGuard)
   @Get('refresh')
   refresh(@Req() request: RequestWithUser) {
-    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(request.user.id);
- 
+    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+      request.user.id,
+    );
+
     request.res.setHeader('Set-Cookie', accessTokenCookie);
     return request.user;
   }
