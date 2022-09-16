@@ -1,0 +1,7 @@
+# production
+/old_pong
+/dist
+/node_modules
+/test
+Docker*
+*.md
