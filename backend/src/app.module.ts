@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 import { User } from './users/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
-import { Friend } from './friend_list/friend_list.entity';
+import { Friend } from './friend_list/friend.entity';
 import { Game } from './game/game.entity';
 
 @Module({

@@ -15,9 +15,10 @@ export class Friend extends BaseEntity {
   @Column()
   user_id: number;
 
-  @Column( {unique: true} )
+  @Column()
   friend_id: number;
 
+  //Following: OneToOne
   @ManyToOne( () => User, (user) => user.friends)
-  friend: User;
+  user: User;
 }
