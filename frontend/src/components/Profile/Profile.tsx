@@ -1,9 +1,9 @@
 import React, { useState, ComponentProps } from "react";
-import {Routes, Route, Link } from "react-router-dom";
-import NavBar from "../";
 import "./Profile.css";
-import UserPicture from "./User Picture/UserPicture";
-import { PieChart } from "react-minimal-pie-chart";
+import UserPicture from "../User Picture/UserPicture";
+import Stats from "./Stats/Stats";
+
+import { IoStarOutline } from "react-icons/io5";
 
 export function ProfileName () {
 	return (
@@ -17,7 +17,6 @@ export function ProfileName () {
 		</div>
 	)
 }
-
 
 function MatchHistory () {
 	return (
@@ -44,57 +43,7 @@ function MatchHistory () {
 	)
 }
 
-function Stats () {
-	let wins=10
-	let looses=2
-	let abandons=1
-	const [selected, setSelected] = useState<number | undefined>(undefined);
-	const [hovered, setHovered] = useState<number | undefined>(undefined);
-
-	const dataMock = [{ title: 'Wins', value: wins, color: '#158727' },
-				{ title: 'Looses', value: looses, color: '#8B0000' },
-				{ title: 'Abandons', value: abandons, color: '#4D1DD8' }]
-	const data = dataMock.map((entry, i) => {
-		if (hovered === i) {
-			return {
-				...entry,
-				color: 'grey',
-			};
-		}
-		return entry;
-	});
-
-	return (
-		<PieChart
-			data={data}
-			lineWidth={40}
-			startAngle={75}
-			paddingAngle={7}
-			segmentsStyle={{ transition: 'stroke .3s', cursor: 'pointer' }}
-			segmentsShift={(index) => (index === selected ? 3 : 1)}
-			label={({ dataEntry }) => dataEntry.value}
-			labelStyle={(index) => ({
-				fill: 'white',
-				fontSize: '5px',
-			})}
-			labelPosition={112}
-			radius={30}
-			onClick={(event, index) => {
-				console.log('CLICK', { event, index });
-				setSelected(index === selected ? undefined : index);
-			}}
-			onMouseOver={(_, index) => {
-				setHovered(index);
-			}}
-			onMouseOut={() => {
-				setHovered(undefined);
-			}}
-		/>
-	)
-}
-
 function Profile () {
-	let star = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Empty_Star.svg/800px-Empty_Star.svg.png';
 	return (
 		<div className="bg-black text-white h-screen flex grid grid-cols-10 grid-rows-6 gap-8">
 			<div className="col-start-2 col-span-3 row-start-2">
@@ -106,11 +55,7 @@ function Profile () {
 			<div className="row-start-3 flex flex-row col-start-2 col-span-3 max-h-[22rem]">
 				<div className="self-center">
 					<Link to="/leaderboard"> 
-						<img
-							src={star}
-							alt="LeaderBoard"
-							width={'40px'}
-						/>
+						<IoStarOutline size="40 />
 					</Link>
 				</div>
 				<div className="self-center">
@@ -128,7 +73,7 @@ function Profile () {
 			</div>
 			<div className="col-span-10"/>
 		</div>
-		)
+	)
 }
 
 export default Profile
