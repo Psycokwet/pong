@@ -1,10 +1,12 @@
 import "./App.css";
 import NavBar from "./NavBar/NavBar";
+import PracticeJwt from "./PracticeJwt";
 
 function App() {
   return (
-    <div className=''>
-      <NavBar />
+    <div className="">
+      <PracticeJwt />
+      {/* <NavBar /> */}
     </div>
   );
 }
