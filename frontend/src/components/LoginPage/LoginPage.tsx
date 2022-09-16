@@ -2,12 +2,18 @@ import React from "react";
 import { useState } from "react";
 
 const LoginPage = () => {
+
+  /***************************************************************
+   * This part is for connecting to backend
+   * I'm not sure how it's done yet so it's just a general idea
+  ***************************************************************/
   const [loginState, setLoginState] = useState(false);
 
   const goOauth = () => {
     setLoginState(!loginState);
     console.log(loginState);
   };
+  /***************************************************************/
 
   return (
     <div className="flex flex-col justify-center items-center space-y-16 bg-gray-900 text-white h-screen text-center">
