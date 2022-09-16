@@ -1,4 +1,6 @@
 export const jwtConstants = {
-  // TODO env
-  secret: 'secretKey',
+  JWT_ACCESS_TOKEN_SECRET: 'VeryComplicatePassword',
+  JWT_ACCESS_TOKEN_EXPIRATION_TIME: 900,
+  JWT_REFRESH_TOKEN_SECRET: 'VeryComplicatePassword',
+  JWT_REFRESH_TOKEN_EXPIRATION_TIME: '1d',
 };
