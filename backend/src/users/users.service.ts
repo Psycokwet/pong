@@ -13,6 +13,8 @@ import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
+import { SetUsernameDto } from './set-username.dto';
+import { GetFriendsListDto } from './get-friends-list.dto';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
@@ -142,16 +144,22 @@ export class UsersService {
   }
 
   async add_friend(dto: AddFriendDto) {
+    /* First we get the caller (person who is initiating the friend request) 
+    and friend in our db */
     const caller = await this.findOne(dto.username);
 
     const friend = await this.findOne(dto.friend_to_add);
 
+    /* Checking if the caller is adding himself (I think this should never 
+      happen on the front side) */
     if (caller.id === friend.id) {
       throw new BadRequestException({
         error: 'You cannot add yourself',
       });
     }
 
+    /* Then we check if the perso the caller wants to add as a friend is already
+    in our friend list and throw a 400 if they are */
     const doubleAddCheck = await this.friendRepository.findOne({
       relations: {
         user: true,
@@ -165,6 +173,7 @@ export class UsersService {
       });
     }
 
+    /* Finally the profile we want to add as a friend is registered in our db */
     const addFriend = Friend.create({
       friend_id: friend.id,
       user_id: caller.id,
@@ -174,21 +183,9 @@ export class UsersService {
     await addFriend.save();
   }
 
-  /*
   async get_friends_list(dto: GetFriendsListDto) {
-    const user = await this.usersRepository.findOne({
-      where: { username: dto.username },
-    });
-
-    if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User not found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    /* Same logic as get_user_history */
+    const user = await this.findOne(dto.username);
 
     const friendsList = await this.friendRepository.find({
       relations: {
@@ -199,5 +196,21 @@ export class UsersService {
 
     return friendsList;
   }
-  */
+
+  async get_username(dto: UserDto) {
+    const user = await this.findOne(dto.username);
+    return user.username;
+  }
+
+  async set_username(dto: SetUsernameDto) {
+    const user = await this.findOne(dto.username);
+
+    /* We use TypeORM's query builder to update our entity */
+    this.usersRepository
+      .createQueryBuilder()
+      .update(user)
+      .set({ username: dto.new_username })
+      .where({ id: user.id })
+      .execute();
+  }
 }

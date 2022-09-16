@@ -1,3 +1,6 @@
+## NOTE
+With the current auth system you have to add users manually in the database if you want to run tests requiring many different users (refer to get user history for info on how to access).
+
 ### Create user :
 
 POST /user/signup
@@ -174,5 +177,87 @@ Adding someone already in your friends list (400):
 ```
 {
     "error": "User is already in friends list"
+}
+```
+
+### get friends list
+
+GET /user/get_friends_list
+
+#### payload :
+
+```
+{
+	"username": "sophie",
+}
+```
+
+#### success response:
+
+```
+[
+    {
+        "username": "cdai"
+    },
+    {
+        "username": "coucou3"
+    },
+    {
+        "username": "mescande"
+    }
+]
+```
+
+#### failure response :
+```
+{
+    "error": "User not found"
+}
+```
+
+### get username
+
+GET /user/get_username
+
+#### payload :
+
+```
+{
+	"username": "sophie",
+}
+```
+
+#### success response:
+
+sophie
+
+#### failure response :
+```
+{
+    "error": "User not found"
+}
+```
+
+### set username
+
+POST /user/set_nickname
+
+#### payload:
+```
+{
+	"username": "sophie",
+    "new_username":"sophie_new",
+}
+```
+
+#### success response:
+
+201 CREATED
+You should see that all instances of the old username are replaced by the new one (try seeing in the friends list or in games)
+
+#### failure response :
+```
+{
+    "error": "User not found"
 }
 ```

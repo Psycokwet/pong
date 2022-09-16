@@ -1,12 +1,17 @@
-import { Controller, Get, Logger, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import RequestWithUser from './requestWithUser.interface';
 import JwtRefreshGuard from './jwtRefresh.guard';
+import { UserDto } from 'src/users/user.dto';
+import { UsersService } from 'src/users/users.service';
 @Controller('/auth/')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @UseGuards(JwtRefreshGuard)
   @Get('refresh')

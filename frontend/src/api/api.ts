@@ -84,5 +84,3 @@ export class Api {
     return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {method: 'GET', headers: this._headers})
   }
 }
-
-
