@@ -22,8 +22,8 @@ services:
     volumes: 
       - "./frontend/src:/usr/src/app/src"
     environment:
-      - VITE_CONTEXT=DEV
-      # - VITE_CONTEXT=MOCKUP
+      - VITE_CONTEXT="DEV"
+      # - VITE_CONTEXT="MOCKUP"
     restart: unless-stopped
 
   #  # Don't forget to uncomment the following conteneur if you want to have the mockup available :) 

@@ -1,6 +1,3 @@
-import { CreateUserDto } from "@back/users/create-user.dto";
-import { AuthUserDto } from "@back/auth/auth-user.dto";
-
 type OnErrorFunction = (reason: any) => void
 type OnSuccess = (data? : object) => void
 
@@ -55,7 +52,7 @@ export class Api {
   }
 
   static async auth(username: string, password: string): Promise<Response> {
-    const authUserDto: AuthUserDto = {
+    const authUserDto = {
       username: username,
       password: password,
     }
@@ -63,7 +60,7 @@ export class Api {
   }
 
   static createUser(username: string, password: string, email: string) {
-    const createUserDto : CreateUserDto = {
+    const createUserDto = {
       username: username,
       password: password,
       email: email,
