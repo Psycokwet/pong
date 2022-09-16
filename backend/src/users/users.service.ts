@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -45,10 +51,12 @@ export class UsersService {
     private jwtService: JwtService,
   ) {}
 
-  async findOne(username: string): Promise<User | undefined> {
-    return await this.usersRepository.findOneBy({
+  async findOne(username: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({
       username: username,
     });
+    if (!user) throw new BadRequestException({ error: 'User not found' });
+    return user;
   }
 
   async signup(dto: UserDto) {
@@ -140,34 +148,9 @@ export class UsersService {
   }
 
   async add_friend(dto: AddFriendDto) {
-    const caller = await this.usersRepository.findOne({
-      where: { username: dto.username },
-    });
-    const friend = await this.usersRepository.findOne({
-      where: { username: dto.friend_to_add },
-    });
+    const caller = await this.findOne(dto.username);
 
-    /* Need to ask Clement if refacto is possible for Bad Requests... */
-
-    if (!caller) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User not found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    if (!friend) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Did not find person you wanted to add',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const friend = await this.findOne(dto.friend_to_add);
 
     const doubleAddCheck = await this.friendRepository.findOne({
       relations: {
@@ -177,13 +160,9 @@ export class UsersService {
     });
 
     if (doubleAddCheck) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User is already in friends list',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException({
+        error: 'User is already in friends list',
+      });
     }
 
     const addFriend = Friend.create({
