@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Game } from 'src/game/game.entity';
 import { Friend } from 'src/friend_list/friend.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -17,9 +18,6 @@ export class User extends BaseEntity {
 
   @Column({ length: 128, unique: true })
   username: string;
-
-  @Column()
-  password: string;
 
   @Column({ length: 128, unique: true })
   email: string;
@@ -35,4 +33,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Friend, (friend) => friend.user)
   friends!: Friend[];
+  @Column({
+    nullable: true,
+  })
+  @Exclude()
+  public currentHashedRefreshToken?: string;
 }
