@@ -2,9 +2,9 @@ import { useState } from "react";
 import { PieChart } from "react-minimal-pie-chart";
 
 function Stats () {
-	let wins=10
-	let looses=2
-	let abandons=1
+	let wins=7
+	let looses=10
+	let abandons=10
 	const [selected, setSelected] = useState<number | undefined>(undefined);
 	const [hovered, setHovered] = useState<number | undefined>(undefined);
 
@@ -38,7 +38,7 @@ function Stats () {
 			radius={30}
 			onClick={(event, index) => {
 				console.log('CLICK', { event, index });
-				setSelected(index === selected ? undefined : index);
+				setSelected((c) => index === c ? undefined : index);
 			}}
 			onMouseOver={(_, index) => {
 				setHovered(index);

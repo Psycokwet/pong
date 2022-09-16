@@ -4,6 +4,7 @@ import UserPicture from "../User Picture/UserPicture";
 import Stats from "./Stats/Stats";
 
 import { IoStarOutline } from "react-icons/io5";
+import { Link } from "react-router-dom";
 
 export function ProfileName () {
 	return (
@@ -55,7 +56,7 @@ function Profile () {
 			<div className="row-start-3 flex flex-row col-start-2 col-span-3 max-h-[22rem]">
 				<div className="self-center">
 					<Link to="/leaderboard"> 
-						<IoStarOutline size="40 />
+						<IoStarOutline size="40" />
 					</Link>
 				</div>
 				<div className="self-center">
