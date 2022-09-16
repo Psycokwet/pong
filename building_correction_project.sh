@@ -11,3 +11,4 @@ done
 cp ./* dist_project/ 
 rm  dist_project/*.md
 rm  dist_project/`basename "$0"`
+mv  dist_project/docker-compose-prod.yml  dist_project/docker-compose.yml
