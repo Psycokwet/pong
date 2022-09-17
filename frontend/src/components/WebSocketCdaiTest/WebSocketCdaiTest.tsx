@@ -12,16 +12,18 @@ function WebsSocketCdaiTest() {
     socket?.emit("send_message", value);
   }
   useEffect(() => {
-    const newSocket = io(ENDPOINT + '/api/chat', {
-    // const newSocket = io(ENDPOINT + '/hat', {
-      // path: 'api/chat',
-      transports: ['websocket'],
-      // withCredentials: true,
-    });
+    const newSocket = io(
+      ENDPOINT,
+      {
+        // const newSocket = io(ENDPOINT + '/hat', {
+        // path: 'chat',
+        transports: ['websocket'],
+        // withCredentials: true,
+      });
     setSocket(newSocket)
   }, [setSocket]);
 
-  const messageListener = (message:string) => {
+  const messageListener = (message: string) => {
     setMessages([...messages, message])
   }
   useEffect(() => {
@@ -33,8 +35,8 @@ function WebsSocketCdaiTest() {
 
   return (
     <>
-      <MessageInput send={send}/>
-      <Messages messages={messages}/>
+      <MessageInput send={send} />
+      <Messages messages={messages} />
     </>
   );
 }

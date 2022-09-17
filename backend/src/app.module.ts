@@ -6,7 +6,7 @@ import { User } from './users/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
-import { ChatGateway } from './chat/chat.gatewey';
+import { ChatGateway } from './chat/chat.gateway';
 import { ChatService } from './chat/chat.service';
 import Message from './chat/message.entity';
 @Module({
@@ -31,4 +31,4 @@ import Message from './chat/message.entity';
   controllers: [AppController],
   providers: [AppService, ChatGateway, ChatService],
 })
-export class AppModule {}
+export class AppModule { }
