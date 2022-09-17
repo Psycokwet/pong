@@ -27,7 +27,7 @@ export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('get_user_rank')
-  //@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async get_user_rank(@Body() user: Omit<UserDto, 'password'>) {
     const user_rank = await this.usersService.get_user_rank(user);
 
