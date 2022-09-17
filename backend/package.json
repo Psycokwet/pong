@@ -28,10 +28,15 @@
     "@nestjs/jwt": "^9.0.0",
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-socket.io": "^9.0.11",
     "@nestjs/typeorm": "^9.0.1",
+    "@nestjs/websockets": "^9.0.11",
+    "@types/cookie": "^0.5.1",
+    "@types/socket.io": "^3.0.2",
     "bcrypt": "^5.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
+    "cookie": "^0.5.0",
     "cookie-parser": "^1.4.6",
     "passport-42": "^1.2.6",
     "passport-jwt": "^4.0.0",
@@ -41,6 +46,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
+    "socket.io": "^4.5.2",
     "typeorm": "^0.3.9"
   },
   "devDependencies": {

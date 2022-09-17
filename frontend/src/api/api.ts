@@ -80,7 +80,7 @@ export class Api {
   }
 
   ping() {
-    return fetch(`${PREFIX}${URL.PROTECTED}`, {method: 'GET', headers: this._headers})
+    return fetch(`${PREFIX}${URL.PROTECTED}`, {method: 'GET', mode:'no-cors', credentials:'include'})
   }
 }
 
