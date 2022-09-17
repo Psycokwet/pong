@@ -3,37 +3,39 @@ import { ConnectionButton } from './ConnectionButton/ConnectionButton';
 import { DisconnectionButton } from './ConnectionButton/DisconnectionButton';
 import "./App.css";
 import { Api } from "../api/api";
+import WebsSocketCdaiTest from "./WebSocketCdaiTest/WebSocketCdaiTest";
 
 function App() {
   const [count, setCount] = useState(0);
 
-  const [connected, setConnected] = useState(false);
+  const [connected, setConnected] = useState(true);
 
-  const api = new Api()
+  // const api = new Api()
 
-  useEffect(() => {
-    api.ping()
-      .then(res => {
-        if (res.status === 200)
-          setConnected(true)
-        // else
-        //   window.location.replace("http://localhost:8080/api/auth/42");
-        // please replace the url on login page different than root of main page
-      })
-    },
-    []
-  )
+  // useEffect(() => {
+  //   api.ping()
+  //     .then(res => {
+  //       if (res.status === 200)
+  //         setConnected(true)
+  //       // else
+  //       //   window.location.replace("http://localhost:8080/api/auth/42");
+  //       // please replace the url on login page different than root of main page
+  //     })
+  //   },
+  //   []
+  // )
 
   return (
     connected ? <div className="App">
+      <WebsSocketCdaiTest/>
       <DisconnectionButton setConnected={setConnected} />
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
-      <div>
+      {/* <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src="https://seeklogo.com/images/V/vite-logo-BFD4283991-seeklogo.com.png" 
           className="block mx-auto h-24 rounded-full sm:mx-0 sm:shrink-0" alt="Vite logo" />
         </a>
-      </div>      
+      </div>       */}
       <h1>Vite + React + Typescript</h1>
       <div className="card">
         <button className="border-solid" onClick={() => setCount((count) => count + 1)}>
