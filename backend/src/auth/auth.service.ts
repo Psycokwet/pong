@@ -2,8 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/user.entity';
-import { compareCryptedPassword } from '../utils';
-import { AuthUserIdDto } from './auth-user.dto';
 import { jwtConstants } from './constants';
 export interface TokenPayload {
   userId: number;
@@ -29,7 +27,7 @@ export class AuthService {
     this.logger.log(`${reqId} user found`);
     return { userId: user.id, username: username };
   }
-  
+
   public getCookieWithJwtAccessToken(userId: number) {
     const payload: TokenPayload = { userId };
     const token = this.jwtService.sign(payload, {
@@ -43,10 +41,10 @@ export class AuthService {
     const payload: TokenPayload = { userId };
     return this.jwtService.sign(payload, {
       secret: jwtConstants.JWT_REFRESH_TOKEN_SECRET,
-      expiresIn: jwtConstants.JWT_REFRESH_TOKEN_EXPIRATION_TIME
+      expiresIn: jwtConstants.JWT_REFRESH_TOKEN_EXPIRATION_TIME,
     });
   }
- 
+
   public getCookieWithJwtRefreshToken(token: string) {
     return `Refresh=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.JWT_REFRESH_TOKEN_EXPIRATION_TIME}`;
   }
@@ -54,7 +52,7 @@ export class AuthService {
   public getCookiesForLogOut() {
     return [
       'Authentication=; HttpOnly; Path=/; Max-Age=0',
-      'Refresh=; HttpOnly; Path=/; Max-Age=0'
+      'Refresh=; HttpOnly; Path=/; Max-Age=0',
     ];
   }
 
