@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { ConnectionButton } from './ConnectionButton/ConnectionButton';
-import { DisconnectionButton } from './ConnectionButton/DisconnectionButton';
+import { ConnectionButton } from "./ConnectionButton/ConnectionButton";
+import { DisconnectionButton } from "./ConnectionButton/DisconnectionButton";
 import "./PracticeJwt.css";
 import { Api } from "../api/api";
 
@@ -10,55 +10,55 @@ function PracticeJwt() {
   const [connected, setConnected] = useState(false);
   const [loopValue, setLoopValue] = useState(0);
 
-  const api = new Api()
+  const api = new Api();
 
   const connectionLoop = () => {
     setLoopValue(
       setInterval(
-        () => api.refreshToken()
-          .then(res => {
-            if (res.status === 200)
-              setConnected(true)
-            else
-            {
-              clearInterval(loopValue)
+        () =>
+          api.refreshToken().then((res) => {
+            if (res.status === 200) setConnected(true);
+            else {
+              clearInterval(loopValue);
               window.location.replace("http://localhost:8080");
             }
-        }),
+          }),
         600000
       )
-    )
-  }
+    );
+  };
 
   useEffect(() => {
-    api.refreshToken()
-      .then(res => {
-        if (res.status === 200)
-        {
-          setConnected(true)
-          connectionLoop()
-        }
-        // else
-        //   window.location.replace("http://localhost:8080/api/auth/42");
-        // please replace the url on login page different than root of main page
-      })
-    },
-    []
-  )
+    api.refreshToken().then((res) => {
+      if (res.status === 200) {
+        setConnected(true);
+        connectionLoop();
+      }
+      // else
+      //   window.location.replace("http://localhost:8080/api/auth/42");
+      // please replace the url on login page different than root of main page
+    });
+  }, []);
 
-  return (
-    connected ? <div className="App">
+  return connected ? (
+    <div className="App">
       <DisconnectionButton setConnected={setConnected} />
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
       <div>
         <a href="https://vitejs.dev" target="_blank">
-          <img src="https://seeklogo.com/images/V/vite-logo-BFD4283991-seeklogo.com.png" 
-          className="block mx-auto h-24 rounded-full sm:mx-0 sm:shrink-0" alt="Vite logo" />
+          <img
+            src="https://seeklogo.com/images/V/vite-logo-BFD4283991-seeklogo.com.png"
+            className="block mx-auto h-24 rounded-full sm:mx-0 sm:shrink-0"
+            alt="Vite logo"
+          />
         </a>
-      </div>      
+      </div>
       <h1>Vite + React + Typescript</h1>
       <div className="card">
-        <button className="border-solid" onClick={() => setCount((count) => count + 1)}>
+        <button
+          className="border-solid"
+          onClick={() => setCount((count) => count + 1)}
+        >
           count is {count}
         </button>
         <p>
@@ -84,8 +84,9 @@ function PracticeJwt() {
           </button>
         </div>
       </div>
-    </div> : <ConnectionButton/>
-
+    </div>
+  ) : (
+    <ConnectionButton />
   );
 }
 
