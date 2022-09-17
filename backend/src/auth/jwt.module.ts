@@ -1,11 +1,11 @@
-
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthService } from './jwt.service';
-import { JwtStrategy } from './jwt.strategy';
+import { JwtAuthStrategy } from './jwt.strategy';
 import { jwtConstants } from './constants';
 import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from 'src/users/users.module';
+import { JwtRefreshStrategy } from './jwtRefresh.strategy';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { UsersModule } from 'src/users/users.module';
       inject: [],
     }),
   ],
-  providers: [JwtStrategy, JwtAuthService],
+  providers: [JwtAuthStrategy, JwtAuthService, JwtRefreshStrategy],
   exports: [JwtModule, JwtAuthService],
 })
 export class JwtAuthModule {}
