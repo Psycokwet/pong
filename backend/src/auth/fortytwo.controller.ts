@@ -13,7 +13,7 @@ import {
 import { Response } from 'express';
 import { FortyTwoGuard } from 'src/auth/fortytwo.guard';
 import { Profile } from 'passport-42';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import RequestWithUser from './requestWithUser.interface';

@@ -10,13 +10,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Game } from 'src/game/game.entity';
-import { AddFriendDto } from './add-friend.dto';
-import { SetUsernameDto } from './set-username.dto';
 import { UserDto } from './user.dto';
-import { UsersService } from './users.service';
+import { UsersService } from './user.service';
 import { GetFriendsListDto } from './get-friends-list.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { AddFriendDto } from './add-friend.dto';
+import { SetUsernameDto } from './set-username.dto';
 
 @Controller('/user/')
 export class UserController {
