@@ -4,8 +4,11 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
+<<<<<<< HEAD
 import { AuthUserIdDto } from 'src/auth/auth-user.dto';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
+=======
+>>>>>>> main
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
@@ -28,7 +31,10 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+<<<<<<< HEAD
     private localFilesService: LocalFilesService
+=======
+>>>>>>> main
   ) {}
 
   async findOne(username: string): Promise<User | undefined> {
