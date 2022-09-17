@@ -2,16 +2,16 @@ import React from "react";
 import { useState } from "react";
 
 const LoginPage = () => {
-
   /***************************************************************
    * This part is for connecting to backend
    * I'm not sure how it's done yet so it's just a general idea
-  ***************************************************************/
-  const [loginState, setLoginState] = useState(false);
+   ***************************************************************/
+  // const [loginState, setLoginState] = useState(false);
 
   const goOauth = () => {
-    setLoginState(!loginState);
-    console.log(loginState);
+    // setLoginState(!loginState);
+    // console.log(loginState);
+    window.location.replace("http://localhost:8080/api/auth/42")
   };
   /***************************************************************/
 
@@ -23,9 +23,7 @@ const LoginPage = () => {
           <button
             className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
             onClick={goOauth}
-          >
-            Login with 42
-          </button>
+          >Login with 42</button>
         </div>
       </div>
     </div>
