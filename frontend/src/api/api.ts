@@ -1,13 +1,15 @@
-import { AuthUserDto } from "./auth-user.dto";
+import { AuthUserDto, AuthUserIdDto } from "./auth-user.dto";
 
 type OnErrorFunction = (reason: any) => void
 type OnSuccess = (data? : object) => void
 
 export const PREFIX = import.meta.env.VITE_CONTEXT == "MOCKUP" ? 'http://localhost:8080/api_mockup' : 'http://localhost:8080/api'
 export enum URL {
+  CREATE_USER = '/user/',
+  AUTH = '/auth/',
   HELLO = '/',
-  SIGNUP = '/user/signup',
-  SIGNIN = '/user/signin',
+  PROTECTED = '/protected',
+  REFRESH_TOKEN = '/auth/refresh',
   SIGNOUT = '/user/signout',
   SET_PICTURE = '/user/set_picture',
   GET_PICTURE = '/user/get_picture',
@@ -41,7 +43,7 @@ export class Api {
   }
 
   private static fetchNoResponseBody(url: string, data: object, onSuccess: OnSuccess, onError: OnErrorFunction) {
-    fetch(url, {method: 'POST', body: JSON.stringify(data), headers: this.header})
+    const myVar = fetch(url, {method: 'POST', body: JSON.stringify(data), headers: this.header})
       .then(r => {
         if (r.status !== 201) {
           r.json().then(d => {
@@ -63,11 +65,11 @@ export class Api {
   }
 
   static createUser(username: string, password: string, email: string) {
-    const createUserDto : AuthUserDto = {
+    const AuthUserIdDto : AuthUserIdDto = {
       username: username,
       password: password,
     }
-    this.fetchNoResponseBody(`${PREFIX}${URL.SIGNUP}`, createUserDto, () => console.log("user created"), console.error)
+    this.fetchNoResponseBody(`${PREFIX}${URL.CREATE_USER}`, AuthUserIdDto, () => console.log("user created"), console.error)
   }
 
   hello() {
@@ -84,6 +86,10 @@ export class Api {
 
   getPicture() {
     return fetch(`${PREFIX}${URL.GET_PICTURE}`, {method: 'GET', headers: this._headers})
+  }
+
+  refreshToken() {
+    return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {method: 'GET', headers: this._headers})
   }
 }
 
