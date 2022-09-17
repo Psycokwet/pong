@@ -49,7 +49,10 @@ function PracticeJwt() {
 
   return (
     connected ? <div className="App">
+<<<<<<< HEAD
       <PictureForm/>
+=======
+>>>>>>> main
       <DisconnectionButton setConnected={setConnected} />
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
       <div>

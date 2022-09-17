@@ -91,6 +91,10 @@ export class Api {
   refreshToken() {
     return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {method: 'GET', headers: this._headers})
   }
+
+  refreshToken() {
+    return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {method: 'GET', headers: this._headers})
+  }
 }
 
 
