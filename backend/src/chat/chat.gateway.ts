@@ -7,7 +7,8 @@ import {
 import { Server } from 'socket.io';
 
 @WebSocketGateway({
-  namespace: 'chat',
+  // namespace: '/chat',
+  transport: ['websocket'],
   cors: '*/*',
 })
 export class ChatGateway {
@@ -16,8 +17,9 @@ export class ChatGateway {
 
   @SubscribeMessage('send_message')
   listenForMessages(@MessageBody() data: string) {
-    console.log(data);
-    console.log(this.server.sockets)
+    console.log("CC BOB");
+    // console.log(data);
+    // console.log(this.server.sockets)
     // this.server.sockets.emit('receive_message', data);
     this.server.emit('receive_message', data);
   }
