@@ -301,10 +301,17 @@
     "@nodelib/fs.scandir" "2.1.5"
     "fastq" "^1.6.0"
 
+<<<<<<< HEAD
+"@types/js-cookie@^3.0.2":
+  "integrity" "sha512-6+0ekgfusHftJNYpihfkMu8BWdeHs9EOJuGcSofErjstGPfPGEu9yTu4t460lTzzAMl2cM5zngQJqPMHbbnvYA=="
+  "resolved" "https://registry.npmjs.org/@types/js-cookie/-/js-cookie-3.0.2.tgz"
+  "version" "3.0.2"
+=======
 "@remix-run/router@1.0.0":
   "integrity" "sha512-SCR1cxRSMNKjaVYptCzBApPDqGwa3FGdjVHc+rOToocNPHQdIYLZBfv/3f+KvYuXDkUGVIW9IAzmPNZDRL1I4A=="
   "resolved" "https://registry.npmjs.org/@remix-run/router/-/router-1.0.0.tgz"
   "version" "1.0.0"
+>>>>>>> main
 
 "@types/js-cookie@^3.0.2":
   "integrity" "sha512-6+0ekgfusHftJNYpihfkMu8BWdeHs9EOJuGcSofErjstGPfPGEu9yTu4t460lTzzAMl2cM5zngQJqPMHbbnvYA=="
