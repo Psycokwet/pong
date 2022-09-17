@@ -6,7 +6,9 @@ RUN npm i -g @nestjs/cli --silent
 
 COPY . .
 
-RUN npm i --silent
+RUN npm install -g npm@latest
+
+RUN npm ci --silent
 
 RUN npm run build
 
