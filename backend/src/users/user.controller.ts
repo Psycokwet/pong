@@ -51,6 +51,7 @@ export class UserController {
             game.winner === game.player1.id
               ? game.player1.username
               : game.player2.username,
+          time: game.createdAt.toString().slice(0, 24),
         };
       }),
     };
