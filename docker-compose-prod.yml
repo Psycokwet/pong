@@ -1,25 +1,19 @@
 #production
 version: '3.9'
 services:
-  nginx:
-    image: nginx:alpine
-    restart: unless-stopped
-    volumes:
-      - ./nginx/reverse_proxy.conf:/etc/nginx/conf.d/default.conf:ro 
-    command: [nginx-debug, '-g', 'daemon off;']
-    ports:
-      - "0.0.0.0:8080:8080"
-    depends_on:
-      - frontend
-      - backend
-
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.production
+    restart: unless-stopped
+    volumes:
+      - ./nginx/reverse_proxy_prod.conf:/etc/nginx/conf.d/default.conf:ro
     environment:
       - VITE_CONTEXT=PRODUCTION
-    restart: unless-stopped
+    ports:
+      - "0.0.0.0:8080:8080"
+    depends_on:
+      - backend
 
   backend:
     build:
@@ -41,7 +35,7 @@ services:
       - POSTGRESQL_MASTER_PORT=5432
     volumes:
       - db:/bitnami/postgresql
-    
+
   admin:
     image: bitnami/phppgadmin
     restart: unless-stopped
@@ -50,10 +44,11 @@ services:
       - DATABASE_PORT_NUMBER=5432
     volumes:
       - db:/bitnami/postgresql
-    ports: 
+    ports:
       - 5431:8080
     depends_on:
       - database
-    
+
 volumes:
   db:
+  front_datas:
