@@ -1,11 +1,11 @@
-import { 
-  BaseEntity, 
-  Column, 
-  Entity, 
-  ManyToOne, 
-  PrimaryGeneratedColumn 
-} from "typeorm";
-import { User } from "src/users/user.entity";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { User } from 'src/user/user.entity';
 
 @Entity()
 export class Friend extends BaseEntity {
@@ -19,6 +19,6 @@ export class Friend extends BaseEntity {
   friend_id: number;
 
   //Following: OneToOne
-  @ManyToOne( () => User, (user) => user.friends)
+  @ManyToOne(() => User, (user) => user.friends)
   user: User;
 }
