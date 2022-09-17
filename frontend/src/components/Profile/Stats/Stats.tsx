@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PieChart } from "react-minimal-pie-chart";
+// import { PieChart } from "react-minimal-pie-chart";
 
 function Stats () {
 	let wins=7
