@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -104,8 +104,10 @@ export class UsersService {
       relations: { picture: true }
     })
 
-    if (!user.picture)
-      return null; // return null if picture === null
+    if (!user.picture) {
+      throw new NotFoundException;
+      // return null if picture === null
+    }
 
     return user.picture.path;
   }
@@ -119,7 +121,6 @@ export class UsersService {
 
     // save in db oldfile
     const picture = await this.localFilesService.saveLocalFileData(fileData);
-    console.log(user, picture.id)
     await this.usersRepository.update(user.id, {
       pictureId: picture.id
     })
