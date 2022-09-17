@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
-import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
 import { User } from './users/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
-
+import { AuthModule } from './auth/auth.module';
+import { Game } from './game/game.entity';
 @Module({
   imports: [
     ConfigModule.forRoot(),
     FortyTwoModule,
-    UsersModule,
+    AuthModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'database',
@@ -21,7 +21,7 @@ import { ConfigModule } from '@nestjs/config';
       database: 'db',
       autoLoadEntities: true,
       synchronize: true, // to disable in prod
-      entities: [User],
+      entities: [User, Game],
     }),
   ],
   controllers: [AppController],
