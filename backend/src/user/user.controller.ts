@@ -17,6 +17,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AddFriendDto } from './add-friend.dto';
 import { SetUsernameDto } from './set-username.dto';
+import { PlayGameDto } from './play-game.dto';
 
 @Controller('/user/')
 export class UserController {
@@ -27,7 +28,7 @@ export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('get_user_rank')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   async get_user_rank(@Body() user: Omit<UserDto, 'password'>) {
     const user_rank = await this.usersService.get_user_rank(user);
 
@@ -35,7 +36,7 @@ export class UserController {
   }
 
   @Post('get_user_history')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   async get_user_history(@Body() user: Omit<UserDto, 'password'>) {
     const userHistory = await this.usersService.get_user_history(user);
 
@@ -50,28 +51,53 @@ export class UserController {
     return {
       nbGames,
       nbWins,
-      games: userHistory.games.map((game) => {
-        return {
-          id: game.id,
-          player1: game.player1.username,
-          player2: game.player2.username,
-          winner:
-            game.winner === game.player1.id
-              ? game.player1.username
-              : game.player2.username,
-        };
-      }),
+      // games: userHistory.games
+      //   .map((game) => {
+      //     return {
+      //       time: game.createdAt.toString().slice(4, 24),
+      //       id: game.id,
+      //       player1: game.player1.username,
+      //       player2: game.player2.username,
+      //       winner:
+      //         game.winner === game.player1.id
+      //           ? game.player1.username
+      //           : game.player2.username,
+      //     };
+      //   })
+      //   .sort((a, b) => b.id - a.id),
+      games: userHistory.games
+        .map((game) => {
+          return {
+            time: game.createdAt.toString().slice(4, 24),
+            opponent:
+              game.player1.id === userHistory.user.id
+                ? game.player2.username
+                : game.player1.username,
+            winner:
+              game.winner === game.player1.id
+                ? game.player1.username
+                : game.player2.username,
+            id: game.id,
+          };
+        })
+        .sort((a, b) => b.id - a.id),
     };
   }
 
+  @Post('play_game')
+  //@UseGuards(JwtAuthGuard)
+  async play_game(@Body() dto: PlayGameDto) {
+    await this.usersService.play_game(dto);
+  }
+
   @Post('add_friend')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   async add_friend(@Body() friend: AddFriendDto) {
     await this.usersService.add_friend(friend);
   }
 
   @Get('get_friends_list')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   async get_friends_list(@Body() friend: GetFriendsListDto) {
     const friendList = await this.usersService.get_friends_list(friend);
 
@@ -83,13 +109,13 @@ export class UserController {
   }
 
   @Get('get_username')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   async get_username(@Body() user: UserDto) {
     return await this.usersService.get_username(user);
   }
 
   @Post('set_username')
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   async set_username(@Body() user: SetUsernameDto) {
     await this.usersService.set_username(user);
   }

@@ -10,6 +10,7 @@ import {
 import { Game } from 'src/game/game.entity';
 import { Friend } from 'src/friend_list/friend.entity';
 import { Exclude } from 'class-transformer';
+import { Min } from 'class-validator';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -38,4 +39,8 @@ export class User extends BaseEntity {
   })
   @Exclude()
   public currentHashedRefreshToken?: string;
+
+  @Column()
+  @Min(0)
+  xp: number;
 }

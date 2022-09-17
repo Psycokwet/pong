@@ -6,7 +6,11 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import {
+  DataSource,
+  LockNotSupportedOnGivenDriverError,
+  Repository,
+} from 'typeorm';
 import { User } from './user.entity';
 import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
@@ -15,6 +19,8 @@ import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
 import { SetUsernameDto } from './set-username.dto';
 import { GetFriendsListDto } from './get-friends-list.dto';
+import { PlayGameDto } from './play-game.dto';
+import { from } from 'rxjs';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
@@ -35,6 +41,7 @@ export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
   constructor(
+    private dataSource: DataSource,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
 
@@ -60,7 +67,8 @@ export class UsersService {
       email: dto.email,
     });
 
-    user.user_rank = 1;
+    user.xp = 0;
+    // user.lv = 0;
     try {
       return await user.save();
     } catch (e) {
@@ -119,16 +127,23 @@ export class UsersService {
   async get_user_rank(dto: Omit<UserDto, 'password'>) {
     const user = await this.findOne(dto.username);
 
-    if (user) return user.user_rank;
+    // SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) Rank FROM "user"  --  subquery
+    // SELECT rank FROM (SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) rank FROM "user") AS coco WHERE id = 1;  --  query
+    const userRanked = await this.dataSource
+      .createQueryBuilder()
+      .select('rank')
+      .from(
+        (subQuery) =>
+          subQuery
+            .select('id')
+            .from(User, 'user')
+            .addSelect('RANK() OVER(ORDER BY xp DESC) as "rank"'),
+        'user',
+      )
+      .where('id = :id', { id: user.id })
+      .getRawOne();
 
-    // User not found
-    throw new HttpException(
-      {
-        status: HttpStatus.BAD_REQUEST,
-        error: 'User not found',
-      },
-      HttpStatus.BAD_REQUEST,
-    );
+    return userRanked;
   }
 
   async get_user_history(dto: Omit<UserDto, 'password'>) {
@@ -161,6 +176,29 @@ export class UsersService {
       user,
       games,
     };
+  }
+
+  async play_game(dto: PlayGameDto) {
+    const player1 = await this.findOne(dto.player1);
+    const player2 = await this.findOne(dto.player2);
+    const winner = await this.findOne(dto.winner);
+
+    const newGame = Game.create({
+      player1_id: player1.id,
+      player2_id: player2.id,
+      winner: winner.id,
+      player1: player1,
+      player2: player2,
+    });
+
+    await newGame.save();
+
+    this.usersRepository
+      .createQueryBuilder()
+      .update(winner)
+      .set({ xp: winner.xp + 2 })
+      .where({ id: winner.id })
+      .execute();
   }
 
   async add_friend(dto: AddFriendDto) {
