@@ -7,6 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -15,9 +16,6 @@ export class User extends BaseEntity {
 
   @Column({ length: 128, unique: true })
   username: string;
-
-  @Column()
-  password: string;
 
   @Column({ length: 128, unique: true })
   email: string;
@@ -31,4 +29,10 @@ export class User extends BaseEntity {
 
   @Column({ nullable: true })
   public pictureId?: number;
+  
+  @Column({
+    nullable: true
+  })
+  @Exclude()
+  public currentHashedRefreshToken?: string;
 }
