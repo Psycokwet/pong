@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import NavBar from "./NavBar/NavBar";
 import { Api } from "../api/api";
 import { DisconnectionButton } from "./ConnectionButton/DisconnectionButton";
+import FriendList from "./FriendList/FriendList";
 
 function App() {
   const [isConnected, setConnected] = useState(false);
@@ -40,6 +41,7 @@ function App() {
     <div>
       <DisconnectionButton setConnected={setConnected} />
       <NavBar />
+      <FriendList />
     </div>
   ) : (
     <LoginPage />
