@@ -18,11 +18,9 @@ function App() {
     if (connectedState == connectionStatusEnum.Unknown) {
       api.refreshToken().then((res) => {
         if (res.status !== 200) {
-          console.log("set false")
           setConnectedState(connectionStatusEnum.Disconnected);
         }
         else {
-          console.log("set true")
           setConnectedState(connectionStatusEnum.Connected);
         }
       });
