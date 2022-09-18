@@ -1,9 +1,5 @@
 import React from "react";
-import { useState } from "react";
 
-import { Api } from "../../api/api";
-
-const api = new Api();
 const LoginPage = () => {
 
   const redirectOauth = () => {
