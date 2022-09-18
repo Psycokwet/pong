@@ -10,6 +10,7 @@ import Profile from "../Profile/Profile";
 import Settings from "./Pages-To-Change/Settings";
 import NotFound from "./Pages-To-Change/NotFound";
 import APage from "./APage";
+import FriendList from "../FriendList/FriendList";
 
 // Icon
 import { FaComments } from "react-icons/fa";
