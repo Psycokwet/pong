@@ -3,7 +3,9 @@ import { ConnectionButton } from "./ConnectionButton/ConnectionButton";
 import { DisconnectionButton } from "./ConnectionButton/DisconnectionButton";
 import "./PracticeJwt.css";
 import { Api } from "../api/api";
+import { PictureForm } from "./PictureForm/PictureForm";
 
+//broken example component, I might even say, deprecated ;) To delete later
 function PracticeJwt() {
 
   const [isConnected, setConnected] = useState(false);
@@ -16,8 +18,7 @@ function PracticeJwt() {
       setInterval(
         () =>
           api.refreshToken().then((res) => {
-            if (res.status !== 200)
-            {
+            if (res.status !== 200) {
               clearInterval(loopValue);
               setConnected(false);
               // window.location.replace("http://localhost:8080"); //to refresh
@@ -42,7 +43,7 @@ function PracticeJwt() {
 
   return isConnected ? (
     <div className="App">
-      <DisconnectionButton setConnected={setConnected} />
+      <DisconnectionButton setDisconnected={() => setConnected(false)} />
     </div>
   ) : (
     <ConnectionButton />

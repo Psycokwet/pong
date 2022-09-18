@@ -1,9 +1,10 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
+import { LocalFilesService } from 'src/localFiles/localFiles.service';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
@@ -26,7 +27,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-  ) {}
+    private localFilesService: LocalFilesService
+  ) { }
 
   async findOne(username: string): Promise<User | undefined> {
     return await this.usersRepository.findOneBy({
@@ -93,5 +95,36 @@ export class UsersService {
     return this.usersRepository.update(userId, {
       currentHashedRefreshToken: null,
     });
+  }
+
+  async get_picture(dto: User) {
+    const user = await this.usersRepository.findOne({
+      where: { username: dto.username },
+      relations: { picture: true }
+    })
+
+    if (!user.picture) {
+      throw new NotFoundException;
+      // return null if picture === null
+    }
+
+    return user.picture.path;
+  }
+
+  async set_picture(user: User, fileData: LocalFileDto) {
+    // delete old file
+    try {
+      const old_file_path = await this.get_picture(user);
+      this.localFilesService.delete_file(old_file_path);
+    } catch (e) {
+      this.logger.error('No existing picture file')
+      // delete file if path exists
+    }
+
+    // save in db oldfile
+    const picture = await this.localFilesService.saveLocalFileData(fileData);
+    await this.usersRepository.update(user.id, {
+      pictureId: picture.id
+    })
   }
 }
