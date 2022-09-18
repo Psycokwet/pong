@@ -4,11 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
-<<<<<<< HEAD
-import { AuthUserIdDto } from 'src/auth/auth-user.dto';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
-=======
->>>>>>> main
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
@@ -31,11 +27,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-<<<<<<< HEAD
     private localFilesService: LocalFilesService
-=======
->>>>>>> main
-  ) {}
+  ) { }
 
   async findOne(username: string): Promise<User | undefined> {
     return await this.usersRepository.findOneBy({
@@ -104,7 +97,7 @@ export class UsersService {
     });
   }
 
-  async get_picture(dto: User ) {
+  async get_picture(dto: User) {
     const user = await this.usersRepository.findOne({
       where: { username: dto.username },
       relations: { picture: true }
@@ -117,8 +110,8 @@ export class UsersService {
 
     return user.picture.path;
   }
-  
-  async set_picture( user: User, fileData: LocalFileDto) {
+
+  async set_picture(user: User, fileData: LocalFileDto) {
     // delete old file
     const old_file_path = await this.get_picture(user);
     if (old_file_path) { // delete file if path exists
