@@ -38,13 +38,11 @@ export class FortyTwoController {
   @UseGuards(FortyTwoGuard)
   @Redirect('/', 302)
   async fortyTwoAuthRedirect(@Req() req: any, @Res() res: Response) {
-    let userFromDb;
+    let userFromDb = await this.usersService.signin({
+      username: req.user.username,
+    });
 
-    try {
-      userFromDb = this.usersService.signin({
-        username: req.user.username,
-      });
-    } catch (e) {
+    if (!userFromDb) {
       userFromDb = await this.usersService.signup({
         username: req.user.user.username,
         email: req.user.user.email,
