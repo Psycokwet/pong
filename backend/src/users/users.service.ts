@@ -173,10 +173,12 @@ export class UsersService {
 
   async set_picture(user: User, fileData: LocalFileDto) {
     // delete old file
-    const old_file_path = await this.get_picture(user);
-    if (old_file_path) {
-      // delete file if path exists
+    try {
+      const old_file_path = await this.get_picture(user);
       this.localFilesService.delete_file(old_file_path);
+    } catch (e) {
+      this.logger.error('No existing picture file');
+      // delete file if path exists
     }
 
     // save in db oldfile
