@@ -10,6 +10,7 @@ import { Game } from './game/game.entity';
 import * as Joi from '@hapi/joi';
 
 import { AuthModule } from './auth/auth.module';
+import LocalFile from './localFiles/localFile.entity';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { AuthModule } from './auth/auth.module';
       database: 'db',
       autoLoadEntities: true,
       synchronize: true, // to disable in prod
-      entities: [User, Game],
+      entities: [User, Game, LocalFile],
     }),
   ],
   controllers: [AppController],
