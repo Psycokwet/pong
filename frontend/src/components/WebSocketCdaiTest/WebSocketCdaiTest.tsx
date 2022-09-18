@@ -1,5 +1,7 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect } from "react";
 import io, { Socket } from "socket.io-client";
+import CreateRoom from "./CreateRoom";
+import JoinRoomButton from "./JoinRoomButton";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
 const ENDPOINT = "http://localhost:8080";
@@ -7,6 +9,7 @@ const ENDPOINT = "http://localhost:8080";
 function WebsSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
   const [messages, setMessages] = useState<string[]>([]);
+  const [roomName, setRoomName] = useState<string>('');
 
   const send = (value: string) => {
     socket?.emit("send_message", value);
@@ -18,7 +21,7 @@ function WebsSocketCdaiTest() {
         // const newSocket = io(ENDPOINT + '/hat', {
         // path: 'chat',
         transports: ['websocket'],
-        // withCredentials: true,
+        withCredentials: true,
       });
     setSocket(newSocket)
   }, [setSocket]);
@@ -35,6 +38,13 @@ function WebsSocketCdaiTest() {
 
   return (
     <>
+      <CreateRoom
+        socket={socket}
+        setRoomName={setRoomName}
+        // roomName={roomName}
+      />
+      <p>{roomName}</p>
+      {/* <JoinRoomButton socket={socket} /> */}
       <MessageInput send={send} />
       <Messages messages={messages} />
     </>
