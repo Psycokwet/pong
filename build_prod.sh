@@ -13,3 +13,6 @@ cp ./* dist_project/
 rm  dist_project/*.md
 rm  dist_project/`basename "$0"`
 mv  dist_project/docker-compose-prod.yml  dist_project/docker-compose.yml
+
+# bash build_prod.sh && cd dist_project && cp ../backend/.env backend/.env && sudo docker system prune -fa && sudo docker-compose up
+# bash build_prod.sh && cd dist_project && cp ../backend/.env backend/.env && sudo docker-compose build --no-cache frontend && sudo docker-compose up
