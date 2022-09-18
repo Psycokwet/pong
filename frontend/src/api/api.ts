@@ -57,23 +57,6 @@ export class Api {
       .catch(onError)
   }
 
-  // static async auth(username: string, password: string): Promise<Response> {
-  //   const authUserDto: AuthUserDto = {
-  //     username: username,
-  //     password: password,
-  //   }
-  //   return this.fetch(`${PREFIX}${URL.AUTH}`, authUserDto)
-  // }
-
-  // static createUser(username: string, password: string, email: string) {
-  //   const AuthUserIdDto: AuthUserIdDto = {
-  //     username: username,
-  //     password: password,
-  //     email: email,
-  //   }
-  //   this.fetchNoResponseBody(`${PREFIX}${URL.CREATE_USER}`, AuthUserIdDto, () => console.log("user created"), console.error)
-  // }
-
   hello() {
     return fetch(`${PREFIX}${URL.HELLO}`, { method: 'GET', headers: this._headers })
   }
@@ -87,7 +70,7 @@ export class Api {
   // }
 
   setPicture(data: FormData) {
-    return fetch(`${PREFIX}${URL.SET_PICTURE}`, {method: 'POST', headers: this._headers, body: data})
+    return fetch(`${PREFIX}${URL.SET_PICTURE}`, {method: 'POST', body: data})
   }
 
   getPicture() {
@@ -96,10 +79,6 @@ export class Api {
 
   refreshToken() {
     return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, { method: 'GET', headers: this._headers })
-  }
-
-  refreshToken() {
-    return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {method: 'GET', headers: this._headers})
   }
 }
 
