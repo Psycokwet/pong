@@ -2,49 +2,44 @@ import "./App.css";
 import LoginPage from "./LoginPage/LoginPage";
 import { useState, useEffect } from "react";
 import NavBar from "./NavBar/NavBar";
-import { Api } from "../api/api";
 import { DisconnectionButton } from "./ConnectionButton/DisconnectionButton";
 import FriendList from "./FriendList/FriendList";
 
+import { Api } from "../api/api";
+import { Loading } from "./Common/Loading";
+enum connectionStatusEnum {
+  Unknown,
+  Connected,
+  Disconnected
+}
+const api = new Api();
 function App() {
-  const [isConnected, setConnected] = useState(false);
-  const [loopValue, setLoopValue] = useState(0);
-
-  const api = new Api();
-
-  const connectionLoop = () => {
-    setLoopValue(
-      setInterval(
-        () =>
-          api.refreshToken().then((res) => {
-            if (res.status !== 200) {
-              clearInterval(loopValue);
-              setConnected(false);
-              window.location.replace("http://localhost:8080"); //to refresh
-            }
-          }),
-        5000
-      )
-    );
-  };
+  const [connectedState, setConnectedState] = useState(connectionStatusEnum.Unknown);
 
   useEffect(() => {
-    api.refreshToken().then((res) => {
-      if (res.status === 200) {
-        setConnected(true);
-        connectionLoop();
-      }
-    });
-  }, []);
+    if (connectedState == connectionStatusEnum.Unknown) {
+      api.refreshToken().then((res) => {
+        if (res.status !== 200) {
+          console.log("set false")
+          setConnectedState(connectionStatusEnum.Disconnected);
+        }
+        else {
+          console.log("set true")
+          setConnectedState(connectionStatusEnum.Connected);
+        }
+      });
+    }
+  }, [connectedState]);
 
-  return isConnected ? (
+  return connectedState == connectionStatusEnum.Unknown ? (
+    <Loading></Loading>
+  ) : (connectedState == connectionStatusEnum.Connected ? (
     <div>
-      <DisconnectionButton setConnected={setConnected} />
-      <NavBar />
-      <FriendList />
+      <NavBar setDisconnected={() => setConnectedState(connectionStatusEnum.Disconnected)}/>
     </div>
   ) : (
     <LoginPage />
+  )
   );
 }
 
