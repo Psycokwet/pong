@@ -33,8 +33,8 @@ function App() {
     <Loading></Loading>
   ) : (connectedState == connectionStatusEnum.Connected ? (
     <div>
-      <DisconnectionButton setDisconnected={() => setConnectedState(connectionStatusEnum.Disconnected)} />
-      <NavBar />
+      {/* <DisconnectionButton setDisconnected={() => setConnectedState(connectionStatusEnum.Disconnected)} /> */}
+      <NavBar setDisconnected={() => setConnectedState(connectionStatusEnum.Disconnected)}/>
     </div>
   ) : (
     <LoginPage />
