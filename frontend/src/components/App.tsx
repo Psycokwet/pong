@@ -2,7 +2,6 @@ import "./App.css";
 import LoginPage from "./LoginPage/LoginPage";
 import { useState, useEffect } from "react";
 import NavBar from "./NavBar/NavBar";
-import { DisconnectionButton } from "./ConnectionButton/DisconnectionButton";
 import { Api } from "../api/api";
 import { Loading } from "./Common/Loading";
 enum connectionStatusEnum {
@@ -33,7 +32,6 @@ function App() {
     <Loading></Loading>
   ) : (connectedState == connectionStatusEnum.Connected ? (
     <div>
-      {/* <DisconnectionButton setDisconnected={() => setConnectedState(connectionStatusEnum.Disconnected)} /> */}
       <NavBar setDisconnected={() => setConnectedState(connectionStatusEnum.Disconnected)}/>
     </div>
   ) : (
