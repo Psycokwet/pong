@@ -1,12 +1,14 @@
 type DisconnectionButtonProps = {
-  setConnected: CallableFunction;
+  setDisconnected: CallableFunction;
 };
+import { Api } from "../../api/api";
 
-export const DisconnectionButton = ({ setConnected }: DisconnectionButtonProps) => {
+const api = new Api();
+
+export const DisconnectionButton = ({ setDisconnected }: DisconnectionButtonProps) => {
 
   const handleClick = () => {
-    setConnected(false)
-    window.location.replace("http://localhost:8080/api/auth/42/logout");
+    api.logout().then(() => setDisconnected());
   }
 
   return (
