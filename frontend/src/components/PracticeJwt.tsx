@@ -16,8 +16,7 @@ function PracticeJwt() {
       setInterval(
         () =>
           api.refreshToken().then((res) => {
-            if (res.status !== 200)
-            {
+            if (res.status !== 200) {
               clearInterval(loopValue);
               setConnected(false);
               // window.location.replace("http://localhost:8080"); //to refresh
@@ -42,7 +41,7 @@ function PracticeJwt() {
 
   return isConnected ? (
     <div className="App">
-      <DisconnectionButton setConnected={setConnected} />
+      <DisconnectionButton setDisconnected={() => setConnected(false)} />
     </div>
   ) : (
     <ConnectionButton />
