@@ -2,9 +2,11 @@ import {
   BaseEntity,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import Room from 'src/chat/room.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -22,4 +24,7 @@ export class User extends BaseEntity {
   })
   @Exclude()
   public currentHashedRefreshToken?: string;
+
+  @OneToMany(() => Room, (Room) => Room.owner)
+  public rooms: Room[];
 }

@@ -7,6 +7,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
 import { Repository } from 'typeorm';
 import { User } from 'src/users/user.entity';
+import Room from './room.entity';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ChatService {
@@ -14,7 +16,25 @@ export class ChatService {
     private readonly authService: AuthService,
     @InjectRepository(Message)
     private messagesRepository: Repository<Message>,
+    @InjectRepository(Room)
+    private roomsRepository: Repository<Room>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+    private userService: UsersService,
   ) {}
+
+  async saveRoom(data: string, clientId: string, userId: number) {
+
+    const user = await this.userService.getById(userId);
+
+    const newRoom = await Room.create({
+      channelName: data,
+      roomName: clientId,
+      owner: user,
+    });
+
+    return newRoom.save();
+  }
 
   async saveMessage(content: string, author: User) {
     const newMessage = await this.messagesRepository.create({

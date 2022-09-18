@@ -9,11 +9,13 @@ import { AuthModule } from './auth/auth.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { ChatService } from './chat/chat.service';
 import Message from './chat/message.entity';
+import { ChatModule } from './chat/chat.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
     FortyTwoModule,
     AuthModule,
+    ChatModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       // host: 'localhost',
@@ -29,6 +31,6 @@ import Message from './chat/message.entity';
     TypeOrmModule.forFeature([Message]),
   ],
   controllers: [AppController],
-  providers: [AppService, ChatGateway, ChatService],
+  providers: [AppService],
 })
 export class AppModule { }
