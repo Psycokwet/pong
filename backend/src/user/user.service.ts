@@ -127,6 +127,8 @@ export class UsersService {
   async get_user_rank(dto: Omit<UserDto, 'password'>) {
     const user = await this.findOne(dto.username);
 
+    const level = Math.log(user.xp);
+
     // SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) Rank FROM "user"  --  subquery
     // SELECT rank FROM (SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) rank FROM "user") AS coco WHERE id = 1;  --  query
     const userRanked = await this.dataSource
@@ -143,7 +145,7 @@ export class UsersService {
       .where('id = :id', { id: user.id })
       .getRawOne();
 
-    return userRanked;
+    return { level, userRanked };
   }
 
   async get_user_history(dto: Omit<UserDto, 'password'>) {
