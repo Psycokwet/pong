@@ -17,22 +17,28 @@ import { ChatService } from './chat.service';
 })
 export class ChatGateway {
   constructor(private readonly chatService: ChatService) {}
-  
-  
+
   @WebSocketServer()
   server: Server;
 
   @SubscribeMessage('joinChannelLobby')
-  joinChannelLobby(@ConnectedSocket() client: Socket) {
-    
-  }
-  
+  joinChannelLobby(@ConnectedSocket() client: Socket) {}
+
   @UseGuards(JwtWsGuard)
   @SubscribeMessage('createRoom')
-  async createRoom(@MessageBody() roomName: string, @ConnectedSocket() client: Socket, @UserPayload() payload: any) {
-    const newRoom = await this.chatService.saveRoom(roomName, client.id, payload.userId);
-    
-    console.log(newRoom)
+  async createRoom(
+    @MessageBody() roomName: string,
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
+    console.log('roomName', roomName);
+    const newRoom = await this.chatService.saveRoom(
+      roomName,
+      client.id,
+      payload.userId,
+    );
+
+    console.log(newRoom);
     await client.join(newRoom.roomName);
 
     this.server.in(newRoom.roomName).emit('createdRoom', `${newRoom.id}`);
@@ -49,7 +55,7 @@ export class ChatGateway {
 
   @SubscribeMessage('send_message')
   listenForMessages(@MessageBody() data: string) {
-    console.log("CC BOB");
+    console.log('CC BOB');
     this.server.in('test').emit('receive_message', data);
   }
 }

@@ -23,15 +23,17 @@ export class ChatService {
     private userService: UsersService,
   ) {}
 
-  async saveRoom(data: string, clientId: string, userId: number) {
-
+  async saveRoom(roomName: string, clientId: string, userId: number) {
+    console.log('saveRoom', roomName);
     const user = await this.userService.getById(userId);
 
+    console.log('getById');
     const newRoom = await Room.create({
-      channelName: data,
-      roomName: clientId,
+      roomName: roomName,
+      channelName: clientId,
       owner: user,
     });
+    console.log('create');
 
     return newRoom.save();
   }
