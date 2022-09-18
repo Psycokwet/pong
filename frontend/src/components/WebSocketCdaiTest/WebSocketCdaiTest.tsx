@@ -10,6 +10,7 @@ function WebsSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
   const [messages, setMessages] = useState<string[]>([]);
   const [roomName, setRoomName] = useState<string>('');
+  const [roomId, setRoomId] = useState<string>('');
 
   const send = (value: string) => {
     socket?.emit("send_message", value);
@@ -36,14 +37,26 @@ function WebsSocketCdaiTest() {
     }
   }, [messageListener])
 
+  const roomCreationListener = (roomIdFromBack: string) => {
+    console.log(roomIdFromBack)
+    setRoomId(roomIdFromBack)
+  }
+  useEffect(() => {
+    socket?.on('createdRoom', roomCreationListener)
+    return () => {
+      socket?.off('createdRoom', roomCreationListener)
+    }
+  }, [roomCreationListener])
+
   return (
     <>
       <CreateRoom
+        roomName={roomName}
         socket={socket}
         setRoomName={setRoomName}
+        roomId={roomId}
         // roomName={roomName}
       />
-      <p>{roomName}</p>
       {/* <JoinRoomButton socket={socket} /> */}
       <MessageInput send={send} />
       <Messages messages={messages} />

@@ -29,16 +29,13 @@ export class ChatGateway {
   
   @UseGuards(JwtWsGuard)
   @SubscribeMessage('createRoom')
-  createRoom(@MessageBody() roomName: string, @ConnectedSocket() client: Socket, @UserPayload() payload: any) {
-    const newRoom = this.chatService.saveRoom(roomName, client.id, payload.userId)
-    .then((room) => {
-      client.join(room.roomName)
-      return room;
-    })
-    .then(
-      room => this.server.in(room.roomName)
-        .emit('createdRoom', room.id)
-    )
+  async createRoom(@MessageBody() roomName: string, @ConnectedSocket() client: Socket, @UserPayload() payload: any) {
+    const newRoom = await this.chatService.saveRoom(roomName, client.id, payload.userId);
+    
+    console.log(newRoom)
+    await client.join(newRoom.roomName);
+
+    this.server.in(newRoom.roomName).emit('createdRoom', `${newRoom.id}`);
   }
 
   @SubscribeMessage('joinRoom')
@@ -50,9 +47,9 @@ export class ChatGateway {
     client.join('test');
   }
 
-  // @SubscribeMessage('send_message')
-  // listenForMessages(@MessageBody() data: string) {
-  //   console.log("CC BOB");
-  //   this.server.in('test').emit('receive_message', data);
-  // }
+  @SubscribeMessage('send_message')
+  listenForMessages(@MessageBody() data: string) {
+    console.log("CC BOB");
+    this.server.in('test').emit('receive_message', data);
+  }
 }
