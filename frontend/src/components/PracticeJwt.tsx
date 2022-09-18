@@ -3,7 +3,9 @@ import { ConnectionButton } from "./ConnectionButton/ConnectionButton";
 import { DisconnectionButton } from "./ConnectionButton/DisconnectionButton";
 import "./PracticeJwt.css";
 import { Api } from "../api/api";
+import { PictureForm } from "./PictureForm/PictureForm";
 
+//broken example component, I might even say, deprecated ;) To delete later
 function PracticeJwt() {
 
   const [isConnected, setConnected] = useState(false);
