@@ -46,7 +46,8 @@ export class UserController {
 
     if (!userHistory) return {};
 
-    /*  Manipulating userHistory array so we get exactly what we want */
+    /*  Manipulating userHistory array so we get exactly what we want.
+        The sort ensures the latest games are returned first. */
 
     const nbGames = userHistory.games.length;
     const nbWins = userHistory.games.filter((game) => {

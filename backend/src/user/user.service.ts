@@ -71,7 +71,7 @@ export class UsersService {
     });
 
     user.xp = 0;
-    // user.lv = 0;
+
     try {
       return await user.save();
     } catch (e) {
@@ -132,9 +132,11 @@ export class UsersService {
 
     const level = Math.log(user.xp);
 
+    /* Keeping the below 2 comments to remind myself of queries */
     // SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) Rank FROM "user"  --  subquery
     // SELECT rank FROM (SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) rank FROM "user") AS coco WHERE id = 1;  --  query
-    const userRanked = await this.dataSource
+
+    const userRank = await this.dataSource
       .createQueryBuilder()
       .select('rank')
       .from(
@@ -148,24 +150,12 @@ export class UsersService {
       .where('id = :id', { id: user.id })
       .getRawOne();
 
-    return { level, userRanked };
+    return { level, userRank };
   }
 
   async get_user_history(dto: Omit<UserDto, 'password'>) {
     /*  Get calling user's object */
-    const user = await this.usersRepository.findOne({
-      where: { username: dto.username },
-    });
-
-    if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User not found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const user = await this.findOne(dto.username);
 
     /*  Get a games object where player 1 and player 2 exist and the calling user
         is either one or the other (where: ...) */
@@ -188,6 +178,17 @@ export class UsersService {
     const player2 = await this.findOne(dto.player2);
     const winner = await this.findOne(dto.winner);
 
+    if (winner != player1 && winner != player2) {
+      throw new BadRequestException({
+        error: 'Winner has to either be player 1 or player 2',
+      });
+    }
+
+    const loser =
+      winner.username === player1.username
+        ? await this.findOne(player2.username)
+        : await this.findOne(player1.username);
+
     const newGame = Game.create({
       player1_id: player1.id,
       player2_id: player2.id,
@@ -198,11 +199,21 @@ export class UsersService {
 
     await newGame.save();
 
+    /* Always increase the winner's XP by 2 */
     this.usersRepository
       .createQueryBuilder()
       .update(winner)
       .set({ xp: winner.xp + 2 })
       .where({ id: winner.id })
+      .execute();
+
+    /* If the loser's xp is > 0, decrease by 1 */
+    this.usersRepository
+      .createQueryBuilder()
+      .update(loser)
+      .set({ xp: loser.xp - 1 })
+      .where('id = :id', { id: loser.id })
+      .andWhere('xp > 0', { xp: loser.xp })
       .execute();
   }
 
@@ -221,7 +232,7 @@ export class UsersService {
       });
     }
 
-    /* Then we check if the perso the caller wants to add as a friend is already
+    /* Then we check if the person the caller wants to add as a friend is already
     in our friend list and throw a 400 if they are */
     const doubleAddCheck = await this.friendRepository.findOne({
       relations: {

@@ -12,7 +12,7 @@ import {
 import { Game } from 'src/game/game.entity';
 import { Friend } from 'src/friend_list/friend.entity';
 import { Exclude } from 'class-transformer';
-import { Min } from 'class-validator';
+import { Max, Min } from 'class-validator';
 import LocalFile from 'src/localFiles/localFile.entity';
 
 @Entity('user')
@@ -25,9 +25,6 @@ export class User extends BaseEntity {
 
   @Column({ length: 128, unique: true })
   email: string;
-
-  @Column({ nullable: true })
-  user_rank: number;
 
   @OneToMany(() => Game, (game) => game.player1)
   games_player1!: Game[];
@@ -52,6 +49,5 @@ export class User extends BaseEntity {
   public pictureId?: number;
 
   @Column()
-  @Min(0)
   xp: number;
 }
