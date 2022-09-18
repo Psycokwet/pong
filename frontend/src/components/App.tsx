@@ -5,7 +5,7 @@ import PracticeJwt from "./PracticeJwt";
 function App() {
   return (
     <div className="">
-      <WebsSocketCdaiTest/>
+      <WebsSocketCdaiTest />
       <PracticeJwt />
       {/* <NavBar /> */}
     </div>
