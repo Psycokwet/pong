@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -6,6 +12,7 @@ import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { LocalFilesService } from 'src/localFiles/localFiles.service';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; username: string; password: string };
@@ -32,6 +39,7 @@ export class UsersService {
     @InjectRepository(Game)
     private gameRepository: Repository<Game>,
     private jwtService: JwtService,
+    private localFilesService: LocalFilesService,
   ) {}
 
   async findOne(username: string): Promise<User | undefined> {
@@ -147,5 +155,34 @@ export class UsersService {
       user,
       games,
     };
+  }
+
+  async get_picture(dto: User) {
+    const user = await this.usersRepository.findOne({
+      where: { username: dto.username },
+      relations: { picture: true },
+    });
+
+    if (!user.picture) {
+      throw new NotFoundException();
+      // return null if picture === null
+    }
+
+    return user.picture.path;
+  }
+
+  async set_picture(user: User, fileData: LocalFileDto) {
+    // delete old file
+    const old_file_path = await this.get_picture(user);
+    if (old_file_path) {
+      // delete file if path exists
+      this.localFilesService.delete_file(old_file_path);
+    }
+
+    // save in db oldfile
+    const picture = await this.localFilesService.saveLocalFileData(fileData);
+    await this.usersRepository.update(user.id, {
+      pictureId: picture.id,
+    });
   }
 }
