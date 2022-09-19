@@ -1,6 +1,6 @@
 import React from "react";
 import { userStatusEnum } from "./FriendList";
-import { RiRadioButtonLine } from "react-icons/ri";
+import { BsCircleFill } from "react-icons/bs";
 
 type SubFriendListProps = {
   friend_list: {
@@ -12,7 +12,7 @@ type SubFriendListProps = {
   input: string;
   user_status: userStatusEnum;
   color: string;
-  group_name: string
+  group_name: string;
 };
 
 const SubFriendList: React.FC<SubFriendListProps> = ({
@@ -22,30 +22,37 @@ const SubFriendList: React.FC<SubFriendListProps> = ({
   color,
   group_name,
 }) => {
+  /******* Url will be changed later ************************/
+  let imageURL = "https://picsum.photos/400";
+
   const goToUserPage = () => {
     window.location.replace("http://localhost:8080/profile");
   };
+  /***********************************************************/
 
   return (
-    <>
-      <h1>{group_name}</h1>
+    <div className="w-40">
+      <div className="flex items-center font-bold">
+        <span className="text-green-600 px-2">
+          <BsCircleFill size="15" className={` ${color}`} />
+        </span>
+        {group_name}
+      </div>
       {friend_list?.map((friend) => {
         if (friend.status === user_status)
           return (
             <li
               key={friend.login}
-              className={`flex justify-between p-2 hover:bg-sky-600 hover:text-white
+              className={`flex items-center p-2 indent-2 hover:bg-sky-600 hover:text-white
               ${friend.nickname.startsWith(input) ? "block" : "hidden"}`}
               onClick={goToUserPage}
             >
-              <span>{friend.nickname}</span>
-              <span className="text-green-600">
-                <RiRadioButtonLine size="15" className={color} />
-              </span>
+              <img src={imageURL} alt="Avatar" className="w-8 rounded-3xl" />
+              <strong>{friend.nickname}</strong>
             </li>
           );
       })}
-    </>
+    </div>
   );
 };
 
