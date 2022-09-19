@@ -9,6 +9,7 @@ import { Repository } from 'typeorm';
 import { User } from 'src/users/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/users/users.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ChatService {
@@ -23,14 +24,29 @@ export class ChatService {
     private userService: UsersService,
   ) {}
 
+  public async getAllRooms() {
+    return this.roomsRepository.find()
+    //   .then(rooms => rooms.map((room => {
+    //     // delete room.roomName;
+    //     return {
+    //       id: room.id,
+    //       channelname: room.channelName,
+    //     };
+    // })));
+  }
+
+  public async getRoomById(id: number) {
+    return this.roomsRepository.findOneBy({id})
+  }
+
   async saveRoom(roomName: string, clientId: string, userId: number) {
     console.log('saveRoom', roomName);
     const user = await this.userService.getById(userId);
 
     console.log('getById');
     const newRoom = await Room.create({
-      roomName: roomName,
-      channelName: clientId,
+      roomName: `channel:${roomName}:${uuidv4()}`,
+      channelName: roomName,
       owner: user,
     });
     console.log('create');
