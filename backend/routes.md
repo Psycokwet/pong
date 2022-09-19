@@ -240,9 +240,10 @@ sophie
 
 ### set username
 
-POST /user/set_nickname
+POST /user/set_username
 
 #### payload:
+
 ```
 {
 	"username": "sophie",
