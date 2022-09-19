@@ -2,10 +2,9 @@ import { useEffect, useState } from "react";
 const ENDPOINT = "http://localhost:8080";
 
 export default function CreateRoom({
-  roomName,
   socket,
-  setRoomName,
-  roomId,
+  channelData,
+  setChannelData,
   // setRoomId,
 }) // :
 // {
@@ -18,7 +17,6 @@ export default function CreateRoom({
 
   const handleCreateRoom = () => {
     socket?.emit("createRoom", tempRoomName);
-    setRoomName(tempRoomName);
   };
 
   return (
@@ -31,8 +29,8 @@ export default function CreateRoom({
           setTempRoomName(e.target.value);
         }}
       ></input>
-      <h4>RoomId: {roomId}</h4>
-      <h4>Room Name: {roomName}</h4>
+      <h4>RoomId: {channelData?.channelId}</h4>
+      <h4>Room Name: {channelData?.channelName}</h4>
       <button onClick={handleCreateRoom}>Create room</button>
     </div>
   );
