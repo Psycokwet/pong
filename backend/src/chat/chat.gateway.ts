@@ -9,7 +9,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
-
 @WebSocketGateway({
   // namespace: '/chat',
   transport: ['websocket'],
@@ -22,7 +21,12 @@ export class ChatGateway {
   server: Server;
 
   @SubscribeMessage('joinChannelLobby')
-  joinChannelLobby(@ConnectedSocket() client: Socket) {}
+  async joinChannelLobby(@ConnectedSocket() client: Socket) {
+    console.log(await this.chatService.getAllRooms())
+    // return await this.chatService.getAllRooms();
+    client.join('channelLobby');
+    this.server.in('channelLobby').emit('allChannel', await this.chatService.getAllRooms());
+  }
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage('createRoom')
@@ -31,21 +35,20 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    console.log('roomName', roomName);
     const newRoom = await this.chatService.saveRoom(
       roomName,
       client.id,
       payload.userId,
     );
 
-    console.log(newRoom);
     await client.join(newRoom.roomName);
 
-    this.server.in(newRoom.roomName).emit('createdRoom', `${newRoom.id}`);
+    this.server.emit('createdRoom', { channelId: newRoom.id, channelName: newRoom.channelName });
   }
 
+  @UseGuards(JwtWsGuard)
   @SubscribeMessage('joinRoom')
-  joinRoom(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
+  joinRoom(@MessageBody() roomId: string, @ConnectedSocket() client: Socket) {
     // create channel named data
     // client.join(data);
     // console.log(data, client, client.id, this.server, this.server.id);
@@ -54,8 +57,12 @@ export class ChatGateway {
   }
 
   @SubscribeMessage('send_message')
-  listenForMessages(@MessageBody() data: string) {
-    console.log('CC BOB');
-    this.server.in('test').emit('receive_message', data);
+  async listenForMessages(@MessageBody() data: {
+    message: string;
+    channelId: number;
+  }) {
+    const room = await this.chatService.getRoomById(data.channelId)
+    if (room)
+      this.server.in(room.roomName).emit('receive_message', data.message);
   }
 }
