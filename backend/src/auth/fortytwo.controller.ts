@@ -41,11 +41,11 @@ export class FortyTwoController {
     let userFromDb;
     try {
       userFromDb = await this.usersService.signin({
-        username: req.user.user.username,
+        login42: req.user.user.login42,
       });
     } catch (e) {
       userFromDb = await this.usersService.signup({
-        username: req.user.user.username,
+        login42: req.user.user.login42,
         email: req.user.user.email,
       });
     }
