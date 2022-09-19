@@ -1,15 +1,12 @@
-import { useState, useEffect } from 'react'
-import io, { Socket } from "socket.io-client";
-import MessageInput from './MessageInput';
-import Messages from './Messages';
-const ENDPOINT = "http://localhost:8080";
+import { useEffect } from 'react'
+import { Socket } from "socket.io-client";
 
 interface ChannelData {
   channelName: string;
   channelId: number;
 }
 
-export default function JoinRoomButton(
+export default function JoinChannelButtons(
   {
     socket,
     allChannel,
@@ -21,21 +18,19 @@ export default function JoinRoomButton(
     setConnectedChannel: any,
   }
   ) {
-
-  // console.log(allChannel)
   const handleClick = (channelId: number) => {
     socket?.emit("joinRoom", channelId);
   }
-
-  const joinRoom = (message: ChannelData) => {
+  const handleJoinRoom = (message: ChannelData) => {
+    console.log(message)
     setConnectedChannel(message)
   }
   useEffect(()=> {
-    socket?.on("joinedRoom", joinRoom);
+    socket?.on("joinedRoom", handleJoinRoom);
     return () => {
-      socket?.off("joinedRoom", joinRoom);
+      socket?.off("joinedRoom", handleJoinRoom);
     };
-  }, [joinRoom]);
+  }, [handleJoinRoom]);
 
   return (
     <div> 

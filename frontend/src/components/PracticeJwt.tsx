@@ -4,6 +4,7 @@ import { DisconnectionButton } from './ConnectionButton/DisconnectionButton';
 import "./PracticeJwt.css";
 import { Api } from "../api/api";
 import { PictureForm } from "./PictureForm/PictureForm";
+import WebsSocketCdaiTest from "./WebSocketCdaiTest/WebSocketCdaiTest";
 
 function PracticeJwt() {
   const [count, setCount] = useState(0);
@@ -47,6 +48,7 @@ function PracticeJwt() {
 
   return (
     connected ? <div className="App">
+      <WebsSocketCdaiTest />
       <PictureForm />
       <DisconnectionButton setConnected={setConnected} />
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
