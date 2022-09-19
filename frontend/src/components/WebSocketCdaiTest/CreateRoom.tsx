@@ -7,13 +7,13 @@ export default function CreateRoom({
   setRoomName,
   roomId,
   // setRoomId,
-}) // :
-// {
-//   socket: Socket | undefined,
-//   // roomName: string,
-//   Dispatch<SetStateAction<string>>,
-// }
-{
+}) {
+  // :
+  // {
+  //   socket: Socket | undefined,
+  //   // roomName: string,
+  //   Dispatch<SetStateAction<string>>,
+  // }
   const [tempRoomName, setTempRoomName] = useState<string>("");
 
   const handleCreateRoom = () => {

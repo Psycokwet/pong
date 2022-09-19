@@ -25,7 +25,7 @@ export class ChatService {
   ) {}
 
   public async getAllRooms() {
-    return this.roomsRepository.find()
+    return this.roomsRepository.find();
     //   .then(rooms => rooms.map((room => {
     //     // delete room.roomName;
     //     return {
@@ -36,7 +36,7 @@ export class ChatService {
   }
 
   public async getRoomById(id: number) {
-    return this.roomsRepository.findOneBy({id})
+    return this.roomsRepository.findOneBy({ id });
   }
 
   async saveRoom(roomName: string, clientId: string, userId: number) {
