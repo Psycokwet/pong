@@ -62,7 +62,7 @@ export class ChatGateway {
   ) {
     const room = await this.chatService.getRoomById(roomId);
     client.join(room.roomName);
-    this.server.in(room.roomName).emit('joinedRoom', {
+    this.server.in(client.id).emit('joinedRoom', {
       channelId: room.id,
       channelName: room.channelName,
     });
