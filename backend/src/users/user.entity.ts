@@ -1,12 +1,16 @@
 import LocalFile from 'src/localFiles/localFile.entity';
 import {
   BaseEntity,
-  Column,
   Entity,
+  Column,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { Game } from 'src/game/game.entity';
 import { Exclude } from 'class-transformer';
 
 @Entity('user')
@@ -20,18 +24,23 @@ export class User extends BaseEntity {
   @Column({ length: 128, unique: true })
   email: string;
 
+  @Column({ nullable: true })
+  user_rank: number;
+
+  @OneToMany(() => Game, (game) => game.player1)
+  games_player1!: Game[];
+
+  @OneToMany(() => Game, (game) => game.player2)
+  games_player2!: Game[];
   @JoinColumn({ name: 'pictureId' })
-  @OneToOne(
-    () => LocalFile,
-    { nullable: true }
-  )
+  @OneToOne(() => LocalFile, { nullable: true })
   public picture?: LocalFile;
 
   @Column({ nullable: true })
   public pictureId?: number;
-  
+
   @Column({
-    nullable: true
+    nullable: true,
   })
   @Exclude()
   public currentHashedRefreshToken?: string;

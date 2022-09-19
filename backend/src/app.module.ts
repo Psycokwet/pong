@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from '@hapi/joi';
  
 import { AuthModule } from './auth/auth.module';
+import { Game } from './game/game.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,7 +30,7 @@ import { AuthModule } from './auth/auth.module';
       database: 'db',
       autoLoadEntities: true,
       synchronize: true, // to disable in prod
-      entities: [User],
+      entities: [User, Game],
     }),
   ],
   controllers: [AppController],
