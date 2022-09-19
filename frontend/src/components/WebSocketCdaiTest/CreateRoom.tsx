@@ -3,8 +3,8 @@ const ENDPOINT = "http://localhost:8080";
 
 export default function CreateRoom({
   socket,
-  channelData,
-  setChannelData,
+  connectedChannel,
+  setConnectedChannel,
   // setRoomId,
 }) // :
 // {
@@ -29,8 +29,8 @@ export default function CreateRoom({
           setTempRoomName(e.target.value);
         }}
       ></input>
-      <h4>RoomId: {channelData?.channelId}</h4>
-      <h4>Room Name: {channelData?.channelName}</h4>
+      <h4>RoomId: {connectedChannel?.channelId}</h4>
+      <h4>Room Name: {connectedChannel?.channelName}</h4>
       <button onClick={handleCreateRoom}>Create room</button>
     </div>
   );

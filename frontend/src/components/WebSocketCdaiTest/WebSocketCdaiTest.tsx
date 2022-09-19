@@ -15,11 +15,11 @@ interface ChannelData {
 function WebsSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
   const [messages, setMessages] = useState<string[]>([]);
-  const [channelData, setChannelData] = useState<ChannelData | undefined>(undefined);
+  const [connectedChannel, setConnectedChannel] = useState<ChannelData | undefined>(undefined);
   const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
 
   const send = (message: string) => {
-    socket?.emit("send_message", {channelId: channelData?.channelId, message});
+    socket?.emit("send_message", {channelId: connectedChannel?.channelId, message});
   };
   useEffect(() => {
     const newSocket = io(ENDPOINT, {
@@ -41,6 +41,7 @@ function WebsSocketCdaiTest() {
     };
   }, [messageListener]);
 
+
   const roomCreationListener = (roomIdFromBack: ChannelData) => {
     console.log(roomIdFromBack);
     setChannelData(roomIdFromBack);
@@ -52,19 +53,43 @@ function WebsSocketCdaiTest() {
     };
   }, [roomCreationListener]);
 
-  const getAllchannel = (message: string) => {
-    setAllChannel(allChannel);
-  };
-  socket?.emit("joinChannelLobby", getAllchannel);
 
+
+
+
+
+  
+  const getAllChannel = (message: []) => {
+    console.log(message)
+    setAllChannel(message);
+  };
+  useEffect(() => {
+    socket?.emit("joinChannelLobby");
+  }, [socket]);
+  
+  useEffect(() => {
+    socket?.on("allChannel", getAllChannel);
+    return () => {
+      socket?.off("allChannel", getAllChannel);
+    };
+  }, [getAllChannel]);
+
+
+
+
+  
   return (
     <>
       <CreateRoom
         socket={socket}
-        channelData={channelData}
-        setChannelData={setChannelData}
+        connectedChannel={connectedChannel}
+        setConnectedChannel={setConnectedChannel}
       />
-      <JoinRoomButton socket={socket} />
+      <JoinRoomButton
+        socket={socket}
+        allChannel={allChannel}
+        setConnectedChannel={setConnectedChannel}
+      />
       <MessageInput send={send} />
       <Messages messages={messages} />
     </>
