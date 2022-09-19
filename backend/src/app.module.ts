@@ -6,10 +6,20 @@ import { AppService } from './app.service';
 import { User } from './users/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
-
+import * as Joi from '@hapi/joi';
+ 
+import { AuthModule } from './auth/auth.module';
+import { Game } from './game/game.entity';
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      validationSchema: Joi.object({
+        CLIENT_ID: Joi.string().required(),
+        CLIENT_SECRET: Joi.string().required(),
+        CALLBACK_URL: Joi.string().required(),
+        UPLOADED_FILES_DESTINATION: Joi.string().required(),
+      })
+    }),
     FortyTwoModule,
     UsersModule,
     TypeOrmModule.forRoot({
@@ -21,7 +31,7 @@ import { ConfigModule } from '@nestjs/config';
       database: 'db',
       autoLoadEntities: true,
       synchronize: true, // to disable in prod
-      entities: [User],
+      entities: [User, Game],
     }),
   ],
   controllers: [AppController],

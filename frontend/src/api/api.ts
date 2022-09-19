@@ -5,7 +5,12 @@ export const PREFIX = import.meta.env.VITE_CONTEXT == "MOCKUP" ? 'http://localho
 export enum URL {
   CREATE_USER = '/user/',
   AUTH = '/auth/',
-  HELLO = '/'
+  HELLO = '/',
+  PROTECTED = '/protected',
+  REFRESH_TOKEN = '/auth/refresh',
+  SIGNOUT = '/user/signout',
+  SET_PICTURE = '/user/set_picture',
+  GET_PICTURE = '/user/get_picture',
 }
 export enum HeadersFields {
   ContentType = 'Content-Type',
@@ -25,16 +30,14 @@ export class Api {
 
   private readonly _headers = new Headers()
 
-  constructor() {
-    this._headers.append(HeadersFields.ContentType, "application/json")
-  }
+  constructor() {}
 
   setToken(token: string) {
     this._headers.set(HeadersFields.Authorization, `Bearer ${token}`)
   }
 
-  private static async fetch(url: string, data: object): Promise<any> {
-    return fetch(url, {method: 'POST', body: JSON.stringify(data), headers: this.header})
+  private static async fetch(url: string, data: any): Promise<any> {
+    return fetch(url, {method: 'POST', body: data, headers: this.header})
   }
 
   private static fetchNoResponseBody(url: string, data: object, onSuccess: OnSuccess, onError: OnErrorFunction) {
@@ -51,29 +54,20 @@ export class Api {
       .catch(onError)
   }
 
-  static async auth(username: string, password: string): Promise<Response> {
-    const authUserDto = {
-      username: username,
-      password: password,
-    }
-    return this.fetch(`${PREFIX}${URL.AUTH}`, authUserDto)
-  }
-
-  static createUser(username: string, password: string, email: string) {
-    const createUserDto = {
-      username: username,
-      password: password,
-      email: email,
-    }
-    this.fetchNoResponseBody(`${PREFIX}${URL.CREATE_USER}`, createUserDto, () => console.log("user created"), console.error)
-  }
-
   hello() {
     return fetch(`${PREFIX}${URL.HELLO}`, {method: 'GET', headers: this._headers})
   }
 
-  logout() {
-    return fetch(`${PREFIX}${URL.AUTH}`, {method: 'DELETE', headers: this._headers})
+  setPicture(data: FormData) {
+    return fetch(`${PREFIX}${URL.SET_PICTURE}`, {method: 'POST', body: data})
+  }
+
+  getPicture() {
+    return fetch(`${PREFIX}${URL.GET_PICTURE}`, {method: 'GET', headers: this._headers})
+  }
+
+  refreshToken() {
+    return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {method: 'GET', headers: this._headers})
   }
 }
 

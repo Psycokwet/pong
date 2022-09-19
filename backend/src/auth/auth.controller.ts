@@ -10,18 +10,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { AppService } from '../app.service';
-import { LocalAuthGuard } from './local-auth.guard';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { QueryFailedError } from 'typeorm';
-import { AuthUserIdDto } from './auth-user.dto';
-
+import RequestWithUser from './requestWithUser.interface';
+import JwtRefreshGuard from './jwtRefresh.guard';
+import { UsersService } from 'src/users/users.service';
 @Controller('/auth/')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
   private reqId = 1;
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @UseGuards(LocalAuthGuard)
   @Post()
