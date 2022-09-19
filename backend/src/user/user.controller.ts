@@ -17,7 +17,7 @@ import { GetFriendsListDto } from './get-friends-list.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AddFriendDto } from './add-friend.dto';
-import { NicknameDto } from './set-nickname.dto';
+import { pongUsernameDto } from './set-pongusername.dto';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Express } from 'express';
@@ -30,7 +30,7 @@ export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('get_user_rank')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async get_user_rank(@Body() user: Omit<UserDto, 'password'>) {
     const user_rank = await this.usersService.get_user_rank(user);
 
@@ -38,7 +38,7 @@ export class UserController {
   }
 
   @Post('get_user_history')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async get_user_history(@Body() user: Omit<UserDto, 'password'>) {
     const userHistory = await this.usersService.get_user_history(user);
 
@@ -68,13 +68,13 @@ export class UserController {
   }
 
   @Post('add_friend')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async add_friend(@Body() friend: AddFriendDto) {
     await this.usersService.add_friend(friend);
   }
 
   @Get('get_friends_list')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async get_friends_list(@Body() friend: GetFriendsListDto) {
     const friendList = await this.usersService.get_friends_list(friend);
 
@@ -87,16 +87,16 @@ export class UserController {
     });
   }
 
-  @Get('get_nickname')
-  @UseGuards(JwtAuthGuard)
+  @Get('get_pongUsername')
+  // @UseGuards(JwtAuthGuard)
   async get_username(@Body() user: UserDto) {
-    return await this.usersService.get_nickname(user);
+    return await this.usersService.get_pongUsername(user);
   }
 
-  @Post('set_nickname')
-  @UseGuards(JwtAuthGuard)
-  async set_username(@Body() user: NicknameDto) {
-    await this.usersService.set_nickname(user);
+  @Post('set_pongUsername')
+  // @UseGuards(JwtAuthGuard)
+  async set_username(@Body() user: pongUsernameDto) {
+    await this.usersService.set_pongUsername(user);
   }
   @Get('get_picture')
   @UseGuards(JwtAuthGuard)
