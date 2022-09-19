@@ -5,7 +5,7 @@ import { Link, Route, Routes } from "react-router-dom";
 import Home from "./Pages-To-Change/Home";
 import Play from "./Pages-To-Change/Play";
 import LeaderBoard from "./Pages-To-Change/LeaderBoard";
-import Community from "./Pages-To-Change/Community";
+import Community from "../Community/Community";
 import Profile from "../Profile/Profile";
 import Settings from "./Pages-To-Change/Settings";
 import NotFound from "./Pages-To-Change/NotFound";
