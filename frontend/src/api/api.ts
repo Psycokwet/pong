@@ -1,12 +1,13 @@
 import { AuthUserDto, AuthUserIdDto } from "./auth-user.dto";
 
 type OnErrorFunction = (reason: any) => void
-type OnSuccess = (data? : object) => void
+type OnSuccess = (data?: object) => void
 
 export const PREFIX = import.meta.env.VITE_CONTEXT == "MOCKUP" ? 'http://localhost:8080/api_mockup' : 'http://localhost:8080/api'
 export enum URL {
   CREATE_USER = '/user/',
-  AUTH = '/auth/',
+  AUTH = '/auth/42/',
+  LOGOUT = '/auth/42/logout',
   HELLO = '/',
   PROTECTED = '/protected',
   REFRESH_TOKEN = '/auth/refresh',
@@ -43,7 +44,7 @@ export class Api {
   }
 
   private static fetchNoResponseBody(url: string, data: object, onSuccess: OnSuccess, onError: OnErrorFunction) {
-    const myVar = fetch(url, {method: 'POST', body: JSON.stringify(data), headers: this.header})
+    const myVar = fetch(url, { method: 'POST', body: JSON.stringify(data), headers: this.header })
       .then(r => {
         if (r.status !== 201) {
           r.json().then(d => {
@@ -57,8 +58,16 @@ export class Api {
   }
 
   hello() {
-    return fetch(`${PREFIX}${URL.HELLO}`, {method: 'GET', headers: this._headers})
+    return fetch(`${PREFIX}${URL.HELLO}`, { method: 'GET', headers: this._headers })
   }
+
+  logout() {
+    return fetch(`${PREFIX}${URL.LOGOUT}`, { method: 'GET', headers: this._headers })
+  }
+  //cors not the way to go
+  // login() {
+  //   return fetch(`${PREFIX}${URL.AUTH}`, { method: 'GET', headers: this._headers })
+  // }
 
   setPicture(data: FormData) {
     return fetch(`${PREFIX}${URL.SET_PICTURE}`, {method: 'POST', body: data})
@@ -69,7 +78,7 @@ export class Api {
   }
 
   refreshToken() {
-    return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {method: 'GET', headers: this._headers})
+    return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, { method: 'GET', headers: this._headers })
   }
 }
 
