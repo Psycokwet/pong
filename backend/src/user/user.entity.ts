@@ -1,7 +1,10 @@
+import LocalFile from 'src/localFiles/localFile.entity';
 import {
   BaseEntity,
   Entity,
   Column,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
   OneToMany,
   ManyToMany,
@@ -33,6 +36,14 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Friend, (friend) => friend.user)
   friends!: Friend[];
+
+  @JoinColumn({ name: 'pictureId' })
+  @OneToOne(() => LocalFile, { nullable: true })
+  public picture?: LocalFile;
+
+  @Column({ nullable: true })
+  public pictureId?: number;
+
   @Column({
     nullable: true,
   })

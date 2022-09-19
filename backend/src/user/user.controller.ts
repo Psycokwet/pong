@@ -1,13 +1,14 @@
 import {
-  Body,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   Logger,
   Post,
   Request,
   UseGuards,
+  StreamableFile,
+  UseInterceptors,
+  UploadedFile,
+  Body,
 } from '@nestjs/common';
 import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
@@ -17,11 +18,13 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AddFriendDto } from './add-friend.dto';
 import { SetUsernameDto } from './set-username.dto';
+import { createReadStream } from 'fs';
+import { join } from 'path';
+import { Express } from 'express';
+import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 
 @Controller('/user/')
 export class UserController {
-  private reqId = 1;
-
   private readonly logger = new Logger(UserController.name);
 
   constructor(private readonly usersService: UsersService) {}
@@ -92,5 +95,30 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async set_username(@Body() user: SetUsernameDto) {
     await this.usersService.set_username(user);
+  }
+  @Get('get_picture')
+  @UseGuards(JwtAuthGuard)
+  async get_picture(@Request() req): Promise<StreamableFile> {
+    const picture_path = await this.usersService.get_picture(req.user);
+
+    // https://docs.nestjs.com/techniques/streaming-files
+    const file = createReadStream(join(process.cwd(), `${picture_path}`));
+    return new StreamableFile(file);
+  }
+
+  @Post('set_picture')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    LocalFilesInterceptor({
+      fieldName: 'file',
+      path: '/avatars',
+    }),
+  )
+  async uploadFile(@Request() req, @UploadedFile() file: Express.Multer.File) {
+    return this.usersService.set_picture(req.user, {
+      path: file.path,
+      filename: file.originalname,
+      mimetype: file.mimetype,
+    });
   }
 }
