@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { BiChevronDown } from "react-icons/bi";
 import { FaSearch } from "react-icons/fa";
-import { RiRadioButtonLine } from "react-icons/ri"
+import { RiRadioButtonLine } from "react-icons/ri";
 import DropDownFriendList from "./DropDownFriendList";
 
 /***************** TYPE ***************************************/
@@ -27,7 +27,7 @@ const UserFriendList = [
   {
     login: "scarboni1",
     nickname: "scarboni1",
-    status: userStatusEnum.Online,
+    status: userStatusEnum.Playing,
     link_to_profile: "/scarboni1",
   },
   {
@@ -39,7 +39,7 @@ const UserFriendList = [
   {
     login: "cdai1",
     nickname: "cdai1",
-    status: userStatusEnum.Offline,
+    status: userStatusEnum.Online,
     link_to_profile: "/cdai1",
   },
   {
@@ -51,7 +51,7 @@ const UserFriendList = [
   {
     login: "nader1",
     nickname: "nader1",
-    status: userStatusEnum.Playing,
+    status: userStatusEnum.Offline,
     link_to_profile: "/nader1",
   },
   {
@@ -63,7 +63,7 @@ const UserFriendList = [
   {
     login: "moot1",
     nickname: "moot1",
-    status: userStatusEnum.Offline,
+    status: userStatusEnum.Online,
     link_to_profile: "/moot1",
   },
 ];
@@ -108,23 +108,63 @@ const FriendList = () => {
             className="text-gray-700 placeholder:text-gray-500 p-2 outline-none"
           />
         </div>
-        {UserFriendList?.map((friend) => (
-          <li
-            key={friend.nickname}
-            className={`flex justify-between p-2 hover:bg-sky-600 hover:text-white
-            ${
-              friend.nickname.startsWith(inputValue)
-                ? "block"
-                : "hidden"
-            }`}
-            onClick={goToUserPage}
-          >
-            <span>{friend.nickname}</span>
-            <span className={`${friend.status === userStatusEnum.Offline ? "text-red-600" : "text-green-600"}`}
-            ><RiRadioButtonLine size="15"/></span>
-          </li>
-        ))}
-      {/* <DropDownFriendList /> */}
+        <div>
+          {/* ******************** */}
+          <div>
+            <h1>ONLINE</h1>
+            {UserFriendList?.map((friend) => { if (friend.status === userStatusEnum.Online)
+            return (
+              <li
+                key={friend.login}
+                className={`flex justify-between p-2 hover:bg-sky-600 hover:text-white
+                ${friend.nickname.startsWith(inputValue) ? "block" : "hidden"}`}
+                onClick={goToUserPage}
+              >
+                <span>{friend.nickname}</span>
+                <span className="text-green-600">
+                  <RiRadioButtonLine size="15" className="text-green-600" />
+                </span>
+              </li>)
+            })}
+          </div>
+          {/* **************** */}
+        <div>
+            <h1>PLAYING</h1>
+            {UserFriendList?.map((friend) => { if (friend.status === userStatusEnum.Playing)
+            return (
+              <li
+                key={friend.login}
+                className={`flex justify-between p-2 hover:bg-sky-600 hover:text-white
+                ${friend.nickname.startsWith(inputValue) ? "block" : "hidden"}`}
+                onClick={goToUserPage}
+              >
+                <span>{friend.nickname}</span>
+                <span className="text-green-600">
+                  <RiRadioButtonLine size="15" className="text-yellow-600" />
+                </span>
+              </li>)
+            })}
+          </div>
+          {/* ******************* */}
+      <div>
+            <h1>OFFLINE</h1>
+            {UserFriendList?.map((friend) => { if (friend.status === userStatusEnum.Offline)
+            return (
+              <li
+                key={friend.login}
+                className={`flex justify-between p-2 hover:bg-sky-600 hover:text-white
+                ${friend.nickname.startsWith(inputValue) ? "block" : "hidden"}`}
+                onClick={goToUserPage}
+              >
+                <span>{friend.nickname}</span>
+                <span className="text-green-600">
+                  <RiRadioButtonLine size="15" className="text-red-600" />
+                </span>
+              </li>)
+            })}
+          </div>
+          {/* ********************** */}
+        </div>
       </div>
     </div>
   );
