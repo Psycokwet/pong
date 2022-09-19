@@ -27,9 +27,9 @@ export type Bearer = {
 export class Api {
   private static readonly header = new Headers()
 
-  static {
+  /*static {
     Api.header.append(HeadersFields.ContentType, "application/json")
-  }
+  }*/
 
   private readonly _headers = new Headers()
 
