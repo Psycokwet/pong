@@ -23,8 +23,6 @@ function WebsSocketCdaiTest() {
   };
   useEffect(() => {
     const newSocket = io(ENDPOINT, {
-      // const newSocket = io(ENDPOINT + '/hat', {
-      // path: 'chat',
       transports: ["websocket"],
       withCredentials: true,
     });
