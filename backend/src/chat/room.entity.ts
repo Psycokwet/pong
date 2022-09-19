@@ -3,6 +3,8 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -28,6 +30,10 @@ class Room extends BaseEntity {
 
   @OneToMany(() => Message, (message) => message.room)
   public messages: Message[];
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  public members: User[];
 }
 
 export default Room;

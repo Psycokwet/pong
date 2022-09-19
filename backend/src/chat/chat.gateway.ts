@@ -74,6 +74,20 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
+  @SubscribeMessage('disconnectFromChannel')
+  async disconnectFromChannel(
+    @MessageBody() roomId: number,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const room = await this.chatService.getRoomById(roomId);
+    client.leave(room.roomName);
+    this.server.in(client.id).emit('disconnectedFromChannel', {
+      channelId: room.id,
+      channelName: room.channelName,
+    });
+  }
+
+  @UseGuards(JwtWsGuard)
   @SubscribeMessage('send_message')
   async listenForMessages(
     @MessageBody() data: { message: string; channelId: number },
