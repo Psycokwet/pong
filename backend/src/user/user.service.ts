@@ -58,6 +58,11 @@ export class UsersService {
     return user;
   }
 
+  getFrontUsername(user: User) {
+    if (!user.nickname) return user.username;
+    return user.nickname;
+  }
+
   async signup(dto: UserDto) {
     // database operation
     const user = User.create({
@@ -224,7 +229,7 @@ export class UsersService {
 
   async get_username(dto: UserDto) {
     const user = await this.findOne(dto.username);
-    return user.username;
+    return this.getFrontUsername(user);
   }
 
   async set_username(dto: SetUsernameDto) {
@@ -234,7 +239,7 @@ export class UsersService {
     this.usersRepository
       .createQueryBuilder()
       .update(user)
-      .set({ username: dto.new_username })
+      .set({ nickname: dto.new_username })
       .where({ id: user.id })
       .execute();
   }
