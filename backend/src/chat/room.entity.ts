@@ -1,4 +1,12 @@
-import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from 'src/users/user.entity';
 import Message from './message.entity';
 
@@ -10,11 +18,10 @@ class Room extends BaseEntity {
   // displayed name for frontend
   @Column()
   public channelName: string;
-  
-  // use only in backend
-  @Column({unique: true})
-  public roomName: string;
 
+  // use only in backend
+  @Column({ unique: true })
+  public roomName: string;
 
   @ManyToOne(() => User, (user) => user.rooms)
   public owner: User;

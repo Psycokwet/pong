@@ -20,6 +20,7 @@ export class ChatGateway {
   @WebSocketServer()
   server: Server;
 
+  @UseGuards(JwtWsGuard)
   @SubscribeMessage('joinChannelLobby')
   async joinChannelLobby(@ConnectedSocket() client: Socket) {
     console.log(await this.chatService.getAllRooms());
@@ -61,12 +62,10 @@ export class ChatGateway {
   ) {
     const room = await this.chatService.getRoomById(roomId);
     client.join(room.roomName);
-    this.server
-      .in(room.roomName)
-      .emit('joinedRoom', {
-        channelId: room.id,
-        channelName: room.channelName,
-      });
+    this.server.in(room.roomName).emit('joinedRoom', {
+      channelId: room.id,
+      channelName: room.channelName,
+    });
     // create channel named data
     // client.join(data);
     // console.log(data, client, client.id, this.server, this.server.id);
@@ -74,6 +73,7 @@ export class ChatGateway {
     // client.join('test');
   }
 
+  @UseGuards(JwtWsGuard)
   @SubscribeMessage('send_message')
   async listenForMessages(
     @MessageBody() data: { message: string; channelId: number },
