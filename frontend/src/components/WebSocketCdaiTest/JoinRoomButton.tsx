@@ -27,8 +27,7 @@ export default function JoinRoomButton(
     socket?.emit("joinRoom", channelId);
   }
 
-  const joinRoom = (message: []) => {
-    console.log(message)
+  const joinRoom = (message: ChannelData) => {
     setConnectedChannel(message)
   }
   useEffect(()=> {
@@ -41,10 +40,11 @@ export default function JoinRoomButton(
   return (
     <div> 
       {
-        allChannel.map((channel) =>
-        <div>
-          <button onClick={() => handleClick(channel.channelId)}>Join {channel.channelName}</button>
-        </div>
+        allChannel.map(
+          (channel) =>
+            <div key={channel.channelId} >
+              <button onClick={() => handleClick(channel.channelId)}>Join {channel.channelName}/id: {channel.channelId}</button>
+            </div>
         )
       }
     </div>

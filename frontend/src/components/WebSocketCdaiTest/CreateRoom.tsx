@@ -5,12 +5,8 @@ export default function CreateRoom({
   socket,
   connectedChannel,
   setConnectedChannel,
-  // setRoomId,
 }) // :
 // {
-//   socket: Socket | undefined,
-//   // roomName: string,
-//   Dispatch<SetStateAction<string>>,
 // }
 {
   const [tempRoomName, setTempRoomName] = useState<string>("");
