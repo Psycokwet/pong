@@ -1,8 +1,8 @@
 import React from "react";
 import { useState } from "react";
+
 import { BiChevronDown } from "react-icons/bi";
 import { FaSearch } from "react-icons/fa";
-import { RiRadioButtonLine } from "react-icons/ri";
 
 import SubFriendList from "./SubFriendList";
 
@@ -15,8 +15,8 @@ export enum userStatusEnum {
 }
 
 /**************************************************
- * I guess this data we'll get from backend /
- * database through api ?! To be delete later.
+ * I guess this is the kind of data we'll get from 
+ * backend / database through api ?! To DELETE later.
  **************************************************/
 const UserFriendList = [
   {
@@ -69,6 +69,25 @@ const UserFriendList = [
   },
 ];
 
+/******************* Sub List ************************/
+const subList = [
+  {
+    status: userStatusEnum.Online,
+    color: "text-green-400",
+    group_name: "Online",
+  },
+  {
+    status: userStatusEnum.Playing,
+    color: "text-yellow-400",
+    group_name: "Playing",
+  },
+  {
+    status: userStatusEnum.Offline,
+    color: "text-red-500",
+    group_name: "Offline",
+  },
+];
+
 /***************** Component **********************************/
 
 const FriendList = () => {
@@ -80,56 +99,47 @@ const FriendList = () => {
   };
 
   return (
-    <div className="text-white bg-gray-900">
-      <div
-        className="p-2 flex justify-between items-center text-2xl font-bold"
-        onClick={showList}
-      >
-        Friend List
-        <BiChevronDown size={20} className={`${active && "rotate-180"}`} />
-      </div>
-      <div
-        className={
-          active ? "bg-gray-700 mt-2 max-h-60 overflow-y-auto" : "hidden"
-        }
-      >
-        <div className="flex items-center p-1 bg-white">
-          <span>
-            <FaSearch size={20} className="text-gray-500" />
-          </span>
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Search a name"
-            className="text-gray-700 placeholder:text-gray-500 p-2 outline-none"
-          />
+      <div className="absolute top-[120px] right-0 text-white bg-gray-900">
+        <div
+          className="p-2 flex items-center text-2xl font-bold"
+          onClick={showList}
+        >
+          <span className="px-4">Friend List</span>
+          <BiChevronDown size={20} className={`${active && "rotate-180"}`} />
         </div>
-        <div>
-          <SubFriendList
-            friend_list={UserFriendList}
-            input={inputValue}
-            user_status={userStatusEnum.Online}
-            color="text-green-400"
-            group_name="ONLINE"
+        <div
+          className={
+            active ? "bg-gray-700 mt-2 max-h-60 overflow-y-auto" : "hidden"
+          }
+        >
+          <div className="flex items-center p-1 bg-white">
+            <span>
+              <FaSearch size={20} className="text-gray-500" />
+            </span>
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Search a name"
+              className="text-gray-700 placeholder:text-gray-500 p-2 outline-none rounded-xl w-40"
             />
-          <SubFriendList
-            friend_list={UserFriendList}
-            input={inputValue}
-            user_status={userStatusEnum.Offline}
-            color="text-red-400"
-            group_name="OFFLINE"
-            />
-          <SubFriendList
-            friend_list={UserFriendList}
-            input={inputValue}
-            user_status={userStatusEnum.Playing}
-            color="text-yellow-400"
-            group_name="PLAYING"
-          />
+          </div>
+          <div>
+            {subList?.map((aSubList) => {
+              return (
+                <SubFriendList
+                  key={aSubList.status}
+                  friend_list={UserFriendList}
+                  input={inputValue}
+                  user_status={aSubList.status}
+                  color={aSubList.color}
+                  group_name={aSubList.group_name}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 
