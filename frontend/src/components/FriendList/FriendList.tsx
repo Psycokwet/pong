@@ -3,11 +3,12 @@ import { useState } from "react";
 import { BiChevronDown } from "react-icons/bi";
 import { FaSearch } from "react-icons/fa";
 import { RiRadioButtonLine } from "react-icons/ri";
-import DropDownFriendList from "./DropDownFriendList";
+
+import SubFriendList from "./SubFriendList";
 
 /***************** TYPE ***************************************/
 
-enum userStatusEnum {
+export enum userStatusEnum {
   Online,
   Playing,
   Offline,
@@ -78,10 +79,6 @@ const FriendList = () => {
     setActive(!active);
   };
 
-  const goToUserPage = () => {
-    window.location.replace("http://localhost:8080/profile");
-  };
-
   return (
     <div className="text-white bg-gray-900">
       <div
@@ -109,61 +106,27 @@ const FriendList = () => {
           />
         </div>
         <div>
-          {/* ******************** */}
-          <div>
-            <h1>ONLINE</h1>
-            {UserFriendList?.map((friend) => { if (friend.status === userStatusEnum.Online)
-            return (
-              <li
-                key={friend.login}
-                className={`flex justify-between p-2 hover:bg-sky-600 hover:text-white
-                ${friend.nickname.startsWith(inputValue) ? "block" : "hidden"}`}
-                onClick={goToUserPage}
-              >
-                <span>{friend.nickname}</span>
-                <span className="text-green-600">
-                  <RiRadioButtonLine size="15" className="text-green-600" />
-                </span>
-              </li>)
-            })}
-          </div>
-          {/* **************** */}
-        <div>
-            <h1>PLAYING</h1>
-            {UserFriendList?.map((friend) => { if (friend.status === userStatusEnum.Playing)
-            return (
-              <li
-                key={friend.login}
-                className={`flex justify-between p-2 hover:bg-sky-600 hover:text-white
-                ${friend.nickname.startsWith(inputValue) ? "block" : "hidden"}`}
-                onClick={goToUserPage}
-              >
-                <span>{friend.nickname}</span>
-                <span className="text-green-600">
-                  <RiRadioButtonLine size="15" className="text-yellow-600" />
-                </span>
-              </li>)
-            })}
-          </div>
-          {/* ******************* */}
-      <div>
-            <h1>OFFLINE</h1>
-            {UserFriendList?.map((friend) => { if (friend.status === userStatusEnum.Offline)
-            return (
-              <li
-                key={friend.login}
-                className={`flex justify-between p-2 hover:bg-sky-600 hover:text-white
-                ${friend.nickname.startsWith(inputValue) ? "block" : "hidden"}`}
-                onClick={goToUserPage}
-              >
-                <span>{friend.nickname}</span>
-                <span className="text-green-600">
-                  <RiRadioButtonLine size="15" className="text-red-600" />
-                </span>
-              </li>)
-            })}
-          </div>
-          {/* ********************** */}
+          <SubFriendList
+            friend_list={UserFriendList}
+            input={inputValue}
+            user_status={userStatusEnum.Online}
+            color="text-green-400"
+            group_name="ONLINE"
+            />
+          <SubFriendList
+            friend_list={UserFriendList}
+            input={inputValue}
+            user_status={userStatusEnum.Offline}
+            color="text-red-400"
+            group_name="OFFLINE"
+            />
+          <SubFriendList
+            friend_list={UserFriendList}
+            input={inputValue}
+            user_status={userStatusEnum.Playing}
+            color="text-yellow-400"
+            group_name="PLAYING"
+          />
         </div>
       </div>
     </div>
