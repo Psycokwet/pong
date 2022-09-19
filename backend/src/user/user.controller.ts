@@ -17,7 +17,7 @@ import { GetFriendsListDto } from './get-friends-list.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AddFriendDto } from './add-friend.dto';
-import { SetUsernameDto } from './set-username.dto';
+import { NicknameDto } from './set-nickname.dto';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Express } from 'express';
@@ -30,7 +30,7 @@ export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('get_user_rank')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async get_user_rank(@Body() user: Omit<UserDto, 'password'>) {
     const user_rank = await this.usersService.get_user_rank(user);
 
@@ -38,7 +38,7 @@ export class UserController {
   }
 
   @Post('get_user_history')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async get_user_history(@Body() user: Omit<UserDto, 'password'>) {
     const userHistory = await this.usersService.get_user_history(user);
 
@@ -68,13 +68,13 @@ export class UserController {
   }
 
   @Post('add_friend')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async add_friend(@Body() friend: AddFriendDto) {
     await this.usersService.add_friend(friend);
   }
 
   @Get('get_friends_list')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async get_friends_list(@Body() friend: GetFriendsListDto) {
     const friendList = await this.usersService.get_friends_list(friend);
 
@@ -82,24 +82,24 @@ export class UserController {
 
     return friendList.map((friend) => {
       return {
-        username: this.usersService.getFrontUsername(friend.user),
+        login42: this.usersService.getFrontUsername(friend.user),
       };
     });
   }
 
-  @Get('get_username')
-  // @UseGuards(JwtAuthGuard)
+  @Get('get_nickname')
+  @UseGuards(JwtAuthGuard)
   async get_username(@Body() user: UserDto) {
-    return await this.usersService.get_username(user);
+    return await this.usersService.get_nickname(user);
   }
 
-  @Post('set_username')
-  // @UseGuards(JwtAuthGuard)
-  async set_username(@Body() user: SetUsernameDto) {
-    await this.usersService.set_username(user);
+  @Post('set_nickname')
+  @UseGuards(JwtAuthGuard)
+  async set_username(@Body() user: NicknameDto) {
+    await this.usersService.set_nickname(user);
   }
   @Get('get_picture')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async get_picture(@Request() req): Promise<StreamableFile> {
     const picture_path = await this.usersService.get_picture(req.user);
 
@@ -109,7 +109,7 @@ export class UserController {
   }
 
   @Post('set_picture')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     LocalFilesInterceptor({
       fieldName: 'file',
@@ -117,6 +117,7 @@ export class UserController {
     }),
   )
   async uploadFile(@Request() req, @UploadedFile() file: Express.Multer.File) {
+    console.log(req.user);
     return this.usersService.set_picture(req.user, {
       path: file.path,
       filename: file.originalname,

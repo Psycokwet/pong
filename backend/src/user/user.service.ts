@@ -14,13 +14,13 @@ import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
-import { SetUsernameDto } from './set-username.dto';
+import { NicknameDto } from './set-nickname.dto';
 import { GetFriendsListDto } from './get-friends-list.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 
 // This should be a real class/interface representing a user entity
-export type UserLocal = { userId: number; username: string; password: string };
+export type UserLocal = { userId: number; login42: string; password: string };
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -50,23 +50,24 @@ export class UsersService {
     private localFilesService: LocalFilesService,
   ) {}
 
-  async findOne(username: string): Promise<User> {
+  async findOne(login42: string): Promise<User> {
     const user = await this.usersRepository.findOneBy({
-      username: username,
+      login42: login42,
     });
     if (!user) throw new BadRequestException({ error: 'User not found' });
     return user;
   }
 
   getFrontUsername(user: User) {
-    if (!user.nickname) return user.username;
+    if (!user.nickname) return user.login42;
     return user.nickname;
   }
 
   async signup(dto: UserDto) {
+    console.log(dto);
     // database operation
     const user = User.create({
-      username: dto.username,
+      login42: dto.login42,
       email: dto.email,
     });
 
@@ -85,7 +86,8 @@ export class UsersService {
   }
 
   async signin(dto: Omit<UserDto, 'email'>) {
-    return await this.findOne(dto.username);
+    console.log(dto);
+    return await this.findOne(dto.login42);
   }
 
   async setCurrentRefreshToken(refreshToken: string, userId: number) {
@@ -127,9 +129,9 @@ export class UsersService {
   }
 
   async get_user_rank(dto: Omit<UserDto, 'password'>) {
-    const user = await this.findOne(dto.username);
+    const user = await this.findOne(dto.login42);
 
-    if (user) return user.user_rank;
+    if (user) return { rank: user.user_rank };
 
     // User not found
     throw new HttpException(
@@ -144,7 +146,7 @@ export class UsersService {
   async get_user_history(dto: Omit<UserDto, 'password'>) {
     /*  Get calling user's object */
     const user = await this.usersRepository.findOne({
-      where: { username: dto.username },
+      where: { login42: dto.login42 },
     });
 
     if (!user) {
@@ -176,7 +178,7 @@ export class UsersService {
   async add_friend(dto: AddFriendDto) {
     /* First we get the caller (person who is initiating the friend request) 
     and friend in our db */
-    const caller = await this.findOne(dto.username);
+    const caller = await this.findOne(dto.login42);
 
     const friend = await this.findOne(dto.friend_to_add);
 
@@ -215,7 +217,7 @@ export class UsersService {
 
   async get_friends_list(dto: GetFriendsListDto) {
     /* Same logic as get_user_history */
-    const user = await this.findOne(dto.username);
+    const user = await this.findOne(dto.login42);
 
     const friendsList = await this.friendRepository.find({
       relations: {
@@ -227,26 +229,26 @@ export class UsersService {
     return friendsList;
   }
 
-  async get_username(dto: UserDto) {
-    const user = await this.findOne(dto.username);
-    return this.getFrontUsername(user);
+  async get_nickname(dto: UserDto) {
+    const user = await this.findOne(dto.login42);
+    return { nickname: this.getFrontUsername(user) };
   }
 
-  async set_username(dto: SetUsernameDto) {
-    const user = await this.findOne(dto.username);
+  async set_nickname(dto: NicknameDto) {
+    const user = await this.findOne(dto.login42);
 
     /* We use TypeORM's query builder to update our entity */
     this.usersRepository
       .createQueryBuilder()
       .update(user)
-      .set({ nickname: dto.new_username })
+      .set({ nickname: dto.new_nickname })
       .where({ id: user.id })
       .execute();
   }
 
   async get_picture(dto: User) {
     const user = await this.usersRepository.findOne({
-      where: { username: dto.username },
+      where: { login42: dto.login42 },
       relations: { picture: true },
     });
 

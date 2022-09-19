@@ -20,7 +20,7 @@ export class User extends BaseEntity {
   id: number;
 
   @Column({ length: 128, unique: true })
-  username: string;
+  login42: string;
 
   @Column({ nullable: true })
   nickname: string;
