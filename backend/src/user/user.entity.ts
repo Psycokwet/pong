@@ -23,7 +23,7 @@ export class User extends BaseEntity {
   login42: string;
 
   @Column({ nullable: true })
-  nickname: string;
+  pongUsername: string;
 
   @Column({ length: 128, unique: true })
   email: string;

@@ -14,7 +14,7 @@ import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
-import { NicknameDto } from './set-nickname.dto';
+import { pongUsernameDto } from './set-pongusername.dto';
 import { GetFriendsListDto } from './get-friends-list.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
@@ -59,8 +59,8 @@ export class UsersService {
   }
 
   getFrontUsername(user: User) {
-    if (!user.nickname) return user.login42;
-    return user.nickname;
+    if (!user.pongUsername) return user.login42;
+    return user.pongUsername;
   }
 
   async signup(dto: UserDto) {
@@ -229,19 +229,19 @@ export class UsersService {
     return friendsList;
   }
 
-  async get_nickname(dto: UserDto) {
+  async get_pongUsername(dto: UserDto) {
     const user = await this.findOne(dto.login42);
-    return { nickname: this.getFrontUsername(user) };
+    return { pongUsername: this.getFrontUsername(user) };
   }
 
-  async set_nickname(dto: NicknameDto) {
+  async set_pongUsername(dto: pongUsernameDto) {
     const user = await this.findOne(dto.login42);
 
     /* We use TypeORM's query builder to update our entity */
     this.usersRepository
       .createQueryBuilder()
       .update(user)
-      .set({ nickname: dto.new_nickname })
+      .set({ pongUsername: dto.new_pongUsername })
       .where({ id: user.id })
       .execute();
   }
