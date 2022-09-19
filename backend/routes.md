@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ## NOTE
 With the current auth system you have to add users manually in the database if you want to run tests requiring many different users (refer to get user history for info on how to access).
 
@@ -8,11 +7,6 @@ POST /user/signup
 
 #### payload :
 
-=======
-### Create user :
-POST /user/signup
-#### payload : 
->>>>>>> nad_route_backend
 ```
 {
 	"username": "sophie",
@@ -20,7 +14,6 @@ POST /user/signup
 	"email": "sophie@sophie.fr"
 }
 ```
-<<<<<<< HEAD
 
 #### success response :
 
@@ -28,11 +21,6 @@ POST /user/signup
 
 #### failure response :
 
-=======
-#### success response : 
-201 created
-#### failure response : 
->>>>>>> nad_route_backend
 ```
 {
     "statusCode": 400,
@@ -42,11 +30,7 @@ POST /user/signup
 		"password must be a string"
 	],
 	"error": "Bad Request"
-<<<<<<< HEAD
 }
-=======
-} 
->>>>>>> nad_route_backend
 ```
 
 ```
@@ -57,22 +41,16 @@ POST /user/signup
 ```
 
 ### get rank :
-<<<<<<< HEAD
 
 GET /user/get_user_rank
 
 #### payload :
 
-=======
-GET /user/get_user_rank
-#### payload : 
->>>>>>> nad_route_backend
 ```
 {
 	"username": "sophie"
 }
 ```
-<<<<<<< HEAD
 
 #### success response :
 
@@ -80,18 +58,12 @@ GET /user/get_user_rank
 
 #### failure response :
 
-=======
-#### success response : 
-1
-#### failure response : 
->>>>>>> nad_route_backend
 ```
 {
     "status": 400,
     "error": "User not found"
 }
 ```
-<<<<<<< HEAD
 
 ### get user history :
 
@@ -113,36 +85,14 @@ GET /user/get_user_rank
 
 #### payload :
 
-=======
-### get user history :
-1/ First you have to manually create some games directly in the database (otherwise there will be no data so you will just see 0 games, 0 wins and no games):
-	* Go to http://localhost:5431/
-	* Click on PostgreSQL icon on the left
-	* Log in: postgres / localroot
-	* Navigate to the "game" db using the menu on the left
-	* Click on "Inserer" and now you have to add some info:
-		=> player1_id: id of player 1, it can be any user id (you can find user ids by clicking on user db and checking id column)
-		=> player2_id: id of player 2
-		=> winner: id of winner
-		=> player1Id: id of player 1, you can use the drop-down menu for this
-		=> player2Id: id of player 2, same as above
-	* Add as many games as you want, if you want to add many in succession you can use the "Inserer et repeter" button for a quicker time
-
-2/ POST /user/get_user_rank
-#### payload : 
->>>>>>> nad_route_backend
 ```
 {
 	"username": "sophie"
 }
 ```
-<<<<<<< HEAD
 
 #### success response :
 
-=======
-#### success response : 
->>>>>>> nad_route_backend
 ```
 {
     "nbGames": 0,
@@ -177,19 +127,14 @@ GET /user/get_user_rank
     ]
 }
 ```
-<<<<<<< HEAD
 
 #### failure response :
 
-=======
-#### failure response : 
->>>>>>> nad_route_backend
 ```
 {
     "status": 400,
     "error": "User not found"
 }
-<<<<<<< HEAD
 ```
 
 ### add friend :
@@ -316,5 +261,3 @@ You should see that all instances of the old username are replaced by the new on
     "error": "User not found"
 }
 ```
-=======
->>>>>>> nad_route_backend
