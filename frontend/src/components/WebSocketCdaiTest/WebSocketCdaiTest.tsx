@@ -6,14 +6,20 @@ import MessageInput from "./MessageInput";
 import Messages from "./Messages";
 const ENDPOINT = "http://localhost:8080";
 
+interface ChannelData {
+  channelName: string;
+  channelId: number;
+}
+ 
+
 function WebsSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
   const [messages, setMessages] = useState<string[]>([]);
-  const [roomName, setRoomName] = useState<string>("");
-  const [roomId, setRoomId] = useState<string>("");
+  const [channelData, setChannelData] = useState<ChannelData | undefined>(undefined);
+  const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
 
-  const send = (value: string) => {
-    socket?.emit("send_message", value);
+  const send = (message: string) => {
+    socket?.emit("send_message", {channelId: channelData?.channelId, message});
   };
   useEffect(() => {
     const newSocket = io(ENDPOINT, {
@@ -35,9 +41,9 @@ function WebsSocketCdaiTest() {
     };
   }, [messageListener]);
 
-  const roomCreationListener = (roomIdFromBack: string) => {
+  const roomCreationListener = (roomIdFromBack: ChannelData) => {
     console.log(roomIdFromBack);
-    setRoomId(roomIdFromBack);
+    setChannelData(roomIdFromBack);
   };
   useEffect(() => {
     socket?.on("createdRoom", roomCreationListener);
@@ -46,16 +52,19 @@ function WebsSocketCdaiTest() {
     };
   }, [roomCreationListener]);
 
+  const getAllchannel = (message: string) => {
+    setAllChannel(allChannel);
+  };
+  socket?.emit("joinChannelLobby", getAllchannel);
+
   return (
     <>
       <CreateRoom
-        roomName={roomName}
         socket={socket}
-        setRoomName={setRoomName}
-        roomId={roomId}
-        // roomName={roomName}
+        channelData={channelData}
+        setChannelData={setChannelData}
       />
-      {/* <JoinRoomButton socket={socket} /> */}
+      <JoinRoomButton socket={socket} />
       <MessageInput send={send} />
       <Messages messages={messages} />
     </>
