@@ -1,44 +1,6 @@
 ## NOTE
+
 With the current auth system you have to add users manually in the database if you want to run tests requiring many different users (refer to get user history for info on how to access).
-
-### Create user :
-
-POST /user/signup
-
-#### payload :
-
-```
-{
-	"username": "sophie",
-	"password": "soph6R756ie",
-	"email": "sophie@sophie.fr"
-}
-```
-
-#### success response :
-
-201 created
-
-#### failure response :
-
-```
-{
-    "statusCode": 400,
-	"message": [
-		"Password should contains 8 character minimum",
-		"Password cannot be empty",
-		"password must be a string"
-	],
-	"error": "Bad Request"
-}
-```
-
-```
-{
-	"status": 400,
-	"error": "Username or Email already used"
-}
-```
 
 ### get rank :
 
@@ -48,13 +10,17 @@ GET /user/get_user_rank
 
 ```
 {
-	"username": "sophie"
+	"login42": "sophie"
 }
 ```
 
 #### success response :
 
-1
+```
+{
+    "rank": 1
+}
+```
 
 #### failure response :
 
@@ -87,7 +53,7 @@ GET /user/get_user_rank
 
 ```
 {
-	"username": "sophie"
+	"login42": "sophie"
 }
 ```
 
@@ -145,7 +111,7 @@ POST /user/add_friend
 
 ```
 {
-	"username": "sophie",
+	"login42": "sophie",
     "friend_to_add":
 }
 ```
@@ -188,7 +154,7 @@ GET /user/get_friends_list
 
 ```
 {
-	"username": "sophie",
+	"login42": "sophie",
 }
 ```
 
@@ -197,57 +163,63 @@ GET /user/get_friends_list
 ```
 [
     {
-        "username": "cdai"
+        "login42": "cdai"
     },
     {
-        "username": "coucou3"
+        "login42": "coucou3"
     },
     {
-        "username": "mescande"
+        "login42": "mescande"
     }
 ]
 ```
 
 #### failure response :
+
 ```
 {
     "error": "User not found"
 }
 ```
 
-### get username
+### get nickname
 
-GET /user/get_username
+GET /user/get_nickname
 
 #### payload :
 
 ```
 {
-	"username": "sophie",
+	"login42": "sophie",
 }
 ```
 
 #### success response:
 
-sophie
+```
+{
+    "nickname": "sophie"
+}
+```
 
 #### failure response :
+
 ```
 {
     "error": "User not found"
 }
 ```
 
-### set username
+### set nickname
 
-POST /user/set_username
+POST /user/set_nickname
 
 #### payload:
 
 ```
 {
-	"username": "sophie",
-    "new_username":"sophie_new",
+	"login42": "sophie",
+    "new_nickname":"sophie_new",
 }
 ```
 
@@ -257,6 +229,7 @@ POST /user/set_username
 You should see that all instances of the old username are replaced by the new one (try seeing in the friends list or in games)
 
 #### failure response :
+
 ```
 {
     "error": "User not found"
