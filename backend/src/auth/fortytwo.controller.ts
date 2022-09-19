@@ -8,8 +8,11 @@ import { Profile } from 'passport-42';
 @Controller('auth/42')
 export class FortyTwoController {
   private readonly logger = new Logger(FortyTwoController.name);
-  
-  constructor(private JwtAuthService: JwtAuthService) {}
+
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Get()
   @UseGuards(FortyTwoGuard)
@@ -20,26 +23,30 @@ export class FortyTwoController {
   @Get('redirect')
   @UseGuards(FortyTwoGuard)
   async fortyTwoAuthRedirect(@Req() req: any, @Res() res: Response) {
-    const {
-      user,
-      authInfo,
-    }: {
-      user: Profile;
-      authInfo: {
-        accessToken: string;
-        refreshToken: string;
-        expires_in: number;
-      };
-    } = req;
+    let userFromDb = await this.usersService.signin({
+      username: req.user.username,
+    });
 
-    if (!user) {
-      res.redirect('/');
-      return;
+    if (!userFromDb) {
+      userFromDb = await this.usersService.signup({
+        username: req.user.user.username,
+        email: req.user.user.email,
+      });
     }
       
     req.user = undefined;
 
-    const jwt = this.JwtAuthService.login(user).accessToken;
+    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+      userFromDb.id,
+    );
+    const refreshToken = this.authService.getJwtRefreshToken(userFromDb.id);
+    const refreshTokenCookie =
+      this.authService.getCookieWithJwtRefreshToken(refreshToken);
+
+    await this.usersService.setCurrentRefreshToken(refreshToken, userFromDb.id);
+
+    req.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
+  }
 
     return res.status(201).json({ jwt });
   }

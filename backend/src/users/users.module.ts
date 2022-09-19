@@ -4,22 +4,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { UserController } from './user.controller';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from 'src/auth/constants';
+import { Game } from 'src/game/game.entity';
+import { LocalFilesModule } from 'src/localFiles/localFiles.module';
+import { LocalFilesService } from 'src/localFiles/localFiles.service';
+import LocalFile from 'src/localFiles/localFile.entity';
+import { UserController } from './user.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), 
-  JwtModule.registerAsync({
-    useFactory: async () => {
-      return {
-        secret: jwtConstants.secret,
-        signOptions: { expiresIn: '60s' },
-      };
-    },
-    inject: [],
-  }),
-],
-  providers: [UsersService],
+  imports: [
+    TypeOrmModule.forFeature([User, LocalFile, Game]),
+    JwtModule,
+    LocalFilesModule,
+  ],
   controllers: [UserController],
-  exports: [UsersService],
+  providers: [UsersService, LocalFilesService],
+  exports: [UsersService, LocalFilesService],
 })
 export class UsersModule {}
