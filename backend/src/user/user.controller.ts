@@ -91,12 +91,12 @@ export class UserController {
 
   @Get('get_pongUsername')
   // @UseGuards(JwtAuthGuard)
-  async get_username(@Query() user: UserDto) {
-    return await this.usersService.get_pongUsername(user);
+  async get_username(@Query() dto: Omit<UserDto, 'email'>) {
+    return await this.usersService.get_pongUsername(dto);
   }
 
   @Post('set_pongUsername')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async set_username(@Body() user: pongUsernameDto) {
     await this.usersService.set_pongUsername(user);
   }
