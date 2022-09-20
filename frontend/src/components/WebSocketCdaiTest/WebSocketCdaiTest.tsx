@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import io, { Socket } from "socket.io-client";
+import ConnectedUserList from "./ConnectedUserList";
 import CreateChannel from "./CreateChannel";
 import JoinChannelButtons from "./JoinChannelButtons";
 import LeaveChannelButton from "./LeaveChannelButton";
@@ -11,13 +12,33 @@ interface ChannelData {
   channelName: string;
   channelId: number;
 }
- 
+
+interface User {
+  id: number;
+  pongUsername: string;
+}
 
 function WebsSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
   const [messages, setMessages] = useState<string[]>([]);
   const [connectedChannel, setConnectedChannel] = useState<ChannelData | undefined>(undefined);
   const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
+  const [connectedUsers, setConnectedUsers] = useState<User[]>([]);
+
+  /** CONNECTED USER LIST */
+  const getConnectedUserList = () => {
+    socket?.emit("getConnectedUserListRequest");
+  };
+  const handleNewConnectedUserList = (newConnectedUserList: User[]) => {
+    setConnectedUsers(newConnectedUserList);
+  };
+  useEffect(() => {
+    socket?.on("connectedUserList", handleNewConnectedUserList);
+    return () => {
+      socket?.off("connectedUserList", handleNewConnectedUserList);
+    };
+  }, [handleNewConnectedUserList]);
+  /** END CONNECTED USER LIST */
 
   /** MESSAGE */
   const send = (message: string) => {
@@ -71,10 +92,11 @@ function WebsSocketCdaiTest() {
   }
   useEffect(()=> {
     socket?.on("confirmChannelEntry", handleJoinChannel);
+    getConnectedUserList()
     return () => {
       socket?.off("confirmChannelEntry", handleJoinChannel);
     };
-  }, [handleJoinChannel]);
+  }, [handleJoinChannel, getConnectedUserList]);
   /** END JOIN CHANNEL */
   
   
@@ -141,6 +163,7 @@ function WebsSocketCdaiTest() {
             channelName={connectedChannel.channelName}
             sendDisconnect={sendDisconnect}
           />
+          <ConnectedUserList connectedUsers={connectedUsers} />
           <MessageInput send={send} />
           <Messages messages={messages} />
         </>

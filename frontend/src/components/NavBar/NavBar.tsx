@@ -56,7 +56,7 @@ const webPages = [
     url: "/practice",
     pageName: "practice",
     element: <PracticeJwt />,
-    // pageIcon: <IoMdSettings size="26" />,
+    pageIcon: <IoMdSettings size="26" />,
   },
 ];
 
