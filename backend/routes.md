@@ -184,7 +184,7 @@ GET /user/get_friends_list
 
 ### get nickname
 
-GET /user/get_nickname
+GET /user/get_pongUsername
 
 #### payload :
 
@@ -212,14 +212,14 @@ GET /user/get_nickname
 
 ### set nickname
 
-POST /user/set_nickname
+POST /user/set_pongUsername
 
 #### payload:
 
 ```
 {
 	"login42": "sophie",
-    "new_nickname":"sophie_new",
+    "new_pongUsername":"sophie_new",
 }
 ```
 
