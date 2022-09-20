@@ -57,8 +57,9 @@ export class ChatService {
   }
 
   async addMemberToChannel(userId: number, room: Room) {
-    console.log(userId);
+    console.log('userId', userId);
     const newMember = await this.userService.getById(userId);
+    console.log('newMember', newMember);
     // let nbMembers = room.members.length;
     // const newMember = await room.members
     // console.log(`Nb members before pushing: ${nbMembers}`);
