@@ -68,8 +68,8 @@ const NavBar: React.FC<DisconnectionButtonProps> = ({ setDisconnected }) => {
   // };
 
   return (
-    <div className="h-full">
-      <nav className="border-b-8 border-sky-600 text-white h-1/8">
+    <div className="h-screen">
+      <nav className="border-b-8 border-sky-600 text-white h-1/8 h-min">
         <ul className="flex p-6 uppercase bg-neutral-900">
           <li>
             <Link to="/" className="text-3xl font-bold ">
