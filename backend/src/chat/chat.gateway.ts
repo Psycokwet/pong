@@ -59,9 +59,12 @@ export class ChatGateway {
   async joinRoom(
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
   ) {
     const room = await this.chatService.getRoomById(roomId);
+    console.log(payload);
     client.join(room.roomName);
+    await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit('joinedRoom', {
       channelId: room.id,
       channelName: room.channelName,
