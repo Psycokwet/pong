@@ -17,7 +17,7 @@ export default function ConnectedUserList(
     <ul>
       {
         connectedUsers.map((user) =>
-          <li>{user.pongUsername}</li>
+          <li key={user.id}>{user.pongUsername}</li>
         )
       }
     </ul>
