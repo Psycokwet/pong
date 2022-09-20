@@ -6,13 +6,17 @@ import Stats from "./Stats/Stats";
 import { IoStarOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 
-export function ProfileName () {
+type ProfileNameProps = {
+	nickname?: string,
+}
+
+export const ProfileName:React.FC<ProfileNameProps> = ({nickname}) => {
 	return (
 		<div className="flex flex-row gap-8 self-center">
 			<UserPicture width="150px" />
 			<div className="self-center">
 				<Link to="/profile">
-					<h1 className="text-xl font-mono font-bold">Profile</h1>
+					<h1 className="text-xl font-mono font-bold">{nickname} </h1>
 				</Link>
 			</div>
 		</div>
@@ -44,11 +48,15 @@ function MatchHistory () {
 	)
 }
 
-function Profile () {
+type ProfileProps = {
+	nickname?: string,
+}
+
+const Profile:React.FC<ProfileProps> = ({nickname}) => {
 	return (
 		<div className="bg-black text-white h-screen flex grid grid-cols-10 grid-rows-6 gap-8">
 			<div className="col-start-2 col-span-3 row-start-2">
-				<ProfileName />
+				<ProfileName nickname={nickname}/>
 			</div>
 			<div className="row-start-2 row-span-3 col-start-6 col-span-3">
 				<MatchHistory />
