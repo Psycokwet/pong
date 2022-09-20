@@ -77,6 +77,7 @@ export class ChatService {
     console.log(room.members);
     if (
       !room.members.filter((member) => member.username === newMember.username)
+        .length
     )
       room.members = [...room.members, newMember];
 

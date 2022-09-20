@@ -84,20 +84,35 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('getUsersInChannel')
+  @SubscribeMessage('getConnectedUserListRequest')
   async getUsersInChannel(
     @MessageBody() roomId: number,
+    @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
     const room = await this.chatService.getRoomByIdWithRelations(roomId);
-    const caller = await this.userService.getById(payload.id);
+    const caller = await this.userService.getById(payload.userId);
     const usersList = room.members.filter(
       (member) => member.username != caller.username,
     );
 
-    return {
-      users: usersList.map((user) => user.username),
-    };
+    console.log(
+      payload,
+      'coucou',
+      caller,
+      usersList.map((user) => {
+        return { id: user.id, pongUsername: user.username };
+      }),
+    );
+    this.server.in(client.id).emit(
+      'connectedUserList',
+      usersList.map((user) => {
+        return { id: user.id, pongUsername: user.username };
+      }),
+    );
+    // return {
+    //   users: usersList.map((user) => user.username),
+    // };
   }
 
   @UseGuards(JwtWsGuard)
