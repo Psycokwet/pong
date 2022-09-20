@@ -66,16 +66,16 @@ function WebsSocketCdaiTest() {
   }, [socket]);
 
   const handleClick = (channelId: number) => {
-    socket?.emit("joinRoom", channelId);
+    socket?.emit("joinChannelRequest", channelId);
   }
   const handleJoinRoom = (message: ChannelData) => {
     console.log(message)
     setConnectedChannel(message)
   }
   useEffect(()=> {
-    socket?.on("joinedRoom", handleJoinRoom);
+    socket?.on("confirmChannelEntry", handleJoinRoom);
     return () => {
-      socket?.off("joinedRoom", handleJoinRoom);
+      socket?.off("confirmChannelEntry", handleJoinRoom);
     };
   }, [handleJoinRoom]);
   /** END JOIN CHANNEL */
