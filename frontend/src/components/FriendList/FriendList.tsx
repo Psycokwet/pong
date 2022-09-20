@@ -105,8 +105,8 @@ const subList = [
     status: userStatusEnum.Offline,
     color: "text-red-500",
     group_name: "Offline",
-    invite: sendMessage,
-    button_name: "Message",
+    // invite: sendMessage,
+    // button_name: "Message",
   },
 ];
 
