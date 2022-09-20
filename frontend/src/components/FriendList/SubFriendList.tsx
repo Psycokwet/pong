@@ -59,7 +59,7 @@ const SubFriendList: React.FC<SubFriendListProps> = ({
               <span className="row-span-2 py-2">{friend.nickname}</span>
               {group_button_name ? (
                 <button
-                  className={`row-span-2 rounded-xl bg-gray-600 hover:bg-gray-800`}
+                  className={`row-span-2 rounded-xl bg-gray-600 hover:bg-gray-800 ${color}`}
                   onClick={handle_click}
                 >
                 {group_button_name}
