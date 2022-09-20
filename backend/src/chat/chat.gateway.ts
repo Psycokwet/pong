@@ -21,14 +21,14 @@ export class ChatGateway {
   server: Server;
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('joinChannelLobby')
+  @SubscribeMessage('joinChannelLobbyRequest')
   async joinChannelLobby(@ConnectedSocket() client: Socket) {
     console.log(await this.chatService.getAllRooms());
     // return await this.chatService.getAllRooms();
     client.join('channelLobby');
     this.server
       .in('channelLobby')
-      .emit('allChannel', await this.chatService.getAllRooms());
+      .emit('listAllChannels', await this.chatService.getAllRooms());
   }
 
   @UseGuards(JwtWsGuard)
@@ -77,26 +77,26 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('disconnectFromChannel')
+  @SubscribeMessage('disconnectFromChannelRequest')
   async disconnectFromChannel(
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
   ) {
     const room = await this.chatService.getRoomById(roomId);
     client.leave(room.roomName);
-    this.server.in(client.id).emit('disconnectedFromChannel', {
+    this.server.in(client.id).emit('confirmChannelDisconnection', {
       channelId: room.id,
       channelName: room.channelName,
     });
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('send_message')
-  async listenForMessages(
+  @SubscribeMessage('sendMessage')
+  async messageListener(
     @MessageBody() data: { message: string; channelId: number },
   ) {
     const room = await this.chatService.getRoomById(data.channelId);
     if (room)
-      this.server.in(room.roomName).emit('receive_message', data.message);
+      this.server.in(room.roomName).emit('receiveMessage', data.message);
   }
 }

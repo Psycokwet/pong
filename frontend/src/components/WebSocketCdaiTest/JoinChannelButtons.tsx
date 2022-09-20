@@ -19,18 +19,18 @@ export default function JoinChannelButtons(
   }
   ) {
   const handleClick = (channelId: number) => {
-    socket?.emit("joinRoom", channelId);
+    socket?.emit("joinChannelRequest", channelId);
   }
-  const handleJoinRoom = (message: ChannelData) => {
+  const handleJoinChannel = (message: ChannelData) => {
     console.log(message)
     setConnectedChannel(message)
   }
   useEffect(()=> {
-    socket?.on("joinedRoom", handleJoinRoom);
+    socket?.on("confirmChannelEntry", handleJoinChannel);
     return () => {
-      socket?.off("joinedRoom", handleJoinRoom);
+      socket?.off("confirmChannelEntry", handleJoinChannel);
     };
-  }, [handleJoinRoom]);
+  }, [handleJoinChannel]);
 
   return (
     <div> 
