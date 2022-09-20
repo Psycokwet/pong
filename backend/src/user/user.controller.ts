@@ -9,6 +9,8 @@ import {
   UseInterceptors,
   UploadedFile,
   Body,
+  Param,
+  Query,
 } from '@nestjs/common';
 import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
@@ -30,7 +32,7 @@ export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('get_user_rank')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async get_user_rank(@Body() user: Omit<UserDto, 'password'>) {
     const user_rank = await this.usersService.get_user_rank(user);
 
@@ -38,7 +40,7 @@ export class UserController {
   }
 
   @Post('get_user_history')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async get_user_history(@Body() user: Omit<UserDto, 'password'>) {
     const userHistory = await this.usersService.get_user_history(user);
 
@@ -68,15 +70,15 @@ export class UserController {
   }
 
   @Post('add_friend')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async add_friend(@Body() friend: AddFriendDto) {
     await this.usersService.add_friend(friend);
   }
 
   @Get('get_friends_list')
   // @UseGuards(JwtAuthGuard)
-  async get_friends_list(@Body() friend: GetFriendsListDto) {
-    const friendList = await this.usersService.get_friends_list(friend);
+  async get_friends_list(@Query() dto: GetFriendsListDto) {
+    const friendList = await this.usersService.get_friends_list(dto);
 
     console.log(friendList);
 
@@ -94,7 +96,7 @@ export class UserController {
   }
 
   @Post('set_pongUsername')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async set_username(@Body() user: pongUsernameDto) {
     await this.usersService.set_pongUsername(user);
   }
