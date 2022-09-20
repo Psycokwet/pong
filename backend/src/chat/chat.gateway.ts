@@ -17,6 +17,8 @@ import { ChatService } from './chat.service';
 export class ChatGateway {
   constructor(private readonly chatService: ChatService) {}
 
+  private static connectedUserId: number[] = [];
+
   @WebSocketServer()
   server: Server;
 
@@ -74,12 +76,14 @@ export class ChatGateway {
     // console.log(data, client, client.id, this.server, this.server.id);
     // client.join(`${data}${client.id}`);
     // client.join('test');
+    ChatGateway.connectedUserId = [...ChatGateway.connectedUserId, payload.userId];
   }
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage('disconnectFromChannelRequest')
   async disconnectFromChannel(
     @MessageBody() roomId: number,
+    @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
     const room = await this.chatService.getRoomById(roomId);
@@ -88,6 +92,8 @@ export class ChatGateway {
       channelId: room.id,
       channelName: room.channelName,
     });
+
+    ChatGateway.connectedUserId = ChatGateway.connectedUserId.filter((id) => id !== payload.userId);
   }
 
   @UseGuards(JwtWsGuard)
