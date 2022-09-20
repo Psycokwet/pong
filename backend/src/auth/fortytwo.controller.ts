@@ -39,7 +39,7 @@ export class FortyTwoController {
   @Redirect('/', 302)
   async fortyTwoAuthRedirect(@Req() req: any, @Res() res: Response) {
     let userFromDb = await this.usersService.signin({
-      username: req.user.username,
+      username: req.user.user.username,
     });
 
     if (!userFromDb) {
