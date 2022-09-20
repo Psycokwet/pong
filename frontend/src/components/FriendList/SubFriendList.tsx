@@ -13,8 +13,8 @@ type SubFriendListProps = {
   group_status: userStatusEnum;
   color: string;
   group_name: string;
-  handle_click: React.MouseEventHandler<HTMLButtonElement>;
-  group_button_name: string;
+  handle_click?: React.MouseEventHandler<HTMLButtonElement>;
+  group_button_name?: string;
 };
 
 const SubFriendList: React.FC<SubFriendListProps> = ({
@@ -57,12 +57,15 @@ const SubFriendList: React.FC<SubFriendListProps> = ({
                 <img src={imageURL} alt="Avatar" className="w-10 rounded-3xl" />
               </div>
               <span className="row-span-2 py-2">{friend.nickname}</span>
-              <button
-                className={`row-span-2 rounded-xl bg-gray-600 hover:bg-gray-800`}
-                onClick={handle_click}
-              >
+              {group_button_name ? (
+                <button
+                  className={`row-span-2 rounded-xl bg-gray-600 hover:bg-gray-800`}
+                  onClick={handle_click}
+                >
                 {group_button_name}
-              </button>
+                </button>
+              ) : ("")
+              }
             </div>
           );
       })}
