@@ -44,7 +44,7 @@ function WebsSocketCdaiTest() {
 
   /** CREATE CHANNEL */
   const handleCreateRoom = (newChannelName: string) => {
-    socket?.emit("createChannel", newChannelName);
+    socket?.emit("createChannelRequest", newChannelName);
   };
   const roomCreationListener = (roomIdFromBack: ChannelData) => {
     console.log(roomIdFromBack);
