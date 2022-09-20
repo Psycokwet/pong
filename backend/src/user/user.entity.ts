@@ -2,12 +2,12 @@ import {
   BaseEntity,
   Entity,
   Column,
+  JoinColumn,
+  OneToOne,
   PrimaryGeneratedColumn,
   OneToMany,
   ManyToMany,
   JoinTable,
-  JoinColumn,
-  OneToOne,
 } from 'typeorm';
 import { Game } from 'src/game/game.entity';
 import { Friend } from 'src/friend_list/friend.entity';

@@ -56,20 +56,6 @@ export class UserController {
     return {
       nbGames,
       nbWins,
-      // games: userHistory.games
-      //   .map((game) => {
-      //     return {
-      //       time: game.createdAt.toString().slice(4, 24),
-      //       id: game.id,
-      //       player1: game.player1.username,
-      //       player2: game.player2.username,
-      //       winner:
-      //         game.winner === game.player1.id
-      //           ? game.player1.username
-      //           : game.player2.username,
-      //     };
-      //   })
-      //   .sort((a, b) => b.id - a.id),
       games: userHistory.games
         .map((game) => {
           return {

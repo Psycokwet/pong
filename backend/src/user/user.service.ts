@@ -178,7 +178,7 @@ export class UsersService {
     const player2 = await this.findOne(dto.player2);
     const winner = await this.findOne(dto.winner);
 
-    if (winner != player1 && winner != player2) {
+    if (winner.id !== player1.id && winner.id !== player2.id) {
       throw new BadRequestException({
         error: 'Winner has to either be player 1 or player 2',
       });
