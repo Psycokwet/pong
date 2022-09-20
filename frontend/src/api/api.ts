@@ -19,6 +19,8 @@ export enum URL {
   GET_PICTURE = "/user/get_picture",
   ADD_FRIEND = "/user/add_friend",
   GET_FRIEND_LIST = "/user/get_friends_list",
+  SET_NICKNAME = "/user/set_pongUsername",
+  GET_NICKNAME = "/user/get_pongUsername",
 }
 export enum HeadersFields {
   ContentType = "Content-Type",
@@ -130,20 +132,20 @@ export class Api {
 
   get_nickname(login42: string) {
     return fetch(
-      `${PREFIX}${URL.REFRESH_TOKEN}` + "?" + new URLSearchParams({ login42 }),
+      `${PREFIX}${URL.GET_NICKNAME}` + "?" + new URLSearchParams({ login42 }),
       {
         method: "GET",
         headers: this._headers,
       }
     );
   }
-  set_nickname(newNicknamePong: string) {
+  set_nickname(login42: string, new_pongUsername: string) {
     let headers = new Headers();
     headers.set(HeadersFields.ContentType, "application/json");
-    return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {
+    return fetch(`${PREFIX}${URL.SET_NICKNAME}`, {
       method: "POST",
       headers: headers,
-      body: JSON.stringify({ newNicknamePong }),
+      body: JSON.stringify({ login42, new_pongUsername }),
     });
   }
 }

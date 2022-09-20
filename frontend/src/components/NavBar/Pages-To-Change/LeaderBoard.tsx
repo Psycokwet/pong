@@ -17,10 +17,17 @@ const LeaderBoard = () => {
         console.log("get_friend_list", content);
       });
     });
-    api.set_nickname("pony").then((res: Response) => {
+    api.set_nickname("scarboni", "ponnnny").then((res: Response) => {
+      console.log(res.status / 200 >= 1 && res.status / 200 <= 2, res);
+      if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
+        res.json().then((content) => {
+          console.log("set_nickname", content);
+        });
+    });
+    api.get_nickname("scarboni").then((res: Response) => {
       console.log(res);
       res.json().then((content) => {
-        console.log("set_nickname", content);
+        console.log("get_nickname", content);
       });
     });
   };
