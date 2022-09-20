@@ -17,6 +17,7 @@ export enum URL {
   SIGNOUT = "/user/signout",
   SET_PICTURE = "/user/set_picture",
   GET_PICTURE = "/user/get_picture",
+  ADD_FRIEND = "/user/add_friend",
   GET_FRIEND_LIST = "/user/get_friends_list",
 }
 export enum HeadersFields {
@@ -29,58 +30,58 @@ export type Bearer = {
 };
 
 export class Api {
-  private static readonly header = new Headers();
+  // private static readonly header = new Headers();
 
-  static {
-    Api.header.append(HeadersFields.ContentType, "application/json");
-  }
+  // static {
+  //   Api.header.append(HeadersFields.ContentType, "application/json");
+  // }
 
   private readonly _headers = new Headers();
 
-  constructor() {}
+  // constructor() {}
 
-  setToken(token: string) {
-    this._headers.set(HeadersFields.Authorization, `Bearer ${token}`);
-  }
+  // setToken(token: string) {
+  //   this._headers.set(HeadersFields.Authorization, `Bearer ${token}`);
+  // }
 
-  private static async fetch(url: string, data: any): Promise<any> {
-    return fetch(url, { method: "POST", body: data, headers: this.header });
-  }
+  // private static async fetch(url: string, data: any): Promise<any> {
+  //   return fetch(url, { method: "POST", body: data, headers: this.header });
+  // }
 
-  private static fetchNoResponseBody(
-    url: string,
-    data: object,
-    onSuccess: OnSuccess,
-    onError: OnErrorFunction
-  ) {
-    const myVar = fetch(url, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: this.header,
-    })
-      .then((r) => {
-        if (r.status !== 201) {
-          r.json().then((d) => {
-            throw d;
-          });
-          return;
-        }
-        onSuccess();
-      })
-      .catch(onError);
-  }
+  // private static fetchNoResponseBody(
+  //   url: string,
+  //   data: object,
+  //   onSuccess: OnSuccess,
+  //   onError: OnErrorFunction
+  // ) {
+  //   const myVar = fetch(url, {
+  //     method: "POST",
+  //     body: JSON.stringify(data),
+  //     headers: this.header,
+  //   })
+  //     .then((r) => {
+  //       if (r.status !== 201) {
+  //         r.json().then((d) => {
+  //           throw d;
+  //         });
+  //         return;
+  //       }
+  //       onSuccess();
+  //     })
+  //     .catch(onError);
+  // }
 
   hello() {
     return fetch(`${PREFIX}${URL.HELLO}`, {
       method: "GET",
-      headers: this._headers,
+      // headers: this._headers,
     });
   }
 
   logout() {
     return fetch(`${PREFIX}${URL.LOGOUT}`, {
       method: "GET",
-      headers: this._headers,
+      // headers: this._headers,
     });
   }
   //cors not the way to go
@@ -95,20 +96,23 @@ export class Api {
   getPicture() {
     return fetch(`${PREFIX}${URL.GET_PICTURE}`, {
       method: "GET",
-      headers: this._headers,
+      // headers: this._headers,
     });
   }
 
   refreshToken() {
     return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {
       method: "GET",
-      headers: this._headers,
+      // headers: this._headers,
     });
   }
-  add_friend() {
-    return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {
-      method: "GET",
-      headers: this._headers,
+  add_friend(login42: string, friend_to_add: string) {
+    let headers = new Headers();
+    headers.set(HeadersFields.ContentType, "application/json");
+    return fetch(`${PREFIX}${URL.ADD_FRIEND}`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({ login42, friend_to_add }),
     });
   }
 
@@ -119,23 +123,27 @@ export class Api {
         new URLSearchParams({ login42 }),
       {
         method: "GET",
-        headers: this._headers,
+        // headers: this._headers,
       }
     );
   }
 
   get_nickname(login42: string) {
-    return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {
-      method: "GET",
-      headers: this._headers,
-      body: login42,
-    });
+    return fetch(
+      `${PREFIX}${URL.REFRESH_TOKEN}` + "?" + new URLSearchParams({ login42 }),
+      {
+        method: "GET",
+        headers: this._headers,
+      }
+    );
   }
   set_nickname(newNicknamePong: string) {
+    let headers = new Headers();
+    headers.set(HeadersFields.ContentType, "application/json");
     return fetch(`${PREFIX}${URL.REFRESH_TOKEN}`, {
       method: "POST",
-      headers: this._headers,
-      body: newNicknamePong,
+      headers: headers,
+      body: JSON.stringify({ newNicknamePong }),
     });
   }
 }

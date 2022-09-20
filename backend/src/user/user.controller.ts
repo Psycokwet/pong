@@ -70,7 +70,7 @@ export class UserController {
   }
 
   @Post('add_friend')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async add_friend(@Body() friend: AddFriendDto) {
     await this.usersService.add_friend(friend);
   }
@@ -91,7 +91,7 @@ export class UserController {
 
   @Get('get_pongUsername')
   // @UseGuards(JwtAuthGuard)
-  async get_username(@Body() user: UserDto) {
+  async get_username(@Query() user: UserDto) {
     return await this.usersService.get_pongUsername(user);
   }
 
