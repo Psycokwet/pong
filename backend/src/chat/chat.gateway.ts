@@ -32,7 +32,7 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('createRoom')
+  @SubscribeMessage('createChannel')
   async createRoom(
     @MessageBody() roomName: string,
     @ConnectedSocket() client: Socket,
@@ -48,7 +48,7 @@ export class ChatGateway {
 
     console.log('new room id: ', newRoom.id);
 
-    this.server.in('channelLobby').emit('createdRoom', {
+    this.server.in('channelLobby').emit('confirmChannelCreation', {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
     });
