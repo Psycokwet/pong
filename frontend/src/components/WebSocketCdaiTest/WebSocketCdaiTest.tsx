@@ -37,7 +37,7 @@ function WebsSocketCdaiTest() {
     return () => {
       socket?.off("connectedUserList", handleNewConnectedUserList);
     };
-  }, [handleNewConnectedUserList]);
+  }, [handleNewConnectedUserList, getConnectedUserList]);
   /** END CONNECTED USER LIST */
 
   /** MESSAGE */
@@ -69,7 +69,7 @@ function WebsSocketCdaiTest() {
   };
   const channelCreationListener = (confirmedConnectedChannel: ChannelData) => {
     console.log(confirmedConnectedChannel);
-    setConnectedChannel(confirmedConnectedChannel);
+    setAllChannel([...allChannel, confirmedConnectedChannel]);
   };
   useEffect(() => {
     socket?.on("confirmChannelCreation", channelCreationListener);
@@ -82,17 +82,17 @@ function WebsSocketCdaiTest() {
 
 
   /** JOIN CHANNEL */
-  
+
   const handleClick = (channelId: number) => {
     socket?.emit("joinChannelRequest", channelId);
-  }
+  };
   const handleJoinChannel = (message: ChannelData) => {
-    console.log(message)
-    setConnectedChannel(message)
-  }
-  useEffect(()=> {
+    console.log(message);
+    setConnectedChannel(message);
+    getConnectedUserList();
+  };
+  useEffect(() => {
     socket?.on("confirmChannelEntry", handleJoinChannel);
-    getConnectedUserList()
     return () => {
       socket?.off("confirmChannelEntry", handleJoinChannel);
     };
