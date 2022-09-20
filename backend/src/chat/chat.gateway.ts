@@ -55,7 +55,7 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('joinRoom')
+  @SubscribeMessage('joinChannelRequest')
   async joinRoom(
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
@@ -65,7 +65,7 @@ export class ChatGateway {
     console.log('payload', payload);
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
-    this.server.in(client.id).emit('joinedRoom', {
+    this.server.in(client.id).emit('confirmChannelEntry', {
       channelId: room.id,
       channelName: room.channelName,
     });
