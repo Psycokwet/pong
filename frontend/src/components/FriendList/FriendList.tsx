@@ -89,21 +89,21 @@ const sendMessage = () => {
 const subList = [
   {
     status: userStatusEnum.Online,
-    color: "green-400",
+    color: "text-green-400",
     group_name: "Online",
     invite: inviteToChallenge,
     button_name: "Challenge",
   },
   {
     status: userStatusEnum.Playing,
-    color: "yellow-400",
+    color: "text-yellow-400",
     group_name: "Playing",
     invite: watchStream,
     button_name: "Watch",
   },
   {
     status: userStatusEnum.Offline,
-    color: "red-500",
+    color: "text-red-500",
     group_name: "Offline",
     invite: sendMessage,
     button_name: "Message",
@@ -143,7 +143,7 @@ const FriendList = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Search a name"
-            className="text-gray-700 placeholder:text-gray-500 p-2 outline-none rounded-xl bg-sky-500"
+            className="text-gray-700 placeholder:text-gray-500 p-2 outline-none rounded-xl"
           />
         </div>
         <div>

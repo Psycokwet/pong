@@ -38,7 +38,7 @@ const SubFriendList: React.FC<SubFriendListProps> = ({
     <>
       <div className="flex items-center font-bold">
         <span className="px-2">
-          <BsCircleFill size="15" className={`text-${color}`} />
+          <BsCircleFill size="15" className={`${color}`} />
         </span>
         {group_name}
       </div>
@@ -58,7 +58,7 @@ const SubFriendList: React.FC<SubFriendListProps> = ({
               </div>
               <span className="row-span-2 py-2">{friend.nickname}</span>
               <button
-                className={`row-span-2 rounded-xl bg-gray-600 hover:bg-gray-800 text-${color}`}
+                className={`row-span-2 rounded-xl bg-gray-600 hover:bg-gray-800`}
                 onClick={handle_click}
               >
                 {group_button_name}
