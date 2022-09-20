@@ -1,19 +1,23 @@
+import { Api } from "../../api/api";
+import { FaSignOutAlt } from "react-icons/fa";
+
 type DisconnectionButtonProps = {
-  setConnected: CallableFunction;
+  setDisconnected: CallableFunction;
 };
 
-export const DisconnectionButton = ({ setConnected }: DisconnectionButtonProps) => {
+const api = new Api();
 
+export const DisconnectionButton = ({
+  setDisconnected,
+}: DisconnectionButtonProps) => {
   const handleClick = () => {
-    setConnected(false)
-    window.location.replace("http://localhost:8080/api/auth/42/logout");
-  }
+    api.logout().then(() => setDisconnected());
+  };
 
   return (
-    <div>
-      <button onClick={handleClick}>
-        Signout
-      </button>
-    </div>
+    <button onClick={handleClick}>
+      <FaSignOutAlt size="26" />
+      <span className="navbar-page-name uppercase group-hover:scale-100">Sign Out</span>
+    </button>
   );
-}
+};
