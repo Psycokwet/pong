@@ -44,16 +44,16 @@ function WebsSocketCdaiTest() {
 
   /** CREATE CHANNEL */
   const handleCreateRoom = (newChannelName: string) => {
-    socket?.emit("createRoom", newChannelName);
+    socket?.emit("createChannel", newChannelName);
   };
   const roomCreationListener = (roomIdFromBack: ChannelData) => {
     console.log(roomIdFromBack);
     setConnectedChannel(roomIdFromBack);
   };
   useEffect(() => {
-    socket?.on("createdRoom", roomCreationListener);
+    socket?.on("confirmChannelCreation", roomCreationListener);
     return () => {
-      socket?.off("createdRoom", roomCreationListener);
+      socket?.off("confirmChannelCreation", roomCreationListener);
     };
   }, [roomCreationListener]);
   /** END CREATE CHANNEL */
