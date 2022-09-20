@@ -2,13 +2,13 @@ import React from "react";
 import { Link, Route, Routes } from "react-router-dom";
 
 // Page Components
-import Home from "./Pages-To-Change/Home";
+import Home from "../Common/Home";
 import Play from "./Pages-To-Change/Play";
 import LeaderBoard from "./Pages-To-Change/LeaderBoard";
 import Community from "./Pages-To-Change/Community";
 import Profile from "../Profile/Profile";
 import Settings from "./Pages-To-Change/Settings";
-import NotFound from "./Pages-To-Change/NotFound";
+import NotFound from "../Common/NotFound";
 import APage from "./APage";
 
 // Icon
