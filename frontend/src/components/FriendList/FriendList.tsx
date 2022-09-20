@@ -1,10 +1,12 @@
 import React from "react";
 import { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 
 import { BiChevronDown } from "react-icons/bi";
 import { FaSearch } from "react-icons/fa";
 
 import SubFriendList from "./SubFriendList";
+import Profile from "../Profile/Profile";
 
 /***************** TYPE ***************************************/
 
@@ -23,49 +25,49 @@ const UserFriendList = [
     login: "scarboni",
     nickname: "scarboni",
     status: userStatusEnum.Online,
-    link_to_profile: "/scarboni",
+    link_to_profile: "/profile",
   },
   {
     login: "scarboni1",
     nickname: "scarboni1",
     status: userStatusEnum.Playing,
-    link_to_profile: "/scarboni1",
+    link_to_profile: "/profile",
   },
   {
     login: "cdai",
     nickname: "cdai",
     status: userStatusEnum.Offline,
-    link_to_profile: "/cdai",
+    link_to_profile: "/profile",
   },
   {
     login: "cdai1",
     nickname: "cdai1",
     status: userStatusEnum.Online,
-    link_to_profile: "/cdai1",
+    link_to_profile: "/profile",
   },
   {
     login: "nader",
     nickname: "nader",
     status: userStatusEnum.Playing,
-    link_to_profile: "/nader",
+    link_to_profile: "/profile",
   },
   {
     login: "nader1",
     nickname: "nader1",
     status: userStatusEnum.Offline,
-    link_to_profile: "/nader1",
+    link_to_profile: "/profile",
   },
   {
     login: "moot",
     nickname: "moot",
     status: userStatusEnum.Offline,
-    link_to_profile: "/moot",
+    link_to_profile: "/profile",
   },
   {
     login: "moot1",
     nickname: "moot1",
     status: userStatusEnum.Online,
-    link_to_profile: "/moot1",
+    link_to_profile: "/profile",
   },
 ];
 
@@ -162,6 +164,18 @@ const FriendList = () => {
             );
           })}
         </div>
+
+        <Routes>
+          {UserFriendList.map((one_friend) => {
+            return (
+              <Route
+                key={one_friend.login}
+                path={one_friend.link_to_profile}
+                element={<Profile nickname={one_friend.nickname} />}
+              />
+            );
+          })}
+        </Routes>
       </div>
     </div>
   );
