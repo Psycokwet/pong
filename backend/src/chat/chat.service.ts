@@ -40,6 +40,15 @@ export class ChatService {
     return this.roomsRepository.findOneBy({ id });
   }
 
+  public async getRoomByIdWithRelations(id: number) {
+    return this.roomsRepository.findOne({
+      where: { id },
+      relations: {
+        members: true,
+      },
+    });
+  }
+
   async saveRoom(roomName: string, clientId: string, userId: number) {
     console.log('saveRoom', roomName);
     const user = await this.userService.getById(userId);
@@ -51,9 +60,11 @@ export class ChatService {
       owner: user,
       members: [user],
     });
+
     console.log('create');
 
-    return newRoom.save();
+    await newRoom.save();
+    return newRoom;
   }
 
   async addMemberToChannel(userId: number, room: Room) {
@@ -64,8 +75,15 @@ export class ChatService {
     // const newMember = await room.members
     // console.log(`Nb members before pushing: ${nbMembers}`);
     console.log(room.members);
-    // room.members.push(newMember);
-    room.members = [newMember];
+    if (
+      !room.members.filter((member) => member.username === newMember.username)
+    )
+      room.members = [...room.members, newMember];
+
+    console.log(room.members);
+    // if (!room.members) room.members = [newMember];
+    // else room.members.push(newMember);
+    // room.members = [newMember];
     const nbMembers = room.members.length;
     console.log(`Nb members after pushing: ${nbMembers}`);
     room.save();
