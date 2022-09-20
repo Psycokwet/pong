@@ -49,10 +49,25 @@ export class ChatService {
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: roomName,
       owner: user,
+      members: [user],
     });
     console.log('create');
 
     return newRoom.save();
+  }
+
+  async addMemberToChannel(userId: number, room: Room) {
+    console.log(userId);
+    const newMember = await this.userService.getById(userId);
+    // let nbMembers = room.members.length;
+    // const newMember = await room.members
+    // console.log(`Nb members before pushing: ${nbMembers}`);
+    console.log(room.members);
+    // room.members.push(newMember);
+    room.members = [newMember];
+    const nbMembers = room.members.length;
+    console.log(`Nb members after pushing: ${nbMembers}`);
+    room.save();
   }
 
   async saveMessage(content: string, author: User) {
