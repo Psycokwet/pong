@@ -87,26 +87,21 @@ export class ChatGateway {
   @SubscribeMessage('getConnectedUserListRequest')
   async getUsersInChannel(
     @MessageBody() roomId: number,
-    @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
     const room = await this.chatService.getRoomByIdWithRelations(roomId);
     const caller = await this.userService.getById(payload.userId);
-    const usersList = room.members.filter(
-      (member) => member.username != caller.username,
-    );
-
-    console.log(
-      payload,
-      'coucou',
-      caller,
-      usersList.map((user) => {
-        return { id: user.id, pongUsername: user.username };
-      }),
-    );
-    this.server.in(client.id).emit(
+    // console.log(
+    //   payload,
+    //   'coucou',
+    //   caller,
+    //   usersList.map((user) => {
+    //     return { id: user.id, pongUsername: user.username };
+    //   }),
+    // );
+    this.server.in(room.roomName).emit(
       'connectedUserList',
-      usersList.map((user) => {
+      room.members.map((user) => {
         return { id: user.id, pongUsername: user.username };
       }),
     );
