@@ -8,19 +8,22 @@ import { Loading } from "./Common/Loading";
 enum connectionStatusEnum {
   Unknown,
   Connected,
-  Disconnected
+  Disconnected,
 }
 const api = new Api();
 function App() {
-  const [connectedState, setConnectedState] = useState(connectionStatusEnum.Unknown);
-
+  const [connectedState, setConnectedState] = useState(
+    connectionStatusEnum.Unknown
+  );
+  useEffect(() => {
+    api.test({ poney: "wpet" });
+  }, []);
   useEffect(() => {
     if (connectedState == connectionStatusEnum.Unknown) {
       api.refreshToken().then((res) => {
         if (res.status !== 200) {
           setConnectedState(connectionStatusEnum.Disconnected);
-        }
-        else {
+        } else {
           setConnectedState(connectionStatusEnum.Connected);
         }
       });
@@ -29,13 +32,16 @@ function App() {
 
   return connectedState == connectionStatusEnum.Unknown ? (
     <Loading></Loading>
-  ) : (connectedState == connectionStatusEnum.Connected ? (
+  ) : connectedState == connectionStatusEnum.Connected ? (
     <div>
-      <NavBar setDisconnected={() => setConnectedState(connectionStatusEnum.Disconnected)}/>
+      <NavBar
+        setDisconnected={() =>
+          setConnectedState(connectionStatusEnum.Disconnected)
+        }
+      />
     </div>
   ) : (
     <LoginPage />
-  )
   );
 }
 

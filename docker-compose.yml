@@ -20,6 +20,7 @@ services:
       dockerfile: Dockerfile.local
     volumes: 
       - "./frontend/src:/usr/src/app/src"
+      - "./backend/src:/usr/src/app/src_backend"
     environment:
       - VITE_CONTEXT=DEV
       # - VITE_CONTEXT=MOCKUP
