@@ -32,7 +32,7 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('createChannel')
+  @SubscribeMessage('createChannelRequest')
   async createRoom(
     @MessageBody() roomName: string,
     @ConnectedSocket() client: Socket,
