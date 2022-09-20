@@ -46,7 +46,7 @@ export class ChatGateway {
 
     await client.join(newRoom.roomName);
 
-    console.log(newRoom.id);
+    console.log('new room id: ', newRoom.id);
 
     this.server.in('channelLobby').emit('createdRoom', {
       channelId: newRoom.id,
@@ -62,7 +62,7 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     const room = await this.chatService.getRoomById(roomId);
-    console.log(payload);
+    console.log('payload', payload);
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit('joinedRoom', {
