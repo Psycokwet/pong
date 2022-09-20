@@ -10,9 +10,7 @@ export default function CreateChannel({
   const [channelName, setChannelName] = useState<string>("");
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.code == 'Enter') {
-      handleCreateChannel(channelName)
-    }
+    if (e.code == 'Enter') handleCreateChannel(channelName)
   }
 
   return (
