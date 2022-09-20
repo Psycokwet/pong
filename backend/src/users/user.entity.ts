@@ -7,6 +7,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { Game } from 'src/game/game.entity';
 import { Exclude } from 'class-transformer';
@@ -46,4 +47,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Room, (Room) => Room.owner)
   public rooms: Room[];
+
+  @ManyToMany(() => Room, (room) => room.members)
+  public channels: Room[];
 }

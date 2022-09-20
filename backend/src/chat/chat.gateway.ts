@@ -9,13 +9,18 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
+import { UsersService } from 'src/users/users.service';
+
 @WebSocketGateway({
   // namespace: '/chat',
   transport: ['websocket'],
   cors: '*/*',
 })
 export class ChatGateway {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private userService: UsersService,
+  ) {}
 
   @WebSocketServer()
   server: Server;
@@ -46,7 +51,7 @@ export class ChatGateway {
 
     await client.join(newRoom.roomName);
 
-    console.log('new room id: ', newRoom.id);
+    console.log('new room id: ', newRoom);
 
     this.server.in('channelLobby').emit('createdRoom', {
       channelId: newRoom.id,
@@ -61,10 +66,12 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomById(roomId);
-    console.log('payload', payload);
+    // const room = await this.chatService.getRoomById(roomId);
+    const room = await this.chatService.getRoomByIdWithRelations(roomId);
+
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
+
     this.server.in(client.id).emit('joinedRoom', {
       channelId: room.id,
       channelName: room.channelName,
@@ -74,6 +81,23 @@ export class ChatGateway {
     // console.log(data, client, client.id, this.server, this.server.id);
     // client.join(`${data}${client.id}`);
     // client.join('test');
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage('getUsersInChannel')
+  async getUsersInChannel(
+    @MessageBody() roomId: number,
+    @UserPayload() payload: any,
+  ) {
+    const room = await this.chatService.getRoomByIdWithRelations(roomId);
+    const caller = await this.userService.getById(payload.id);
+    const usersList = room.members.filter(
+      (member) => member.username != caller.username,
+    );
+
+    return {
+      users: usersList.map((user) => user.username),
+    };
   }
 
   @UseGuards(JwtWsGuard)
