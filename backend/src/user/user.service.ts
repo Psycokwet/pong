@@ -64,14 +64,12 @@ export class UsersService {
   }
 
   async signup(dto: UserDto) {
-    console.log(dto);
     // database operation
     const user = User.create({
       login42: dto.login42,
       email: dto.email,
     });
 
-    user.user_rank = 1;
     try {
       return await user.save();
     } catch (e) {
@@ -86,7 +84,6 @@ export class UsersService {
   }
 
   async signin(dto: Omit<UserDto, 'email'>) {
-    console.log(dto);
     return await this.findOne(dto.login42);
   }
 
@@ -128,7 +125,7 @@ export class UsersService {
     });
   }
 
-  async get_user_rank(dto: Omit<UserDto, 'password'>) {
+  async getUserRank(dto: Omit<UserDto, 'password'>) {
     const user = await this.findOne(dto.login42);
 
     if (user) return { rank: user.user_rank };
@@ -143,7 +140,7 @@ export class UsersService {
     );
   }
 
-  async get_user_history(dto: Omit<UserDto, 'password'>) {
+  async getUserHistory(dto: Omit<UserDto, 'password'>) {
     /*  Get calling user's object */
     const user = await this.usersRepository.findOne({
       where: { login42: dto.login42 },
@@ -175,11 +172,10 @@ export class UsersService {
     };
   }
 
-  async add_friend(dto: AddFriendDto) {
+  async addFriend(dto: AddFriendDto, login42: string) {
     /* First we get the caller (person who is initiating the friend request) 
     and friend in our db */
-    const caller = await this.findOne(dto.login42);
-
+    const caller = await this.findOne(login42);
     const friend = await this.findOne(dto.friend_to_add);
 
     /* Checking if the caller is adding himself (I think this should never 
@@ -215,9 +211,9 @@ export class UsersService {
     await addFriend.save();
   }
 
-  async get_friends_list(dto: GetFriendsListDto) {
-    /* Same logic as get_user_history */
-    const user = await this.findOne(dto.login42);
+  async getFriendsList(login42: string) {
+    /* Same logic as getUserHistory */
+    const user = await this.findOne(login42);
 
     const friendsList = await this.friendRepository.find({
       relations: {
@@ -229,24 +225,21 @@ export class UsersService {
     return friendsList;
   }
 
-  async get_pongUsername(dto: UserDto) {
-    const user = await this.findOne(dto.login42);
+  async getPongUsername(login42: string) {
+    const user = await this.findOne(login42);
     return { pongUsername: this.getFrontUsername(user) };
   }
 
-  async set_pongUsername(dto: pongUsernameDto) {
-    const user = await this.findOne(dto.login42);
+  async setPongUsername(dto: pongUsernameDto, login42: string) {
+    const user = await this.findOne(login42);
 
-    /* We use TypeORM's query builder to update our entity */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(user)
-      .set({ pongUsername: dto.new_pongUsername })
-      .where({ id: user.id })
-      .execute();
+    /* We use TypeORM's update function to update our entity */
+    await this.usersRepository.update(user.id, {
+      pongUsername: dto.newPongUsername,
+    });
   }
 
-  async get_picture(dto: User) {
+  async getPicture(dto: User) {
     const user = await this.usersRepository.findOne({
       where: { login42: dto.login42 },
       relations: { picture: true },
@@ -260,10 +253,10 @@ export class UsersService {
     return user.picture.path;
   }
 
-  async set_picture(user: User, fileData: LocalFileDto) {
+  async setPicture(user: User, fileData: LocalFileDto) {
     // delete old file
     try {
-      const old_file_path = await this.get_picture(user);
+      const old_file_path = await this.getPicture(user);
       this.localFilesService.delete_file(old_file_path);
     } catch (e) {
       this.logger.error('No existing picture file');

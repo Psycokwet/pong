@@ -34,16 +34,16 @@ export class UserController {
 
   @Get(ROUTES_BASE.USER.GET_USER_RANK)
   @UseGuards(JwtAuthGuard)
-  async get_user_rank(@Body() user: Omit<UserDto, 'password'>) {
-    const user_rank = await this.usersService.get_user_rank(user);
+  async getUserRank(@Body() user: Omit<UserDto, 'password'>) {
+    const user_rank = await this.usersService.getUserRank(user);
 
     return user_rank;
   }
 
   @Post(ROUTES_BASE.USER.GET_USER_HISTORY)
   @UseGuards(JwtAuthGuard)
-  async get_user_history(@Body() user: Omit<UserDto, 'password'>) {
-    const userHistory = await this.usersService.get_user_history(user);
+  async getUserHistory(@Body() user: Omit<UserDto, 'password'>) {
+    const userHistory = await this.usersService.getUserHistory(user);
 
     if (!userHistory) return {};
 
@@ -71,17 +71,15 @@ export class UserController {
   }
 
   @Post('add_friend')
-  // @UseGuards(JwtAuthGuard)
-  async add_friend(@Body() friend: AddFriendDto) {
-    await this.usersService.add_friend(friend);
+  @UseGuards(JwtAuthGuard)
+  async addFriend(@Body() friend: AddFriendDto, @Request() req) {
+    await this.usersService.addFriend(friend, req.user.login42);
   }
 
   @Get('get_friends_list')
-  // @UseGuards(JwtAuthGuard)
-  async get_friends_list(@Query() dto: GetFriendsListDto) {
-    const friendList = await this.usersService.get_friends_list(dto);
-
-    console.log(friendList);
+  @UseGuards(JwtAuthGuard)
+  async getFriendsList(@Request() req) {
+    const friendList = await this.usersService.getFriendsList(req.user.login42);
 
     return friendList.map((friend) => {
       return {
@@ -90,21 +88,24 @@ export class UserController {
     });
   }
 
-  @Get('get_pongUsername')
-  // @UseGuards(JwtAuthGuard)
-  async get_username(@Query() dto: Omit<UserDto, 'email'>) {
-    return await this.usersService.get_pongUsername(dto);
+  @Get('get_pong_username')
+  @UseGuards(JwtAuthGuard)
+  async getPongUsername(@Request() req) {
+    return await this.usersService.getPongUsername(req.user.login42);
   }
 
-  @Post('set_pongUsername')
-  // @UseGuards(JwtAuthGuard)
-  async set_username(@Body() user: pongUsernameDto) {
-    await this.usersService.set_pongUsername(user);
+  @Post('set_pong_username')
+  @UseGuards(JwtAuthGuard)
+  async setPongUsername(
+    @Body() newPongUsername: pongUsernameDto,
+    @Request() req,
+  ) {
+    await this.usersService.setPongUsername(newPongUsername, req.user.login42);
   }
   @Get(ROUTES_BASE.USER.GET_PICTURE)
   @UseGuards(JwtAuthGuard)
-  async get_picture(@Request() req): Promise<StreamableFile> {
-    const picture_path = await this.usersService.get_picture(req.user);
+  async getPicture(@Request() req): Promise<StreamableFile> {
+    const picture_path = await this.usersService.getPicture(req.user);
 
     // https://docs.nestjs.com/techniques/streaming-files
     const file = createReadStream(join(process.cwd(), `${picture_path}`));
@@ -120,8 +121,7 @@ export class UserController {
     }),
   )
   async uploadFile(@Request() req, @UploadedFile() file: Express.Multer.File) {
-    console.log(req.user);
-    return this.usersService.set_picture(req.user, {
+    return this.usersService.setPicture(req.user, {
       path: file.path,
       filename: file.originalname,
       mimetype: file.mimetype,
