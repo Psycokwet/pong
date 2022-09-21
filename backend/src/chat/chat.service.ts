@@ -27,7 +27,6 @@ export class ChatService {
   public async getAllRooms() {
     return this.roomsRepository.find().then((rooms) =>
       rooms.map((room) => {
-        // delete room.roomName;
         return {
           channelId: room.id,
           channelName: room.channelName,
