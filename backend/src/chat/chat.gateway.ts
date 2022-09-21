@@ -61,7 +61,7 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomById(roomId);
+    const room = await this.chatService.getRoomByIdWithRelations(roomId);
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit('confirmChannelEntry', {
@@ -78,23 +78,13 @@ export class ChatGateway {
   ) {
     const room = await this.chatService.getRoomByIdWithRelations(roomId);
     const caller = await this.userService.getById(payload.userId);
-    // console.log(
-    //   payload,
-    //   'coucou',
-    //   caller,
-    //   usersList.map((user) => {
-    //     return { id: user.id, pongUsername: user.username };
-    //   }),
-    // );
+
     this.server.in(room.roomName).emit(
       'connectedUserList',
       room.members.map((user) => {
         return { id: user.id, pongUsername: user.username };
       }),
     );
-    // return {
-    //   users: usersList.map((user) => user.username),
-    // };
   }
 
   @UseGuards(JwtWsGuard)
