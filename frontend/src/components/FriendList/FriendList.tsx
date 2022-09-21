@@ -122,6 +122,7 @@ const FriendList = () => {
   };
   
   return (
+    <div>
     <div className="absolute top-[120px] right-0 text-white bg-gray-900">
       
       <div
@@ -140,7 +141,7 @@ const FriendList = () => {
       >
         <DropDownFriendList subListInfo={subList} profile_data={UserFriendList}/>
       </div>
-
+</div>
       {/* ************************ Router ************************* */}
       <Routes>
         {UserFriendList.map((one_friend) => {
