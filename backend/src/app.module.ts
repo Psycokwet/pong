@@ -5,12 +5,13 @@ import { AppService } from './app.service';
 import { User } from './user/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 
 import Message from './chat/message.entity';
 import { ChatModule } from './chat/chat.module';
 import { Game } from './game/game.entity';
+import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { Game } from './game/game.entity';
       entities: [User, Game],
     }),
     TypeOrmModule.forFeature([Message]),
+    TwoFactorAuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
