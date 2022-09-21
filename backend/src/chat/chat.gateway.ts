@@ -65,7 +65,9 @@ export class ChatGateway {
       channelId: room.id,
       channelName: room.channelName,
     });
-    ChatGateway.connectedUserId = [...ChatGateway.connectedUserId, payload.userId];
+    if (!ChatGateway.connectedUserId.includes(payload.userId))
+      ChatGateway.connectedUserId = [...ChatGateway.connectedUserId, payload.userId];
+    this.server.in(room.roomName).emit('updateConnectedUsers', ChatGateway.connectedUserId);
   }
 
   @UseGuards(JwtWsGuard)
@@ -83,6 +85,7 @@ export class ChatGateway {
     });
 
     ChatGateway.connectedUserId = ChatGateway.connectedUserId.filter((id) => id !== payload.userId);
+    this.server.in(room.roomName).emit('updateConnectedUsers', ChatGateway.connectedUserId);
   }
 
   @UseGuards(JwtWsGuard)
