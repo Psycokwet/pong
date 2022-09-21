@@ -3,16 +3,11 @@ import {
   Logger,
   Get,
   Req,
-  Res,
   UseGuards,
   Injectable,
   Redirect,
-  Post,
-  HttpCode,
 } from '@nestjs/common';
-import { Response } from 'express';
 import { FortyTwoGuard } from 'src/auth/fortytwo.guard';
-import { Profile } from 'passport-42';
 import { UsersService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -40,16 +35,16 @@ export class FortyTwoController {
   @Get(ROUTES_BASE.AUTH.REDIRECT)
   @UseGuards(FortyTwoGuard)
   @Redirect('/', 302)
-  async fortyTwoAuthRedirect(@Req() req: any, @Res() res: Response) {
+  async fortyTwoAuthRedirect(@Req() req: any) {
     let userFromDb;
     try {
       userFromDb = await this.usersService.signin({
-        login42: req.user.user.login42,
+        login42: req.user.profile.username,
       });
     } catch (e) {
       userFromDb = await this.usersService.signup({
-        login42: req.user.user.login42,
-        email: req.user.user.email,
+        login42: req.user.profile.username,
+        email: req.user.profile.email,
       });
     }
 
