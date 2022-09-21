@@ -9,15 +9,12 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
-import { ChatRoom } from 'shared/interfaces/ChatRoom';
 @WebSocketGateway({
   transport: ['websocket'],
   cors: '*/*',
 })
 export class ChatGateway {
   constructor(private readonly chatService: ChatService) {}
-
-  private static chatRoomList: ChatRoom[] = [];
 
   @WebSocketServer()
   server: Server;
@@ -51,12 +48,8 @@ export class ChatGateway {
       channelName: newRoom.channelName,
     });
     
-    const newChatRoom = new ChatRoom();
-    newChatRoom.roomName = newRoom.roomName;
-    newChatRoom.userIdList = [payload.userId];
-    
-    ChatGateway.chatRoomList = [...ChatGateway.chatRoomList, newChatRoom];
-    this.server.in(newRoom.roomName).emit('updateConnectedUsers', newChatRoom.userIdList);
+    const connectedUserIdList: number[] = this.chatService.updateUserConnectedToRooms(newRoom.roomName, payload.userId);
+    this.server.in(newRoom.roomName).emit('updateConnectedUsers', connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)
@@ -74,22 +67,8 @@ export class ChatGateway {
       channelName: room.channelName,
     });
 
-    let chatRoomIndex = ChatGateway.chatRoomList.findIndex((chatRoom) => chatRoom.roomName == room.roomName);
-    if (chatRoomIndex === -1) {
-      const newChatRoom = new ChatRoom();
-      newChatRoom.roomName = room.roomName;
-      newChatRoom.userIdList = [payload.userId];
-      
-      ChatGateway.chatRoomList = [...ChatGateway.chatRoomList, newChatRoom];
-      chatRoomIndex = ChatGateway.chatRoomList.findIndex((chatRoom) => chatRoom.roomName == room.roomName);
-    }
-    else if (!ChatGateway.chatRoomList[chatRoomIndex].userIdList.includes(payload.userId)) {
-      ChatGateway.chatRoomList[chatRoomIndex].userIdList = [
-        ...ChatGateway.chatRoomList[chatRoomIndex].userIdList,
-        payload.userId
-      ];
-    }
-    this.server.in(room.roomName).emit('updateConnectedUsers', ChatGateway.chatRoomList[chatRoomIndex].userIdList);
+    const connectedUserIdList: number[] = this.chatService.updateUserConnectedToRooms(room.roomName, payload.userId);
+    this.server.in(room.roomName).emit('updateConnectedUsers', connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)
@@ -106,18 +85,10 @@ export class ChatGateway {
       channelName: room.channelName,
     });
 
-    const chatRoomIndex = ChatGateway.chatRoomList.findIndex((chatRoom) => chatRoom.roomName == room.roomName);
-    if (ChatGateway.chatRoomList[chatRoomIndex].userIdList.includes(payload.userId))
-    {
-      ChatGateway.chatRoomList[chatRoomIndex].userIdList = 
-        ChatGateway
-          .chatRoomList[chatRoomIndex]
-          .userIdList
-          .filter((id) => id !== payload.userId);
-    }
+    const connectedUserIdList: number[] = this.chatService.removeUserConnectedToRooms(room.roomName, payload.userId);
     this.server.in(room.roomName).emit(
       'updateConnectedUsers',
-      ChatGateway.chatRoomList[chatRoomIndex].userIdList
+      connectedUserIdList,
     );
   }
 
