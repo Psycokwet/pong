@@ -54,4 +54,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Room, (Room) => Room.owner)
   public rooms: Room[];
+
+  @Column({
+    nullable: false,
+  })
+  public is_2fa_activated: boolean;
 }

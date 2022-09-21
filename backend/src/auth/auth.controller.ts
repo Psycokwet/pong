@@ -20,4 +20,23 @@ export class AuthController {
     request.res.setHeader('Set-Cookie', accessTokenCookie);
     return request.user;
   }
+  @UseGuards(JwtRefreshGuard)
+  @Get(ROUTES_BASE.AUTH.TURN_ON_2FA)
+  turn_on_2FA(@Req() request: RequestWithUser) {
+    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+      request.user.id,
+    );
+
+    request.res.setHeader('Set-Cookie', accessTokenCookie);
+    return request.user;
+  }
+  @Get(ROUTES_BASE.AUTH.TURN_OFF_2FA)
+  turn_off_2FA(@Req() request: RequestWithUser) {
+    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+      request.user.id,
+    );
+
+    request.res.setHeader('Set-Cookie', accessTokenCookie);
+    return request.user;
+  }
 }

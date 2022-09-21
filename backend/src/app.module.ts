@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 import { User } from './user/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
-import { Friend } from './friend_list/friend.entity';
 import * as Joi from '@hapi/joi';
 import { AuthModule } from './auth/auth.module';
 
