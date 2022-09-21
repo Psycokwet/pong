@@ -68,7 +68,6 @@ function WebsSocketCdaiTest() {
     socket?.emit("createChannelRequest", newChannelName);
   };
   const channelCreationListener = (confirmedConnectedChannel: ChannelData) => {
-    console.log(confirmedConnectedChannel);
     setAllChannel([...allChannel, confirmedConnectedChannel]);
   };
   useEffect(() => {
@@ -87,7 +86,6 @@ function WebsSocketCdaiTest() {
     socket?.emit("joinChannelRequest", channelId);
   };
   const handleJoinChannel = (message: ChannelData) => {
-    console.log(message);
     setConnectedChannel(message);
     getConnectedUserList();
   };
@@ -106,7 +104,6 @@ function WebsSocketCdaiTest() {
     socket?.emit("joinChannelLobbyRequest");
   }, [socket]);
   const getAllChannel = (message: []) => {
-    console.log(message)
     setAllChannel(message);
   };
   useEffect(() => {
