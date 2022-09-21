@@ -23,22 +23,19 @@ function WebsSocketCdaiTest() {
   const [messages, setMessages] = useState<string[]>([]);
   const [connectedChannel, setConnectedChannel] = useState<ChannelData | undefined>(undefined);
   const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
-  const [connectedUsers, setConnectedUsers] = useState<User[]>([]);
+  const [channelAttachedUserList, setChannelAttachedUserList] = useState<User[]>([]);
 
-  /** CONNECTED USER LIST */
-  const getConnectedUserList = () => {
-    socket?.emit("getConnectedUserListRequest");
-  };
-  const handleNewConnectedUserList = (newConnectedUserList: User[]) => {
-    setConnectedUsers(newConnectedUserList);
+  /** CHANNEL ATTACHED USER LIST */
+  const handleChannelAttachedUserList = (channelAttachedUserList: User[]) => {
+    setChannelAttachedUserList(channelAttachedUserList);
   };
   useEffect(() => {
-    socket?.on("connectedUserList", handleNewConnectedUserList);
+    socket?.on("updateChannelAttachedUserList", handleChannelAttachedUserList);
     return () => {
-      socket?.off("connectedUserList", handleNewConnectedUserList);
+      socket?.off("updateChannelAttachedUserList", handleChannelAttachedUserList);
     };
-  }, [handleNewConnectedUserList, getConnectedUserList]);
-  /** END CONNECTED USER LIST */
+  }, [handleChannelAttachedUserList]);
+  /** END CHANNEL ATTACHED USER LIST */
 
   /** MESSAGE */
   const send = (message: string) => {
@@ -87,14 +84,13 @@ function WebsSocketCdaiTest() {
   };
   const handleJoinChannel = (message: ChannelData) => {
     setConnectedChannel(message);
-    getConnectedUserList();
   };
   useEffect(() => {
     socket?.on("confirmChannelEntry", handleJoinChannel);
     return () => {
       socket?.off("confirmChannelEntry", handleJoinChannel);
     };
-  }, [handleJoinChannel, getConnectedUserList]);
+  }, [handleJoinChannel]);
   /** END JOIN CHANNEL */
   
   
@@ -124,6 +120,7 @@ function WebsSocketCdaiTest() {
   }
   const handleDisconnect = () => {
     setConnectedChannel(undefined);
+    setChannelAttachedUserList([]);
   };
   useEffect(() => {
     socket?.on("confirmChannelDisconnection", handleDisconnect);
@@ -160,7 +157,7 @@ function WebsSocketCdaiTest() {
             channelName={connectedChannel.channelName}
             sendDisconnect={sendDisconnect}
           />
-          <ConnectedUserList connectedUsers={connectedUsers} />
+          <ChannelAttachedUsers channelAttachedUserList={channelAttachedUserList} />
           <MessageInput send={send} />
           <Messages messages={messages} />
         </>

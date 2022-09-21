@@ -5,18 +5,18 @@ interface User {
   pongUsername: string;
 }
 
-export default function ConnectedUserList(
+export default function ChannelAttachedUsers(
   {
-    connectedUsers,
+    channelAttachedUserList,
   }:
   {
-    connectedUsers: User[],
+    channelAttachedUserList: User[],
   }
   ) {
   return (
     <ul>
       {
-        connectedUsers.map((user) =>
+        channelAttachedUserList.map((user) =>
           <li key={user.id}>{user.pongUsername}</li>
         )
       }
