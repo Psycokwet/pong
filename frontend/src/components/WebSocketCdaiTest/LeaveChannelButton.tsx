@@ -1,8 +1,4 @@
-import { Socket } from "socket.io-client";
-interface ChannelData {
-  channelName: string;
-  channelId: number;
-}
+import ChannelData from "../../../shared/interface/ChannelData";
 
 export default function LeaveChannelButton(
   {

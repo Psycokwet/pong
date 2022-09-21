@@ -1,36 +1,15 @@
-import { useEffect } from 'react'
-import { Socket } from "socket.io-client";
-
-interface ChannelData {
-  channelName: string;
-  channelId: number;
-}
+import ChannelData from "../../../shared/interface/ChannelData";
 
 export default function JoinChannelButtons(
   {
-    socket,
     allChannel,
-    setConnectedChannel,
+    handleClick,
   }:
   {
-    socket: Socket | undefined,
     allChannel: ChannelData[],
-    setConnectedChannel: any,
+    handleClick: any,
   }
   ) {
-  const handleClick = (channelId: number) => {
-    socket?.emit("joinChannelRequest", channelId);
-  }
-  const handleJoinChannel = (message: ChannelData) => {
-    console.log(message)
-    setConnectedChannel(message)
-  }
-  useEffect(()=> {
-    socket?.on("confirmChannelEntry", handleJoinChannel);
-    return () => {
-      socket?.off("confirmChannelEntry", handleJoinChannel);
-    };
-  }, [handleJoinChannel]);
 
   return (
     <div> 

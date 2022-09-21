@@ -9,27 +9,32 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
+
+import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
+
 @WebSocketGateway({
   transport: ['websocket'],
   cors: '*/*',
 })
 export class ChatGateway {
   constructor(private readonly chatService: ChatService) {}
+  private channelLobby = 'channelLobby';
 
   @WebSocketServer()
   server: Server;
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('joinChannelLobbyRequest')
+  // @SubscribeMessage('joinChannelLobbyRequest')
+  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
   async joinChannelLobby(@ConnectedSocket() client: Socket) {
-    client.join('channelLobby');
+    client.join(this.channelLobby);
     this.server
-      .in('channelLobby')
-      .emit('listAllChannels', await this.chatService.getAllRooms());
+      .in(this.channelLobby)
+      .emit(ROUTES_BASE.CHAT.LIST_ALL_CHANNELS, await this.chatService.getAllRooms());
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('createChannelRequest')
+  @SubscribeMessage(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST)
   async createRoom(
     @MessageBody() roomName: string,
     @ConnectedSocket() client: Socket,
@@ -43,14 +48,14 @@ export class ChatGateway {
 
     await client.join(newRoom.roomName);
 
-    this.server.in('channelLobby').emit('confirmChannelCreation', {
+    this.server.in(this.channelLobby).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
     });
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('joinChannelRequest')
+  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNE_REQUEST)
   async joinRoom(
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
@@ -59,33 +64,33 @@ export class ChatGateway {
     const room = await this.chatService.getRoomById(roomId);
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
-    this.server.in(client.id).emit('confirmChannelEntry', {
+    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, {
       channelId: room.id,
       channelName: room.channelName,
     });
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('disconnectFromChannelRequest')
+  @SubscribeMessage(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST)
   async disconnectFromChannel(
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
   ) {
     const room = await this.chatService.getRoomById(roomId);
     client.leave(room.roomName);
-    this.server.in(client.id).emit('confirmChannelDisconnection', {
+    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, {
       channelId: room.id,
       channelName: room.channelName,
     });
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('sendMessage')
+  @SubscribeMessage(ROUTES_BASE.CHAT.SEND_MESSAGE)
   async messageListener(
     @MessageBody() data: { message: string; channelId: number },
   ) {
     const room = await this.chatService.getRoomById(data.channelId);
     if (room)
-      this.server.in(room.roomName).emit('receiveMessage', data.message);
+      this.server.in(room.roomName).emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, data.message);
   }
 }
