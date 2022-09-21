@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import NavBar from "./NavBar/NavBar";
 import FriendList from "./FriendList/FriendList";
 
+import Loading from "./Common/Loading";
 import { Api } from "../api/api";
-import { Loading } from "./Common/Loading";
 enum connectionStatusEnum {
   Unknown,
   Connected,
@@ -19,14 +19,31 @@ function App() {
 
   useEffect(() => {
     if (connectedState == connectionStatusEnum.Unknown) {
-      api.refreshToken().then((res) => {
+      api.refreshToken().then((res: Response) => {
         if (res.status !== 200) {
+          console.log(res);
           setConnectedState(connectionStatusEnum.Disconnected);
         } else {
           setConnectedState(connectionStatusEnum.Connected);
         }
       });
     }
+    const interval = setInterval(() => {
+      setConnectedState(() => {
+        api.refreshToken().then((res) => {
+          if (res.status !== 200) {
+            console.log(res);
+            return connectionStatusEnum.Disconnected;
+          } else {
+            return connectionStatusEnum.Connected;
+          }
+        });
+      });
+    }, 600_000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [connectedState]);
 
   return connectedState == connectionStatusEnum.Unknown ? (
