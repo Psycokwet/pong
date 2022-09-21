@@ -24,14 +24,15 @@ import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
+import { ROUTES_BASE } from 'shared/routes';
 
-@Controller('/user/')
+@Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
   constructor(private readonly usersService: UsersService) {}
 
-  @Get('get_user_rank')
+  @Get(ROUTES_BASE.USER.GET_USER_RANK)
   @UseGuards(JwtAuthGuard)
   async get_user_rank(@Body() user: Omit<UserDto, 'password'>) {
     const user_rank = await this.usersService.get_user_rank(user);
@@ -39,7 +40,7 @@ export class UserController {
     return user_rank;
   }
 
-  @Post('get_user_history')
+  @Post(ROUTES_BASE.USER.GET_USER_HISTORY)
   @UseGuards(JwtAuthGuard)
   async get_user_history(@Body() user: Omit<UserDto, 'password'>) {
     const userHistory = await this.usersService.get_user_history(user);
@@ -100,7 +101,7 @@ export class UserController {
   async set_username(@Body() user: pongUsernameDto) {
     await this.usersService.set_pongUsername(user);
   }
-  @Get('get_picture')
+  @Get(ROUTES_BASE.USER.GET_PICTURE)
   @UseGuards(JwtAuthGuard)
   async get_picture(@Request() req): Promise<StreamableFile> {
     const picture_path = await this.usersService.get_picture(req.user);
@@ -110,7 +111,7 @@ export class UserController {
     return new StreamableFile(file);
   }
 
-  @Post('set_picture')
+  @Post(ROUTES_BASE.USER.SET_PICTURE)
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     LocalFilesInterceptor({

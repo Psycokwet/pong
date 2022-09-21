@@ -1,4 +1,5 @@
 import {
+  CanActivate,
   createParamDecorator,
   ExecutionContext,
   Injectable,
@@ -9,7 +10,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class WsGuard extends AuthGuard('jwt') {
+export class JwtWsGuard extends AuthGuard('jwt') implements CanActivate {
   constructor(private jwtService: JwtService) {
     super();
   }
@@ -18,9 +19,13 @@ export class WsGuard extends AuthGuard('jwt') {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToWs().getClient();
-    const bearerToken = req.handshake.headers.authorization;
+    const authToken = req.handshake.headers.cookie
+      .split('; ')
+      .map((elem) => elem.split('='))
+      .find(elem => elem[0] === 'Authentication')[1];
+
     try {
-      req.user = this.jwtService.verify(bearerToken, {
+      req.user = this.jwtService.verify(authToken, {
         secret: jwtConstants.JWT_ACCESS_TOKEN_SECRET,
       });
     } catch (e: unknown) {
@@ -35,13 +40,13 @@ export class WsGuard extends AuthGuard('jwt') {
 
 export const UserPayload = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToWs().getClient();
-    return request.user;
-  },
-);
+    const jwtService = new JwtService;
+    const authToken = ctx.switchToWs().getClient()
+      .handshake.headers.cookie
+      .split('; ')
+      .map((elem) => elem.split('='))
+      .find(elem => elem[0] === 'Authentication')[1]
 
-export const DataPayload = createParamDecorator(
-  (data: unknown, ctx: ExecutionContext) => {
-    return ctx.switchToWs().getData();
+    return jwtService.decode(authToken);
   },
 );
