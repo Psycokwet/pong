@@ -226,6 +226,19 @@ export class UsersService {
     return friendsList;
   }
 
+  async get2fa(login42: string) {
+    const user = await this.findOne(login42);
+
+    return user.is_2fa_activated;
+  }
+  async set2fa(login42: string, value: boolean) {
+    const user = await this.findOne(login42);
+
+    /* We use TypeORM's update function to update our entity */
+    await this.usersRepository.update(user.id, {
+      is_2fa_activated: value,
+    });
+  }
   async getPongUsername(login42: string) {
     const user = await this.findOne(login42);
     return { pongUsername: this.getFrontUsername(user) };

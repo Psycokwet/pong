@@ -12,7 +12,7 @@ const LeaderBoard = () => {
         });
     });
     api.get_friend_list("scarboni").then((res: Response) => {
-      console.log("get_friend_list",res);
+      console.log("get_friend_list", res);
       res.json().then((content) => {
         console.log("get_friend_list", content);
       });
@@ -39,6 +39,45 @@ const LeaderBoard = () => {
         onClick={sendRequest}
       >
         send request
+      </button>
+      <button
+        className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
+        onClick={() => {
+          api.turn_off_2fa().then((res: Response) => {
+            console.log("turn_off_2fa", res);
+            res.json().then((content) => {
+              console.log("turn_off_2fa", content);
+            });
+          });
+        }}
+      >
+        turn off 2fa
+      </button>
+      <button
+        className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
+        onClick={() => {
+          api.turn_on_2fa().then((res: Response) => {
+            console.log("turn_on_2fa", res);
+            res.json().then((content) => {
+              console.log("turn_on_2fa", content);
+            });
+          });
+        }}
+      >
+        turn on 2fa
+      </button>
+      <button
+        className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
+        onClick={() => {
+          api.get_2fa().then((res: Response) => {
+            console.log("get_2fa", res);
+            res.json().then((content) => {
+              console.log("get_2fa", content);
+            });
+          });
+        }}
+      >
+        get 2fa
       </button>
     </>
   );
