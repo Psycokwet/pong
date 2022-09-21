@@ -6,10 +6,12 @@ import { User } from './user/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
 import { Friend } from './friend_list/friend.entity';
-import { Game } from './game/game.entity';
 import * as Joi from '@hapi/joi';
-
 import { AuthModule } from './auth/auth.module';
+
+import Message from './chat/message.entity';
+import { ChatModule } from './chat/chat.module';
+import { Game } from './game/game.entity';
 import LocalFile from './localFiles/localFile.entity';
 
 @Module({
@@ -24,8 +26,10 @@ import LocalFile from './localFiles/localFile.entity';
     }),
     FortyTwoModule,
     AuthModule,
+    ChatModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
+      // host: 'localhost',
       host: 'database',
       port: 5432,
       username: 'postgres',
@@ -35,6 +39,7 @@ import LocalFile from './localFiles/localFile.entity';
       synchronize: true, // to disable in prod
       entities: [User, Game, LocalFile],
     }),
+    TypeOrmModule.forFeature([Message]),
   ],
   controllers: [AppController],
   providers: [AppService],
