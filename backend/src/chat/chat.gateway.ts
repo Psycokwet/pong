@@ -9,6 +9,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
+import { ChatRoom } from 'shared/interfaces/ChatRoom';
 @WebSocketGateway({
   transport: ['websocket'],
   cors: '*/*',
@@ -16,7 +17,7 @@ import { ChatService } from './chat.service';
 export class ChatGateway {
   constructor(private readonly chatService: ChatService) {}
 
-  private static connectedUserId: number[] = [];
+  private static chatRoomList: ChatRoom[] = [];
 
   @WebSocketServer()
   server: Server;
@@ -49,6 +50,13 @@ export class ChatGateway {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
     });
+    
+    const newChatRoom = new ChatRoom();
+    newChatRoom.roomName = newRoom.roomName;
+    newChatRoom.userIdList = [payload.userId];
+    
+    ChatGateway.chatRoomList = [...ChatGateway.chatRoomList, newChatRoom];
+    this.server.in(newRoom.roomName).emit('updateConnectedUsers', newChatRoom.userIdList);
   }
 
   @UseGuards(JwtWsGuard)
@@ -65,9 +73,10 @@ export class ChatGateway {
       channelId: room.id,
       channelName: room.channelName,
     });
-    if (!ChatGateway.connectedUserId.includes(payload.userId))
-      ChatGateway.connectedUserId = [...ChatGateway.connectedUserId, payload.userId];
-    this.server.in(room.roomName).emit('updateConnectedUsers', ChatGateway.connectedUserId);
+
+    // if (!ChatGateway.connectedUserId.includes(payload.userId))
+    //   ChatGateway.connectedUserId = [...ChatGateway.connectedUserId, payload.userId];
+    // this.server.in(room.roomName).emit('updateConnectedUsers', ChatGateway.connectedUserId);
   }
 
   @UseGuards(JwtWsGuard)
@@ -84,8 +93,8 @@ export class ChatGateway {
       channelName: room.channelName,
     });
 
-    ChatGateway.connectedUserId = ChatGateway.connectedUserId.filter((id) => id !== payload.userId);
-    this.server.in(room.roomName).emit('updateConnectedUsers', ChatGateway.connectedUserId);
+    // ChatGateway.connectedUserId = ChatGateway.connectedUserId.filter((id) => id !== payload.userId);
+    // this.server.in(room.roomName).emit('updateConnectedUsers', ChatGateway.connectedUserId);
   }
 
   @UseGuards(JwtWsGuard)
