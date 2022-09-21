@@ -17,7 +17,7 @@ const LeaderBoard = () => {
         console.log("get_friend_list", content);
       });
     });
-    api.set_nickname("scarboni", "ponnnny").then((res: Response) => {
+    api.set_nickname("ponnnny").then((res: Response) => {
       console.log("set_nickname", res);
       if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
         res.json().then((content) => {
