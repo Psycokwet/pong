@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import io, { Socket } from "socket.io-client";
+import ConnectedUsers from "./ConnectedUsers";
 import CreateChannel from "./CreateChannel";
 import JoinChannelButtons from "./JoinChannelButtons";
 import LeaveChannelButton from "./LeaveChannelButton";
@@ -17,6 +18,7 @@ function WebsSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
   const [messages, setMessages] = useState<string[]>([]);
   const [connectedChannel, setConnectedChannel] = useState<ChannelData | undefined>(undefined);
+  const [connectedUserIdList, setConnectedUserIdList] = useState<number[]>([]);
   const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
 
   /** MESSAGE */
@@ -115,7 +117,17 @@ function WebsSocketCdaiTest() {
   /** DISCONNECT CHANNEL */
 
 
-
+  /** CONNECTED USER LIST */
+  const handleUpdateConnectedUserIdList = (newConnectedUserIdList: number[]) => {
+    setConnectedUserIdList(newConnectedUserIdList);
+  };
+  useEffect(() => {
+    socket?.on("updateConnectedUsers", handleUpdateConnectedUserIdList);
+    return () => {
+      socket?.off("updateConnectedUsers", handleUpdateConnectedUserIdList);
+    };
+  }, [handleUpdateConnectedUserIdList]);
+  /** END CONNECTED USER LIST */
 
 
   
@@ -135,12 +147,19 @@ function WebsSocketCdaiTest() {
         </>
         :
         <>
+          <ConnectedUsers connectedUserIdList={connectedUserIdList} />
+          <br />
+
           <h4>Channel Id: {connectedChannel?.channelId}</h4>
           <h4>Channel Name: {connectedChannel?.channelName}</h4>
+          <br />
+
           <LeaveChannelButton
             channelName={connectedChannel.channelName}
             sendDisconnect={sendDisconnect}
           />
+          <br />
+          
           <MessageInput send={send} />
           <Messages messages={messages} />
         </>
