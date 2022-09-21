@@ -5,10 +5,10 @@ import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
-import { DbOptions, FindOptionsRelations, Repository } from 'typeorm';
-import { User } from 'src/users/user.entity';
+import { FindOptionsRelations, Repository } from 'typeorm';
+import { User } from 'src/user/user.entity';
 import Room from './room.entity';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -61,8 +61,11 @@ export class ChatService {
     const newMember = await this.userService.getById(userId);
     console.log(room.members);
     if (
-      !room.members.filter((member) => member.username === newMember.username)
-        .length
+      !room.members.filter(
+        (member) =>
+          this.userService.getFrontUsername(member) ===
+          this.userService.getFrontUsername(newMember),
+      ).length
     )
       room.members = [...room.members, newMember];
 

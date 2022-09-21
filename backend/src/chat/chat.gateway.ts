@@ -9,7 +9,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/user/user.service';
 @WebSocketGateway({
   transport: ['websocket'],
   cors: '*/*',
@@ -79,7 +79,7 @@ export class ChatGateway {
       room.messages.map((message) => {
         return {
           id: message.id,
-          author: message.author.username,
+          author: this.userService.getFrontUsername(message.author),
           time: message.createdAt,
           content: message.content,
         };
@@ -101,13 +101,16 @@ export class ChatGateway {
     this.server.in(room.roomName).emit(
       'connectedUserList',
       room.members.map((user) => {
-        return { id: user.id, pongUsername: user.username };
+        return {
+          id: user.id,
+          pongUsername: this.userService.getFrontUsername(user),
+        };
       }),
     );
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('disconnectFromChannel')
+  @SubscribeMessage('disconnectFromChannelRequest')
   async disconnectFromChannel(
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
@@ -142,7 +145,12 @@ export class ChatGateway {
     );
 
     if (room)
-      this.server.in(room.roomName).emit('receiveMessage', data.message);
+      this.server.in(room.roomName).emit('receiveMessage', {
+        id: newMessage.id,
+        author: this.userService.getFrontUsername(newMessage.author),
+        time: newMessage.createdAt,
+        content: newMessage.content,
+      });
     // const newMessage = await this.chatService.saveMessage(
     //   data.message,
     //   author,
