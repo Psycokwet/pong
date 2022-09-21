@@ -11,11 +11,18 @@ interface ChannelData {
   channelName: string;
   channelId: number;
 }
+
+interface Message {
+  id: number;
+  author: string,
+  time: Date,
+  content: string,
+}
  
 
 function WebsSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [connectedChannel, setConnectedChannel] = useState<ChannelData | undefined>(undefined);
   const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
 
@@ -31,8 +38,8 @@ function WebsSocketCdaiTest() {
     setSocket(newSocket);
   }, [setSocket]);
 
-  const messageListener = (message: string) => {
-    setMessages((current: string[]) => [...current, message]);
+  const messageListener = (message: Message) => {
+    setMessages((current: Message[]) => [...current, message]);
   };
   useEffect(() => {
     socket?.on("receiveMessage", messageListener);
@@ -40,6 +47,20 @@ function WebsSocketCdaiTest() {
       socket?.off("receiveMessage", messageListener);
     };
   }, [messageListener]);
+
+
+
+
+  const handleMessageHistory = (messageHistory: Message[]) => {
+    setMessages(messageHistory);
+  };
+  useEffect(() => {
+    socket?.on("messageHistory", handleMessageHistory);
+    return () => {
+      socket?.off("messageHistory", handleMessageHistory);
+    };
+  }, [messageListener]);
+
   /** END MESSAGE */
 
   /** CREATE CHANNEL */
@@ -105,6 +126,7 @@ function WebsSocketCdaiTest() {
   }
   const handleDisconnect = () => {
     setConnectedChannel(undefined);
+    setMessages([]);
   };
   useEffect(() => {
     socket?.on("confirmChannelDisconnection", handleDisconnect);
