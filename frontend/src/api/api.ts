@@ -1,4 +1,4 @@
-import { FULL_ROUTE } from "../../shared/routes";
+import { FULL_ROUTE } from "../../shared/httpsRoutes/routes";
 
 export const PREFIX =
   import.meta.env.VITE_CONTEXT == "MOCKUP"
