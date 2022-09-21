@@ -12,6 +12,7 @@ import {
 import { Game } from 'src/game/game.entity';
 import { Exclude } from 'class-transformer';
 import Room from 'src/chat/room.entity';
+import Message from 'src/chat/message.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -32,6 +33,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Game, (game) => game.player2)
   games_player2!: Game[];
+
   @JoinColumn({ name: 'pictureId' })
   @OneToOne(() => LocalFile, { nullable: true })
   public picture?: LocalFile;
@@ -50,4 +52,7 @@ export class User extends BaseEntity {
 
   @ManyToMany(() => Room, (room) => room.members)
   public channels: Room[];
+
+  @OneToMany(() => Message, (message) => message.author)
+  public messages: Message[];
 }

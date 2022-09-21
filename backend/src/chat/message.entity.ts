@@ -1,4 +1,10 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from 'src/users/user.entity';
 import Room from './room.entity';
 
@@ -16,8 +22,11 @@ class Message {
   @ManyToOne(() => Room)
   public room: Room;
 
-  @CreateDateColumn()
-  createdDate: Date;
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  createdAt: Date;
 }
 
 export default Message;

@@ -40,11 +40,20 @@ export class ChatService {
     return this.roomsRepository.findOneBy({ id });
   }
 
-  public async getRoomByIdWithRelations(id: number) {
+  public async getRoomByIdWithMembers(id: number) {
     return this.roomsRepository.findOne({
       where: { id },
       relations: {
         members: true,
+      },
+    });
+  }
+
+  public async getRoomByIdWithMessages(id: number) {
+    return this.roomsRepository.findOne({
+      where: { id },
+      relations: {
+        messages: true,
       },
     });
   }
@@ -64,12 +73,7 @@ export class ChatService {
   }
 
   async addMemberToChannel(userId: number, room: Room) {
-    console.log('userId', userId);
     const newMember = await this.userService.getById(userId);
-    console.log('newMember', newMember);
-    // let nbMembers = room.members.length;
-    // const newMember = await room.members
-    // console.log(`Nb members before pushing: ${nbMembers}`);
     console.log(room.members);
     if (
       !room.members.filter((member) => member.username === newMember.username)
@@ -77,19 +81,14 @@ export class ChatService {
     )
       room.members = [...room.members, newMember];
 
-    console.log(room.members);
-    // if (!room.members) room.members = [newMember];
-    // else room.members.push(newMember);
-    // room.members = [newMember];
-    const nbMembers = room.members.length;
-    console.log(`Nb members after pushing: ${nbMembers}`);
     room.save();
   }
 
-  async saveMessage(content: string, author: User) {
+  async saveMessage(content: string, author: User, channel: Room) {
     const newMessage = await this.messagesRepository.create({
-      content,
-      author,
+      content: content,
+      author: author,
+      room: channel,
     });
     await this.messagesRepository.save(newMessage);
     return newMessage;
