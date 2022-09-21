@@ -61,7 +61,6 @@ function WebsSocketCdaiTest() {
 
 
   /** JOIN CHANNEL */
-  
   const handleClick = (channelId: number) => {
     socket?.emit("joinChannelRequest", channelId);
   }
@@ -93,6 +92,16 @@ function WebsSocketCdaiTest() {
       socket?.off("listAllChannels", getAllChannel);
     };
   }, [getAllChannel]);
+  // handle new channel creation
+  const handleNewChannelCreation = (newChannel: any) => {
+    setAllChannel((current) => [...current, newChannel]);
+  };
+  useEffect(() => {
+    socket?.on("newChannelCreated", handleNewChannelCreation);
+    return () => {
+      socket?.off("newChannelCreated", handleNewChannelCreation);
+    };
+  }, [handleNewChannelCreation]);
   /** END GET ALL CHANNEL */
 
 
