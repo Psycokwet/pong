@@ -5,27 +5,27 @@ const api = new Api();
 const LeaderBoard = () => {
   const sendRequest = () => {
     api.add_friend("scarboni", "bob").then((res: Response) => {
-      console.log(res);
+      console.log("add_friend", res);
       if (res.status != 200)
         res.json().then((content) => {
           console.log("add_friend", content);
         });
     });
     api.get_friend_list("scarboni").then((res: Response) => {
-      console.log(res);
+      console.log("get_friend_list",res);
       res.json().then((content) => {
         console.log("get_friend_list", content);
       });
     });
     api.set_nickname("scarboni", "ponnnny").then((res: Response) => {
-      console.log(res.status / 200 >= 1 && res.status / 200 <= 2, res);
+      console.log("set_nickname", res);
       if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
         res.json().then((content) => {
           console.log("set_nickname", content);
         });
     });
     api.get_nickname("scarboni").then((res: Response) => {
-      console.log(res);
+      console.log("get_nickname", res);
       res.json().then((content) => {
         console.log("get_nickname", content);
       });

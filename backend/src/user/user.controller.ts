@@ -70,13 +70,13 @@ export class UserController {
     };
   }
 
-  @Post('add_friend')
+  @Post(ROUTES_BASE.USER.ADD_FRIEND)//'add_friend')
   @UseGuards(JwtAuthGuard)
   async addFriend(@Body() friend: AddFriendDto, @Request() req) {
     await this.usersService.addFriend(friend, req.user.login42);
   }
 
-  @Get('get_friends_list')
+  @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)//'get_friends_list')
   @UseGuards(JwtAuthGuard)
   async getFriendsList(@Request() req) {
     const friendList = await this.usersService.getFriendsList(req.user.login42);
@@ -88,13 +88,13 @@ export class UserController {
     });
   }
 
-  @Get('get_pong_username')
+  @Get(ROUTES_BASE.USER.GET_NICKNAME)//'get_pong_username')
   @UseGuards(JwtAuthGuard)
   async getPongUsername(@Request() req) {
     return await this.usersService.getPongUsername(req.user.login42);
   }
 
-  @Post('set_pong_username')
+  @Post(ROUTES_BASE.USER.SET_NICKNAME)//'set_pong_username')
   @UseGuards(JwtAuthGuard)
   async setPongUsername(
     @Body() newPongUsername: pongUsernameDto,
