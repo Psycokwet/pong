@@ -14,7 +14,6 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
 
   async validate(accessToken: string, refreshToken: string, profile: Profile) {
     // Here a custom User object is returned. In the the repo I'm using a UsersService with repository pattern, learn more here: https://docs.nestjs.com/techniques/database
-    console.log(profile.username);
     return {
       user: {
         provider: '42',
