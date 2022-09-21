@@ -2,31 +2,29 @@ import { KeyboardEvent, useState } from "react";
 import { Socket } from "socket.io-client";
 
 export default function CreateChannel({
-  handleCreateRoom,
+  handleCreateChannel,
 } : {
-  handleCreateRoom: (newChannelName: string) => void 
+  handleCreateChannel: (newChannelName: string) => void 
 })
 {
-  const [tempRoomName, setTempRoomName] = useState<string>("");
+  const [channelName, setChannelName] = useState<string>("");
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.code == 'Enter') {
-      handleCreateRoom(tempRoomName)
-    }
+    if (e.code == 'Enter') handleCreateChannel(channelName)
   }
 
   return (
     <div>
       <input
         type="text"
-        placeholder="Room's name"
-        value={tempRoomName}
+        placeholder="Channel's name"
+        value={channelName}
         onChange={(e) => {
-          setTempRoomName(e.target.value);
+          setChannelName(e.target.value);
         }}
         onKeyDown={handleKeyDown}
       ></input>
-      <button onClick={() => handleCreateRoom(tempRoomName)}>Create room</button>
+      <button onClick={() => handleCreateChannel(channelName)}>Create channel</button>
     </div>
   );
 }

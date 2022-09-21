@@ -20,12 +20,29 @@ function App() {
     if (connectedState == connectionStatusEnum.Unknown) {
       api.refreshToken().then((res) => {
         if (res.status !== 200) {
+          console.log(res);
           setConnectedState(connectionStatusEnum.Disconnected);
         } else {
           setConnectedState(connectionStatusEnum.Connected);
         }
       });
     }
+    const interval = setInterval(() => {
+      setConnectedState(() => {
+        api.refreshToken().then((res) => {
+          if (res.status !== 200) {
+            console.log(res);
+            return connectionStatusEnum.Disconnected;
+          } else {
+            return connectionStatusEnum.Connected;
+          }
+        });
+      });
+    }, 600_000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [connectedState]);
 
   return connectedState == connectionStatusEnum.Unknown ? (
