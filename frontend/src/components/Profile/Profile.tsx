@@ -5,7 +5,7 @@ import Stats from "./Stats/Stats";
 import { IoStarOutline } from "react-icons/io5";
 import { Link, useParams } from "react-router-dom";
 import { PictureForm } from "../PictureForm/PictureForm";
-import ProfileName from "./ProfileName"
+import ProfileName from "./ProfileName";
 
 function MatchHistory() {
   return (
@@ -32,8 +32,8 @@ function MatchHistory() {
   );
 }
 
-export const Profile = () => {
-  const {user_login} = useParams();
+const Profile = () => {
+  const { user_login } = useParams();
 
   return (
     <div className="bg-black text-white h-screen flex grid grid-cols-10 grid-rows-6 gap-8">
@@ -67,5 +67,6 @@ export const Profile = () => {
       <PictureForm></PictureForm>
     </div>
   );
-}
+};
 
+export default Profile;
