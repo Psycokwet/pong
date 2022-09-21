@@ -13,7 +13,7 @@ import {
 import { Response } from 'express';
 import { FortyTwoGuard } from 'src/auth/fortytwo.guard';
 import { Profile } from 'passport-42';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import RequestWithUser from './requestWithUser.interface';
@@ -40,13 +40,14 @@ export class FortyTwoController {
   @UseGuards(FortyTwoGuard)
   @Redirect('/', 302)
   async fortyTwoAuthRedirect(@Req() req: any, @Res() res: Response) {
-    let userFromDb = await this.usersService.signin({
-      username: req.user.user.username,
-    });
-
-    if (!userFromDb) {
+    let userFromDb;
+    try {
+      userFromDb = await this.usersService.signin({
+        login42: req.user.user.login42,
+      });
+    } catch (e) {
       userFromDb = await this.usersService.signup({
-        username: req.user.user.username,
+        login42: req.user.user.login42,
         email: req.user.user.email,
       });
     }

@@ -9,6 +9,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Game } from 'src/game/game.entity';
+import { Friend } from 'src/friend_list/friend.entity';
 import { Exclude } from 'class-transformer';
 import Room from 'src/chat/room.entity';
 
@@ -18,7 +19,10 @@ export class User extends BaseEntity {
   id: number;
 
   @Column({ length: 128, unique: true })
-  username: string;
+  login42: string;
+
+  @Column({ nullable: true })
+  pongUsername: string;
 
   @Column({ length: 128, unique: true })
   email: string;
@@ -31,6 +35,10 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Game, (game) => game.player2)
   games_player2!: Game[];
+
+  @OneToMany(() => Friend, (friend) => friend.user)
+  friends!: Friend[];
+
   @JoinColumn({ name: 'pictureId' })
   @OneToOne(() => LocalFile, { nullable: true })
   public picture?: LocalFile;
