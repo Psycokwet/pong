@@ -10,7 +10,6 @@ import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
 import { UsersService } from 'src/users/users.service';
-
 @WebSocketGateway({
   transport: ['websocket'],
   cors: '*/*',
@@ -18,7 +17,7 @@ import { UsersService } from 'src/users/users.service';
 export class ChatGateway {
   constructor(
     private readonly chatService: ChatService,
-    private userService: UsersService,
+    private readonly userService: UsersService,
   ) {}
 
   @WebSocketServer()
@@ -61,13 +60,31 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomByIdWithMembers(roomId);
+    // const room = await this.chatService.getRoomByIdWithMembers(roomId);
+    const room = await this.chatService.getRoomsById(roomId, {
+      members: true,
+      messages: {
+        author: true,
+      },
+    });
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit('confirmChannelEntry', {
       channelId: room.id,
       channelName: room.channelName,
     });
+
+    this.server.in(client.id).emit(
+      'messageHistory',
+      room.messages.map((message) => {
+        return {
+          id: message.id,
+          author: message.author.username,
+          time: message.createdAt,
+          content: message.content,
+        };
+      }),
+    );
     //await this.getMessageHistoryInChannel();
   }
 
@@ -77,8 +94,9 @@ export class ChatGateway {
     @MessageBody() roomId: number,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomByIdWithMembers(roomId);
-    const caller = await this.userService.getById(payload.userId);
+    const room = await this.chatService.getRoomsById(roomId, {
+      members: true,
+    });
 
     this.server.in(room.roomName).emit(
       'connectedUserList',
@@ -94,7 +112,7 @@ export class ChatGateway {
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
   ) {
-    const room = await this.chatService.getRoomById(roomId);
+    const room = await this.chatService.getRoomsById(roomId);
     client.leave(room.roomName);
     this.server.in(client.id).emit('confirmChannelDisconnection', {
       channelId: room.id,
@@ -108,7 +126,9 @@ export class ChatGateway {
     @MessageBody() data: { message: string; channelId: number },
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomByIdWithMessages(data.channelId);
+    const room = await this.chatService.getRoomsById(data.channelId, {
+      messages: true,
+    });
     //const author = await this.userService.getById(payload.userId);
     const author = await this.userService.getUserByIdWithMessages(
       payload.userId,
@@ -133,21 +153,21 @@ export class ChatGateway {
     console.log('author.messages', author.messages);
   }
 
-  @UseGuards(JwtWsGuard)
-  @SubscribeMessage('getMessageHistoryInChannel')
-  async getMessageHistoryInChannel(@MessageBody() roomId: number) {
-    const room = await this.chatService.getRoomByIdWithMessages(roomId);
+  // @UseGuards(JwtWsGuard)
+  // @SubscribeMessage('getMessageHistoryInChannel')
+  // async getMessageHistoryInChannel(@MessageBody() roomId: number) {
+  //   const room = await this.chatService.getRoomByIdWithMessages(roomId);
 
-    this.server.in(room.roomName).emit(
-      'messageHistory',
-      room.messages.map((message) => {
-        return {
-          id: message.id,
-          author: message.author.username,
-          time: message.createdAt,
-          content: message.content,
-        };
-      }),
-    );
-  }
+  //   this.server.in(room.roomName).emit(
+  //     'messageHistory',
+  //     room.messages.map((message) => {
+  //       return {
+  //         id: message.id,
+  //         author: message.author.username,
+  //         time: message.createdAt,
+  //         content: message.content,
+  //       };
+  //     }),
+  //   );
+  // }
 }
