@@ -6,13 +6,9 @@ import LeaveChannelButton from "./LeaveChannelButton";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
 const ENDPOINT = "http://localhost:8080";
-
-interface ChannelData {
-  channelName: string;
-  channelId: number;
-}
+import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
+import ChannelData from "../../../shared/interface/ChannelData";
  
-
 function WebsSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
   const [messages, setMessages] = useState<string[]>([]);
@@ -21,7 +17,7 @@ function WebsSocketCdaiTest() {
 
   /** MESSAGE */
   const send = (message: string) => {
-    socket?.emit("sendMessage", {channelId: connectedChannel?.channelId, message});
+    socket?.emit(ROUTES_BASE.CHAT.SEND_MESSAGE, {channelId: connectedChannel?.channelId, message});
   };
   useEffect(() => {
     const newSocket = io(ENDPOINT, {
@@ -35,25 +31,24 @@ function WebsSocketCdaiTest() {
     setMessages((current: string[]) => [...current, message]);
   };
   useEffect(() => {
-    socket?.on("receiveMessage", messageListener);
+    socket?.on(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageListener);
     return () => {
-      socket?.off("receiveMessage", messageListener);
+      socket?.off(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageListener);
     };
   }, [messageListener]);
   /** END MESSAGE */
 
   /** CREATE CHANNEL */
   const handleCreateChannel = (newChannelName: string) => {
-    socket?.emit("createChannelRequest", newChannelName);
+    socket?.emit(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST, newChannelName);
   };
   const channelCreationListener = (confirmedConnectedChannel: ChannelData) => {
-    console.log(confirmedConnectedChannel);
     setConnectedChannel(confirmedConnectedChannel);
   };
   useEffect(() => {
-    socket?.on("confirmChannelCreation", channelCreationListener);
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelCreationListener);
     return () => {
-      socket?.off("confirmChannelCreation", channelCreationListener);
+      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelCreationListener);
     };
   }, [channelCreationListener]);
   /** END CREATE CHANNEL */
@@ -61,18 +56,16 @@ function WebsSocketCdaiTest() {
 
 
   /** JOIN CHANNEL */
-  
-  const handleClick = (channelId: number) => {
-    socket?.emit("joinChannelRequest", channelId);
+  const handleJoinChannelClick = (channelId: number) => {
+    socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNE_REQUEST, channelId);
   }
   const handleJoinChannel = (message: ChannelData) => {
-    console.log(message)
     setConnectedChannel(message)
   }
   useEffect(()=> {
-    socket?.on("confirmChannelEntry", handleJoinChannel);
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, handleJoinChannel);
     return () => {
-      socket?.off("confirmChannelEntry", handleJoinChannel);
+      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, handleJoinChannel);
     };
   }, [handleJoinChannel]);
   /** END JOIN CHANNEL */
@@ -81,16 +74,15 @@ function WebsSocketCdaiTest() {
   
   /** GET ALL CHANNEL */
   useEffect(() => {
-    socket?.emit("joinChannelLobbyRequest");
+    socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST);
   }, [socket]);
   const getAllChannel = (message: []) => {
-    console.log(message)
     setAllChannel(message);
   };
   useEffect(() => {
-    socket?.on("listAllChannels", getAllChannel);
+    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_CHANNELS, getAllChannel);
     return () => {
-      socket?.off("listAllChannels", getAllChannel);
+      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_CHANNELS, getAllChannel);
     };
   }, [getAllChannel]);
   /** END GET ALL CHANNEL */
@@ -101,15 +93,15 @@ function WebsSocketCdaiTest() {
 
   /** DISCONNECT CHANNEL */
   const sendDisconnect = () => {
-    socket?.emit('disconnectFromChannelRequest', connectedChannel?.channelId);
+    socket?.emit(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST, connectedChannel?.channelId);
   }
   const handleDisconnect = () => {
     setConnectedChannel(undefined);
   };
   useEffect(() => {
-    socket?.on("confirmChannelDisconnection", handleDisconnect);
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, handleDisconnect);
     return () => {
-      socket?.off("confirmChannelDisconnection", handleDisconnect);
+      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, handleDisconnect);
     };
   }, [handleDisconnect]);
   /** DISCONNECT CHANNEL */
@@ -128,9 +120,8 @@ function WebsSocketCdaiTest() {
             handleCreateChannel={handleCreateChannel}
           />
           <JoinChannelButtons
-            socket={socket}
             allChannel={allChannel}
-            setConnectedChannel={setConnectedChannel}
+            handleClick={handleJoinChannelClick}
           />
         </>
         :
