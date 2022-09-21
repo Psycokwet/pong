@@ -1,8 +1,9 @@
 import React from 'react'
+import Loading from '../../Common/Loading'
 
 const Home = () => {
   return (
-    <h1 className='text-rose-600'>I'm Home Page</h1>
+    <Loading />
   )
 }
 

@@ -18,8 +18,10 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import RequestWithUser from './requestWithUser.interface';
 
+import { ROUTES_BASE } from 'shared/routes';
+
 @Injectable()
-@Controller('auth/42')
+@Controller(ROUTES_BASE.AUTH.ENDPOINT)
 export class FortyTwoController {
   private readonly logger = new Logger(FortyTwoController.name);
 
@@ -34,7 +36,7 @@ export class FortyTwoController {
     // Guard redirects
   }
 
-  @Get('redirect')
+  @Get(ROUTES_BASE.AUTH.REDIRECT)
   @UseGuards(FortyTwoGuard)
   @Redirect('/', 302)
   async fortyTwoAuthRedirect(@Req() req: any, @Res() res: Response) {
@@ -61,7 +63,7 @@ export class FortyTwoController {
     req.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
   }
 
-  @Get('logout')
+  @Get(ROUTES_BASE.AUTH.LOGOUT)
   @UseGuards(JwtAuthGuard)
   @Redirect('/', 302)
   async logout(@Req() request: RequestWithUser) {
