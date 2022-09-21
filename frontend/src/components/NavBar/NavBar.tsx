@@ -98,7 +98,7 @@ const NavBar: React.FC<DisconnectionButtonProps> = ({ setDisconnected }) => {
         {webPages.map((onePage, i) => {
           return <Route key={i} path={onePage.url} element={onePage.element} />;
         })}
-        <Route path="*" element={<NotFound />} />
+        {/* <Route path="*" element={<NotFound />} /> */}
         <Route path="/" element={<Home />} />
       </Routes>
     </div>

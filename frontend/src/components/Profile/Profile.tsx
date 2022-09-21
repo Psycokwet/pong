@@ -4,7 +4,7 @@ import UserPicture from "../User Picture/UserPicture";
 import Stats from "./Stats/Stats";
 
 import { IoStarOutline } from "react-icons/io5";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 type ProfileNameProps = {
 	nickname?: string,
@@ -48,15 +48,13 @@ function MatchHistory () {
 	)
 }
 
-type ProfileProps = {
-	nickname?: string,
-}
+const Profile = () => {
+	const {user_login} = useParams();
 
-const Profile:React.FC<ProfileProps> = ({nickname}) => {
 	return (
 		<div className="bg-black text-white h-screen flex grid grid-cols-10 grid-rows-6 gap-8">
 			<div className="col-start-2 col-span-3 row-start-2">
-				<ProfileName nickname={nickname}/>
+				{user_login}
 			</div>
 			<div className="row-start-2 row-span-3 col-start-6 col-span-3">
 				<MatchHistory />

@@ -1,12 +1,11 @@
 import React from "react";
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 import { BiChevronDown } from "react-icons/bi";
-import { FaSearch } from "react-icons/fa";
 
-import SubFriendList from "./SubFriendList";
 import Profile from "../Profile/Profile";
+import DropDownFriendList from "./DropDownFriendList";
 
 /***************** TYPE ***************************************/
 
@@ -23,51 +22,51 @@ export enum userStatusEnum {
 const UserFriendList = [
   {
     login: "scarboni",
-    nickname: "scarboni",
+    nickname: "scarboniiii",
     status: userStatusEnum.Online,
-    link_to_profile: "/profile",
+    image_url: "https://picsum.photos/400",
   },
   {
     login: "scarboni1",
-    nickname: "scarboni1",
+    nickname: "scarboni1234",
     status: userStatusEnum.Playing,
-    link_to_profile: "/profile",
+    image_url: "https://picsum.photos/400",
   },
   {
     login: "cdai",
-    nickname: "cdai",
+    nickname: "cdai11",
     status: userStatusEnum.Offline,
-    link_to_profile: "/profile",
+    image_url: "https://picsum.photos/400",
   },
   {
     login: "cdai1",
-    nickname: "cdai1",
+    nickname: "cdai1234",
     status: userStatusEnum.Online,
-    link_to_profile: "/profile",
+    image_url: "https://picsum.photos/400",
   },
   {
     login: "nader",
-    nickname: "nader",
+    nickname: "nader322",
     status: userStatusEnum.Playing,
-    link_to_profile: "/profile",
+    image_url: "https://picsum.photos/400",
   },
   {
     login: "nader1",
-    nickname: "nader1",
+    nickname: "nader1432",
     status: userStatusEnum.Offline,
-    link_to_profile: "/profile",
+    image_url: "https://picsum.photos/400",
   },
   {
     login: "moot",
-    nickname: "moot",
+    nickname: "moot234",
     status: userStatusEnum.Offline,
-    link_to_profile: "/profile",
+    image_url: "https://picsum.photos/400",
   },
   {
     login: "moot1",
-    nickname: "moot1",
+    nickname: "moot1123",
     status: userStatusEnum.Online,
-    link_to_profile: "/profile",
+    image_url: "https://picsum.photos/400",
   },
 ];
 
@@ -116,14 +115,15 @@ const subList = [
 
 const FriendList = () => {
   const [active, setActive] = useState(false);
-  const [inputValue, setInputValue] = useState("");
+  
 
   const showList = () => {
     setActive(!active);
   };
-
+  
   return (
     <div className="absolute top-[120px] right-0 text-white bg-gray-900">
+      
       <div
         className="p-2 flex items-center text-2xl font-bold"
         onClick={showList}
@@ -131,52 +131,28 @@ const FriendList = () => {
         <span className="px-4">Friend List</span>
         <BiChevronDown size={20} className={`${active && "rotate-180"}`} />
       </div>
+
+      {/************************* Dropdown Menu **************************/}
       <div
         className={
           active ? "bg-gray-700 mt-2 max-h-60 overflow-y-auto" : "hidden"
         }
       >
-        <div className="flex items-center p-1 bg-white">
-          <span>
-            <FaSearch size={20} className="text-gray-500" />
-          </span>
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Search a name"
-            className="text-gray-700 placeholder:text-gray-500 p-2 outline-none rounded-xl"
-          />
-        </div>
-        <div>
-          {subList?.map((aSubList) => {
-            return (
-              <SubFriendList
-                key={aSubList.status}
-                friend_list={UserFriendList}
-                input={inputValue}
-                group_status={aSubList.status}
-                color={aSubList.color}
-                group_name={aSubList.group_name}
-                handle_click={aSubList.invite}
-                group_button_name={aSubList.button_name}
-              />
-            );
-          })}
-        </div>
-
-        <Routes>
-          {UserFriendList.map((one_friend) => {
-            return (
-              <Route
-                key={one_friend.login}
-                path={one_friend.link_to_profile}
-                element={<Profile nickname={one_friend.nickname} />}
-              />
-            );
-          })}
-        </Routes>
+        <DropDownFriendList subListInfo={subList} profile_data={UserFriendList}/>
       </div>
+
+      {/* ************************ Router ************************* */}
+      <Routes>
+        {UserFriendList.map((one_friend) => {
+          return (
+            <Route
+              key={one_friend.login}
+              path={`/profile/:user_login`}
+              element={<Profile />}
+            />
+          );
+        })}
+      </Routes>
     </div>
   );
 };

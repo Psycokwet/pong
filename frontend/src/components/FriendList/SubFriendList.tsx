@@ -2,14 +2,13 @@ import React from "react";
 import { userStatusEnum } from "./FriendList";
 import { BsCircleFill } from "react-icons/bs";
 import { Routes, Link } from "react-router-dom";
-import Profile from "../Profile/Profile"
 
 type SubFriendListProps = {
   friend_list: {
     login: string;
     nickname: string;
     status: userStatusEnum;
-    link_to_profile: string;
+    image_url: string;
   }[];
   input: string;
   group_status: userStatusEnum;
@@ -28,10 +27,6 @@ const SubFriendList: React.FC<SubFriendListProps> = ({
   handle_click,
   group_button_name,
 }) => {
-  /******* Url will be changed later ************************/
-  let imageURL = "https://picsum.photos/400";
-
-  /***********************************************************/
 
   return (
     <>
@@ -54,11 +49,11 @@ const SubFriendList: React.FC<SubFriendListProps> = ({
               {/* Avatar and Nickname */}
               <li>
                 <Link
-                  to={friend.link_to_profile}
+                  to={`/profile/${friend.login}`}
                   className="grid grid-cols-2 m-2"
                 >
                   <img
-                    src={imageURL}
+                    src={friend.image_url}
                     alt="Avatar"
                     className="w-10 rounded-3xl"
                   />
