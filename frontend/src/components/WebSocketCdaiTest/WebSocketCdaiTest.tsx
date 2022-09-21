@@ -63,7 +63,7 @@ function WebsSocketCdaiTest() {
     setConnectedChannel(message)
   }
   useEffect(()=> {
-    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, handleJoinChannel);
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, handleJoinChannel);
     return () => {
       socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, handleJoinChannel);
     };
