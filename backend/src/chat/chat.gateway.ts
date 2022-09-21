@@ -12,7 +12,6 @@ import { ChatService } from './chat.service';
 import { UsersService } from 'src/users/users.service';
 
 @WebSocketGateway({
-  // namespace: '/chat',
   transport: ['websocket'],
   cors: '*/*',
 })
@@ -26,18 +25,16 @@ export class ChatGateway {
   server: Server;
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('joinChannelLobby')
+  @SubscribeMessage('joinChannelLobbyRequest')
   async joinChannelLobby(@ConnectedSocket() client: Socket) {
-    console.log(await this.chatService.getAllRooms());
-    // return await this.chatService.getAllRooms();
     client.join('channelLobby');
     this.server
       .in('channelLobby')
-      .emit('allChannel', await this.chatService.getAllRooms());
+      .emit('listAllChannels', await this.chatService.getAllRooms());
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('createRoom')
+  @SubscribeMessage('createChannelRequest')
   async createRoom(
     @MessageBody() roomName: string,
     @ConnectedSocket() client: Socket,
@@ -51,36 +48,26 @@ export class ChatGateway {
 
     await client.join(newRoom.roomName);
 
-    console.log('new room id: ', newRoom);
-
-    this.server.in('channelLobby').emit('createdRoom', {
+    this.server.in('channelLobby').emit('confirmChannelCreation', {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
     });
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('joinRoom')
+  @SubscribeMessage('joinChannelRequest')
   async joinRoom(
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    // const room = await this.chatService.getRoomById(roomId);
-    const room = await this.chatService.getRoomByIdWithRelations(roomId);
-
+    const room = await this.chatService.getRoomById(roomId);
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
-
-    this.server.in(client.id).emit('joinedRoom', {
+    this.server.in(client.id).emit('confirmChannelEntry', {
       channelId: room.id,
       channelName: room.channelName,
     });
-    // create channel named data
-    // client.join(data);
-    // console.log(data, client, client.id, this.server, this.server.id);
-    // client.join(`${data}${client.id}`);
-    // client.join('test');
   }
 
   @UseGuards(JwtWsGuard)
@@ -118,19 +105,19 @@ export class ChatGateway {
   ) {
     const room = await this.chatService.getRoomById(roomId);
     client.leave(room.roomName);
-    this.server.in(client.id).emit('disconnectedFromChannel', {
+    this.server.in(client.id).emit('confirmChannelDisconnection', {
       channelId: room.id,
       channelName: room.channelName,
     });
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('send_message')
-  async listenForMessages(
+  @SubscribeMessage('sendMessage')
+  async messageListener(
     @MessageBody() data: { message: string; channelId: number },
   ) {
     const room = await this.chatService.getRoomById(data.channelId);
     if (room)
-      this.server.in(room.roomName).emit('receive_message', data.message);
+      this.server.in(room.roomName).emit('receiveMessage', data.message);
   }
 }

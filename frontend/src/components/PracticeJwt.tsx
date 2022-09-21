@@ -45,8 +45,10 @@ function PracticeJwt() {
 
   return isConnected ? (
     <div className="App">
-      <WebSocketCdaiTest />
-      <DisconnectionButton setDisconnected={() => setConnected(false)} />
+      <WebsSocketCdaiTest />
+      <div>
+        <DisconnectionButton setDisconnected={() => setConnected(false)} />
+      </div>
     </div>
   ) : (
     <ConnectionButton />

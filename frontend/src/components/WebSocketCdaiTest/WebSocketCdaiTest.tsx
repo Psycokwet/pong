@@ -21,7 +21,7 @@ function WebsSocketCdaiTest() {
 
   /** MESSAGE */
   const send = (message: string) => {
-    socket?.emit("send_message", {channelId: connectedChannel?.channelId, message});
+    socket?.emit("sendMessage", {channelId: connectedChannel?.channelId, message});
   };
   useEffect(() => {
     const newSocket = io(ENDPOINT, {
@@ -35,62 +35,62 @@ function WebsSocketCdaiTest() {
     setMessages((current: string[]) => [...current, message]);
   };
   useEffect(() => {
-    socket?.on("receive_message", messageListener);
+    socket?.on("receiveMessage", messageListener);
     return () => {
-      socket?.off("receive_message", messageListener);
+      socket?.off("receiveMessage", messageListener);
     };
   }, [messageListener]);
   /** END MESSAGE */
 
   /** CREATE CHANNEL */
-  const handleCreateRoom = (newChannelName: string) => {
-    socket?.emit("createRoom", newChannelName);
+  const handleCreateChannel = (newChannelName: string) => {
+    socket?.emit("createChannelRequest", newChannelName);
   };
-  const roomCreationListener = (roomIdFromBack: ChannelData) => {
-    console.log(roomIdFromBack);
-    setConnectedChannel(roomIdFromBack);
+  const channelCreationListener = (confirmedConnectedChannel: ChannelData) => {
+    console.log(confirmedConnectedChannel);
+    setConnectedChannel(confirmedConnectedChannel);
   };
   useEffect(() => {
-    socket?.on("createdRoom", roomCreationListener);
+    socket?.on("confirmChannelCreation", channelCreationListener);
     return () => {
-      socket?.off("createdRoom", roomCreationListener);
+      socket?.off("confirmChannelCreation", channelCreationListener);
     };
-  }, [roomCreationListener]);
+  }, [channelCreationListener]);
   /** END CREATE CHANNEL */
 
 
 
   /** JOIN CHANNEL */
-  useEffect(() => {
-    socket?.emit("joinChannelLobby");
-  }, [socket]);
-
+  
   const handleClick = (channelId: number) => {
-    socket?.emit("joinRoom", channelId);
+    socket?.emit("joinChannelRequest", channelId);
   }
-  const handleJoinRoom = (message: ChannelData) => {
+  const handleJoinChannel = (message: ChannelData) => {
     console.log(message)
     setConnectedChannel(message)
   }
   useEffect(()=> {
-    socket?.on("joinedRoom", handleJoinRoom);
+    socket?.on("confirmChannelEntry", handleJoinChannel);
     return () => {
-      socket?.off("joinedRoom", handleJoinRoom);
+      socket?.off("confirmChannelEntry", handleJoinChannel);
     };
-  }, [handleJoinRoom]);
+  }, [handleJoinChannel]);
   /** END JOIN CHANNEL */
   
-
-
+  
+  
   /** GET ALL CHANNEL */
+  useEffect(() => {
+    socket?.emit("joinChannelLobbyRequest");
+  }, [socket]);
   const getAllChannel = (message: []) => {
     console.log(message)
     setAllChannel(message);
   };
   useEffect(() => {
-    socket?.on("allChannel", getAllChannel);
+    socket?.on("listAllChannels", getAllChannel);
     return () => {
-      socket?.off("allChannel", getAllChannel);
+      socket?.off("listAllChannels", getAllChannel);
     };
   }, [getAllChannel]);
   /** END GET ALL CHANNEL */
@@ -101,15 +101,15 @@ function WebsSocketCdaiTest() {
 
   /** DISCONNECT CHANNEL */
   const sendDisconnect = () => {
-    socket?.emit('disconnectFromChannel', connectedChannel?.channelId);
+    socket?.emit('disconnectFromChannelRequest', connectedChannel?.channelId);
   }
   const handleDisconnect = () => {
     setConnectedChannel(undefined);
   };
   useEffect(() => {
-    socket?.on("disconnectedFromChannel", handleDisconnect);
+    socket?.on("confirmChannelDisconnection", handleDisconnect);
     return () => {
-      socket?.off("disconnectedFromChannel", handleDisconnect);
+      socket?.off("confirmChannelDisconnection", handleDisconnect);
     };
   }, [handleDisconnect]);
   /** DISCONNECT CHANNEL */
@@ -125,7 +125,7 @@ function WebsSocketCdaiTest() {
         !connectedChannel ?
         <>
           <CreateChannel
-            handleCreateRoom={handleCreateRoom}
+            handleCreateChannel={handleCreateChannel}
           />
           <JoinChannelButtons
             socket={socket}
@@ -135,8 +135,8 @@ function WebsSocketCdaiTest() {
         </>
         :
         <>
-          <h4>RoomId: {connectedChannel?.channelId}</h4>
-          <h4>Room Name: {connectedChannel?.channelName}</h4>
+          <h4>Channel Id: {connectedChannel?.channelId}</h4>
+          <h4>Channel Name: {connectedChannel?.channelName}</h4>
           <LeaveChannelButton
             channelName={connectedChannel.channelName}
             sendDisconnect={sendDisconnect}

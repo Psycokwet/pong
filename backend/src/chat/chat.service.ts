@@ -50,18 +50,14 @@ export class ChatService {
   }
 
   async saveRoom(roomName: string, clientId: string, userId: number) {
-    console.log('saveRoom', roomName);
     const user = await this.userService.getById(userId);
 
-    console.log('getById');
     const newRoom = await Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: roomName,
       owner: user,
       members: [user],
     });
-
-    console.log('create');
 
     await newRoom.save();
     return newRoom;
@@ -106,7 +102,6 @@ export class ChatService {
   }
 
   async getUserFromSocket(socket: Socket) {
-    console.log(socket.handshake, socket.handshake.headers);
     const cookie = socket.handshake.headers.cookie;
     const { Authentication: authenticationToken } = parse(cookie);
     const user = await this.authService.getUserFromAuthenticationToken(
