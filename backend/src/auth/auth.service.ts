@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../users/user.entity';
+import { User } from '../user/user.entity';
 import { jwtConstants } from './constants';
 export interface TokenPayload {
   userId: number;
@@ -17,15 +17,15 @@ export class AuthService {
   ) {}
 
   // validateUser looks to the service to find the appropriate user and return
-  // its username and its id. Returns null if the user is not found.
+  // its login42 and its id. Returns null if the user is not found.
   async validateUser(
-    username: string,
-  ): Promise<{ userId: number; username: string } | undefined> {
+    login42: string,
+  ): Promise<{ userId: number; login42: string } | undefined> {
     const reqId = this.reqId++;
-    this.logger.log(`req no. ${reqId}: Trying to find user ${username}`);
-    const user: User | undefined = await this.userService.findOne(username);
+    this.logger.log(`req no. ${reqId}: Trying to find user ${login42}`);
+    const user: User | undefined = await this.userService.findOne(login42);
     this.logger.log(`${reqId} user found`);
-    return { userId: user.id, username: username };
+    return { userId: user.id, login42: login42 };
   }
 
   public getCookieWithJwtAccessToken(userId: number) {

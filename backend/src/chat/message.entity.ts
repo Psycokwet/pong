@@ -5,7 +5,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+<<<<<<< HEAD
 import { User } from 'src/users/user.entity';
+=======
+import { User } from 'src/user/user.entity';
+>>>>>>> main
 import Room from './room.entity';
 
 @Entity()
