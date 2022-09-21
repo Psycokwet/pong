@@ -18,7 +18,7 @@ function App() {
 
   useEffect(() => {
     if (connectedState == connectionStatusEnum.Unknown) {
-      api.refreshToken().then((res) => {
+      api.refreshToken().then((res: Response) => {
         if (res.status !== 200) {
           console.log(res);
           setConnectedState(connectionStatusEnum.Disconnected);
