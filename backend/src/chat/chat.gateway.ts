@@ -24,7 +24,6 @@ export class ChatGateway {
   server: Server;
 
   @UseGuards(JwtWsGuard)
-  // @SubscribeMessage('joinChannelLobbyRequest')
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
   async joinChannelLobby(@ConnectedSocket() client: Socket) {
     client.join(this.channelLobby);
