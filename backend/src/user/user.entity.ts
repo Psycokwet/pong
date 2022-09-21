@@ -1,19 +1,17 @@
 import {
   BaseEntity,
-  Entity,
   Column,
   JoinColumn,
   OneToOne,
+  Entity,
   PrimaryGeneratedColumn,
   OneToMany,
-  ManyToMany,
-  JoinTable,
 } from 'typeorm';
 import { Game } from 'src/game/game.entity';
 import { Friend } from 'src/friend_list/friend.entity';
 import { Exclude } from 'class-transformer';
-import { Max, Min } from 'class-validator';
 import LocalFile from 'src/localFiles/localFile.entity';
+import Room from 'src/chat/room.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -21,7 +19,10 @@ export class User extends BaseEntity {
   id: number;
 
   @Column({ length: 128, unique: true })
-  username: string;
+  login42: string;
+
+  @Column({ nullable: true })
+  pongUsername: string;
 
   @Column({ length: 128, unique: true })
   email: string;
@@ -35,12 +36,6 @@ export class User extends BaseEntity {
   @OneToMany(() => Friend, (friend) => friend.user)
   friends!: Friend[];
 
-  @Column({
-    nullable: true,
-  })
-  @Exclude()
-  public currentHashedRefreshToken?: string;
-
   @JoinColumn({ name: 'pictureId' })
   @OneToOne(() => LocalFile, { nullable: true })
   public picture?: LocalFile;
@@ -50,4 +45,13 @@ export class User extends BaseEntity {
 
   @Column()
   xp: number;
+
+  @Column({
+    nullable: true,
+  })
+  @Exclude()
+  public currentHashedRefreshToken?: string;
+
+  @OneToMany(() => Room, (Room) => Room.owner)
+  public rooms: Room[];
 }

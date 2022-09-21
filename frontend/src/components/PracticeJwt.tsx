@@ -4,6 +4,7 @@ import { DisconnectionButton } from "./ConnectionButton/DisconnectionButton";
 import "./PracticeJwt.css";
 import { Api } from "../api/api";
 import { PictureForm } from "./PictureForm/PictureForm";
+import WebsSocketCdaiTest from "./WebSocketCdaiTest/WebSocketCdaiTest";
 
 //broken example component, I might even say, deprecated ;) To delete later
 function PracticeJwt() {
@@ -42,12 +43,15 @@ function PracticeJwt() {
   }, []);
 
   return isConnected ? (
-    <div className="App">
-      <DisconnectionButton setDisconnected={() => setConnected(false)} />
-    </div>
-  ) : (
-    <ConnectionButton />
-  );
+      <div className="App">
+        <WebsSocketCdaiTest/>
+        <div>
+          <DisconnectionButton setDisconnected={() => setConnected(false)} />
+        </div>
+      </div>
+    ) : (
+      <ConnectionButton />
+    );
 }
 
 export default PracticeJwt;

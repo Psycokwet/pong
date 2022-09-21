@@ -7,25 +7,20 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  DataSource,
-  LockNotSupportedOnGivenDriverError,
-  Repository,
-} from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
-import { SetUsernameDto } from './set-username.dto';
-import { GetFriendsListDto } from './get-friends-list.dto';
+import { pongUsernameDto } from './set-pongusername.dto';
 import { PlayGameDto } from './play-game.dto';
-import { from } from 'rxjs';
+import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 
 // This should be a real class/interface representing a user entity
-export type UserLocal = { userId: number; username: string; password: string };
+export type UserLocal = { userId: number; login42: string; password: string };
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -41,7 +36,6 @@ async function passwordCompare(
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
-  localFilesService: any;
 
   constructor(
     private dataSource: DataSource,
@@ -53,24 +47,32 @@ export class UsersService {
 
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
+    private jwtService: JwtService,
+    private localFilesService: LocalFilesService,
   ) {}
 
-  async findOne(username: string): Promise<User> {
+  async findOne(login42: string): Promise<User> {
     const user = await this.usersRepository.findOneBy({
-      username: username,
+      login42: login42,
     });
     if (!user) throw new BadRequestException({ error: 'User not found' });
     return user;
   }
 
+  getFrontUsername(user: User) {
+    if (!user.pongUsername) return user.login42;
+    return user.pongUsername;
+  }
+
   async signup(dto: UserDto) {
     // database operation
     const user = User.create({
-      username: dto.username,
+      login42: dto.login42,
       email: dto.email,
+      xp: 0,
     });
 
-    user.xp = 0;
+    //user.xp = 0;
 
     try {
       return await user.save();
@@ -86,7 +88,7 @@ export class UsersService {
   }
 
   async signin(dto: Omit<UserDto, 'email'>) {
-    return await this.findOne(dto.username);
+    return await this.findOne(dto.login42);
   }
 
   async setCurrentRefreshToken(refreshToken: string, userId: number) {
@@ -127,8 +129,8 @@ export class UsersService {
     });
   }
 
-  async get_user_rank(dto: Omit<UserDto, 'password'>) {
-    const user = await this.findOne(dto.username);
+  async getUserRank(login42: string) {
+    const user = await this.findOne(login42);
 
     const level = Math.log(user.xp);
 
@@ -153,9 +155,21 @@ export class UsersService {
     return { level, userRank };
   }
 
-  async get_user_history(dto: Omit<UserDto, 'password'>) {
+  async getUserHistory(login42: string) {
     /*  Get calling user's object */
-    const user = await this.findOne(dto.username);
+    const user = await this.usersRepository.findOne({
+      where: { login42: login42 },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: 'User not found',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     /*  Get a games object where player 1 and player 2 exist and the calling user
         is either one or the other (where: ...) */
@@ -173,7 +187,7 @@ export class UsersService {
     };
   }
 
-  async play_game(dto: PlayGameDto) {
+  async playGame(dto: PlayGameDto) {
     const player1 = await this.findOne(dto.player1);
     const player2 = await this.findOne(dto.player2);
     const winner = await this.findOne(dto.winner);
@@ -185,9 +199,9 @@ export class UsersService {
     }
 
     const loser =
-      winner.username === player1.username
-        ? await this.findOne(player2.username)
-        : await this.findOne(player1.username);
+      winner.id === player1.id
+        ? await this.findOne(player2.login42)
+        : await this.findOne(player1.login42);
 
     const newGame = Game.create({
       player1_id: player1.id,
@@ -207,21 +221,20 @@ export class UsersService {
       .where({ id: winner.id })
       .execute();
 
-    /* If the loser's xp is > 0, decrease by 1 */
+    /* If the loser's xp is > 0, increases only by 1 */
     this.usersRepository
       .createQueryBuilder()
       .update(loser)
-      .set({ xp: loser.xp - 1 })
+      .set({ xp: loser.xp + 1 })
       .where('id = :id', { id: loser.id })
       .andWhere('xp > 0', { xp: loser.xp })
       .execute();
   }
 
-  async add_friend(dto: AddFriendDto) {
+  async addFriend(dto: AddFriendDto, login42: string) {
     /* First we get the caller (person who is initiating the friend request) 
     and friend in our db */
-    const caller = await this.findOne(dto.username);
-
+    const caller = await this.findOne(login42);
     const friend = await this.findOne(dto.friend_to_add);
 
     /* Checking if the caller is adding himself (I think this should never 
@@ -257,9 +270,9 @@ export class UsersService {
     await addFriend.save();
   }
 
-  async get_friends_list(dto: GetFriendsListDto) {
-    /* Same logic as get_user_history */
-    const user = await this.findOne(dto.username);
+  async getFriendsList(login42: string) {
+    /* Same logic as getUserHistory */
+    const user = await this.findOne(login42);
 
     const friendsList = await this.friendRepository.find({
       relations: {
@@ -271,26 +284,23 @@ export class UsersService {
     return friendsList;
   }
 
-  async get_username(dto: UserDto) {
-    const user = await this.findOne(dto.username);
-    return user.username;
+  async getPongUsername(login42: string) {
+    const user = await this.findOne(login42);
+    return { pongUsername: this.getFrontUsername(user) };
   }
 
-  async set_username(dto: SetUsernameDto) {
-    const user = await this.findOne(dto.username);
+  async setPongUsername(dto: pongUsernameDto, login42: string) {
+    const user = await this.findOne(login42);
 
-    /* We use TypeORM's query builder to update our entity */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(user)
-      .set({ username: dto.new_username })
-      .where({ id: user.id })
-      .execute();
+    /* We use TypeORM's update function to update our entity */
+    await this.usersRepository.update(user.id, {
+      pongUsername: dto.newPongUsername,
+    });
   }
 
-  async get_picture(dto: User) {
+  async getPicture(dto: User) {
     const user = await this.usersRepository.findOne({
-      where: { username: dto.username },
+      where: { login42: dto.login42 },
       relations: { picture: true },
     });
 
@@ -302,10 +312,10 @@ export class UsersService {
     return user.picture.path;
   }
 
-  async set_picture(user: User, fileData: LocalFileDto) {
+  async setPicture(user: User, fileData: LocalFileDto) {
     // delete old file
     try {
-      const old_file_path = await this.get_picture(user);
+      const old_file_path = await this.getPicture(user);
       this.localFilesService.delete_file(old_file_path);
     } catch (e) {
       this.logger.error('No existing picture file');

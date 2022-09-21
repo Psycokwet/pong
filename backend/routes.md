@@ -1,7 +1,9 @@
 ## NOTE
+
 With the current auth system you have to add users manually in the database if you want to run tests requiring many different users.
 
 To create new entries manually in a database:
+
 - Go to http://localhost:5431/
 - Click on PostgreSQL icon on the left
 - Log in: postgres / localroot
@@ -17,7 +19,7 @@ GET /user/get_user_rank
 
 ```
 {
-	"username": "sophie"
+	"login42": "sophie"
 }
 ```
 
@@ -48,7 +50,7 @@ GET /user/get_user_history
 
 ```
 {
-	"username": "sophie"
+	"login42": "sophie"
 }
 ```
 
@@ -112,7 +114,7 @@ POST /user/add_friend
 
 ```
 {
-	"username": "sophie",
+	"login42": "sophie",
     "friend_to_add":
 }
 ```
@@ -155,7 +157,7 @@ GET /user/get_friends_list
 
 ```
 {
-	"username": "sophie",
+	"login42": "sophie",
 }
 ```
 
@@ -164,56 +166,63 @@ GET /user/get_friends_list
 ```
 [
     {
-        "username": "cdai"
+        "login42": "cdai"
     },
     {
-        "username": "coucou3"
+        "login42": "coucou3"
     },
     {
-        "username": "mescande"
+        "login42": "mescande"
     }
 ]
 ```
 
 #### failure response :
+
 ```
 {
     "error": "User not found"
 }
 ```
 
-### get username
+### get nickname
 
-GET /user/get_username
+GET /user/get_pongUsername
 
 #### payload :
 
 ```
 {
-	"username": "sophie",
+	"login42": "sophie",
 }
 ```
 
 #### success response:
 
-sophie
+```
+{
+    "nickname": "sophie"
+}
+```
 
 #### failure response :
+
 ```
 {
     "error": "User not found"
 }
 ```
 
-### set username
+### set nickname
 
-POST /user/set_nickname
+POST /user/set_pongUsername
 
 #### payload:
+
 ```
 {
-	"username": "sophie",
-    "new_username":"sophie_new",
+	"login42": "sophie",
+    "new_pongUsername":"sophie_new",
 }
 ```
 
@@ -223,6 +232,7 @@ POST /user/set_nickname
 You should see that all instances of the old username are replaced by the new one (try seeing in the friends list or in games)
 
 #### failure response :
+
 ```
 {
     "error": "User not found"
