@@ -61,13 +61,14 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomById(roomId);
+    const room = await this.chatService.getRoomByIdWithMembers(roomId);
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit('confirmChannelEntry', {
       channelId: room.id,
       channelName: room.channelName,
     });
+    //await this.getMessageHistoryInChannel();
   }
 
   @UseGuards(JwtWsGuard)
@@ -76,25 +77,15 @@ export class ChatGateway {
     @MessageBody() roomId: number,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomByIdWithRelations(roomId);
+    const room = await this.chatService.getRoomByIdWithMembers(roomId);
     const caller = await this.userService.getById(payload.userId);
-    // console.log(
-    //   payload,
-    //   'coucou',
-    //   caller,
-    //   usersList.map((user) => {
-    //     return { id: user.id, pongUsername: user.username };
-    //   }),
-    // );
+
     this.server.in(room.roomName).emit(
       'connectedUserList',
       room.members.map((user) => {
         return { id: user.id, pongUsername: user.username };
       }),
     );
-    // return {
-    //   users: usersList.map((user) => user.username),
-    // };
   }
 
   @UseGuards(JwtWsGuard)
@@ -115,9 +106,48 @@ export class ChatGateway {
   @SubscribeMessage('sendMessage')
   async messageListener(
     @MessageBody() data: { message: string; channelId: number },
+    @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomById(data.channelId);
+    const room = await this.chatService.getRoomByIdWithMessages(data.channelId);
+    //const author = await this.userService.getById(payload.userId);
+    const author = await this.userService.getUserByIdWithMessages(
+      payload.userId,
+    );
+    console.log('room', room);
+    console.log('author', author);
+    const newMessage = await this.chatService.saveMessage(
+      data.message,
+      author,
+      room,
+    );
+
     if (room)
       this.server.in(room.roomName).emit('receiveMessage', data.message);
+    // const newMessage = await this.chatService.saveMessage(
+    //   data.message,
+    //   author,
+    //   room,
+    // );
+    console.log('newMessage: ', newMessage);
+    console.log('room.messages', room.messages);
+    console.log('author.messages', author.messages);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage('getMessageHistoryInChannel')
+  async getMessageHistoryInChannel(@MessageBody() roomId: number) {
+    const room = await this.chatService.getRoomByIdWithMessages(roomId);
+
+    this.server.in(room.roomName).emit(
+      'messageHistory',
+      room.messages.map((message) => {
+        return {
+          id: message.id,
+          author: message.author.username,
+          time: message.createdAt,
+          content: message.content,
+        };
+      }),
+    );
   }
 }
