@@ -38,7 +38,7 @@ const Profile = () => {
   return (
     <div className="bg-black text-white h-screen flex grid grid-cols-10 grid-rows-6 gap-8">
       <div className="col-start-2 col-span-3 row-start-2">
-        <ProfileName />
+        <ProfileName nickname={user_login}/>
       </div>
       <div className="row-start-2 row-span-3 col-start-6 col-span-3">
         <MatchHistory />
