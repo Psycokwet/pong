@@ -49,13 +49,17 @@ function Community () {
 	const addMessage = (newElem:MessageType) => {
 		setMessages((current_messages)=>{
 		return [...current_messages, newElem];
-	})}
+		})
+		setValue('');
+	}
 
 	const handleKeyDown = (e: KeyboardEvent) => {
 		if (e.code == 'Enter') {
 			addMessage({content:value, sender:user})
-			setValue('')
-	}}
+			if(e.preventDefault)
+				e.preventDefault();
+		}
+	}
 
 	console.log(Messages);
 	return (
@@ -79,9 +83,14 @@ function Community () {
 						onChange={(e) => setValue(e.target.value)}
 						onKeyDown={handleKeyDown}
 					/>
-					<div onClick={() => {addMessage({content:value, sender:user})}}>
-						<IoSend size="40" />
-					</div>
+					<IoSend
+						size="40"
+						onClick={() => {
+							if (value !== '')
+								addMessage({content:value, sender:user})
+							}}
+						className="cursor-pointer"
+						/>
 				</div>
 			</div>
 			<div className="row-start-1 row-span-6 col-start-5">
