@@ -68,6 +68,7 @@ export class UsersService {
     const user = User.create({
       login42: dto.login42,
       email: dto.email,
+      is_2fa_activated: false,
     });
 
     try {

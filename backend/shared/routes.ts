@@ -16,6 +16,8 @@ export const ROUTES_BASE = {
     LOGOUT: 'logout',
     REFRESH: 'refresh',
     REDIRECT: 'redirect',
+    TURN_ON_2FA: 'turn_on_2fa',
+    TURN_OFF_2FA: 'turn_off_2fa',
   },
   ROOT: {
     ENDPOINT: '/',
