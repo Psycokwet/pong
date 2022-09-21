@@ -6,6 +6,6 @@ export class UserDto {
   email?: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'You must have a email' })
+  @IsNotEmpty({ message: 'You must have a login42' })
   login42: string;
 }
