@@ -18,6 +18,7 @@ import { HiChartBar } from "react-icons/hi";
 import { RiPingPongFill } from "react-icons/ri";
 import { IoMdSettings } from "react-icons/io";
 import { DisconnectionButton } from "../ConnectionButton/DisconnectionButton";
+import PracticeJwt from "../PracticeJwt";
 
 /***************** List of Pages ******************************************/
 const webPages = [
@@ -50,6 +51,12 @@ const webPages = [
     pageName: "settings",
     element: <Settings />,
     pageIcon: <IoMdSettings size="26" />,
+  },
+  {
+    url: "/practice",
+    pageName: "practice",
+    element: <PracticeJwt />,
+    // pageIcon: <IoMdSettings size="26" />,
   },
 ];
 
