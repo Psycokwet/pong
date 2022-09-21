@@ -47,9 +47,15 @@ export class ChatGateway {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
     });
-    
-    const connectedUserIdList: number[] = this.chatService.updateUserConnectedToRooms(newRoom.roomName, payload.userId);
-    this.server.in(newRoom.roomName).emit('updateConnectedUsers', connectedUserIdList);
+
+    const connectedUserIdList: number[] =
+      this.chatService.updateUserConnectedToRooms(
+        newRoom.roomName,
+        payload.userId,
+      );
+    this.server
+      .in(newRoom.roomName)
+      .emit('updateConnectedUsers', connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)
@@ -67,8 +73,14 @@ export class ChatGateway {
       channelName: room.channelName,
     });
 
-    const connectedUserIdList: number[] = this.chatService.updateUserConnectedToRooms(room.roomName, payload.userId);
-    this.server.in(room.roomName).emit('updateConnectedUsers', connectedUserIdList);
+    const connectedUserIdList: number[] =
+      this.chatService.updateUserConnectedToRooms(
+        room.roomName,
+        payload.userId,
+      );
+    this.server
+      .in(room.roomName)
+      .emit('updateConnectedUsers', connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)
@@ -85,11 +97,14 @@ export class ChatGateway {
       channelName: room.channelName,
     });
 
-    const connectedUserIdList: number[] = this.chatService.removeUserConnectedToRooms(room.roomName, payload.userId);
-    this.server.in(room.roomName).emit(
-      'updateConnectedUsers',
-      connectedUserIdList,
-    );
+    const connectedUserIdList: number[] =
+      this.chatService.removeUserConnectedToRooms(
+        room.roomName,
+        payload.userId,
+      );
+    this.server
+      .in(room.roomName)
+      .emit('updateConnectedUsers', connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)

@@ -98,33 +98,38 @@ export class ChatService {
 
   /** ChatRoomConnectedUsers methods */
   updateUserConnectedToRooms(roomName: string, userId): number[] {
-    let chatRoomIndex = ChatService.chatRoomList.findIndex((chatRoom) => chatRoom.roomName === roomName);
+    let chatRoomIndex = ChatService.chatRoomList.findIndex(
+      (chatRoom) => chatRoom.roomName === roomName,
+    );
     if (chatRoomIndex === -1) {
       const newChatRoom = new ChatRoom();
-      newChatRoom.roomName =roomName;
+      newChatRoom.roomName = roomName;
       newChatRoom.userIdList = [userId];
-      
+
       ChatService.chatRoomList = [...ChatService.chatRoomList, newChatRoom];
-      chatRoomIndex = ChatService.chatRoomList.findIndex((chatRoom) => chatRoom.roomName === roomName);
-    }
-    else if (!ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)) {
+      chatRoomIndex = ChatService.chatRoomList.findIndex(
+        (chatRoom) => chatRoom.roomName === roomName,
+      );
+    } else if (
+      !ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)
+    ) {
       ChatService.chatRoomList[chatRoomIndex].userIdList = [
         ...ChatService.chatRoomList[chatRoomIndex].userIdList,
-        userId
+        userId,
       ];
     }
     return ChatService.chatRoomList[chatRoomIndex].userIdList;
   }
 
   removeUserConnectedToRooms(roomName: string, userId): number[] {
-    const chatRoomIndex = ChatService.chatRoomList.findIndex((chatRoom) => chatRoom.roomName == roomName);
-    if (ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId))
-    {
-      ChatService.chatRoomList[chatRoomIndex].userIdList = 
-        ChatService
-          .chatRoomList[chatRoomIndex]
-          .userIdList
-          .filter((id) => id !== userId);
+    const chatRoomIndex = ChatService.chatRoomList.findIndex(
+      (chatRoom) => chatRoom.roomName == roomName,
+    );
+    if (ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)) {
+      ChatService.chatRoomList[chatRoomIndex].userIdList =
+        ChatService.chatRoomList[chatRoomIndex].userIdList.filter(
+          (id) => id !== userId,
+        );
     }
     return ChatService.chatRoomList[chatRoomIndex].userIdList;
   }
