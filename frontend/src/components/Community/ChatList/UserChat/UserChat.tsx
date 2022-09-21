@@ -1,5 +1,5 @@
 import React from "react"
-import UserPicture from "../../User Picture/UserPicture";
+import UserPicture from "../../../User Picture/UserPicture";
 
 type Props = {
 	name: string;
