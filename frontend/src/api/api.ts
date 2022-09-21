@@ -34,6 +34,9 @@ export class Api {
     });
   }
 
+  ping() {
+    return fetch(`${PREFIX}${URL.PROTECTED}`, {method: 'GET', mode:'no-cors', credentials:'include'})
+  }
   refreshToken() {
     return fetch(`${PREFIX}${FULL_ROUTE.AUTH.REFRESH}`, {
       method: "GET",
