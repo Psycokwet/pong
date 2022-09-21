@@ -74,9 +74,22 @@ export class ChatGateway {
       channelName: room.channelName,
     });
 
-    // if (!ChatGateway.connectedUserId.includes(payload.userId))
-    //   ChatGateway.connectedUserId = [...ChatGateway.connectedUserId, payload.userId];
-    // this.server.in(room.roomName).emit('updateConnectedUsers', ChatGateway.connectedUserId);
+    let chatRoomIndex = ChatGateway.chatRoomList.findIndex((chatRoom) => chatRoom.roomName == room.roomName);
+    if (chatRoomIndex === -1) {
+      const newChatRoom = new ChatRoom();
+      newChatRoom.roomName = room.roomName;
+      newChatRoom.userIdList = [payload.userId];
+      
+      ChatGateway.chatRoomList = [...ChatGateway.chatRoomList, newChatRoom];
+      chatRoomIndex = ChatGateway.chatRoomList.findIndex((chatRoom) => chatRoom.roomName == room.roomName);
+    }
+    else if (!ChatGateway.chatRoomList[chatRoomIndex].userIdList.includes(payload.userId)) {
+      ChatGateway.chatRoomList[chatRoomIndex].userIdList = [
+        ...ChatGateway.chatRoomList[chatRoomIndex].userIdList,
+        payload.userId
+      ];
+    }
+    this.server.in(room.roomName).emit('updateConnectedUsers', ChatGateway.chatRoomList[chatRoomIndex].userIdList);
   }
 
   @UseGuards(JwtWsGuard)
@@ -93,8 +106,19 @@ export class ChatGateway {
       channelName: room.channelName,
     });
 
-    // ChatGateway.connectedUserId = ChatGateway.connectedUserId.filter((id) => id !== payload.userId);
-    // this.server.in(room.roomName).emit('updateConnectedUsers', ChatGateway.connectedUserId);
+    const chatRoomIndex = ChatGateway.chatRoomList.findIndex((chatRoom) => chatRoom.roomName == room.roomName);
+    if (ChatGateway.chatRoomList[chatRoomIndex].userIdList.includes(payload.userId))
+    {
+      ChatGateway.chatRoomList[chatRoomIndex].userIdList = 
+        ChatGateway
+          .chatRoomList[chatRoomIndex]
+          .userIdList
+          .filter((id) => id !== payload.userId);
+    }
+    this.server.in(room.roomName).emit(
+      'updateConnectedUsers',
+      ChatGateway.chatRoomList[chatRoomIndex].userIdList
+    );
   }
 
   @UseGuards(JwtWsGuard)
