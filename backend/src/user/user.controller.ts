@@ -11,14 +11,8 @@ import {
   StreamableFile,
   UseInterceptors,
   UploadedFile,
-  Param,
-  Query,
 } from '@nestjs/common';
-import { Game } from 'src/game/game.entity';
-import { UserDto } from './user.dto';
 import { UsersService } from './user.service';
-import { GetFriendsListDto } from './get-friends-list.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
@@ -43,7 +37,7 @@ export class UserController {
     return user_rank;
   }
 
-  @Post(ROUTES_BASE.USER.GET_USER_HISTORY)
+  @Get(ROUTES_BASE.USER.GET_USER_HISTORY)
   @UseGuards(JwtAuthGuard)
   async getUserHistory(@Request() req) {
     const userHistory = await this.usersService.getUserHistory(
