@@ -89,4 +89,19 @@ export class Api {
       body: JSON.stringify({ newPongUsername }),
     });
   }
+  turn_on_2fa() {
+    return fetch(`${PREFIX}${FULL_ROUTE.AUTH.TURN_ON_2FA}`, {
+      method: "PUT",
+    });
+  }
+  turn_off_2fa() {
+    return fetch(`${PREFIX}${FULL_ROUTE.AUTH.TURN_OFF_2FA}`, {
+      method: "PUT",
+    });
+  }
+  get_2fa() {
+    return fetch(`${PREFIX}${FULL_ROUTE.AUTH.GET_2FA}`, {
+      method: "GET",
+    });
+  }
 }
