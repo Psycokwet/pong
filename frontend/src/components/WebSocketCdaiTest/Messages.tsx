@@ -1,10 +1,20 @@
 import React, { useState } from 'react'
 
-export default function Messages({messages}:{messages:string[]}) {
+interface Message {
+  id: number;
+  author: string,
+  time: Date,
+  content: string,
+}
+
+export default function Messages({messages}:{messages:Message[]}) {
   return (
     <>{
       messages.map((message, index) => {
-        return <div key={index}>{message}</div>
+        return <div key={message.id}>
+          <h6>{message.author}: {message.time.toString()}</h6>
+          <p>{message.content}</p>
+        </div>
       })
     }</>
   )
