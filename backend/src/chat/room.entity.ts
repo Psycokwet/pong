@@ -25,6 +25,9 @@ class Room extends BaseEntity {
   @Column({ unique: true })
   public roomName: string;
 
+  @Column()
+  public password: string;
+
   @ManyToOne(() => User, (user) => user.rooms)
   public owner: User;
 
@@ -34,6 +37,9 @@ class Room extends BaseEntity {
   @ManyToMany(() => User, (user) => user.channels, { cascade: true })
   @JoinTable()
   public members: User[];
+
+  @Column()
+  public isChannelPrivate: boolean;
 }
 
 export default Room;

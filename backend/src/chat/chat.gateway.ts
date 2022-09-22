@@ -9,7 +9,19 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/user/user.service';
+import * as bcrypt from 'bcrypt';
+
+async function crypt(password: string): Promise<string> {
+  return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
+}
+
+async function passwordCompare(
+  password: string,
+  hash: string,
+): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -30,20 +42,28 @@ export class ChatGateway {
     client.join('channelLobby');
     this.server
       .in('channelLobby')
-      .emit('listAllChannels', await this.chatService.getAllRooms());
+      .emit('listAllChannels', await this.chatService.getAllPublicRooms());
   }
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage('createChannelRequest')
   async createRoom(
-    @MessageBody() roomName: string,
+    @MessageBody()
+    createChannelRequestData: {
+      roomName: string;
+      isChannelPrivate: boolean;
+      password: string;
+    },
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
+    const hashedPassword = await crypt(createChannelRequestData.password);
     const newRoom = await this.chatService.saveRoom(
-      roomName,
+      createChannelRequestData.roomName,
       client.id,
       payload.userId,
+      createChannelRequestData.isChannelPrivate,
+      hashedPassword,
     );
 
     await client.join(newRoom.roomName);
@@ -66,11 +86,23 @@ export class ChatGateway {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage('joinChannelRequest')
   async joinRoom(
-    @MessageBody() roomId: number,
+    @MessageBody()
+    joinChannelRequestData: { roomId: number; userPassword: string },
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomByIdWithRelations(roomId);
+    //WARNING: si on fait comme ca, on doit toujours demander un password
+    //a l'utilisateur
+    const room = await this.chatService.getRoomByIdWithRelations(
+      joinChannelRequestData.roomId,
+    );
+    if (room.password !== '') {
+      const isGoodPassword = passwordCompare(
+        joinChannelRequestData.userPassword,
+        room.password,
+      );
+      if (!isGoodPassword) return;
+    }
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit('confirmChannelEntry', {
@@ -100,13 +132,16 @@ export class ChatGateway {
     this.server.in(room.roomName).emit(
       'connectedUserList',
       room.members.map((user) => {
-        return { id: user.id, pongUsername: user.username };
+        return {
+          id: user.id,
+          pongUsername: this.userService.getFrontUsername(user),
+        };
       }),
     );
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('disconnectFromChannel')
+  @SubscribeMessage('disconnectFromChannelRequest')
   async disconnectFromChannel(
     @MessageBody() roomId: number,
     @UserPayload() payload: any,

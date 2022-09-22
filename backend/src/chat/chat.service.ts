@@ -25,15 +25,19 @@ export class ChatService {
   ) {}
   private static chatRoomList: ChatRoom[] = [];
 
-  public async getAllRooms() {
-    return this.roomsRepository.find().then((rooms) =>
-      rooms.map((room) => {
-        return {
-          channelId: room.id,
-          channelName: room.channelName,
-        };
-      }),
-    );
+  public async getAllPublicRooms() {
+    return this.roomsRepository
+      .find({
+        where: { isChannelPrivate: false },
+      })
+      .then((rooms) =>
+        rooms.map((room) => {
+          return {
+            channelId: room.id,
+            channelName: room.channelName,
+          };
+        }),
+      );
   }
 
   public async getRoomById(id: number) {
@@ -49,14 +53,22 @@ export class ChatService {
     });
   }
 
-  async saveRoom(roomName: string, clientId: string, userId: number) {
+  async saveRoom(
+    roomName: string,
+    clientId: string,
+    userId: number,
+    isChannelPrivate: boolean,
+    password: string,
+  ) {
     const user = await this.userService.getById(userId);
 
     const newRoom = await Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: roomName,
+      password: password,
       owner: user,
       members: [user],
+      isChannelPrivate: isChannelPrivate,
     });
 
     await newRoom.save();
@@ -67,8 +79,11 @@ export class ChatService {
     const newMember = await this.userService.getById(userId);
 
     if (
-      !room.members.filter((member) => member.username === newMember.username)
-        .length
+      !room.members.filter(
+        (member) =>
+          this.userService.getFrontUsername(member) ===
+          this.userService.getFrontUsername(newMember),
+      ).length
     )
       room.members = [...room.members, newMember];
 
