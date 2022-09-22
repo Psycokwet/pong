@@ -10,7 +10,7 @@ import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
-
+import { ChatRoom } from 'shared/interfaces/ChatRoom';
 @Injectable()
 export class ChatService {
   constructor(
@@ -23,6 +23,7 @@ export class ChatService {
     private usersRepository: Repository<User>,
     private userService: UsersService,
   ) {}
+  private static chatRoomList: ChatRoom[] = [];
 
   public async getAllRooms() {
     return this.roomsRepository.find().then((rooms) =>
@@ -39,6 +40,15 @@ export class ChatService {
     return this.roomsRepository.findOneBy({ id });
   }
 
+  public async getRoomByIdWithRelations(id: number) {
+    return this.roomsRepository.findOne({
+      where: { id },
+      relations: {
+        members: true,
+      },
+    });
+  }
+
   async saveRoom(roomName: string, userId: number) {
     const user = await this.userService.getById(userId);
 
@@ -49,12 +59,20 @@ export class ChatService {
       members: [user],
     });
 
-    return newRoom.save();
+    await newRoom.save();
+    return newRoom;
   }
 
   async addMemberToChannel(userId: number, room: Room) {
     const newMember = await this.userService.getById(userId);
-    room.members = [newMember];
+
+    if (
+      !room.members.filter(
+        (member: User) => member.login42 === newMember.login42,
+      ).length
+    )
+      room.members = [...room.members, newMember];
+
     room.save();
   }
 
@@ -84,4 +102,43 @@ export class ChatService {
     }
     return user;
   }
+
+  /** ChatRoomConnectedUsers methods */
+  updateUserConnectedToRooms(roomName: string, userId): number[] {
+    let chatRoomIndex = ChatService.chatRoomList.findIndex(
+      (chatRoom) => chatRoom.roomName === roomName,
+    );
+    if (chatRoomIndex === -1) {
+      const newChatRoom = new ChatRoom();
+      newChatRoom.roomName = roomName;
+      newChatRoom.userIdList = [userId];
+
+      ChatService.chatRoomList = [...ChatService.chatRoomList, newChatRoom];
+      chatRoomIndex = ChatService.chatRoomList.findIndex(
+        (chatRoom) => chatRoom.roomName === roomName,
+      );
+    } else if (
+      !ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)
+    ) {
+      ChatService.chatRoomList[chatRoomIndex].userIdList = [
+        ...ChatService.chatRoomList[chatRoomIndex].userIdList,
+        userId,
+      ];
+    }
+    return ChatService.chatRoomList[chatRoomIndex].userIdList;
+  }
+
+  removeUserConnectedToRooms(roomName: string, userId): number[] {
+    const chatRoomIndex = ChatService.chatRoomList.findIndex(
+      (chatRoom) => chatRoom.roomName == roomName,
+    );
+    if (ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)) {
+      ChatService.chatRoomList[chatRoomIndex].userIdList =
+        ChatService.chatRoomList[chatRoomIndex].userIdList.filter(
+          (id) => id !== userId,
+        );
+    }
+    return ChatService.chatRoomList[chatRoomIndex].userIdList;
+  }
+  /** END ChatRoomConnectedUsers methods */
 }
