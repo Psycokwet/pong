@@ -53,16 +53,30 @@ export class ChatService {
     });
   }
 
-  async saveRoom(
-    roomName: string,
-    clientId: string,
-    userId: number,
-    isChannelPrivate: boolean,
-    password: string,
-  ) {
+  public async getRoomByNameWithRelations(roomName: string) {
+    return this.roomsRepository.findOne({
+      where: { channelName: roomName },
+      relations: {
+        members: true,
+      },
+    });
+  }
+
+  async saveRoom({
+    roomName,
+    clientId,
+    userId,
+    isChannelPrivate,
+    password,
+  }: {
+    roomName: string;
+    clientId: string;
+    userId: number;
+    isChannelPrivate: boolean;
+    password: string;
+  }) {
     const user = await this.userService.getById(userId);
 
-    console.log('roomName', roomName);
     const newRoom = await Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: roomName,
@@ -72,7 +86,7 @@ export class ChatService {
       isChannelPrivate: isChannelPrivate,
     });
 
-    console.log(newRoom);
+    console.log('newRoom', newRoom);
     await newRoom.save();
     return newRoom;
   }
