@@ -36,7 +36,7 @@ const Messages = ({messages}: {messages:MessageType[]}) => {
 						<h6 className="text-lg font-semibold self-center">
 							{message.sender.nickname}
 						</h6>
-						<p className="text-sm">
+						<p className="break-all max-w-full whitespace-pre-wrap text-sm">
 							{message.content}
 						</p>
 					</div>
