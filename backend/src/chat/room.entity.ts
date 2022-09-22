@@ -9,7 +9,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/user/user.entity';
 import Message from './message.entity';
 
 @Entity()
@@ -31,7 +31,7 @@ class Room extends BaseEntity {
   @OneToMany(() => Message, (message) => message.room)
   public messages: Message[];
 
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, (user) => user.channels, { cascade: true })
   @JoinTable()
   public members: User[];
 }
