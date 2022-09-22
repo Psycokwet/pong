@@ -1,5 +1,6 @@
 import React from "react";
 import { Api } from "../../../api/api";
+import { PictureGetter } from "../../PictureForm/PictureGetter";
 
 const api = new Api();
 const LeaderBoard = () => {
@@ -106,6 +107,20 @@ const LeaderBoard = () => {
       >
         get 2fa
       </button>
+      <button
+        className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
+        onClick={() => {
+          api.generate_2fa().then((res: Response) => {
+            console.log("generate_2fa", res);
+            res.json().then((content) => {
+              console.log("generate_2fa", content);
+            });
+          });
+        }}
+      >
+        generate 2fa
+      </button>
+      <PictureGetter apiCall={() => api.generate_2fa()} />
     </>
   );
 };

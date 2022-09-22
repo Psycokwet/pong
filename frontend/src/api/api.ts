@@ -123,4 +123,12 @@ export class Api {
       method: "GET",
     });
   }
+  generate_2fa() {
+    let headers = new Headers();
+    headers.set(HeadersFields.ContentType, "application/json");
+    return fetch(`${PREFIX}${FULL_ROUTE.AUTH.GENERATE_2FA}`, {
+      method: "POST",
+      headers: headers,
+    });
+  }
 }
