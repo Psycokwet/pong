@@ -168,7 +168,7 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     const room = await this.chatService.getRoomByNameWithRelations(
-      data.roomName,
+      data.channelName,
     );
     if (!room) {
       throw new BadRequestException({
@@ -178,7 +178,7 @@ export class ChatGateway {
 
     if (room.password !== '') {
       const isGoodPassword = await passwordCompare(
-        data.userPassword,
+        data.inputPassword,
         room.password,
       );
       if (!isGoodPassword)
