@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Message from './message.entity';
+import { IsNotEmpty } from 'class-validator';
 
 @Entity()
 class Room extends BaseEntity {
@@ -18,7 +19,8 @@ class Room extends BaseEntity {
   public id: number;
 
   // displayed name for frontend
-  @Column()
+  @Column({ unique: true })
+  @IsNotEmpty({ message: 'Channel name is mandatory' })
   public channelName: string;
 
   // use only in backend
