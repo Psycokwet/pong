@@ -43,7 +43,7 @@ export class ChatService {
     });
   }
 
-  async saveRoom(roomName: string, clientId: string, userId: number) {
+  async saveRoom(roomName: string, userId: number) {
     const user = await this.userService.getById(userId);
 
     const newRoom = await Room.create({
