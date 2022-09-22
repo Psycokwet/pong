@@ -4,6 +4,7 @@ export const ROUTES_BASE = {
     /** LOBBY */
     JOIN_CHANNEL_LOBBY_REQUEST: 'joinChannelLobbyRequest',
     LIST_ALL_CHANNELS: 'listAllChannels',
+    NEW_CHANNEL_CREATED: 'newChannelCreated',
     /** CREATE CHANNEL */
     CREATE_CHANNEL_REQUEST: 'createChannelRequest',
     CONFIRM_CHANNEL_CREATION: 'confirmChannelCreation',
