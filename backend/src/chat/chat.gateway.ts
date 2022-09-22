@@ -9,7 +9,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/user/user.service';
+import { User } from 'src/user/user.entity';
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -99,8 +100,8 @@ export class ChatGateway {
 
     this.server.in(room.roomName).emit(
       'connectedUserList',
-      room.members.map((user) => {
-        return { id: user.id, pongUsername: user.username };
+      room.members.map((user: User) => {
+        return { id: user.id, pongUsername: user.pongUsername };
       }),
     );
   }

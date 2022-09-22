@@ -67,8 +67,9 @@ export class ChatService {
     const newMember = await this.userService.getById(userId);
 
     if (
-      !room.members.filter((member) => member.username === newMember.username)
-        .length
+      !room.members.filter(
+        (member: User) => member.login42 === newMember.login42,
+      ).length
     )
       room.members = [...room.members, newMember];
 
