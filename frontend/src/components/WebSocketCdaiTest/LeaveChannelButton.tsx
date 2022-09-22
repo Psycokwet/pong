@@ -1,23 +1,15 @@
-import { Socket } from "socket.io-client";
-interface ChannelData {
+export default function LeaveChannelButton({
+  channelName,
+  sendDisconnect,
+}: {
   channelName: string;
-  channelId: number;
-}
-
-export default function LeaveChannelButton(
-  {
-    channelName,
-    sendDisconnect,
-  }:
-  {
-    channelName: string,
-    sendDisconnect: () => void,
-  }
-  ) {
-
+  sendDisconnect: () => void;
+}) {
   return (
     <div>
-      <button onClick={sendDisconnect}>Disconnect to the channel {channelName}</button>
+      <button onClick={sendDisconnect}>
+        Disconnect to the channel {channelName}
+      </button>
     </div>
-  )
+  );
 }
