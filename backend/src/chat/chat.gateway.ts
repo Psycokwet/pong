@@ -44,6 +44,8 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
+    if (roomName === '') return;
+
     const newRoom = await this.chatService.saveRoom(
       roomName,
       payload.userId,
@@ -142,6 +144,7 @@ export class ChatGateway {
   async messageListener(
     @MessageBody() data: { message: string; channelId: number },
   ) {
+    if (data.message === '') return;
     const room = await this.chatService.getRoomById(data.channelId);
     if (room)
       this.server.in(room.roomName).emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, data.message);
