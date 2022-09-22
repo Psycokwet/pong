@@ -100,9 +100,7 @@ export class ChatService {
 
     if (
       !room.members.filter(
-        (member) =>
-          this.userService.getFrontUsername(member) ===
-          this.userService.getFrontUsername(newMember),
+        (member: User) => member.login42 === newMember.login42,
       ).length
     )
       room.members = [...room.members, newMember];
