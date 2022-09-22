@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
@@ -15,7 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
-import { GetFriendsListDto } from './get-friends-list.dto';
+import { PlayGameDto } from './play-game.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 
@@ -38,6 +38,7 @@ export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
   constructor(
+    private dataSource: DataSource,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
 
@@ -68,7 +69,10 @@ export class UsersService {
     const user = User.create({
       login42: dto.login42,
       email: dto.email,
+      xp: 0,
     });
+
+    //user.xp = 0;
 
     try {
       return await user.save();
@@ -134,25 +138,36 @@ export class UsersService {
     });
   }
 
-  async getUserRank(dto: Omit<UserDto, 'password'>) {
-    const user = await this.findOne(dto.login42);
+  async getUserRank(login42: string) {
+    const user = await this.findOne(login42);
 
-    if (user) return { rank: user.user_rank };
+    const level = Math.log(user.xp);
 
-    // User not found
-    throw new HttpException(
-      {
-        status: HttpStatus.BAD_REQUEST,
-        error: 'User not found',
-      },
-      HttpStatus.BAD_REQUEST,
-    );
+    /* Keeping the below 2 comments to remind myself of queries */
+    // SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) Rank FROM "user"  --  subquery
+    // SELECT rank FROM (SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) rank FROM "user") AS coco WHERE id = 1;  --  query
+
+    const userRank = await this.dataSource
+      .createQueryBuilder()
+      .select('rank')
+      .from(
+        (subQuery) =>
+          subQuery
+            .select('id')
+            .from(User, 'user')
+            .addSelect('RANK() OVER(ORDER BY xp DESC) as "rank"'),
+        'user',
+      )
+      .where('id = :id', { id: user.id })
+      .getRawOne();
+
+    return { level, userRank };
   }
 
-  async getUserHistory(dto: Omit<UserDto, 'password'>) {
+  async getUserHistory(login42: string) {
     /*  Get calling user's object */
     const user = await this.usersRepository.findOne({
-      where: { login42: dto.login42 },
+      where: { login42: login42 },
     });
 
     if (!user) {
@@ -181,6 +196,50 @@ export class UsersService {
     };
   }
 
+  async playGame(dto: PlayGameDto) {
+    const player1 = await this.findOne(dto.player1);
+    const player2 = await this.findOne(dto.player2);
+    const winner = await this.findOne(dto.winner);
+
+    if (winner.id !== player1.id && winner.id !== player2.id) {
+      throw new BadRequestException({
+        error: 'Winner has to either be player 1 or player 2',
+      });
+    }
+
+    const loser =
+      winner.id === player1.id
+        ? await this.findOne(player2.login42)
+        : await this.findOne(player1.login42);
+
+    const newGame = Game.create({
+      player1_id: player1.id,
+      player2_id: player2.id,
+      winner: winner.id,
+      player1: player1,
+      player2: player2,
+    });
+
+    await newGame.save();
+
+    /* Always increase the winner's XP by 2 */
+    this.usersRepository
+      .createQueryBuilder()
+      .update(winner)
+      .set({ xp: winner.xp + 2 })
+      .where({ id: winner.id })
+      .execute();
+
+    /* If the loser's xp is > 0, increases only by 1 */
+    this.usersRepository
+      .createQueryBuilder()
+      .update(loser)
+      .set({ xp: loser.xp + 1 })
+      .where('id = :id', { id: loser.id })
+      .andWhere('xp > 0', { xp: loser.xp })
+      .execute();
+  }
+
   async addFriend(dto: AddFriendDto, login42: string) {
     /* First we get the caller (person who is initiating the friend request) 
     and friend in our db */
@@ -195,7 +254,7 @@ export class UsersService {
       });
     }
 
-    /* Then we check if the perso the caller wants to add as a friend is already
+    /* Then we check if the person the caller wants to add as a friend is already
     in our friend list and throw a 400 if they are */
     const doubleAddCheck = await this.friendRepository.findOne({
       relations: {

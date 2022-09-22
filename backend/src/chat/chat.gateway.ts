@@ -51,6 +51,15 @@ export class ChatGateway {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
     });
+
+    const connectedUserIdList: number[] =
+      this.chatService.updateUserConnectedToRooms(
+        newRoom.roomName,
+        payload.userId,
+      );
+    this.server
+      .in(newRoom.roomName)
+      .emit('updateConnectedUsers', connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)
@@ -84,6 +93,14 @@ export class ChatGateway {
         };
       }),
     );
+    const connectedUserIdList: number[] =
+      this.chatService.updateUserConnectedToRooms(
+        room.roomName,
+        payload.userId,
+      );
+    this.server
+      .in(room.roomName)
+      .emit('updateConnectedUsers', connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)
@@ -111,6 +128,7 @@ export class ChatGateway {
   @SubscribeMessage('disconnectFromChannelRequest')
   async disconnectFromChannel(
     @MessageBody() roomId: number,
+    @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
     const room = await this.chatService.getRoomsById(roomId);
@@ -119,6 +137,15 @@ export class ChatGateway {
       channelId: room.id,
       channelName: room.channelName,
     });
+
+    const connectedUserIdList: number[] =
+      this.chatService.removeUserConnectedToRooms(
+        room.roomName,
+        payload.userId,
+      );
+    this.server
+      .in(room.roomName)
+      .emit('updateConnectedUsers', connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)
