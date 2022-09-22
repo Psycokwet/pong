@@ -12,18 +12,22 @@ interface ChannelData {
   channelName: string;
   channelId: number;
 }
- 
 
-function WebsSocketCdaiTest() {
+function WebSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
   const [messages, setMessages] = useState<string[]>([]);
-  const [connectedChannel, setConnectedChannel] = useState<ChannelData | undefined>(undefined);
+  const [connectedChannel, setConnectedChannel] = useState<
+    ChannelData | undefined
+  >(undefined);
   const [connectedUserIdList, setConnectedUserIdList] = useState<number[]>([]);
   const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
 
   /** MESSAGE */
   const send = (message: string) => {
-    socket?.emit("sendMessage", {channelId: connectedChannel?.channelId, message});
+    socket?.emit("sendMessage", {
+      channelId: connectedChannel?.channelId,
+      message,
+    });
   };
   useEffect(() => {
     const newSocket = io(ENDPOINT, {
@@ -60,33 +64,29 @@ function WebsSocketCdaiTest() {
   }, [channelCreationListener]);
   /** END CREATE CHANNEL */
 
-
-
   /** JOIN CHANNEL */
-  
+
   const handleClick = (channelId: number) => {
     socket?.emit("joinChannelRequest", channelId);
-  }
+  };
   const handleJoinChannel = (message: ChannelData) => {
-    console.log(message)
-    setConnectedChannel(message)
-  }
-  useEffect(()=> {
+    console.log(message);
+    setConnectedChannel(message);
+  };
+  useEffect(() => {
     socket?.on("confirmChannelEntry", handleJoinChannel);
     return () => {
       socket?.off("confirmChannelEntry", handleJoinChannel);
     };
   }, [handleJoinChannel]);
   /** END JOIN CHANNEL */
-  
-  
-  
+
   /** GET ALL CHANNEL */
   useEffect(() => {
     socket?.emit("joinChannelLobbyRequest");
   }, [socket]);
   const getAllChannel = (message: []) => {
-    console.log(message)
+    console.log(message);
     setAllChannel(message);
   };
   useEffect(() => {
@@ -97,14 +97,10 @@ function WebsSocketCdaiTest() {
   }, [getAllChannel]);
   /** END GET ALL CHANNEL */
 
-
-
-
-
   /** DISCONNECT CHANNEL */
   const sendDisconnect = () => {
-    socket?.emit('disconnectFromChannel', connectedChannel?.channelId);
-  }
+    socket?.emit("disconnectFromChannel", connectedChannel?.channelId);
+  };
   const handleDisconnect = () => {
     setConnectedChannel(undefined);
   };
@@ -116,9 +112,10 @@ function WebsSocketCdaiTest() {
   }, [handleDisconnect]);
   /** DISCONNECT CHANNEL */
 
-
   /** CONNECTED USER LIST */
-  const handleUpdateConnectedUserIdList = (newConnectedUserIdList: number[]) => {
+  const handleUpdateConnectedUserIdList = (
+    newConnectedUserIdList: number[]
+  ) => {
     setConnectedUserIdList(newConnectedUserIdList);
   };
   useEffect(() => {
@@ -129,23 +126,18 @@ function WebsSocketCdaiTest() {
   }, [handleUpdateConnectedUserIdList]);
   /** END CONNECTED USER LIST */
 
-
-  
   return (
     <>
-      {
-        !connectedChannel ?
+      {!connectedChannel ? (
         <>
-          <CreateChannel
-            handleCreateChannel={handleCreateChannel}
-          />
+          <CreateChannel handleCreateChannel={handleCreateChannel} />
           <JoinChannelButtons
             socket={socket}
             allChannel={allChannel}
             setConnectedChannel={setConnectedChannel}
           />
         </>
-        :
+      ) : (
         <>
           <ConnectedUsers connectedUserIdList={connectedUserIdList} />
           <br />
@@ -159,13 +151,13 @@ function WebsSocketCdaiTest() {
             sendDisconnect={sendDisconnect}
           />
           <br />
-          
+
           <MessageInput send={send} />
           <Messages messages={messages} />
         </>
-      }
+      )}
     </>
   );
 }
 
-export default WebsSocketCdaiTest;
+export default WebSocketCdaiTest;
