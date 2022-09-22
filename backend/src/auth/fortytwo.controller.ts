@@ -39,12 +39,12 @@ export class FortyTwoController {
     let userFromDb;
     try {
       userFromDb = await this.usersService.signin({
-        login42: req.user.profile.username,
+        login42: req.user.user.login42,
       });
     } catch (e) {
       userFromDb = await this.usersService.signup({
-        login42: req.user.profile.username,
-        email: req.user.profile.emails[0].value,
+        login42: req.user.user.login42,
+        email: req.user.user.email,
       });
     }
 
