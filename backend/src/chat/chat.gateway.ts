@@ -51,7 +51,12 @@ export class ChatGateway {
 
     await client.join(newRoom.roomName);
 
-    this.server.in(this.channelLobby).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
+    // this.server.in(this.channelLobby).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
+    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
+      channelId: newRoom.id,
+      channelName: newRoom.channelName,
+    });
+    this.server.in('channelLobby').emit(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
     });
