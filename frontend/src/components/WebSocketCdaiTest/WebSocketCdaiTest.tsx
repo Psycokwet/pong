@@ -8,7 +8,7 @@ import MessageInput from "./MessageInput";
 import Messages from "./Messages";
 const ENDPOINT = "http://localhost:8080";
 import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
-import ChannelData from "../../../shared/interface/ChannelData";
+import { ChannelData } from "../../../shared/interfaces/ChannelData";
 
 function WebSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
@@ -21,7 +21,10 @@ function WebSocketCdaiTest() {
 
   /** MESSAGE */
   const send = (message: string) => {
-    socket?.emit(ROUTES_BASE.CHAT.SEND_MESSAGE, {channelId: connectedChannel?.channelId, message});
+    socket?.emit(ROUTES_BASE.CHAT.SEND_MESSAGE, {
+      channelId: connectedChannel?.channelId,
+      message,
+    });
   };
   useEffect(() => {
     const newSocket = io(ENDPOINT, {
@@ -50,9 +53,15 @@ function WebSocketCdaiTest() {
     setConnectedChannel(confirmedConnectedChannel);
   };
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelCreationListener);
+    socket?.on(
+      ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION,
+      channelCreationListener
+    );
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelCreationListener);
+      socket?.off(
+        ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION,
+        channelCreationListener
+      );
     };
   }, [channelCreationListener]);
   /** END CREATE CHANNEL */
@@ -60,11 +69,11 @@ function WebSocketCdaiTest() {
   /** JOIN CHANNEL */
   const handleJoinChannelClick = (channelId: number) => {
     socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNE_REQUEST, channelId);
-  }
+  };
   const handleJoinChannel = (message: ChannelData) => {
-    setConnectedChannel(message)
-  }
-  useEffect(()=> {
+    setConnectedChannel(message);
+  };
+  useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, handleJoinChannel);
     return () => {
       socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, handleJoinChannel);
@@ -89,15 +98,24 @@ function WebSocketCdaiTest() {
 
   /** DISCONNECT CHANNEL */
   const sendDisconnect = () => {
-    socket?.emit(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST, connectedChannel?.channelId);
-  }
+    socket?.emit(
+      ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST,
+      connectedChannel?.channelId
+    );
+  };
   const handleDisconnect = () => {
     setConnectedChannel(undefined);
   };
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, handleDisconnect);
+    socket?.on(
+      ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION,
+      handleDisconnect
+    );
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, handleDisconnect);
+      socket?.off(
+        ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION,
+        handleDisconnect
+      );
     };
   }, [handleDisconnect]);
   /** DISCONNECT CHANNEL */
@@ -109,9 +127,15 @@ function WebSocketCdaiTest() {
     setConnectedUserIdList(newConnectedUserIdList);
   };
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, handleUpdateConnectedUserIdList);
+    socket?.on(
+      ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS,
+      handleUpdateConnectedUserIdList
+    );
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, handleUpdateConnectedUserIdList);
+      socket?.off(
+        ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS,
+        handleUpdateConnectedUserIdList
+      );
     };
   }, [handleUpdateConnectedUserIdList]);
   /** END CONNECTED USER LIST */
