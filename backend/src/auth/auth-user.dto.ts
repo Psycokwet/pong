@@ -1,10 +1,10 @@
 export interface AuthUserDto {
-  username: string;
+  login42: string;
   password: string;
 }
 
 export interface AuthUserIdDto {
-  username: string;
+  login42: string;
   password: string;
   userId: number;
 }

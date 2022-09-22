@@ -6,11 +6,11 @@ import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
 import { Repository } from 'typeorm';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/user/user.entity';
 import Room from './room.entity';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
-
+import { ChatRoom } from 'shared/interfaces/ChatRoom';
 @Injectable()
 export class ChatService {
   constructor(
@@ -23,11 +23,11 @@ export class ChatService {
     private usersRepository: Repository<User>,
     private userService: UsersService,
   ) {}
+  private static chatRoomList: ChatRoom[] = [];
 
   public async getAllRooms() {
     return this.roomsRepository.find().then((rooms) =>
       rooms.map((room) => {
-        // delete room.roomName;
         return {
           channelId: room.id,
           channelName: room.channelName,
@@ -40,6 +40,15 @@ export class ChatService {
     return this.roomsRepository.findOneBy({ id });
   }
 
+  public async getRoomByIdWithRelations(id: number) {
+    return this.roomsRepository.findOne({
+      where: { id },
+      relations: {
+        members: true,
+      },
+    });
+  }
+
   async saveRoom(roomName: string, clientId: string, userId: number) {
     const user = await this.userService.getById(userId);
 
@@ -50,21 +59,19 @@ export class ChatService {
       members: [user],
     });
 
-    return newRoom.save();
+    await newRoom.save();
+    return newRoom;
   }
 
   async addMemberToChannel(userId: number, room: Room) {
-    console.log('userId', userId);
     const newMember = await this.userService.getById(userId);
-    console.log('newMember', newMember);
-    // let nbMembers = room.members.length;
-    // const newMember = await room.members
-    // console.log(`Nb members before pushing: ${nbMembers}`);
-    console.log(room.members);
-    // room.members.push(newMember);
-    room.members = [newMember];
-    const nbMembers = room.members.length;
-    console.log(`Nb members after pushing: ${nbMembers}`);
+
+    if (
+      !room.members.filter((member) => member.username === newMember.username)
+        .length
+    )
+      room.members = [...room.members, newMember];
+
     room.save();
   }
 
@@ -94,4 +101,43 @@ export class ChatService {
     }
     return user;
   }
+
+  /** ChatRoomConnectedUsers methods */
+  updateUserConnectedToRooms(roomName: string, userId): number[] {
+    let chatRoomIndex = ChatService.chatRoomList.findIndex(
+      (chatRoom) => chatRoom.roomName === roomName,
+    );
+    if (chatRoomIndex === -1) {
+      const newChatRoom = new ChatRoom();
+      newChatRoom.roomName = roomName;
+      newChatRoom.userIdList = [userId];
+
+      ChatService.chatRoomList = [...ChatService.chatRoomList, newChatRoom];
+      chatRoomIndex = ChatService.chatRoomList.findIndex(
+        (chatRoom) => chatRoom.roomName === roomName,
+      );
+    } else if (
+      !ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)
+    ) {
+      ChatService.chatRoomList[chatRoomIndex].userIdList = [
+        ...ChatService.chatRoomList[chatRoomIndex].userIdList,
+        userId,
+      ];
+    }
+    return ChatService.chatRoomList[chatRoomIndex].userIdList;
+  }
+
+  removeUserConnectedToRooms(roomName: string, userId): number[] {
+    const chatRoomIndex = ChatService.chatRoomList.findIndex(
+      (chatRoom) => chatRoom.roomName == roomName,
+    );
+    if (ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)) {
+      ChatService.chatRoomList[chatRoomIndex].userIdList =
+        ChatService.chatRoomList[chatRoomIndex].userIdList.filter(
+          (id) => id !== userId,
+        );
+    }
+    return ChatService.chatRoomList[chatRoomIndex].userIdList;
+  }
+  /** END ChatRoomConnectedUsers methods */
 }
