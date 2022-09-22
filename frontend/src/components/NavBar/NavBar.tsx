@@ -11,6 +11,8 @@ import Settings from "./Pages-To-Change/Settings";
 import NotFound from "./Pages-To-Change/NotFound";
 import APage from "./APage";
 import FriendList from "../FriendList/FriendList";
+import ProfileRoutes from "../Profile/ProfileRoutes";
+import { userStatusEnum } from "../FriendList/FriendList";
 
 // Icon
 import { FaComments } from "react-icons/fa";
@@ -20,6 +22,9 @@ import { RiPingPongFill } from "react-icons/ri";
 import { IoMdSettings } from "react-icons/io";
 import { DisconnectionButton } from "../ConnectionButton/DisconnectionButton";
 import PracticeJwt from "../PracticeJwt";
+
+/***************** To get with real data ******************************************/
+let connected_user = "scarboni"
 
 /***************** List of Pages ******************************************/
 const webPages = [
@@ -42,9 +47,9 @@ const webPages = [
     pageIcon: <FaComments size="28" />,
   },
   {
-    url: "/profile",
-    pageName: "profile",
-    element: <Profile />,
+    url: `/profile/${connected_user}`, // to change with real user
+    pageName: `profile ${connected_user}`, // to change with real user
+    element: <ProfileRoutes />,
     pageIcon: <FaUser size="26" />,
   },
   {
@@ -67,13 +72,6 @@ type DisconnectionButtonProps = {
 
 /***************** Component NavBar ******************************************/
 const NavBar: React.FC<DisconnectionButtonProps> = ({ setDisconnected }) => {
-  /******************************************************** 
-  Can be useful if we want to do NavBar for phone version 
-  ********************************************************/
-  // const [active, setActive] = useState(false);
-  // const showMenu = () => {
-  //   setActive(!active);
-  // };
 
   return (
     <div>
@@ -101,13 +99,13 @@ const NavBar: React.FC<DisconnectionButtonProps> = ({ setDisconnected }) => {
         </ul>
       </nav>
 
-      <Routes>
+      {/* <Routes>
+        <Route path="/" element={<Home />} />
         {webPages.map((onePage, i) => {
           return <Route key={i} path={onePage.url} element={onePage.element} />;
         })}
-        {/* <Route path="*" element={<NotFound />} /> */}
-        <Route path="/" element={<Home />} />
-      </Routes>
+        <Route path="*" element={<NotFound />} />
+      </Routes> */}
     </div>
   );
 };
