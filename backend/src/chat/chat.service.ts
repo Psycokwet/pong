@@ -6,9 +6,9 @@ import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
 import { Repository } from 'typeorm';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/user/user.entity';
 import Room from './room.entity';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()

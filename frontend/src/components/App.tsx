@@ -2,7 +2,8 @@ import "./App.css";
 import LoginPage from "./LoginPage/LoginPage";
 import { useState, useEffect } from "react";
 import NavBar from "./NavBar/NavBar";
-import { DisconnectionButton } from "./ConnectionButton/DisconnectionButton";
+import FriendList from "./FriendList/FriendList";
+
 import Loading from "./Common/Loading";
 import { Api } from "../api/api";
 enum connectionStatusEnum {
@@ -18,7 +19,7 @@ function App() {
 
   useEffect(() => {
     if (connectedState == connectionStatusEnum.Unknown) {
-      api.refreshToken().then((res) => {
+      api.refreshToken().then((res: Response) => {
         if (res.status !== 200) {
           console.log(res);
           setConnectedState(connectionStatusEnum.Disconnected);
@@ -54,6 +55,7 @@ function App() {
           setConnectedState(connectionStatusEnum.Disconnected)
         }
       />
+      <FriendList />
     </div>
   ) : (
     <LoginPage />
