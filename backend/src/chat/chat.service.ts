@@ -62,6 +62,7 @@ export class ChatService {
   ) {
     const user = await this.userService.getById(userId);
 
+    console.log('roomName', roomName);
     const newRoom = await Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: roomName,
@@ -71,6 +72,7 @@ export class ChatService {
       isChannelPrivate: isChannelPrivate,
     });
 
+    console.log(newRoom);
     await newRoom.save();
     return newRoom;
   }
