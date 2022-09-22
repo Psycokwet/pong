@@ -27,7 +27,6 @@ export class ChatService {
   public async getAllRooms() {
     return this.roomsRepository.find().then((rooms) =>
       rooms.map((room) => {
-        // delete room.roomName;
         return {
           channelId: room.id,
           channelName: room.channelName,
@@ -40,6 +39,15 @@ export class ChatService {
     return this.roomsRepository.findOneBy({ id });
   }
 
+  public async getRoomByIdWithRelations(id: number) {
+    return this.roomsRepository.findOne({
+      where: { id },
+      relations: {
+        members: true,
+      },
+    });
+  }
+
   async saveRoom(roomName: string, clientId: string, userId: number) {
     const user = await this.userService.getById(userId);
 
@@ -50,21 +58,19 @@ export class ChatService {
       members: [user],
     });
 
-    return newRoom.save();
+    await newRoom.save();
+    return newRoom;
   }
 
   async addMemberToChannel(userId: number, room: Room) {
-    console.log('userId', userId);
     const newMember = await this.userService.getById(userId);
-    console.log('newMember', newMember);
-    // let nbMembers = room.members.length;
-    // const newMember = await room.members
-    // console.log(`Nb members before pushing: ${nbMembers}`);
-    console.log(room.members);
-    // room.members.push(newMember);
-    room.members = [newMember];
-    const nbMembers = room.members.length;
-    console.log(`Nb members after pushing: ${nbMembers}`);
+
+    if (
+      !room.members.filter((member) => member.username === newMember.username)
+        .length
+    )
+      room.members = [...room.members, newMember];
+
     room.save();
   }
 

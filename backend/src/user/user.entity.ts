@@ -6,6 +6,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { Game } from 'src/game/game.entity';
 import { Friend } from 'src/friend_list/friend.entity';
@@ -54,4 +55,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Room, (Room) => Room.owner)
   public rooms: Room[];
+
+  @ManyToMany(() => Room, (room) => room.members)
+  public channels: Room[];
 }
