@@ -1,6 +1,6 @@
 import React from "react";
 import { PictureForm } from "../PictureForm/PictureForm";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { IoStarOutline } from "react-icons/io5";
 import ProfileName from "./ProfileName";
 import Stats from "./Stats/Stats";
