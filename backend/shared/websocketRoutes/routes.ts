@@ -21,6 +21,8 @@ export const ROUTES_BASE = {
     GET_CONNECTED_USER_LIST_REQUEST: 'getConnectedUserListRequest',
     CONNECTED_USER_LIST: 'connectedUserList',
     UPDATE_CONNECTED_USERS: 'updateConnectedUsers',
+    /** CREATE DM */
+    CREATE_DM: 'createDMRequest',
   },
 };
 const generate_full_routes = (routes_base) => {
