@@ -8,7 +8,7 @@ import MessageInput from "./MessageInput";
 import Messages from "./Messages";
 const ENDPOINT = "http://localhost:8080";
 import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
-import { ChannelData } from "../../../shared/interfaces/ChannelData";
+import ChannelData from "../../../shared/interfaces/ChannelData";
 
 function WebSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
