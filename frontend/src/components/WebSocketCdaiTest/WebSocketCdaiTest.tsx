@@ -31,7 +31,7 @@ function WebsSocketCdaiTest() {
       withCredentials: true,
     });
     setSocket(newSocket);
-  }, [setSocket]);
+  }, []);
 
   const messageListener = (message: string) => {
     setMessages((current: string[]) => [...current, message]);
@@ -103,7 +103,7 @@ function WebsSocketCdaiTest() {
 
   /** DISCONNECT CHANNEL */
   const sendDisconnect = () => {
-    socket?.emit('disconnectFromChannelRequest', connectedChannel?.channelId);
+    socket?.emit('disconnectFromChannel', connectedChannel?.channelId);
   }
   const handleDisconnect = () => {
     setConnectedChannel(undefined);
