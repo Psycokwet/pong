@@ -1,4 +1,4 @@
 export default interface SearchChannel {
-  roomName: string;
-  userPassword: string;
+  channelName: string;
+  inputPassword: string;
 }
