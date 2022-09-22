@@ -1,6 +1,15 @@
 ## NOTE
 
-With the current auth system you have to add users manually in the database if you want to run tests requiring many different users (refer to get user history for info on how to access).
+With the current auth system you have to add users manually in the database if you want to run tests requiring many different users.
+
+To create new entries manually in a database:
+
+- Go to http://localhost:5431/
+- Click on PostgreSQL icon on the left
+- Log in: postgres / localroot
+- Navigate to the db you want to add entries to using the menu on the left
+- Click on "Inserer" and now you have to add some info relevant to the entity's columns, should be fairly straightforward
+- Add as many entries as you want, if you want to add many in succession you can use the "Inserer et repeter" button for a quicker time
 
 ### get rank :
 
@@ -18,7 +27,10 @@ GET /user/get_user_rank
 
 ```
 {
-    "rank": 1
+    "level": 2.0794415416798357,
+    "userRank": {
+        "rank": "1"
+    }
 }
 ```
 
@@ -26,28 +38,13 @@ GET /user/get_user_rank
 
 ```
 {
-    "status": 400,
     "error": "User not found"
 }
 ```
 
 ### get user history :
 
-1. First you have to manually create some games directly in the database (otherwise there will be no data so you will just see 0 games, 0 wins and no games):
-
-   - Go to http://localhost:5431/
-   - Click on PostgreSQL icon on the left
-   - Log in: postgres / localroot
-   - Navigate to the "game" db using the menu on the left
-   - Click on "Inserer" and now you have to add some info:
-     - player1_id: id of player 1, it can be any user id (you can find user ids by clicking on user db and checking id column)
-     - player2_id: id of player 2
-     - winner: id of winner
-     - player1Id: id of player 1, you can use the drop-down menu for this
-     - player2Id: id of player 2, same as above
-   - Add as many games as you want, if you want to add many in succession you can use the "Inserer et repeter" button for a quicker time
-
-2. POST /user/get_user_rank
+GET /user/get_user_history
 
 #### payload :
 
@@ -69,26 +66,32 @@ GET /user/get_user_rank
 
 ```
 {
-    "nbGames": 3,
+    "nbGames": 4,
     "nbWins": 2,
     "games": [
         {
-            "id": 4,
-            "player1": "sophie",
-            "player2": "coucou2",
-            "winner": "sophie"
+            "time": "Sep 18 2022 17:25:42",
+            "opponent": "thi-nguy",
+            "winner": "cdai",
+            "id": 8
         },
         {
-            "id": 5,
-            "player1": "coucou3",
-            "player2": "sophie",
-            "winner": "coucou3"
+            "time": "Sep 18 2022 17:25:00",
+            "opponent": "nel-masr",
+            "winner": "nel-masr",
+            "id": 6
         },
         {
-            "id": 6,
-            "player1": "coucou3",
-            "player2": "sophie",
-            "winner": "sophie"
+            "time": "Sep 18 2022 17:24:48",
+            "opponent": "scarboni",
+            "winner": "cdai",
+            "id": 5
+        },
+        {
+            "time": "Sep 18 2022 17:24:19",
+            "opponent": "mescande",
+            "winner": "mescande",
+            "id": 4
         }
     ]
 }
