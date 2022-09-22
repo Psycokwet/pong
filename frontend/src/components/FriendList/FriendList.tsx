@@ -1,12 +1,9 @@
 import React from "react";
 import { useState } from "react";
-import { Route, Routes } from "react-router-dom";
 
 import { BiChevronDown } from "react-icons/bi";
 
-import Profile from "../Profile/Profile";
 import DropDownFriendList from "./DropDownFriendList";
-import NotFound from "../NavBar/Pages-To-Change/NotFound";
 
 /***************** TYPE ***************************************/
 
@@ -144,19 +141,6 @@ const FriendList = () => {
           />
         </div>
       </div>
-      {/* ************************ Router ************************* */}
-        {/* <Routes location="/profile">
-          {UserFriendList.map((one_friend) => {
-            return (
-              <Route
-                key={one_friend.login}
-                path={`/profile/:user_login`}
-                element={<Profile />}
-              />
-            );
-          })}
-          <Route path="*" element={<NotFound />} />
-        </Routes> */}
     </div>
   );
 };
