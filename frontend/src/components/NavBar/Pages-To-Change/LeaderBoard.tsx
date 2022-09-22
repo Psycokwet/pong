@@ -12,7 +12,7 @@ const LeaderBoard = () => {
         });
     });
     api.get_friend_list("scarboni").then((res: Response) => {
-      console.log("get_friend_list",res);
+      console.log("get_friend_list", res);
       res.json().then((content) => {
         console.log("get_friend_list", content);
       });
@@ -31,6 +31,26 @@ const LeaderBoard = () => {
       });
     });
   };
+  const sendRequestHisRank = () => {
+    api.get_user_rank().then((res: Response) => {
+      console.log("get_user_rank", res);
+      res.json().then((content) => {
+        console.log("get_user_rank", content);
+      });
+    });
+    api.get_user_history().then((res: Response) => {
+      console.log("get_user_history", res);
+      res.json().then((content) => {
+        console.log("get_user_history", content);
+      });
+    });
+    api.add_played_game("scarboni", "bob", "scarboni").then((res: Response) => {
+      console.log("add_played_game", res);
+      res.json().then((content) => {
+        console.log("add_played_game", content);
+      });
+    });
+  };
   return (
     <>
       <h1 className="text-amber-600">I'm practice request page</h1>
@@ -39,6 +59,13 @@ const LeaderBoard = () => {
         onClick={sendRequest}
       >
         send request
+      </button>
+      <h1 className="text-amber-600">I'm practice request page</h1>
+      <button
+        className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
+        onClick={sendRequestHisRank}
+      >
+        send requests history/rank
       </button>
     </>
   );
