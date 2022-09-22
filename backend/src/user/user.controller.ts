@@ -20,7 +20,7 @@ import { createReadStream } from 'fs';
 import { join } from 'path';
 import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
-import { ROUTES_BASE } from 'shared/routes';
+import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { PlayGameDto } from './play-game.dto';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
