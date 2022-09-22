@@ -41,7 +41,6 @@ export class ChatGateway {
   ) {
     const newRoom = await this.chatService.saveRoom(
       roomName,
-      client.id,
       payload.userId,
     );
 
