@@ -12,7 +12,7 @@ export const PictureGetter: React.FC<Props> = ({ apiCall }) => {
     apiCall()
       .then((res: Response) => res.blob())
       .then((myBlob: Blob) => setUserPicture(URL.createObjectURL(myBlob)))
-      .catch((err: Error) => alert("File Download Error:", err));
+      .catch((err: Error) => alert("File Download Error:" + err));
   };
 
   return (
