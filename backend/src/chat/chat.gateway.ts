@@ -10,6 +10,8 @@ import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
 import { UsersService } from 'src/user/user.service';
+import { User } from 'src/user/user.entity';
+
 @WebSocketGateway({
   transport: ['websocket'],
   cors: '*/*',
