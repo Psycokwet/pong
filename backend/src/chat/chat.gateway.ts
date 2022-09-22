@@ -1,4 +1,8 @@
-import { UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -57,13 +61,34 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    let hashedPassword = '';
+    if (createChannelRequestData.roomName === '') {
+      throw new BadRequestException({
+        error: 'You must input a channel name',
+      });
+    }
+    /*  We first check if the channel name is already taken, if it is 
+        we throw a Bad Request exception */
+    const duplicateRoomCheck =
+      await this.chatService.getRoomByNameWithRelations(
+        createChannelRequestData.roomName,
+      );
 
-    console.log(createChannelRequestData.password);
+    if (duplicateRoomCheck) {
+      throw new BadRequestException({
+        error: 'Channel name is already taken',
+      });
+    }
+    console.log('roomName: ', createChannelRequestData.roomName);
+    /*  Then we check if the channel will be password protected, if it's not
+        then the password will be an empty string, if it is we hash the 
+        password */
+    let hashedPassword = '';
 
     if (createChannelRequestData.password !== '')
       hashedPassword = await crypt(createChannelRequestData.password);
 
+    /*  Then we create the room in the db and then enter the channel we 
+        just created */
     const newRoom = await this.chatService.saveRoom({
       roomName: createChannelRequestData.roomName,
       clientId: client.id,
@@ -97,8 +122,6 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    //WARNING: si on fait comme ca, on doit toujours demander un password
-    //a l'utilisateur
     const room = await this.chatService.getRoomByIdWithRelations(
       joinChannelRequestData.roomId,
     );
@@ -107,8 +130,13 @@ export class ChatGateway {
         joinChannelRequestData.userPassword,
         room.password,
       );
-      if (!isGoodPassword) return;
+      if (!isGoodPassword)
+        throw new UnauthorizedException({
+          error:
+            'A password has been set for this channel. Please enter the correct password.',
+        });
     }
+
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit('confirmChannelEntry', {
@@ -127,7 +155,7 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('joinPrivateChannelRequest')
+  @SubscribeMessage('searchChannelRequest')
   async joinPrivateRoom(
     @MessageBody()
     joinPrivateChannelRequestData: {
@@ -140,14 +168,24 @@ export class ChatGateway {
     const room = await this.chatService.getRoomByNameWithRelations(
       joinPrivateChannelRequestData.roomName,
     );
-    if (!room) return;
+    if (!room) {
+      throw new BadRequestException({
+        error: 'You must specify which channel you want to join',
+      });
+    }
+
     if (room.password !== '') {
       const isGoodPassword = await passwordCompare(
         joinPrivateChannelRequestData.userPassword,
         room.password,
       );
-      if (!isGoodPassword) return;
+      if (!isGoodPassword)
+        throw new UnauthorizedException({
+          error:
+            'A password has been set for this channel. Please enter the correct password.',
+        });
     }
+
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit('confirmChannelEntry', {

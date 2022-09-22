@@ -53,6 +53,10 @@ export class ChatService {
     });
   }
 
+  public async getRoomByName(roomName: string) {
+    return this.roomsRepository.findOneBy({ roomName: roomName });
+  }
+
   public async getRoomByNameWithRelations(roomName: string) {
     return this.roomsRepository.findOne({
       where: { channelName: roomName },
