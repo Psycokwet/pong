@@ -6,10 +6,11 @@ export const ROUTES_BASE = {
     GET_PICTURE: 'get_picture',
     ADD_FRIEND: 'add_friend',
     GET_FRIEND_LIST: 'get_friends_list',
-    SET_NICKNAME: 'set_pongUsername',
-    GET_NICKNAME: 'get_pongUsername',
+    SET_NICKNAME: 'set_pong_username',
+    GET_NICKNAME: 'get_pong_username',
     GET_USER_RANK: 'get_user_rank',
     GET_USER_HISTORY: 'get_user_history',
+    PLAY_GAME: 'play_game',
   },
   AUTH: {
     ENDPOINT: '/auth/42/',
