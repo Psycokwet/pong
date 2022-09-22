@@ -73,8 +73,6 @@ export class UsersService {
       is_2fa_activated: false,
     });
 
-    //user.xp = 0;
-
     try {
       return await user.save();
     } catch (e) {
@@ -283,6 +281,15 @@ export class UsersService {
     });
 
     return friendsList;
+  }
+
+  async setTwoFactorAuthenticationSecret(secret: string, login42: string) {
+    const user = await this.findOne(login42);
+
+    /* We use TypeORM's update function to update our entity */
+    await this.usersRepository.update(user.id, {
+      twoFactorAuthenticationSecret: secret,
+    });
   }
 
   async get2fa(login42: string) {

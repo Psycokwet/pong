@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { Api } from '../../api/api';
+import React, { useState } from "react";
+type Props = {
+  apiCall: () => Promise<Response>;
+};
 
-export const PictureGetter = () => {
+export const PictureGetter: React.FC<Props> = ({ apiCall }) => {
   const [userPicture, setUserPicture] = useState<string | null>(null);
 
-  const api = new Api();
+  const submitDownloadForm = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
 
-  const submitDownloadForm = (e) => {
-    e.preventDefault()
-
-    api.getPicture()
-      .then(res => res.blob())
-      .then(myBlob => setUserPicture(URL.createObjectURL(myBlob)))
-      .catch((err) => alert("File Download Error"));
-  }
+    apiCall()
+      .then((res: Response) => res.blob())
+      .then((myBlob: Blob) => setUserPicture(URL.createObjectURL(myBlob)))
+      .catch((err: Error) => alert("File Download Error:", err));
+  };
 
   return (
     <div>
@@ -21,8 +21,11 @@ export const PictureGetter = () => {
         <h1>React File Download</h1>
         <button onClick={submitDownloadForm}>Submit</button>
       </form>
-      <img src={userPicture ? userPicture : ''} alt="user picture" hidden={!!userPicture} />
+      <img
+        src={userPicture ? userPicture : ""}
+        alt="user picture"
+        hidden={!!userPicture}
+      />
     </div>
   );
-}
-
+};
