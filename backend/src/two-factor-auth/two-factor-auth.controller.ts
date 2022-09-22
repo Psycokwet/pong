@@ -1,5 +1,5 @@
 import { Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
-import { ROUTES_BASE } from 'shared/routes';
+import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import JwtRefreshGuard from 'src/auth/jwtRefresh.guard';
 import { UsersService } from 'src/user/user.service';
 
