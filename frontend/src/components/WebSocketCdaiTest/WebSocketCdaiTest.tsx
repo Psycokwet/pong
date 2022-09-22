@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import io, { Socket } from "socket.io-client";
-import ConnectedUserList from "./ConnectedUserList";
+import ChannelAttachedUsers from "./ChannelAttachedUsers";
 import CreateChannel from "./CreateChannel";
 import JoinChannelButtons from "./JoinChannelButtons";
 import LeaveChannelButton from "./LeaveChannelButton";
