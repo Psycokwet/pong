@@ -10,6 +10,7 @@ import Messages from "./Messages";
 const ENDPOINT = "http://localhost:8080";
 import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
 import ChannelData from "../../../shared/interfaces/ChannelData";
+import User from "../../../shared/interfaces/User";
 
 function WebSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
@@ -26,9 +27,9 @@ function WebSocketCdaiTest() {
     setChannelAttachedUserList(channelAttachedUserList);
   };
   useEffect(() => {
-    socket?.on("updateChannelAttachedUserList", handleChannelAttachedUserList);
+    socket?.on(ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST, handleChannelAttachedUserList);
     return () => {
-      socket?.off("updateChannelAttachedUserList", handleChannelAttachedUserList);
+      socket?.off(ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST, handleChannelAttachedUserList);
     };
   }, [handleChannelAttachedUserList]);
   /** END CHANNEL ATTACHED USER LIST */
