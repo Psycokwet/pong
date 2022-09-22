@@ -10,6 +10,7 @@ import Profile from "../Profile/Profile";
 import Settings from "./Pages-To-Change/Settings";
 import NotFound from "./Pages-To-Change/NotFound";
 import APage from "./APage";
+import FriendList from "../FriendList/FriendList";
 
 // Icon
 import { FaComments } from "react-icons/fa";
@@ -56,7 +57,7 @@ const webPages = [
     url: "/practice",
     pageName: "practice",
     element: <PracticeJwt />,
-    // pageIcon: <IoMdSettings size="26" />,
+    pageIcon: <IoMdSettings size="26" />,
   },
 ];
 
@@ -104,7 +105,7 @@ const NavBar: React.FC<DisconnectionButtonProps> = ({ setDisconnected }) => {
         {webPages.map((onePage, i) => {
           return <Route key={i} path={onePage.url} element={onePage.element} />;
         })}
-        <Route path="*" element={<NotFound />} />
+        {/* <Route path="*" element={<NotFound />} /> */}
         <Route path="/" element={<Home />} />
       </Routes>
     </div>
