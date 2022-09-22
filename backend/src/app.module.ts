@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import Message from './chat/message.entity';
 import { ChatModule } from './chat/chat.module';
 import { Game } from './game/game.entity';
+import LocalFile from './localFiles/localFile.entity';
 import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
 
 @Module({
@@ -36,7 +37,7 @@ import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
       database: 'db',
       autoLoadEntities: true,
       synchronize: true, // to disable in prod
-      entities: [User, Game],
+      entities: [User, Game, LocalFile],
     }),
     TypeOrmModule.forFeature([Message]),
     TwoFactorAuthModule,

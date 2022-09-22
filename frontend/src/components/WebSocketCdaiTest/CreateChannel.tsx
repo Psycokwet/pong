@@ -3,15 +3,15 @@ import { Socket } from "socket.io-client";
 
 export default function CreateChannel({
   handleCreateChannel,
-} : {
-  handleCreateChannel: (newChannelName: string) => void 
-})
-{
+}: {
+  handleCreateChannel: (newChannelName: string) => void;
+}) {
   const [channelName, setChannelName] = useState<string>("");
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.code == 'Enter') handleCreateChannel(channelName)
-  }
+    if (e.code == "Enter" && channelName !== "")
+      handleCreateChannel(channelName);
+  };
 
   return (
     <div>
@@ -24,7 +24,9 @@ export default function CreateChannel({
         }}
         onKeyDown={handleKeyDown}
       ></input>
-      <button onClick={() => handleCreateChannel(channelName)}>Create channel</button>
+      <button onClick={() => handleCreateChannel(channelName)}>
+        Create channel
+      </button>
     </div>
   );
 }
