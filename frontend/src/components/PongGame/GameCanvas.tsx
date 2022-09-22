@@ -29,28 +29,10 @@ function draw(canvas) {
   context.stroke();
 }
 
-// function ballMove(game) {
-//   const newGame = {...game}
-
-//   // Rebounds on top and bottom
-//   if (newGame.ball.y > canvas.height || newGame.ball.y < 0) {
-//       newGame.ball.speed.y *= -1;
-//   }
-
-//   if (newGame.ball.x > canvas.width - PLAYER_WIDTH) {
-//       collide(newGame.computer);
-//   } else if (newGame.ball.x < PLAYER_WIDTH) {
-//       collide(newGame.player);
-//   }
-
-//   newGame.ball.x += newGame.ball.speed.x;
-//   newGame.ball.y += newGame.ball.speed.y;
-// }
-
 function GameCanvas() {
   const canvasRef = useRef(null);
   const [coords, setCoords] = useState({x: 0, y: 0});
-  const [mousePressing,setMousePressing] = useState(false);
+  const [mousePressing,setMousePressing] = useState(true);
   const [globalCoords, setGlobalCoords] = useState({x: 0, y: 0});
   const [game, setGame] = useState({
     player: {
@@ -66,8 +48,8 @@ function GameCanvas() {
       y: canvasHeight / 2,
       r: 5,
       speed: {
-        x: 2,
-        y: 2
+        x: (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2),
+        y: (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2),
       }
     }
   })
@@ -96,33 +78,35 @@ function GameCanvas() {
       game.ball.speed.y = Math.round(impact * ratio / 10);
     }
 
-    function collide(player) {
+    function collide(player, newGame) {
       // The player does not hit the ball
-      if (game.ball.y < player.y || game.ball.y > player.y + PLAYER_HEIGHT) {
-          // reset();
-  
-          // Update score
-          if (player == game.player) {
-              game.computer.score++;
-              // document.querySelector('#computer-score').textContent = game.computer.score;
-          } else {
-              game.player.score++;
-              // document.querySelector('#player-score').textContent = game.player.score;
-          }
+      if (newGame.ball.y < player.y || newGame.ball.y > player.y + PLAYER_HEIGHT) {
+
+        newGame.ball.x = canvasWidth / 2;
+        newGame.ball.y = canvasHeight / 2;
+        newGame.ball.speed.x = (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
+        newGame.ball.speed.y = (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
+        // Update score
+        if (player == newGame.player) {
+            newGame.computer.score++;
+        } else {
+            newGame.player.score++;
+        }
       } else {
-          // Change direction
-          game.ball.speed.x *= -1;
-          changeDirection(player.y);
-  
-          // Increase speed if it has not reached max speed
-          if (Math.abs(game.ball.speed.x) < MAX_SPEED) {
-              game.ball.speed.x *= 1.2;
-          }
+        // Change direction
+        newGame.ball.speed.x *= -1;
+        changeDirection(player.y);
+
+        // Increase speed if it has not reached max speed
+        if (Math.abs(newGame.ball.speed.x) < MAX_SPEED) {
+            newGame.ball.speed.x *= 1.2;
+        }
       }
-  }
+      return newGame;
+    }
 
     const interval = setInterval(() => {
-      const newGame = {...game}
+      let newGame = {...game}
 
       // Rebounds on top and bottom
       if (newGame.ball.y > canvasRef.current.height || newGame.ball.y < 0) {
@@ -130,9 +114,9 @@ function GameCanvas() {
       }
     
       if (newGame.ball.x > canvasRef.current.width - PLAYER_WIDTH) {
-          collide(newGame.computer);
+        newGame = collide(newGame.computer, newGame);
       } else if (newGame.ball.x < PLAYER_WIDTH) {
-          collide(newGame.player);
+        newGame = collide(newGame.player, newGame);
       }
     
       newGame.ball.x += newGame.ball.speed.x;
@@ -202,7 +186,7 @@ function GameCanvas() {
   };
 
   const stopCounter = () => {
-    setMousePressing(false)
+    setMousePressing(true)
   };
 
 
@@ -211,6 +195,10 @@ function GameCanvas() {
     <div
       style={{padding: '3rem', backgroundColor: 'lightgray'}}
     >
+      <div>
+        <p>player1 : {game.player.score}</p>
+        <p>computer : {game.computer.score}</p>
+      </div>
       <canvas
         onMouseMove={handleMouseMove}
         onMouseDown={startCounter}
