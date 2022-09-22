@@ -44,10 +44,10 @@ function WebsSocketCdaiTest() {
 
   /** CREATE CHANNEL */
   const handleCreatePrivateChannel = ({newChannelName, newChannelPass} : {newChannelName: string, newChannelPass: string}) => {
-    socket?.emit("createChannelRequest", newChannelName, true, newChannelPass);
+    socket?.emit("createChannelRequest", {roomName:newChannelName, isChannelPrivate:true, password:newChannelPass});
   };
   const handleCreatePublicChannel = ({newChannelName, newChannelPass} : {newChannelName: string, newChannelPass: string}) => {
-    socket?.emit("createChannelRequest", newChannelName, false, newChannelPass);
+    socket?.emit("createChannelRequest", {roomName:newChannelName, isChannelPrivate:false, password:newChannelPass});
   };
   const channelCreationListener = (confirmedConnectedChannel: ChannelData) => {
     console.log(confirmedConnectedChannel);
