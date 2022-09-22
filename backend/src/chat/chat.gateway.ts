@@ -9,12 +9,17 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
+import { UsersService } from 'src/users/users.service';
+
 @WebSocketGateway({
   transport: ['websocket'],
   cors: '*/*',
 })
 export class ChatGateway {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private userService: UsersService,
+  ) {}
 
   @WebSocketServer()
   server: Server;
@@ -56,7 +61,7 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomById(roomId);
+    const room = await this.chatService.getRoomByIdWithRelations(roomId);
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit('confirmChannelEntry', {
@@ -66,7 +71,24 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('disconnectFromChannelRequest')
+  @SubscribeMessage('getConnectedUserListRequest')
+  async getUsersInChannel(
+    @MessageBody() roomId: number,
+    @UserPayload() payload: any,
+  ) {
+    const room = await this.chatService.getRoomByIdWithRelations(roomId);
+    const caller = await this.userService.getById(payload.userId);
+
+    this.server.in(room.roomName).emit(
+      'connectedUserList',
+      room.members.map((user) => {
+        return { id: user.id, pongUsername: user.username };
+      }),
+    );
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage('disconnectFromChannel')
   async disconnectFromChannel(
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
