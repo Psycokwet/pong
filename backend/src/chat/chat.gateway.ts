@@ -9,6 +9,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
+
+import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import { UsersService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
 
@@ -17,6 +19,7 @@ import { User } from 'src/user/user.entity';
   cors: '*/*',
 })
 export class ChatGateway {
+  private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,
     private readonly userService: UsersService,
@@ -26,30 +29,36 @@ export class ChatGateway {
   server: Server;
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('joinChannelLobbyRequest')
+  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
   async joinChannelLobby(@ConnectedSocket() client: Socket) {
-    client.join('channelLobby');
+    client.join(this.channelLobby);
     this.server
-      .in('channelLobby')
-      .emit('listAllChannels', await this.chatService.getAllRooms());
+      .in(this.channelLobby)
+      .emit(
+        ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
+        await this.chatService.getAllRooms(),
+      );
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('createChannelRequest')
+  @SubscribeMessage(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST)
   async createRoom(
     @MessageBody() roomName: string,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const newRoom = await this.chatService.saveRoom(
-      roomName,
-      client.id,
-      payload.userId,
-    );
+    if (roomName === '') return;
+
+    const newRoom = await this.chatService.saveRoom(roomName, payload.userId);
 
     await client.join(newRoom.roomName);
 
-    this.server.in('channelLobby').emit('confirmChannelCreation', {
+    // this.server.in(this.channelLobby).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
+    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
+      channelId: newRoom.id,
+      channelName: newRoom.channelName,
+    });
+    this.server.in('channelLobby').emit(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
     });
@@ -61,11 +70,11 @@ export class ChatGateway {
       );
     this.server
       .in(newRoom.roomName)
-      .emit('updateConnectedUsers', connectedUserIdList);
+      .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('joinChannelRequest')
+  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNE_REQUEST)
   async joinRoom(
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
@@ -79,7 +88,7 @@ export class ChatGateway {
     });
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
-    this.server.in(client.id).emit('confirmChannelEntry', {
+    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, {
       channelId: room.id,
       channelName: room.channelName,
     });
@@ -102,11 +111,11 @@ export class ChatGateway {
       );
     this.server
       .in(room.roomName)
-      .emit('updateConnectedUsers', connectedUserIdList);
+      .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('getConnectedUserListRequest')
+  @SubscribeMessage(ROUTES_BASE.CHAT.GET_CONNECTED_USER_LIST_REQUEST)
   async getUsersInChannel(
     @MessageBody() roomId: number,
     @UserPayload() payload: any,
@@ -116,7 +125,7 @@ export class ChatGateway {
     });
 
     this.server.in(room.roomName).emit(
-      'connectedUserList',
+      ROUTES_BASE.CHAT.CONNECTED_USER_LIST,
       room.members.map((user) => {
         return {
           id: user.id,
@@ -127,7 +136,7 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('disconnectFromChannelRequest')
+  @SubscribeMessage(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST)
   async disconnectFromChannel(
     @MessageBody() roomId: number,
     @UserPayload() payload: any,
@@ -135,10 +144,12 @@ export class ChatGateway {
   ) {
     const room = await this.chatService.getRoomsById(roomId);
     client.leave(room.roomName);
-    this.server.in(client.id).emit('confirmChannelDisconnection', {
-      channelId: room.id,
-      channelName: room.channelName,
-    });
+    this.server
+      .in(client.id)
+      .emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, {
+        channelId: room.id,
+        channelName: room.channelName,
+      });
 
     const connectedUserIdList: number[] =
       this.chatService.removeUserConnectedToRooms(
@@ -147,11 +158,11 @@ export class ChatGateway {
       );
     this.server
       .in(room.roomName)
-      .emit('updateConnectedUsers', connectedUserIdList);
+      .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage('sendMessage')
+  @SubscribeMessage(ROUTES_BASE.CHAT.SEND_MESSAGE)
   async messageListener(
     @MessageBody() data: { message: string; channelId: number },
     @UserPayload() payload: any,
@@ -170,7 +181,7 @@ export class ChatGateway {
     );
 
     if (room)
-      this.server.in(room.roomName).emit('receiveMessage', {
+      this.server.in(room.roomName).emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, {
         id: newMessage.id,
         author: this.userService.getFrontUsername(newMessage.author),
         time: newMessage.createdAt,
