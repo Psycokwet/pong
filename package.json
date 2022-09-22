@@ -1,5 +1,6 @@
 {
   "devDependencies": {
     "@types/multer": "^1.4.7"
+    "react-minimal-pie-chart": "^8.3.0"
   }
 }
