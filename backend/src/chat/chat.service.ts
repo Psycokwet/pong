@@ -27,7 +27,6 @@ export class ChatService {
   public async getAllRooms() {
     return this.roomsRepository.find().then((rooms) =>
       rooms.map((room) => {
-        // delete room.roomName;
         return {
           channelId: room.id,
           channelName: room.channelName,
@@ -40,7 +39,7 @@ export class ChatService {
     return this.roomsRepository.findOneBy({ id });
   }
 
-  async saveRoom(roomName: string, clientId: string, userId: number) {
+  async saveRoom(roomName: string, userId: number) {
     const user = await this.userService.getById(userId);
 
     const newRoom = await Room.create({
@@ -54,17 +53,8 @@ export class ChatService {
   }
 
   async addMemberToChannel(userId: number, room: Room) {
-    console.log('userId', userId);
     const newMember = await this.userService.getById(userId);
-    console.log('newMember', newMember);
-    // let nbMembers = room.members.length;
-    // const newMember = await room.members
-    // console.log(`Nb members before pushing: ${nbMembers}`);
-    console.log(room.members);
-    // room.members.push(newMember);
     room.members = [newMember];
-    const nbMembers = room.members.length;
-    console.log(`Nb members after pushing: ${nbMembers}`);
     room.save();
   }
 
