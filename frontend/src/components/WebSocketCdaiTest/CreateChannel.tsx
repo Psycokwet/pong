@@ -2,19 +2,36 @@ import { KeyboardEvent, useState } from "react";
 import { Socket } from "socket.io-client";
 
 export default function CreateChannel({
-  handleCreateChannel,
+  handleCreatePrivateChannel,
+  handleCreatePublicChannel,
 } : {
-  handleCreateChannel: (newChannelName: string) => void 
+  handleCreatePrivateChannel: ({newChannelName, newChannelPass} : {newChannelName: string, newChannelPass: string}) => void,  
+  handleCreatePublicChannel: ({newChannelName, newChannelPass} : {newChannelName: string, newChannelPass: string}) => void 
 })
 {
   const [channelName, setChannelName] = useState<string>("");
+  const [channelPass, setChannelPass] = useState<string>("");
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.code == 'Enter') handleCreateChannel(channelName)
+    if (e.code == 'Enter') {
+			handleCreatePublicChannel({newChannelName:channelName, newChannelPass:channelPass})
+			setChannelName("")
+			setChannelPass("")
+		}
+  }
+  const handleClickPublic = () => {
+		handleCreatePublicChannel({newChannelName:channelName, newChannelPass:channelPass})
+		setChannelName("")
+		setChannelPass("")
+  }
+  const handleClickPrivate = () => {
+		handleCreatePrivateChannel({newChannelName:channelName, newChannelPass:channelPass})
+		setChannelName("")
+		setChannelPass("")
   }
 
   return (
-    <div>
+    <div className="flex">
       <input
         type="text"
         placeholder="Channel's name"
@@ -24,7 +41,17 @@ export default function CreateChannel({
         }}
         onKeyDown={handleKeyDown}
       ></input>
-      <button onClick={() => handleCreateChannel(channelName)}>Create channel</button>
+      <input
+        type="text"
+        placeholder="password"
+        value={channelPass}
+        onChange={(e) => {
+          setChannelPass(e.target.value);
+        }}
+        onKeyDown={handleKeyDown}
+      ></input>
+      <button onClick={handleClickPublic}>Create public</button>
+      <button onClick={handleClickPrivate}>Create private</button>
     </div>
   );
 }

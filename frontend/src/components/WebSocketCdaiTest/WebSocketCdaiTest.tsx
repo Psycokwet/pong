@@ -43,8 +43,11 @@ function WebsSocketCdaiTest() {
   /** END MESSAGE */
 
   /** CREATE CHANNEL */
-  const handleCreateChannel = (newChannelName: string) => {
-    socket?.emit("createChannelRequest", newChannelName);
+  const handleCreatePrivateChannel = ({newChannelName, newChannelPass} : {newChannelName: string, newChannelPass: string}) => {
+    socket?.emit("createChannelRequest", newChannelName, true, newChannelPass);
+  };
+  const handleCreatePublicChannel = ({newChannelName, newChannelPass} : {newChannelName: string, newChannelPass: string}) => {
+    socket?.emit("createChannelRequest", newChannelName, false, newChannelPass);
   };
   const channelCreationListener = (confirmedConnectedChannel: ChannelData) => {
     console.log(confirmedConnectedChannel);
@@ -125,7 +128,8 @@ function WebsSocketCdaiTest() {
         !connectedChannel ?
         <>
           <CreateChannel
-            handleCreateChannel={handleCreateChannel}
+            handleCreatePrivateChannel={handleCreatePrivateChannel}
+            handleCreatePublicChannel={handleCreatePublicChannel}
           />
           <JoinChannelButtons
             socket={socket}

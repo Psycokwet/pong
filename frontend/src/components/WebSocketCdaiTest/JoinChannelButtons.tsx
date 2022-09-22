@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { KeyboardEvent, useState } from "react";
 import { Socket } from "socket.io-client";
 
 interface ChannelData {
@@ -19,7 +20,9 @@ export default function JoinChannelButtons(
   }
   ) {
   const handleClick = (channelId: number) => {
-    socket?.emit("joinChannelRequest", channelId);
+    socket?.emit("joinChannelRequest", channelId, privatePass);
+			setPrivateName("")
+			setPrivatePass("")
   }
   const handleJoinChannel = (message: ChannelData) => {
     console.log(message)
@@ -32,8 +35,36 @@ export default function JoinChannelButtons(
     };
   }, [handleJoinChannel]);
 
+  const [privateName, setPrivateName] = useState<string>("");
+  const [privatePass, setPrivatePass] = useState<string>("");
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.code == 'Enter') {
+			socket?.emit("joinPrivateChannelRequest", {privateName, privatePass});
+			setPrivateName("")
+			setPrivatePass("")
+		}
+  }
+
   return (
     <div> 
+      <input
+        type="text"
+        placeholder="join private"
+        value={privateName}
+        onChange={(e) => {
+          setPrivateName(e.target.value);
+        }}
+        onKeyDown={handleKeyDown}
+      ></input>
+      <input
+        type="text"
+        placeholder="private password"
+        value={privatePass}
+        onChange={(e) => {
+          setPrivatePass(e.target.value);
+        }}
+        onKeyDown={handleKeyDown}
+      ></input>
       {
         allChannel.map(
           (channel) =>
