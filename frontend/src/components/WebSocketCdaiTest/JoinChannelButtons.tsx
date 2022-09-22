@@ -20,7 +20,7 @@ export default function JoinChannelButtons(
   }
   ) {
   const handleClick = (channelId: number) => {
-    socket?.emit("joinChannelRequest", channelId, privatePass);
+    socket?.emit("joinChannelRequest", {roomId: channelId, userPassword: privatePass});
 			setPrivateName("")
 			setPrivatePass("")
   }
@@ -39,7 +39,7 @@ export default function JoinChannelButtons(
   const [privatePass, setPrivatePass] = useState<string>("");
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.code == 'Enter') {
-			socket?.emit("joinPrivateChannelRequest", {privateName, privatePass});
+			socket?.emit("joinPrivateChannelRequest", {roomName: privateName, userPassword: privatePass});
 			setPrivateName("")
 			setPrivatePass("")
 		}
