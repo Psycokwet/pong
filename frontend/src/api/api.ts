@@ -1,4 +1,4 @@
-import { FULL_ROUTE } from "../../shared/routes";
+import { FULL_ROUTE } from "../../shared/httpsRoutes/routes";
 
 export const PREFIX =
   import.meta.env.VITE_CONTEXT == "MOCKUP"
@@ -87,6 +87,25 @@ export class Api {
       method: "POST",
       headers: headers,
       body: JSON.stringify({ newPongUsername }),
+    });
+  }
+  get_user_rank() {
+    return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_USER_RANK}`, {
+      method: "GET",
+    });
+  }
+  get_user_history() {
+    return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_USER_HISTORY}`, {
+      method: "GET",
+    });
+  }
+  add_played_game(player1: string, player2: string, winner: string) {
+    let headers = new Headers();
+    headers.set(HeadersFields.ContentType, "application/json");
+    return fetch(`${PREFIX}${FULL_ROUTE.USER.PLAY_GAME}`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({ player1, player2, winner }),
     });
   }
   turn_on_2fa() {
