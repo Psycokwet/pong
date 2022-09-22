@@ -120,6 +120,8 @@ export class ChatGateway {
       .emit('updateConnectedUsers', connectedUserIdList);
   }
 
+  //joinPrivateChannelRequest
+
   @UseGuards(JwtWsGuard)
   @SubscribeMessage('getConnectedUserListRequest')
   async getUsersInChannel(
