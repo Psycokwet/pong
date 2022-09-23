@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import io, { Socket } from "socket.io-client";
-import MousePosition from "../../../shared/interfaces/MousePosition";
+import Position from "../../../shared/interfaces/Position";
 import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
 
 
@@ -37,9 +37,9 @@ function draw(canvas) {
 
 function GameCanvas() {
   const canvasRef = useRef(null);
-  const [coords, setCoords] = useState<MousePosition>({x: 0, y: 0});
+  const [coords, setCoords] = useState<Position>({x: 0, y: 0});
   const [mousePressing,setMousePressing] = useState(true);
-  const [globalCoords, setGlobalCoords] = useState({x: 0, y: 0});
+  const [globalCoords, setGlobalCoords] = useState<Position>({x: 0, y: 0});
   const [game, setGame] = useState({
     player: {
       score: 0,
@@ -186,10 +186,11 @@ function GameCanvas() {
   }, []);
 
   const handleMouseMove = event => {
-    setCoords({
+    const position: Position = {
       x: event.clientX - event.target.offsetLeft,
       y: event.clientY - event.target.offsetTop,
-    });
+    }
+    setCoords(position);
     if (mousePressing) {
       const canvasLocation = canvasRef.current.getBoundingClientRect();
       const mouseLocation = event.clientY - canvasLocation.y;
@@ -202,15 +203,8 @@ function GameCanvas() {
           game.player.y = mouseLocation - PLAYER_HEIGHT / 2;
       }
 
-
-      console.log({
-        x: event.clientX - event.target.offsetLeft,
-        y: event.clientY - event.target.offsetTop,
-      });
-      socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
-        x: event.clientX - event.target.offsetLeft,
-        y: event.clientY - event.target.offsetTop,
-      });
+      console.log(position);
+      socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, position);
     }
   };
 
