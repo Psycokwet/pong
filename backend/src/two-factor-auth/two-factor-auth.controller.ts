@@ -1,10 +1,12 @@
 import {
+  Body,
   Controller,
   Get,
   Post,
   Put,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
@@ -22,8 +24,10 @@ export class TwoFactorAuthController {
   ) {}
 
   @UseGuards(JwtRefreshGuard)
-  @Put(ROUTES_BASE.AUTH.TURN_ON_2FA)
-  turn_on_2FA(@Req() req) {
+  @Post(ROUTES_BASE.AUTH.TURN_ON_2FA) // to use after generate, with the code
+  turn_on_2FA(@Req() req, @Body() code: string) {
+    const isValid = this.twoFactorAuthService.is2FACodeValid(code, req.user);
+    if (!isValid) throw new UnauthorizedException('Wrong authentication code');
     this.userService.set2fa(req.user.login42, true);
   }
   @Put(ROUTES_BASE.AUTH.TURN_OFF_2FA)
@@ -49,4 +53,17 @@ export class TwoFactorAuthController {
       );
     return this.twoFactorAuthService.pipeQrCodeStream(response, otpauthUrl);
   }
+
+  // @Post(ROUTES_BASE.AUTH.CHECK_2FA)
+  // @UseGuards(JwtAuthGuard)
+  // async check_2FA(
+  //   @Res() response: Response,
+  //   @Req() request: RequestWithUser,
+  // ) {
+  //   const { otpauthUrl } =
+  //     await this.twoFactorAuthService.generateTwoFactorAuthenticationSecret(
+  //       request.user,
+  //     );
+  //   return this.twoFactorAuthService.pipeQrCodeStream(response, otpauthUrl);
+  // }
 }
