@@ -1,4 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import io, { Socket } from "socket.io-client";
+import MousePosition from "../../../shared/interfaces/MousePosition";
+import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
+
+
+const ENDPOINT = "http://localhost:8080"; // please put in env file in the future
 
 const canvasWidth = 640
 const canvasHeight = 480
@@ -31,7 +37,7 @@ function draw(canvas) {
 
 function GameCanvas() {
   const canvasRef = useRef(null);
-  const [coords, setCoords] = useState({x: 0, y: 0});
+  const [coords, setCoords] = useState<MousePosition>({x: 0, y: 0});
   const [mousePressing,setMousePressing] = useState(true);
   const [globalCoords, setGlobalCoords] = useState({x: 0, y: 0});
   const [game, setGame] = useState({
@@ -54,6 +60,19 @@ function GameCanvas() {
     }
   })
 
+  /** WEBSOCKET */
+  const [socket, setSocket] = useState<Socket>();
+
+  useEffect(() => {
+    const newSocket = io(ENDPOINT, {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
+    setSocket(newSocket);
+  }, []);
+  /** END WEBSOCKET */
+
+  /** GAME HANDLER */
   useEffect(() => {
     const canvas = canvasRef.current
     const context = canvas.getContext('2d')
@@ -106,6 +125,12 @@ function GameCanvas() {
     }
 
     const interval = setInterval(() => {
+      /** WEBSOCKET FOR GAME */
+      // const send = (message: string) => {
+        // console.log(coords);
+        socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, coords);
+      // };
+      /** END WEBSOCKET FOR GAME */
       let newGame = {...game}
 
       // Rebounds on top and bottom
@@ -141,8 +166,10 @@ function GameCanvas() {
       clearInterval(interval)
     }
   }, [])
+  /** END GAME HANDLER */
 
 
+  /** MOUSE HANDLER */
   useEffect(() => {
     // 👇️ get global mouse coordinates
     const handleWindowMouseMove = event => {
@@ -174,6 +201,16 @@ function GameCanvas() {
       } else {
           game.player.y = mouseLocation - PLAYER_HEIGHT / 2;
       }
+
+
+      console.log({
+        x: event.clientX - event.target.offsetLeft,
+        y: event.clientY - event.target.offsetTop,
+      });
+      socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
+        x: event.clientX - event.target.offsetLeft,
+        y: event.clientY - event.target.offsetTop,
+      });
     }
   };
 
@@ -188,6 +225,10 @@ function GameCanvas() {
   const stopCounter = () => {
     setMousePressing(true)
   };
+  /** END MOUSE HANDLER */
+
+
+
 
 
 
