@@ -13,9 +13,10 @@ function TextField ({addMessage} : {addMessage: any}) {
   const [value, setValue] = useState<string>('')
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    e.preventDefault();
-    if (e.code == 'Enter')
+    if (e.code == 'Enter') {
+      e.preventDefault();
       handleMessage();
+    }
   }
 
   const handleMessage = () => {
