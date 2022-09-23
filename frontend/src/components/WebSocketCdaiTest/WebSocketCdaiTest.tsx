@@ -107,6 +107,16 @@ function WebsSocketCdaiTest() {
       socket?.off(ROUTES_BASE.CHAT.LIST_ALL_CHANNELS, getAllChannel);
     };
   }, [getAllChannel]);
+  // handle new channel creation
+  const handleNewChannelCreation = (newChannel: any) => {
+    setAllChannel((current) => [...current, newChannel]);
+  };
+  useEffect(() => {
+    socket?.on("newChannelCreated", handleNewChannelCreation);
+    return () => {
+      socket?.off("newChannelCreated", handleNewChannelCreation);
+    };
+  }, [handleNewChannelCreation]);
   /** END GET ALL CHANNEL */
 
   /** DISCONNECT CHANNEL */
