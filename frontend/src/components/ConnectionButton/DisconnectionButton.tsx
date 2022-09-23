@@ -17,7 +17,9 @@ export const DisconnectionButton = ({
   return (
     <button onClick={handleClick}>
       <FaSignOutAlt size="26" />
-      <span className="navbar-page-name uppercase group-hover:scale-100">Sign Out</span>
+      <span className="navbar-page-name uppercase group-hover:scale-100">
+        Sign Out
+      </span>
     </button>
   );
 };
