@@ -59,13 +59,6 @@ export class UsersService {
     return user;
   }
 
-  async getByPongUsername(inputPongUsername: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({
-      pongUsername: inputPongUsername,
-    });
-    return user;
-  }
-
   getFrontUsername(user: User) {
     if (!user.pongUsername) return user.login42;
     return user.pongUsername;
@@ -298,17 +291,15 @@ export class UsersService {
 
   async setPongUsername(dto: pongUsernameDto, login42: string) {
     const user = await this.findOne(login42);
-    const isPongUsernameTaken = await this.getByPongUsername(
-      dto.newPongUsername,
-    );
-
-    if (isPongUsernameTaken)
-      throw new BadRequestException({ error: 'Nickname already taken' });
 
     /* We use TypeORM's update function to update our entity */
-    await this.usersRepository.update(user.id, {
-      pongUsername: dto.newPongUsername,
-    });
+    try {
+      await this.usersRepository.update(user.id, {
+        pongUsername: dto.newPongUsername,
+      });
+    } catch (e) {
+      throw new BadRequestException({ error: 'Nickname already taken' });
+    }
   }
 
   async getPicture(dto: User) {
