@@ -1,10 +1,8 @@
 import React from "react";
 import { useState } from "react";
-import { Route, Routes } from "react-router-dom";
 
 import { BiChevronDown } from "react-icons/bi";
 
-import Profile from "../Profile/Profile";
 import DropDownFriendList from "./DropDownFriendList";
 
 /***************** TYPE ***************************************/
@@ -115,45 +113,34 @@ const subList = [
 
 const FriendList = () => {
   const [active, setActive] = useState(false);
-  
 
   const showList = () => {
     setActive(!active);
   };
-  
+
   return (
     <div>
-    <div className="absolute top-[120px] right-0 text-white bg-gray-900">
-      
-      <div
-        className="p-2 flex items-center text-2xl font-bold"
-        onClick={showList}
-      >
-        <span className="px-4">Friend List</span>
-        <BiChevronDown size={20} className={`${active && "rotate-180"}`} />
-      </div>
+      <div className="absolute top-[120px] right-0 text-white bg-gray-900">
+        <div
+          className="p-2 flex items-center text-2xl font-bold"
+          onClick={showList}
+        >
+          <span className="px-4">Friend List</span>
+          <BiChevronDown size={20} className={`${active && "rotate-180"}`} />
+        </div>
 
-      {/************************* Dropdown Menu **************************/}
-      <div
-        className={
-          active ? "bg-gray-700 mt-2 max-h-60 overflow-y-auto" : "hidden"
-        }
-      >
-        <DropDownFriendList subListInfo={subList} profile_data={UserFriendList}/>
+        {/************************* Dropdown Menu **************************/}
+        <div
+          className={
+            active ? "bg-gray-700 mt-2 max-h-60 overflow-y-auto" : "hidden"
+          }
+        >
+          <DropDownFriendList
+            subListInfo={subList}
+            profile_data={UserFriendList}
+          />
+        </div>
       </div>
-</div>
-      {/* ************************ Router ************************* */}
-      <Routes>
-        {UserFriendList.map((one_friend) => {
-          return (
-            <Route
-              key={one_friend.login}
-              path={`/profile/:user_login`}
-              element={<Profile />}
-            />
-          );
-        })}
-      </Routes>
     </div>
   );
 };
