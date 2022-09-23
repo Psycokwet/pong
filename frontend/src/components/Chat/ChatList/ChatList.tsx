@@ -41,7 +41,7 @@ function ChatList({ msg }: { msg: MessageType }) {
         {DMList.map((Chan, i) => {
           return (
             <div key={i}>
-              <UserChat name={Chan.name} content={msg.content} />
+              <UserChat name={Chan.name} content={(msg!=undefined ? msg.content:"")} />
             </div>
           );
         })}
