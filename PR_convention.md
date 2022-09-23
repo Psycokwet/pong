@@ -46,4 +46,4 @@ You can also do positives comments if you see something you like. A nice word ca
 
 No questions are stupids :) 
 
-If you take on yourself to do changes on the pr (fixing typos on doc, or any other code issues you saw), please, comment about those in the pr.
+If you see some fix that you can achieve yourself, please, create a sub branch, commit your change there, and offer the updates you did from this branch, to the branch you were reviewing. So that the person who was working on this can discuss the change or accept them in the best conditions.
