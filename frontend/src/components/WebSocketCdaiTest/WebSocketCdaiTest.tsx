@@ -77,7 +77,7 @@ function WebSocketCdaiTest() {
     newChannelPass: string;
   }) => {
     socket?.emit(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST, {
-      roomName: newChannelName,
+      channelName: newChannelName,
       isChannelPrivate: true,
       password: newChannelPass,
     });
@@ -90,7 +90,7 @@ function WebSocketCdaiTest() {
     newChannelPass: string;
   }) => {
     socket?.emit(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST, {
-      roomName: newChannelName,
+      channelName: newChannelName,
       isChannelPrivate: false,
       password: newChannelPass,
     });
