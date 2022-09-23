@@ -13,7 +13,7 @@ import { GameService } from './game.service';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import { UsersService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
-import MousePosition from 'shared/interfaces/MousePosition';
+import Position from 'shared/interfaces/Position';
 
 
 @WebSocketGateway({
@@ -23,6 +23,7 @@ import MousePosition from 'shared/interfaces/MousePosition';
 export class GameGateway {
   constructor(
     private userService: UsersService,
+    private gameService: GameService,
   ) {}
 
   @WebSocketServer()
@@ -31,7 +32,7 @@ export class GameGateway {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.SEND_INPUT)
   async receiveInput(
-    @MessageBody() position: MousePosition,
+    @MessageBody() position: Position,
     @ConnectedSocket() client: Socket
   ) {
     console.log(position);

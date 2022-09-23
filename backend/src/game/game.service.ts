@@ -11,6 +11,7 @@ import { User } from 'src/user/user.entity';
 import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatRoom } from 'shared/interfaces/ChatRoom';
+import GameRoom from 'shared/interfaces/GameRoom';
 
 @Injectable()
 export class GameService {
@@ -25,5 +26,7 @@ export class GameService {
     private usersRepository: Repository<User>,
     private userService: UsersService,
   ) {}
+
+  private static gameRoomList: GameRoom[] = [];
 
 }
