@@ -11,10 +11,12 @@ import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
 import ChannelData from "../../../shared/interfaces/ChannelData";
 import Message from "../../../shared/interfaces/Message";
 
-function WebsSocketCdaiTest() {
+function WebSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [connectedChannel, setConnectedChannel] = useState<ChannelData | undefined>(undefined);
+  const [connectedChannel, setConnectedChannel] = useState<
+    ChannelData | undefined
+  >(undefined);
   const [connectedUserIdList, setConnectedUserIdList] = useState<number[]>([]);
   const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
 
@@ -42,9 +44,6 @@ function WebsSocketCdaiTest() {
       socket?.off(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageListener);
     };
   }, [messageListener]);
-
-
-
 
   const handleMessageHistory = (messageHistory: Message[]) => {
     setMessages(messageHistory);
