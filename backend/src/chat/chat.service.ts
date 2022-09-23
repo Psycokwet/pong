@@ -11,6 +11,7 @@ import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatRoom } from 'shared/interfaces/ChatRoom';
+import ChannelData from 'shared/interfaces/ChannelData';
 @Injectable()
 export class ChatService {
   constructor(
@@ -25,7 +26,7 @@ export class ChatService {
   ) {}
   private static chatRoomList: ChatRoom[] = [];
 
-  public async getAllPublicRooms() {
+  public async getAllPublicRooms(): Promise<ChannelData[]> {
     return this.roomsRepository
       .find({
         where: { isChannelPrivate: false },
@@ -68,13 +69,11 @@ export class ChatService {
 
   async saveRoom({
     roomName,
-    clientId,
     userId,
     isChannelPrivate,
     password,
   }: {
     roomName: string;
-    clientId: string;
     userId: number;
     isChannelPrivate: boolean;
     password: string;
@@ -90,7 +89,6 @@ export class ChatService {
       isChannelPrivate: isChannelPrivate,
     });
 
-    console.log('newRoom', newRoom);
     await newRoom.save();
     return newRoom;
   }
