@@ -124,11 +124,14 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomsById(roomId, {
-      members: false,
+    const room = await this.chatService.getRoomsById({
+      id: roomId /*, isDM: false },
+      {
+        members: true,*/,
     });
     client.join(room.roomName);
-    await this.chatService.addMemberToChannel(payload.userId, room);
+    if (room.isDM === false)
+      await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, {
       channelId: room.id,
       channelName: room.channelName,
@@ -145,6 +148,7 @@ export class ChatGateway {
   }
 
   /* JOIN DM ROOM*/
+  /** Needs front routes to test */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_REQUEST)
   async joinDMRoom(
@@ -152,7 +156,12 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomsById(roomId, { members: true });
+    const room = await this.chatService.getRoomsById(
+      { id: roomId, isDM: true },
+      {
+        members: true,
+      },
+    );
     client.join(room.roomName);
     this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_ENTRY, {
       channelId: room.id,
@@ -176,7 +185,7 @@ export class ChatGateway {
     @MessageBody() roomId: number,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomsById(roomId);
+    const room = await this.chatService.getRoomsById({ id: roomId });
     const caller = await this.userService.getById(payload.userId);
 
     this.server.in(room.roomName).emit(
@@ -195,7 +204,7 @@ export class ChatGateway {
     @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
-    const room = await this.chatService.getRoomsById(roomId);
+    const room = await this.chatService.getRoomsById({ id: roomId });
     client.leave(room.roomName);
     this.server
       .in(client.id)
@@ -221,7 +230,7 @@ export class ChatGateway {
     @MessageBody() data: { message: string; channelId: number },
   ) {
     if (data.message === '') return;
-    const room = await this.chatService.getRoomsById(data.channelId);
+    const room = await this.chatService.getRoomsById({ id: data.channelId });
     if (room)
       this.server
         .in(room.roomName)
