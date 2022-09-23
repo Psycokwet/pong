@@ -22,6 +22,11 @@ export const ROUTES_BASE = {
     CONNECTED_USER_LIST: 'connectedUserList',
     UPDATE_CONNECTED_USERS: 'updateConnectedUsers',
   },
+  GAME: {
+    ENDPOINT: '/game/',
+    /** SEND INPUT */
+    SEND_INPUT: 'sendInput',
+  }
 };
 const generate_full_routes = (routes_base) => {
   let accumulator = {};
