@@ -26,7 +26,6 @@ export const PictureSetter = () => {
   return (
     <div>
       <form>
-        <h1>React File Upload</h1>
         <input type="file" onChange={handleChange}/>
         <button onClick={submitUploadForm}>Submit</button>
       </form>
