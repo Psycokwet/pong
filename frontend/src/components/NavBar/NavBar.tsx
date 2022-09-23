@@ -56,7 +56,7 @@ type DisconnectionButtonProps = {
 /***************** Component NavBar ******************************************/
 const NavBar: React.FC<DisconnectionButtonProps> = ({ setDisconnected }) => {
   return (
-    <div className="h-screen">
+    <div>
       <nav className="border-b-8 border-sky-600 text-white h-1/8 h-min">
         <ul className="flex p-6 uppercase bg-neutral-900">
           <li>

@@ -87,7 +87,7 @@ function App() {
   return connectedState == connectionStatusEnum.Unknown ? (
     <Loading></Loading>
   ) : connectedState == connectionStatusEnum.Connected ? (
-    <div>
+    <div className="h-screen">
       <NavBar
         setDisconnected={() =>
           setConnectedState(connectionStatusEnum.Disconnected)
