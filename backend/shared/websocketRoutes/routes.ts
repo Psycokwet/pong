@@ -5,12 +5,21 @@ export const ROUTES_BASE = {
     JOIN_CHANNEL_LOBBY_REQUEST: 'joinChannelLobbyRequest',
     LIST_ALL_CHANNELS: 'listAllChannels',
     NEW_CHANNEL_CREATED: 'newChannelCreated',
+    /** ATTACHED CHANNELS LOBBY */
+    JOIN_ATTACHED_CHANNEL_LOBBY_REQUEST: 'joinAttachedChannelLobbyRequest',
+    LIST_ALL_ATTACHED_CHANNELS: 'listAllAttachedChannels',
+    /** DM CHANNELS LOBBY */
+    JOIN_DM_CHANNEL_LOBBY_REQUEST: 'joinDMChannelLobbyRequest',
+    LIST_ALL_DM_CHANNELS: 'listAllDMChannels',
+    NEW_DM_CHANNEL_CREATED: 'newDMChannelCreated',
     /** CREATE CHANNEL */
     CREATE_CHANNEL_REQUEST: 'createChannelRequest',
     CONFIRM_CHANNEL_CREATION: 'confirmChannelCreation',
     /** JOIN CHANNEL */
     JOIN_CHANNE_REQUEST: 'joinChannelRequest',
     CONFIRM_CHANNEL_ENTRY: 'confirmChannelEntry',
+    /** JOIN ATTACHED CHANNELS LOBBY */
+    /** JOIN DM CHANNELS LOBBY */
     /** DISCONNECT FROM CHANNEL */
     DISCONNECT_FROM_CHANNEL_REQUEST: 'disconnectFromChannelRequest',
     CONFIRM_CHANNEL_DISCONNECTION: 'confirmChannelDisconnection',

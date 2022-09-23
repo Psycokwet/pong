@@ -36,6 +36,62 @@ export class ChatService {
     );
   }
 
+  public async getAllAttachedRooms(user: User) {
+    return this.roomsRepository
+      .find({
+        relations: {
+          members: true,
+        },
+        where: {
+          members: {
+            id: user.id,
+          },
+        },
+      })
+      .then((rooms) =>
+        rooms.map((room) => {
+          return {
+            channelId: room.id,
+            channelName: room.channelName,
+          };
+        }),
+      );
+
+    // return this.roomsRepository.find().then((rooms) =>
+    //   rooms
+    //     .filter((room) => room.members.includes(user))
+    //     .map((room) => {
+    //       return {
+    //         channelId: room.id,
+    //         channelName: room.channelName,
+    //       };
+    //     }),
+    // );
+  }
+
+  public async getAllDMRooms(user: User) {
+    return this.roomsRepository
+      .find({
+        relations: {
+          members: true,
+          isDM: true,
+        },
+        where: {
+          members: {
+            id: user.id,
+          },
+        },
+      })
+      .then((rooms) =>
+        rooms.map((room) => {
+          return {
+            id: room.id,
+            targetName: room.members.find((target) => target.id !== user.id),
+          };
+        }),
+      );
+  }
+
   public async getRoomById(id: number) {
     return this.roomsRepository.findOneBy({ id });
   }

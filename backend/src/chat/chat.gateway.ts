@@ -34,7 +34,39 @@ export class ChatGateway {
     client.join(this.channelLobby);
     this.server
       .in(this.channelLobby)
-      .emit(ROUTES_BASE.CHAT.LIST_ALL_CHANNELS, await this.chatService.getAllRooms());
+      .emit(
+        ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
+        await this.chatService.getAllRooms(),
+      );
+  }
+  /** JOIN ATTACHED CHANNELS LOBBY */
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_ATTACHED_CHANNEL_LOBBY_REQUEST)
+  async joinAttachedChannelLobby(
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
+    this.server
+      .in(client.id)
+      .emit(
+        ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
+        await this.chatService.getAllAttachedRooms(payload.userId),
+      );
+  }
+
+  /** JOIN DM CHANNELS LOBBY */
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_LOBBY_REQUEST)
+  async joinDMChannelLobby(
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
+    this.server
+      .in(client.id)
+      .emit(
+        ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS,
+        await this.chatService.getAllDMRooms(payload.userId),
+      );
   }
 
   @UseGuards(JwtWsGuard)
@@ -46,10 +78,7 @@ export class ChatGateway {
   ) {
     if (roomName === '') return;
 
-    const newRoom = await this.chatService.saveRoom(
-      roomName,
-      payload.userId,
-    );
+    const newRoom = await this.chatService.saveRoom(roomName, payload.userId);
 
     await client.join(newRoom.roomName);
 
@@ -103,18 +132,18 @@ export class ChatGateway {
   async getUsersInChannel(
     @MessageBody() roomId: number,
     @UserPayload() payload: any,
-    ) {
+  ) {
     const room = await this.chatService.getRoomByIdWithRelations(roomId);
     const caller = await this.userService.getById(payload.userId);
-    
+
     this.server.in(room.roomName).emit(
       ROUTES_BASE.CHAT.CONNECTED_USER_LIST,
       room.members.map((user: User) => {
         return { id: user.id, pongUsername: user.pongUsername };
       }),
-      );
-    }
-    
+    );
+  }
+
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST)
   async disconnectFromChannel(
@@ -124,10 +153,12 @@ export class ChatGateway {
   ) {
     const room = await this.chatService.getRoomById(roomId);
     client.leave(room.roomName);
-    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, {
-      channelId: room.id,
-      channelName: room.channelName,
-    });
+    this.server
+      .in(client.id)
+      .emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, {
+        channelId: room.id,
+        channelName: room.channelName,
+      });
 
     const connectedUserIdList: number[] =
       this.chatService.removeUserConnectedToRooms(
@@ -147,6 +178,8 @@ export class ChatGateway {
     if (data.message === '') return;
     const room = await this.chatService.getRoomById(data.channelId);
     if (room)
-      this.server.in(room.roomName).emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, data.message);
+      this.server
+        .in(room.roomName)
+        .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, data.message);
   }
 }
