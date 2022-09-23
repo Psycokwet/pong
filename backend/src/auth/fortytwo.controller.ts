@@ -3,23 +3,21 @@ import {
   Logger,
   Get,
   Req,
-  Res,
   UseGuards,
   Injectable,
   Redirect,
-  Post,
-  HttpCode,
 } from '@nestjs/common';
-import { Response } from 'express';
 import { FortyTwoGuard } from 'src/auth/fortytwo.guard';
-import { Profile } from 'passport-42';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import RequestWithUser from './requestWithUser.interface';
+import JwtRefreshGuard from './jwtRefresh.guard';
+
+import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 
 @Injectable()
-@Controller('auth/42')
+@Controller(ROUTES_BASE.AUTH.ENDPOINT)
 export class FortyTwoController {
   private readonly logger = new Logger(FortyTwoController.name);
 
@@ -34,17 +32,18 @@ export class FortyTwoController {
     // Guard redirects
   }
 
-  @Get('redirect')
+  @Get(ROUTES_BASE.AUTH.REDIRECT)
   @UseGuards(FortyTwoGuard)
   @Redirect('/', 302)
-  async fortyTwoAuthRedirect(@Req() req: any, @Res() res: Response) {
-    let userFromDb = await this.usersService.signin({
-      username: req.user.username,
-    });
-
-    if (!userFromDb) {
+  async fortyTwoAuthRedirect(@Req() req: any) {
+    let userFromDb;
+    try {
+      userFromDb = await this.usersService.signin({
+        login42: req.user.user.login42,
+      });
+    } catch (e) {
       userFromDb = await this.usersService.signup({
-        username: req.user.user.username,
+        login42: req.user.user.login42,
         email: req.user.user.email,
       });
     }
@@ -61,11 +60,22 @@ export class FortyTwoController {
     req.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
   }
 
-  @Get('logout')
+  @Get(ROUTES_BASE.AUTH.LOGOUT)
   @UseGuards(JwtAuthGuard)
   @Redirect('/', 302)
   async logout(@Req() request: RequestWithUser) {
     await this.usersService.removeRefreshToken(request.user.id);
     request.res.setHeader('Set-Cookie', this.authService.getCookiesForLogOut());
+  }
+
+  @UseGuards(JwtRefreshGuard)
+  @Get(ROUTES_BASE.AUTH.REFRESH)
+  refresh(@Req() request: RequestWithUser) {
+    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+      request.user.id,
+    );
+
+    request.res.setHeader('Set-Cookie', accessTokenCookie);
+    return request.user;
   }
 }

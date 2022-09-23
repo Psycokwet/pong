@@ -6,11 +6,12 @@ import {
   ManyToMany,
   JoinTable,
   CreateDateColumn,
+  BaseEntity,
 } from 'typeorm';
-import { User } from '../users/user.entity';
+import { User } from '../user/user.entity';
 
 @Entity()
-export class Game {
+export class Game extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
