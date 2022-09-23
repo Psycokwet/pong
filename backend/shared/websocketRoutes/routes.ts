@@ -23,6 +23,8 @@ export const ROUTES_BASE = {
     UPDATE_CONNECTED_USERS: 'updateConnectedUsers',
     /** SEARCH CHANNEL */
     SEARCH_CHANNEL_REQUEST: 'searchChannelRequest',
+    /** CHANNEL ATTACHED USER LIST */
+    UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
   },
 };
 const generate_full_routes = (routes_base) => {
