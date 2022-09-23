@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import io, { Socket } from "socket.io-client";
 import Position from "../../../shared/interfaces/Position";
+import GameRoom from "../../../shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
 
 
@@ -40,6 +41,9 @@ function GameCanvas() {
   const [coords, setCoords] = useState<Position>({x: 0, y: 0});
   const [mousePressing,setMousePressing] = useState(true);
   const [globalCoords, setGlobalCoords] = useState<Position>({x: 0, y: 0});
+  const [cdai, setCdai] = useState<GameRoom | undefined>(undefined)
+
+
   const [game, setGame] = useState({
     player: {
       score: 0,
@@ -222,7 +226,24 @@ function GameCanvas() {
   /** END MOUSE HANDLER */
 
 
+  /** GAME CREATION */
+  const handleGameCreation = (gameData: GameRoom) => {
 
+    console.log(gameData)
+    setCdai(gameData)
+    // setAllChannel((current) => [...current, newChannel]);
+  };
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.GAME.CONFIRM_GAME_CREATION, handleGameCreation);
+    return () => {
+      socket?.off(ROUTES_BASE.GAME.CONFIRM_GAME_CREATION, handleGameCreation);
+    };
+  }, [handleGameCreation]);
+
+  const handleCreateGame = () => {
+    socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST);
+  }
+  /** END GAME CREATION */
 
 
 
@@ -230,22 +251,37 @@ function GameCanvas() {
     <div
       style={{padding: '3rem', backgroundColor: 'lightgray'}}
     >
-      <div>
-        <p>player1 : {game.player.score}</p>
-        <p>computer : {game.computer.score}</p>
-      </div>
-      <canvas
-        onMouseMove={handleMouseMove}
-        onMouseDown={startCounter}
-        onMouseUp={stopCounter}
-        ref={canvasRef}
-        id="canvas"
-        width={canvasWidth}
-        height={canvasHeight}
-      ></canvas>
+      <h2>Final Game</h2>
+      {
+        cdai && cdai.gameData.player1.pongUsername !== '' ?
+          <>{cdai.gameData.player1.pongUsername}</>
+          :
+          <>
+            <button onClick={handleCreateGame}>Create game</button>
+            {/* <button onClick={handleJoinGame}>Join game</button> */}
+          </>
+      }
+      <br />
+      <>
+        <h2>PROTOTYPE</h2>
+        <div>
+          <p>player1 : {game.player.score}</p>
+          <p>computer : {game.computer.score}</p>
+        </div>
+        <canvas
+          onMouseMove={handleMouseMove}
+          onMouseDown={startCounter}
+          onMouseUp={stopCounter}
+          ref={canvasRef}
+          id="canvas"
+          width={canvasWidth}
+          height={canvasHeight}
+        ></canvas>
+      </>
       {
         mousePressing ?
         <>
+          <h2>DEV INFORMATIONS</h2>
           <h2>
             Coords: X: {coords.x} -- Y: {coords.y}
           </h2>
