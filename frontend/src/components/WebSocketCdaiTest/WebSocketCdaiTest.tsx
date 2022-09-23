@@ -206,8 +206,9 @@ function WebSocketCdaiTest() {
             handleCreatePublicChannel={handleCreatePublicChannel}
           />
           <JoinChannelButtons
+            socket={socket}
             allChannel={allChannel}
-            handleClick={handleJoinChannelClick}
+            setConnectedChannel={setConnectedChannel}
           />
         </>
       ) : (
