@@ -13,7 +13,7 @@ import NotFound from "./NavBar/Pages-To-Change/NotFound";
 import PracticeJwt from "./PracticeJwt";
 import Play from "./NavBar/Pages-To-Change/Play";
 import Home from "./NavBar/Pages-To-Change/Home";
-import Community from "./NavBar/Pages-To-Change/Community";
+import Community from "./Chat/Chat";
 import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
 import Settings from "./NavBar/Pages-To-Change/Settings";
 import Profile from "./Profile/Profile";
@@ -87,7 +87,7 @@ function App() {
   return connectedState == connectionStatusEnum.Unknown ? (
     <Loading></Loading>
   ) : connectedState == connectionStatusEnum.Connected ? (
-    <div>
+    <div className="h-screen">
       <NavBar
         setDisconnected={() =>
           setConnectedState(connectionStatusEnum.Disconnected)
