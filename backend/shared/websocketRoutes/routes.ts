@@ -8,9 +8,15 @@ export const ROUTES_BASE = {
     /** CREATE CHANNEL */
     CREATE_CHANNEL_REQUEST: 'createChannelRequest',
     CONFIRM_CHANNEL_CREATION: 'confirmChannelCreation',
+    /** CREATE DM CHANNEL */
+    CREATE_DM: 'createDMRequest',
+    CONFIRM_DM_CHANNEL_CREATION: 'confirmDMChannelCreation',
     /** JOIN CHANNEL */
     JOIN_CHANNE_REQUEST: 'joinChannelRequest',
     CONFIRM_CHANNEL_ENTRY: 'confirmChannelEntry',
+    /** JOIN DM CHANNEL */
+    JOIN_DM_CHANNEL_REQUEST: 'joinDMChannelRequest',
+    CONFIRM_DM_CHANNEL_ENTRY: 'confirmDMChannelEntry',
     /** DISCONNECT FROM CHANNEL */
     DISCONNECT_FROM_CHANNEL_REQUEST: 'disconnectFromChannelRequest',
     CONFIRM_CHANNEL_DISCONNECTION: 'confirmChannelDisconnection',
@@ -21,8 +27,6 @@ export const ROUTES_BASE = {
     GET_CONNECTED_USER_LIST_REQUEST: 'getConnectedUserListRequest',
     CONNECTED_USER_LIST: 'connectedUserList',
     UPDATE_CONNECTED_USERS: 'updateConnectedUsers',
-    /** CREATE DM */
-    CREATE_DM: 'createDMRequest',
   },
 };
 const generate_full_routes = (routes_base) => {

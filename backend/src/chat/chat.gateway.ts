@@ -1,4 +1,4 @@
-import { UseGuards } from '@nestjs/common';
+import { BadRequestException, UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -28,6 +28,7 @@ export class ChatGateway {
   @WebSocketServer()
   server: Server;
 
+  /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
   async joinChannelLobby(@ConnectedSocket() client: Socket) {
@@ -40,6 +41,7 @@ export class ChatGateway {
       );
   }
 
+  /* CREATE ROOM */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST)
   async createRoom(
@@ -73,6 +75,7 @@ export class ChatGateway {
       .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
   }
 
+  /* CREATE DM ROOM*/
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.CREATE_DM)
   async createDM(
@@ -80,6 +83,12 @@ export class ChatGateway {
     @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
+    if (payload.userId === friendId) {
+      throw new BadRequestException({
+        error: "You're trying to send a DM to yourself",
+      });
+    }
+
     const newDMRoom = await this.chatService.saveDMRoom(
       friendId,
       payload.userId,
@@ -87,11 +96,12 @@ export class ChatGateway {
 
     await client.join(newDMRoom.roomName);
 
-    // this.server.in(this.channelLobby).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
-    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
-      channelId: newDMRoom.id,
-      channelName: newDMRoom.channelName,
-    });
+    this.server
+      .in(client.id)
+      .emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_CREATION, {
+        channelId: newDMRoom.id,
+        channelName: newDMRoom.channelName,
+      });
 
     const connectedUserIdList: number[] =
       this.chatService.updateUserConnectedToRooms(
@@ -103,6 +113,7 @@ export class ChatGateway {
       .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
   }
 
+  /* JOIN ROOM */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNE_REQUEST)
   async joinRoom(
@@ -110,7 +121,7 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomsById(roomId);
+    const room = await this.chatService.getRoomsById(roomId, { isDM: false });
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, {
@@ -128,6 +139,32 @@ export class ChatGateway {
       .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
   }
 
+  /* JOIN DM ROOM*/
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_REQUEST)
+  async joinDMRoom(
+    @MessageBody() roomId: number,
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
+    const room = await this.chatService.getRoomsById(roomId, { isDM: true });
+    client.join(room.roomName);
+    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_ENTRY, {
+      channelId: room.id,
+      channelName: room.channelName,
+    });
+
+    const connectedUserIdList: number[] =
+      this.chatService.updateUserConnectedToRooms(
+        room.roomName,
+        payload.userId,
+      );
+    this.server
+      .in(room.roomName)
+      .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
+  }
+
+  /* GET USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.GET_CONNECTED_USER_LIST_REQUEST)
   async getUsersInChannel(
@@ -145,6 +182,7 @@ export class ChatGateway {
     );
   }
 
+  /* DISCONNECT FROM CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST)
   async disconnectFromChannel(
@@ -171,6 +209,7 @@ export class ChatGateway {
       .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
   }
 
+  /*MESSAGE LISTENER */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.SEND_MESSAGE)
   async messageListener(
