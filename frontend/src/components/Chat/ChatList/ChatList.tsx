@@ -15,15 +15,11 @@ type MessageType = {
 }
 
 function ChatList({ msg }: { msg: MessageType }) {
-  let ChannelList = [
+  let channelList = [
     { name: "SUS" },
     { name: "seconD" },
     { name: "and the third long" },
   ];
-  let DMList = [{ name: "user" }, { name: "bis" }, { name: "Johny" }];
-
-function ChatList ({msg} : {msg:MessageType}) {
-  let channelList = [{name:"SUS"}, {name:"seconD"}, {name:"and the third long"}]
   let DMList = [{name:"user"}, {name:"bis"}, {name:"Johny"}]
   return (
     <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end">

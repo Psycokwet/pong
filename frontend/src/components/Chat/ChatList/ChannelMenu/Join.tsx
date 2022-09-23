@@ -18,7 +18,7 @@ function Join ()  {
             <p>Or</p>
             <select className="bg-slate-600">
               <option value="" disabled selected hidden>Select Public Channel</option>
-              {channelList.map((Chan) => {return <option>{Chan.name}</option>})}
+              {channelList.map((Chan, i) => {return <option key={i}>{Chan.name}</option>})}
             </select>
             <input
               className="bg-slate-600"
