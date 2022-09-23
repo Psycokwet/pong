@@ -1,7 +1,8 @@
 import React from "react";
+import SignInPage from "../../SignInPage/SignInPage";
 
 const Settings = () => {
-  return <h1 className="text-sky-700">I'm Settings Page</h1>;
+  return <SignInPage />
 };
 
 export default Settings;
