@@ -24,6 +24,11 @@ export const ROUTES_BASE = {
   },
   GAME: {
     ENDPOINT: '/game/',
+    /** CREATE GAME */
+    CREATE_GAME_REQUEST: 'createGameRequest',
+    CONFIRM_GAME_CREATION: 'confirmGameCreation',
+    /** JOIN GAME */
+    JOIN_GAME_REQUEST: 'joinGameRequest',
     /** SEND INPUT */
     SEND_INPUT: 'sendInput',
   }
