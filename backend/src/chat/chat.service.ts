@@ -5,7 +5,7 @@ import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
-import { FindOptionsRelations, Repository } from 'typeorm';
+import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
@@ -36,10 +36,13 @@ export class ChatService {
     );
   }
 
-  public async getRoomsById(id: number, options?: FindOptionsRelations<Room>) {
+  public async getRoomsById(
+    where: FindOptionsWhere<Room>,
+    relations?: FindOptionsRelations<Room>,
+  ) {
     return this.roomsRepository.findOne({
-      where: { id },
-      relations: options,
+      where: where,
+      relations: relations,
     });
   }
 
