@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import io, { Socket } from "socket.io-client";
+import ChannelAttachedUsers from "./ChannelAttachedUsers";
 import ConnectedUsers from "./ConnectedUsers";
 import CreateChannel from "./CreateChannel";
 import JoinChannelButtons from "./JoinChannelButtons";
@@ -10,6 +11,7 @@ const ENDPOINT = "http://localhost:8080";
 import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
 import ChannelData from "../../../shared/interfaces/ChannelData";
 import Message from "../../../shared/interfaces/Message";
+import User from "../../../shared/interfaces/User";
 
 function WebSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
@@ -19,6 +21,19 @@ function WebSocketCdaiTest() {
   >(undefined);
   const [connectedUserIdList, setConnectedUserIdList] = useState<number[]>([]);
   const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
+  const [channelAttachedUserList, setChannelAttachedUserList] = useState<User[]>([]);
+
+  /** CHANNEL ATTACHED USER LIST */
+  const handleChannelAttachedUserList = (channelAttachedUserList: User[]) => {
+    setChannelAttachedUserList(channelAttachedUserList);
+  };
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST, handleChannelAttachedUserList);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST, handleChannelAttachedUserList);
+    };
+  }, [handleChannelAttachedUserList]);
+  /** END CHANNEL ATTACHED USER LIST */
 
   /** MESSAGE */
   const send = (message: string) => {
@@ -128,6 +143,7 @@ function WebSocketCdaiTest() {
   const handleDisconnect = () => {
     setConnectedChannel(undefined);
     setMessages([]);
+    setChannelAttachedUserList([]);
   };
   useEffect(() => {
     socket?.on(
@@ -186,6 +202,7 @@ function WebSocketCdaiTest() {
             channelName={connectedChannel.channelName}
             sendDisconnect={sendDisconnect}
           />
+          <ChannelAttachedUsers channelAttachedUserList={channelAttachedUserList} />
           <br />
 
           <MessageInput send={send} />
