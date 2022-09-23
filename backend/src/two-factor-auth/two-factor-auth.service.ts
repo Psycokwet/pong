@@ -3,6 +3,7 @@ import { authenticator } from 'otplib';
 import { User } from 'src/user/user.entity';
 import { UsersService } from 'src/user/user.service';
 import { toFileStream } from 'qrcode';
+import { TWO_FACTOR_AUTHENTICATION_APP_NAME } from 'shared/other/basicConsts';
 
 @Injectable()
 export class TwoFactorAuthService {
@@ -12,7 +13,7 @@ export class TwoFactorAuthService {
     const secret = authenticator.generateSecret();
     const otpauthUrl = authenticator.keyuri(
       user.email,
-      process.env.UPLOADED_FILES_DESTINATION,
+      TWO_FACTOR_AUTHENTICATION_APP_NAME,
       secret,
     );
     await this.userService.setTwoFactorAuthenticationSecret(
@@ -23,5 +24,11 @@ export class TwoFactorAuthService {
   }
   public async pipeQrCodeStream(stream: Response, otpauthUrl: string) {
     return toFileStream(stream, otpauthUrl);
+  }
+  public async is2FACodeValid(code: string, user: User) {
+    return authenticator.verify({
+      token: code,
+      secret: user.twoFactorAuthenticationSecret,
+    });
   }
 }

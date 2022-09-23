@@ -22,7 +22,6 @@ import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
         CLIENT_SECRET: Joi.string().required(),
         CALLBACK_URL: Joi.string().required(),
         UPLOADED_FILES_DESTINATION: Joi.string().required(),
-        TWO_FACTOR_AUTHENTICATION_APP_NAME: Joi.string().required(),
       }),
     }),
     FortyTwoModule,

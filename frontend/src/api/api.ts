@@ -35,7 +35,7 @@ export class Api {
   }
 
   ping() {
-    return fetch(`${PREFIX}${URL.PROTECTED}`, {
+    return fetch(`${PREFIX}${FULL_ROUTE.ROOT.PROTECTED}`, {
       method: "GET",
       mode: "no-cors",
       credentials: "include",
@@ -108,9 +108,12 @@ export class Api {
       body: JSON.stringify({ player1, player2, winner }),
     });
   }
-  turn_on_2fa() {
+  turn_on_2fa(code: string) {
+    let headers = new Headers();
+    headers.set(HeadersFields.ContentType, "application/json");
     return fetch(`${PREFIX}${FULL_ROUTE.AUTH.TURN_ON_2FA}`, {
-      method: "PUT",
+      method: "POST",
+      body: JSON.stringify({ code }),
     });
   }
   turn_off_2fa() {
