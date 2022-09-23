@@ -26,11 +26,14 @@ export const ROUTES_BASE = {
     ENDPOINT: '/game/',
     /** CREATE GAME */
     CREATE_GAME_REQUEST: 'createGameRequest',
-    CONFIRM_GAME_CREATION: 'confirmGameCreation',
+    // CONFIRM_GAME_CREATION: 'confirmGameCreation',
     /** JOIN GAME */
     JOIN_GAME_REQUEST: 'joinGameRequest',
+    CONFIRM_GAME_JOINED: 'confirmGameJoined',
     /** SEND INPUT */
     SEND_INPUT: 'sendInput',
+    /** GAME LOOP */
+    UPDATE_GAME: 'updateGame',
   }
 };
 const generate_full_routes = (routes_base) => {

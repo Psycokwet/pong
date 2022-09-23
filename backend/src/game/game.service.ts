@@ -11,8 +11,8 @@ import { User } from 'src/user/user.entity';
 import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatRoom } from 'shared/interfaces/ChatRoom';
-import GameRoom from 'shared/interfaces/GameRoom';
-import GameData from 'shared/interfaces/GameData';
+import GameRoom from 'shared/interfaces/game/GameRoom';
+import GameData from 'shared/interfaces/game/GameData';
 
 @Injectable()
 export class GameService {
@@ -29,6 +29,7 @@ export class GameService {
   ) {}
 
   private static gameRoomList: GameRoom[] = [];
+  public static gameIntervalList: number[] = [];
 
   private static defaultGameData: GameData = {
     player1: {
@@ -53,6 +54,12 @@ export class GameService {
       }
     }
   }
+  private CANVAS_WIDTH = 640;
+  private CANVAS_HEIGHT = 480;
+  private PLAYER_HEIGHT = 100;
+  private PLAYER_WIDTH = 5;
+  private MAX_SPEED = 10;
+  private DEFAULT_RAYON = 5;
 
   createGame(user: User): GameRoom {
     const newGameRoom: GameRoom = {
@@ -70,7 +77,9 @@ export class GameService {
   }
 
   matchMaking(user: User): GameRoom {
-    const gameToLaunch:GameRoom = GameService.gameRoomList.find(gameData => gameData.started === false);
+    const gamesToLaunch:GameRoom[] = GameService.gameRoomList.filter(gameRoom => !gameRoom.started);
+
+    const gameToLaunch = gamesToLaunch.length ? gamesToLaunch[0] : undefined;
 
     if (!gameToLaunch) return this.createGame(user);
 
@@ -78,28 +87,95 @@ export class GameService {
     gameToLaunch.gameData.player2.pongUsername = this.userService.getFrontUsername(user);
     gameToLaunch.started = true;
     gameToLaunch.gameData = this.gameStart(gameToLaunch.gameData);
+    // console.log(gameToLaunch.gameData)
 
     return gameToLaunch;
-
   }
 
   gameStart(gameData: GameData): GameData {
-    const CANVAS_WIDTH = 640;
-    const CONVAS_HEIGHT = 480;
-    // const PLAYER_HEIGHT = 500
-    const PLAYER_HEIGHT = 100;
-    const PLAYER_WIDTH = 5;
-    const MAX_SPEED = 10;
-    const DEFAULT_RAYON = 5;
-
-    gameData.player1.y = CONVAS_HEIGHT / 2 - PLAYER_HEIGHT / 2;
-    gameData.player2.y = CONVAS_HEIGHT / 2 - PLAYER_HEIGHT / 2;
-    gameData.ball.x = CANVAS_WIDTH / 2;
-    gameData.ball.y = CONVAS_HEIGHT / 2;
-    gameData.ball.rayon = DEFAULT_RAYON;
+    gameData.player1.y = this.CANVAS_HEIGHT / 2 - this.PLAYER_HEIGHT / 2;
+    gameData.player2.y = this.CANVAS_HEIGHT / 2 - this.PLAYER_HEIGHT / 2;
+    gameData.ball.x = this.CANVAS_WIDTH / 2;
+    gameData.ball.y = this.CANVAS_HEIGHT / 2;
+    gameData.ball.rayon = this.DEFAULT_RAYON;
     gameData.ball.speed.x = (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
     gameData.ball.speed.y = (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
 
     return gameData;
   }
+
+  findUserRoom(userId: number): GameRoom {
+    const index = GameService.gameRoomList.findIndex(gameRoom => 
+      gameRoom.gameData.player1.userId === userId
+      ||
+      gameRoom.gameData.player2.userId === userId
+    )
+    return GameService.gameRoomList[index];
+  }
+
+  findIndex(copyGameRoom: GameRoom): number {
+    return GameService.gameRoomList.findIndex(gameRoom => gameRoom.roomName == copyGameRoom.roomName)
+  }
+
+  updateGameRoom(roomIndex, gameRoom) {
+    GameService.gameRoomList[roomIndex] = gameRoom;
+  }
+
+  /** GAME LOOP */
+  private changeDirection(game, playerPosition) {
+    const impact = game.ball.y - playerPosition - this.PLAYER_HEIGHT / 2;
+    const ratio = 100 / (this.PLAYER_HEIGHT / 2);
+
+    // Get a value between 0 and 10
+    game.ball.speed.y = Math.round(impact * ratio / 10);
+    return game;
+  }
+
+  private collide(player1, newGame) {
+    // The player does not hit the ball
+    if (newGame.ball.y < player1.y || newGame.ball.y > player1.y + this.PLAYER_HEIGHT) {
+
+      newGame.ball.x = this.CANVAS_WIDTH / 2;
+      newGame.ball.y = this.CANVAS_HEIGHT / 2;
+      newGame.ball.speed.x = (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
+      newGame.ball.speed.y = (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
+      // Update score
+      if (player1 == newGame.player1) {
+          newGame.player2.score++;
+      } else {
+          newGame.player1.score++;
+      }
+    } else {
+      // Change direction
+      newGame.ball.speed.x *= -1;
+      newGame = this.changeDirection(newGame, player1.y);
+
+      // Increase speed if it has not reached max speed
+      if (Math.abs(newGame.ball.speed.x) < this.MAX_SPEED) {
+          newGame.ball.speed.x *= 1.2;
+      }
+    }
+    return newGame;
+  }
+
+  gameLoop(gameRoomName: string): GameRoom | undefined {
+    const index = GameService.gameRoomList.findIndex(gameRoom => gameRoom.roomName === gameRoomName)
+
+    let newGame = GameService.gameRoomList[index].gameData
+    if (newGame.ball.y > this.CANVAS_HEIGHT || newGame.ball.y < 0) {
+        newGame.ball.speed.y *= -1;
+    }
+  
+    if (newGame.ball.x > this.CANVAS_WIDTH - this.PLAYER_WIDTH) {
+      newGame = this.collide(newGame.player2, newGame);
+    } else if (newGame.ball.x < this.PLAYER_WIDTH) {
+      newGame = this.collide(newGame.player1, newGame);
+    }
+    newGame.ball.x += newGame.ball.speed.x;
+    newGame.ball.y += newGame.ball.speed.y;
+    GameService.gameRoomList[index].gameData.ball = newGame.ball;
+
+    return GameService.gameRoomList[index];
+  }
+  /** END GAME LOOP */
 }

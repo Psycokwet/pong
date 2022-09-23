@@ -43,6 +43,8 @@ function GameCanvas() {
   const [globalCoords, setGlobalCoords] = useState<Position>({x: 0, y: 0});
   const [cdai, setCdai] = useState<GameRoom | undefined>(undefined)
 
+  const [player1Name, setPlayer1name] = useState('');
+  const [player2Name, setPlayer2name] = useState('');
 
   const [game, setGame] = useState({
     player: {
@@ -199,16 +201,10 @@ function GameCanvas() {
       const canvasLocation = canvasRef.current.getBoundingClientRect();
       const mouseLocation = event.clientY - canvasLocation.y;
   
-      if (mouseLocation < PLAYER_HEIGHT / 2) {
-          game.player.y = 0;
-      } else if (mouseLocation > canvas.height - PLAYER_HEIGHT / 2) {
-          game.player.y = canvas.height - PLAYER_HEIGHT;
-      } else {
-          game.player.y = mouseLocation - PLAYER_HEIGHT / 2;
-      }
-
-      console.log(position);
-      socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, position);
+      socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
+        canvasLocation: canvasLocation,
+        mouseLocation: mouseLocation,
+      });
     }
   };
 
@@ -226,19 +222,41 @@ function GameCanvas() {
   /** END MOUSE HANDLER */
 
 
-  /** GAME CREATION */
-  const handleGameCreation = (gameData: GameRoom) => {
+  /** GAME LOOP */
+  const handleGameUpdate = (gameRoom: GameRoom) => {
+    if (gameRoom.started === true) {
+      const canvas = canvasRef.current
+      const context = canvas.getContext('2d')
+      draw(canvas)
 
-    console.log(gameData)
-    setCdai(gameData)
-    // setAllChannel((current) => [...current, newChannel]);
+      // Draw players
+      context.fillStyle = 'white';
+      context.fillRect(0, gameRoom.gameData.player1.y, PLAYER_WIDTH, PLAYER_HEIGHT);
+      context.fillRect(canvas.width - PLAYER_WIDTH, gameRoom.gameData.player2.y, PLAYER_WIDTH, PLAYER_HEIGHT);
+
+      // Draw ball
+      context.beginPath();
+      context.fillStyle = 'white';
+      context.arc(gameRoom.gameData.ball.x, gameRoom.gameData.ball.y, gameRoom.gameData.ball.rayon, 0, Math.PI * 2, false);
+      context.fill();
+    }
+    setCdai(gameRoom)
   };
   useEffect(() => {
-    socket?.on(ROUTES_BASE.GAME.CONFIRM_GAME_CREATION, handleGameCreation);
+    socket?.on(ROUTES_BASE.GAME.UPDATE_GAME, handleGameUpdate);
     return () => {
-      socket?.off(ROUTES_BASE.GAME.CONFIRM_GAME_CREATION, handleGameCreation);
+      socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, handleGameUpdate);
     };
-  }, [handleGameCreation]);
+  }, [handleGameUpdate]);
+  /** END GAME LOOP */
+
+  /** GAME CREATION */
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, handleGameUpdate);
+    return () => {
+      socket?.off(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, handleGameUpdate);
+    };
+  }, [handleGameUpdate]);
 
   const handleCreateGame = () => {
     socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST);
@@ -247,18 +265,39 @@ function GameCanvas() {
 
 
 
+  
+  /** GAME JOIN */
+  const handleJoinGame = () => {
+    socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST);
+  }
+  /** END GAME JOIN */
+
+  const displayPlayername = () => {
+    const playerPongUsernames = [];
+    if (cdai.gameData.player1.pongUsername !== '')
+      playerPongUsernames.push(
+        <p key={cdai.gameData.player1.pongUsername}>{cdai.gameData.player1.pongUsername} : {cdai.gameData.player1.score}</p>
+      )
+    if (cdai.gameData.player2.pongUsername !== '')
+      playerPongUsernames.push(
+        <p key={cdai.gameData.player2.pongUsername}>{cdai.gameData.player2.pongUsername} : {cdai.gameData.player2.score}</p>
+      )
+    return playerPongUsernames;
+  }
+
   return (
     <div
       style={{padding: '3rem', backgroundColor: 'lightgray'}}
     >
       <h2>Final Game</h2>
       {
-        cdai && cdai.gameData.player1.pongUsername !== '' ?
-          <>{cdai.gameData.player1.pongUsername}</>
+        cdai ? 
+          displayPlayername()
           :
           <>
             <button onClick={handleCreateGame}>Create game</button>
-            {/* <button onClick={handleJoinGame}>Join game</button> */}
+            <div></div>
+            <button onClick={handleJoinGame}>Join game</button>
           </>
       }
       <br />
@@ -268,7 +307,7 @@ function GameCanvas() {
           <p>player1 : {game.player.score}</p>
           <p>computer : {game.computer.score}</p>
         </div>
-        <canvas
+      <canvas
           onMouseMove={handleMouseMove}
           onMouseDown={startCounter}
           onMouseUp={stopCounter}
