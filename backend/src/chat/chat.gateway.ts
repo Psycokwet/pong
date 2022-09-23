@@ -20,6 +20,7 @@ import CreateChannel from '../../shared/interfaces/CreateChannel';
 import SearchChannel from '../../shared/interfaces/SearchChannel';
 
 import * as bcrypt from 'bcrypt';
+import JoinChannel from 'shared/interfaces/JoinChannel';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -91,7 +92,6 @@ export class ChatGateway {
         just created */
     const newRoom = await this.chatService.saveRoom({
       roomName: data.channelName,
-      clientId: client.id,
       userId: payload.userId,
       isChannelPrivate: data.isChannelPrivate,
       password: hashedPassword,
@@ -124,16 +124,14 @@ export class ChatGateway {
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST)
   async joinRoom(
     @MessageBody()
-    joinChannelRequestData: { roomId: number; userPassword: string },
+    data: JoinChannel,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomByIdWithRelations(
-      joinChannelRequestData.roomId,
-    );
+    const room = await this.chatService.getRoomByIdWithRelations(data.roomId);
     if (room.password !== '') {
       const isGoodPassword = await passwordCompare(
-        joinChannelRequestData.userPassword,
+        data.inputPassword,
         room.password,
       );
       if (!isGoodPassword)

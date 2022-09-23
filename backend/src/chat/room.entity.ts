@@ -27,7 +27,7 @@ class Room extends BaseEntity {
   @Column({ unique: true })
   public roomName: string;
 
-  @Column()
+  @Column({ default: '' })
   public password: string;
 
   @ManyToOne(() => User, (user) => user.rooms)
@@ -40,7 +40,7 @@ class Room extends BaseEntity {
   @JoinTable()
   public members: User[];
 
-  @Column()
+  @Column({ nullable: false, default: false })
   public isChannelPrivate: boolean;
 }
 
