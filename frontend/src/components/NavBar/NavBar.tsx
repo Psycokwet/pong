@@ -45,7 +45,7 @@ export const NavBarPageList = [
   {
     url: "/practice",
     pageName: "practice",
-    // pageIcon: <IoMdSettings size="26" />,
+    pageIcon: <IoMdSettings size="26" />,
   },
 ];
 
