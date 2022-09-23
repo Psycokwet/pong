@@ -34,6 +34,9 @@ class Room extends BaseEntity {
   @ManyToMany(() => User, (user) => user.channels, { cascade: true })
   @JoinTable()
   public members: User[];
+
+  @Column()
+  public isDM: boolean;
 }
 
 export default Room;
