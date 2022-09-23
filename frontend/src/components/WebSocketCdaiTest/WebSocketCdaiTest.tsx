@@ -6,6 +6,7 @@ import JoinChannelButtons from "./JoinChannelButtons";
 import LeaveChannelButton from "./LeaveChannelButton";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
+import CreateDm from "./CreateDm";
 const ENDPOINT = "http://localhost:8080";
 import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
 import ChannelData from "../../../shared/interfaces/ChannelData";
@@ -64,6 +65,9 @@ function WebSocketCdaiTest() {
       );
     };
   }, [channelCreationListener]);
+  const handleCreateDM = (newDmName: string) => {
+    socket?.emit(ROUTES_BASE.CHAT.CREATE_DM, Number(newDmName.trim()));
+  };
   /** END CREATE CHANNEL */
 
   /** JOIN CHANNEL */
@@ -94,6 +98,16 @@ function WebSocketCdaiTest() {
       socket?.off(ROUTES_BASE.CHAT.LIST_ALL_CHANNELS, getAllChannel);
     };
   }, [getAllChannel]);
+  // handle new channel creation
+  const handleNewChannelCreation = (newChannel: any) => {
+    setAllChannel((current) => [...current, newChannel]);
+  };
+  useEffect(() => {
+    socket?.on("newChannelCreated", handleNewChannelCreation);
+    return () => {
+      socket?.off("newChannelCreated", handleNewChannelCreation);
+    };
+  }, [handleNewChannelCreation]);
   /** END GET ALL CHANNEL */
 
   /** DISCONNECT CHANNEL */
@@ -142,7 +156,8 @@ function WebSocketCdaiTest() {
 
   return (
     <>
-      {!connectedChannel ? (
+      <CreateDm handleCreateDM={handleCreateDM}/>
+{/*      {!connectedChannel ? (
         <>
           <CreateChannel handleCreateChannel={handleCreateChannel} />
           <JoinChannelButtons
@@ -168,7 +183,7 @@ function WebSocketCdaiTest() {
           <MessageInput send={send} />
           <Messages messages={messages} />
         </>
-      )}
+      )}*/}
     </>
   );
 }
