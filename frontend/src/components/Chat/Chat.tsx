@@ -36,8 +36,6 @@ function Chat () {
     });
     setSocket(newSocket);
   }, []);
-
-
   const addMessage = (newElem:MessageType) => {
     setMessages((current_messages)=>{
     return [...current_messages, newElem];
