@@ -20,16 +20,24 @@ function WebSocketCdaiTest() {
   >(undefined);
   const [connectedUserIdList, setConnectedUserIdList] = useState<number[]>([]);
   const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
-  const [channelAttachedUserList, setChannelAttachedUserList] = useState<User[]>([]);
+  const [channelAttachedUserList, setChannelAttachedUserList] = useState<
+    User[]
+  >([]);
 
   /** CHANNEL ATTACHED USER LIST */
   const handleChannelAttachedUserList = (channelAttachedUserList: User[]) => {
     setChannelAttachedUserList(channelAttachedUserList);
   };
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST, handleChannelAttachedUserList);
+    socket?.on(
+      ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST,
+      handleChannelAttachedUserList
+    );
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST, handleChannelAttachedUserList);
+      socket?.off(
+        ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST,
+        handleChannelAttachedUserList
+      );
     };
   }, [handleChannelAttachedUserList]);
   /** END CHANNEL ATTACHED USER LIST */
@@ -61,11 +69,31 @@ function WebSocketCdaiTest() {
   /** END MESSAGE */
 
   /** CREATE CHANNEL */
-  const handleCreatePrivateChannel = ({newChannelName, newChannelPass} : {newChannelName: string, newChannelPass: string}) => {
-    socket?.emit("createChannelRequest", {roomName:newChannelName, isChannelPrivate:true, password:newChannelPass});
+  const handleCreatePrivateChannel = ({
+    newChannelName,
+    newChannelPass,
+  }: {
+    newChannelName: string;
+    newChannelPass: string;
+  }) => {
+    socket?.emit(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST, {
+      roomName: newChannelName,
+      isChannelPrivate: true,
+      password: newChannelPass,
+    });
   };
-  const handleCreatePublicChannel = ({newChannelName, newChannelPass} : {newChannelName: string, newChannelPass: string}) => {
-    socket?.emit("createChannelRequest", {roomName:newChannelName, isChannelPrivate:false, password:newChannelPass});
+  const handleCreatePublicChannel = ({
+    newChannelName,
+    newChannelPass,
+  }: {
+    newChannelName: string;
+    newChannelPass: string;
+  }) => {
+    socket?.emit(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST, {
+      roomName: newChannelName,
+      isChannelPrivate: false,
+      password: newChannelPass,
+    });
   };
   const channelCreationListener = (confirmedConnectedChannel: ChannelData) => {
     setConnectedChannel(confirmedConnectedChannel);
@@ -195,7 +223,9 @@ function WebSocketCdaiTest() {
             channelName={connectedChannel.channelName}
             sendDisconnect={sendDisconnect}
           />
-          <ChannelAttachedUsers channelAttachedUserList={channelAttachedUserList} />
+          <ChannelAttachedUsers
+            channelAttachedUserList={channelAttachedUserList}
+          />
           <br />
 
           <MessageInput send={send} />
