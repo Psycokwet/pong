@@ -27,7 +27,7 @@ export const PictureSetter = () => {
     <div>
       <form>
         <input type="file" onChange={handleChange}/>
-        <button onClick={submitUploadForm}>Submit</button>
+        <button onClick={submitUploadForm}>Upload Avatar</button>
       </form>
     </div>
   );

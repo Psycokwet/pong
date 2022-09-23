@@ -17,7 +17,7 @@ const LeaderBoard = () => {
         console.log("get_friend_list", content);
       });
     });
-    api.set_nickname("ponnnny").then((res: Response) => {
+    api.set_nickname("bla bla").then((res: Response) => {
       console.log("set_nickname", res);
       if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
         res.json().then((content) => {
@@ -25,9 +25,9 @@ const LeaderBoard = () => {
         });
     });
     api.get_nickname("scarboni").then((res: Response) => {
-      console.log("get_nickname", res);
+      console.log("results after get_nickname", res);
       res.json().then((content) => {
-        console.log("get_nickname", content);
+        console.log("results after get_nickname", content);
       });
     });
   };
