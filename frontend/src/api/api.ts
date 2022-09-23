@@ -113,6 +113,7 @@ export class Api {
     headers.set(HeadersFields.ContentType, "application/json");
     return fetch(`${PREFIX}${FULL_ROUTE.AUTH.TURN_ON_2FA}`, {
       method: "POST",
+      headers: headers,
       body: JSON.stringify({ code }),
     });
   }

@@ -25,10 +25,15 @@ export class TwoFactorAuthController {
 
   @UseGuards(JwtRefreshGuard)
   @Post(ROUTES_BASE.AUTH.TURN_ON_2FA) // to use after generate, with the code
-  turn_on_2FA(@Req() req, @Body() code: string) {
-    const isValid = this.twoFactorAuthService.is2FACodeValid(code, req.user);
-    if (!isValid) throw new UnauthorizedException('Wrong authentication code');
-    this.userService.set2fa(req.user.login42, true);
+  async turn_on_2FA(@Req() req, @Body() { code }: TwoFactorAuthCodeDto) {
+    const isValid = await this.twoFactorAuthService.is2FACodeValid(
+      code,
+      req.user,
+    );
+    if (!isValid) {
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+    await this.userService.set2fa(req.user.login42, true);
   }
   @Put(ROUTES_BASE.AUTH.TURN_OFF_2FA)
   @UseGuards(JwtRefreshGuard)
