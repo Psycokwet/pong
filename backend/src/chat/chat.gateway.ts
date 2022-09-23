@@ -123,8 +123,7 @@ export class ChatGateway {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST)
   async joinRoom(
-    @MessageBody()
-    data: JoinChannel,
+    @MessageBody() data: JoinChannel,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
