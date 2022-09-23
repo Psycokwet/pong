@@ -89,6 +89,7 @@ export class Api {
       body: JSON.stringify({ newPongUsername }),
     });
   }
+  
   get_user_rank() {
     return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_USER_RANK}`, {
       method: "GET",
