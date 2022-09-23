@@ -10,11 +10,12 @@ import Messages from "./Messages";
 const ENDPOINT = "http://localhost:8080";
 import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
 import ChannelData from "../../../shared/interfaces/ChannelData";
+import Message from "../../../shared/interfaces/Message";
 import User from "../../../shared/interfaces/User";
 
 function WebSocketCdaiTest() {
   const [socket, setSocket] = useState<Socket>();
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [connectedChannel, setConnectedChannel] = useState<
     ChannelData | undefined
   >(undefined);
@@ -49,8 +50,8 @@ function WebSocketCdaiTest() {
     setSocket(newSocket);
   }, []);
 
-  const messageListener = (message: string) => {
-    setMessages((current: string[]) => [...current, message]);
+  const messageListener = (message: Message) => {
+    setMessages((current: Message[]) => [...current, message]);
   };
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageListener);
@@ -58,6 +59,17 @@ function WebSocketCdaiTest() {
       socket?.off(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageListener);
     };
   }, [messageListener]);
+
+  const handleMessageHistory = (messageHistory: Message[]) => {
+    setMessages(messageHistory);
+  };
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.MESSAGE_HISTORY, handleMessageHistory);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.MESSAGE_HISTORY, handleMessageHistory);
+    };
+  }, [messageListener]);
+
   /** END MESSAGE */
 
   /** CREATE CHANNEL */
@@ -130,6 +142,7 @@ function WebSocketCdaiTest() {
   };
   const handleDisconnect = () => {
     setConnectedChannel(undefined);
+    setMessages([]);
     setChannelAttachedUserList([]);
   };
   useEffect(() => {
