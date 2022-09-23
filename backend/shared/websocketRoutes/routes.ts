@@ -19,6 +19,8 @@ export const ROUTES_BASE = {
     /** SEND MESSAGE */
     SEND_MESSAGE: 'sendMessage',
     RECEIVE_MESSAGE: 'receiveMessage',
+    /** MESSAGE HISTORY */
+    MESSAGE_HISTORY: 'messageHistory',
     /** GET CONNECTED USER LIST */
     GET_CONNECTED_USER_LIST_REQUEST: 'getConnectedUserListRequest',
     CONNECTED_USER_LIST: 'connectedUserList',
