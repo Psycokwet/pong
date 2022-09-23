@@ -52,6 +52,7 @@ export class TwoFactorAuthController {
     @Res() response: Response,
     @Req() request: RequestWithUser,
   ) {
+    this.userService.set2fa(request.user.login42, false); //We change the secret, previous 2fa ain't valid anymore
     const { otpauthUrl } =
       await this.twoFactorAuthService.generateTwoFactorAuthenticationSecret(
         request.user,
