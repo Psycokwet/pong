@@ -42,6 +42,7 @@ export class FortyTwoController {
         login42: req.user.user.login42,
       });
     } catch (e) {
+      //will have to manage signup more ... Slowly, like, in multiple stes, to fit requirement
       userFromDb = await this.usersService.signup({
         login42: req.user.user.login42,
         email: req.user.user.email,
