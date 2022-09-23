@@ -136,3 +136,4 @@ dist
 
 # front/back shared folder
 frontend/shared/*
+frontend/shared
