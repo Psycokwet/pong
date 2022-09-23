@@ -18,9 +18,10 @@ function TextField ({addMessage} : {addMessage: any}) {
 			e.preventDefault();
 			setValue('');
 		}
-		else if (e.code == 'Enter')
+		else if (e.code == 'Enter') {
 			e.preventDefault();
 			setValue('');
+		}
 	}
 
 	const handleClick = () => {
