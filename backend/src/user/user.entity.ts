@@ -13,6 +13,7 @@ import { Friend } from 'src/friend_list/friend.entity';
 import { Exclude } from 'class-transformer';
 import LocalFile from 'src/localFiles/localFile.entity';
 import Room from 'src/chat/room.entity';
+import Message from 'src/chat/message.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -22,7 +23,7 @@ export class User extends BaseEntity {
   @Column({ length: 128, unique: true })
   login42: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   pongUsername: string;
 
   @Column({ length: 128, unique: true })
@@ -58,4 +59,7 @@ export class User extends BaseEntity {
 
   @ManyToMany(() => Room, (room) => room.members)
   public channels: Room[];
+
+  @OneToMany(() => Message, (message) => message.author)
+  public messages: Message[];
 }
