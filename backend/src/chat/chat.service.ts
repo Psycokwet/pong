@@ -59,12 +59,14 @@ export class ChatService {
 
   async saveDMRoom(friendId: number, userId: number) {
     const friend = await this.userService.getById(friendId);
+    const user = await this.userService.getById(userId);
     const roomName = 'DM_' + uuidv4();
 
     const newRoom = await Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: uuidv4(),
       isDM: true,
+      members: [user, friend],
     });
 
     await newRoom.save();
