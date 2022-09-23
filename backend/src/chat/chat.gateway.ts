@@ -83,7 +83,10 @@ export class ChatGateway {
     @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
+    const receiver = await this.userService.getById(friendId);
+
     if (payload.userId === friendId) {
+      console.log('Dm yourself');
       throw new BadRequestException({
         error: "You're trying to send a DM to yourself",
       });
@@ -121,7 +124,9 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomsById(roomId, { isDM: false });
+    const room = await this.chatService.getRoomsById(roomId, {
+      members: false,
+    });
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, {
@@ -147,7 +152,7 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomsById(roomId, { isDM: true });
+    const room = await this.chatService.getRoomsById(roomId, { members: true });
     client.join(room.roomName);
     this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_ENTRY, {
       channelId: room.id,

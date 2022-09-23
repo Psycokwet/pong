@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
@@ -51,26 +51,61 @@ export class ChatService {
       channelName: roomName,
       owner: user,
       members: [user],
+      isDM: false,
     });
 
     await newRoom.save();
     return newRoom;
   }
 
-  async saveDMRoom(friendId: number, userId: number) {
-    const friend = await this.userService.getById(friendId);
-    const user = await this.userService.getById(userId);
+  async saveDMRoom(receiverId: number, senderId: number) {
+    const receiver = await this.userService.getById(receiverId);
+    const sender = await this.userService.getById(senderId);
     const roomName = 'DM_' + uuidv4();
+
+    /** Making sure a DM channel between the receiver and the sender does not already exist, throws
+     * a Bad Request if there is
+     */
+    await this.doesDMChannelExist(receiverId, senderId);
 
     const newRoom = await Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: uuidv4(),
       isDM: true,
-      members: [user, friend],
+      members: [sender, receiver],
     });
+
+    console.log('newRoom', newRoom);
 
     await newRoom.save();
     return newRoom;
+  }
+
+  async doesDMChannelExist(receiverId: number, senderId: number) {
+    const senderDMs = await this.roomsRepository.find({
+      relations: {
+        members: true,
+      },
+      where: {
+        isDM: true,
+        members: [{ id: senderId }, { id: receiverId }],
+      },
+    });
+
+    console.log('senderDMs', senderDMs);
+
+    const DMExists = await senderDMs.filter((room) => {
+      return room.members.length === 2;
+    }).length;
+
+    console.log('DMExists', DMExists);
+
+    if (DMExists !== 0) {
+      console.log('DM already exists');
+      throw new BadRequestException({
+        error: 'DM already exists',
+      });
+    } else return false;
   }
 
   async addMemberToChannel(userId: number, room: Room) {

@@ -156,8 +156,8 @@ function WebSocketCdaiTest() {
 
   return (
     <>
-      <CreateDm handleCreateDM={handleCreateDM}/>
-{/*      {!connectedChannel ? (
+      <CreateDm handleCreateDM={handleCreateDM} />
+      {!connectedChannel ? (
         <>
           <CreateChannel handleCreateChannel={handleCreateChannel} />
           <JoinChannelButtons
@@ -183,7 +183,7 @@ function WebSocketCdaiTest() {
           <MessageInput send={send} />
           <Messages messages={messages} />
         </>
-      )}*/}
+      )}
     </>
   );
 }
