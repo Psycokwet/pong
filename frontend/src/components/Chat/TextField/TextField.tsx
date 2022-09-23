@@ -13,21 +13,15 @@ function TextField ({addMessage} : {addMessage: any}) {
   const [value, setValue] = useState<string>('')
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.code == 'Enter' && value.trim() !== '') {
-      e.preventDefault();
-      addMessage({content:value, sender:user})
-      setValue('');
-    }
-    else if (e.code == 'Enter') {
-      e.preventDefault();
-      setValue('');
-    }
+    e.preventDefault();
+    if (e.code == 'Enter')
+      handleMessage();
   }
 
-  const handleClick = () => {
-    setValue('');
+  const handleMessage = () => {
     if (value.trim() !== '')
       addMessage({content:value, sender:user});
+    setValue('');
   }
 
   return (
@@ -45,7 +39,7 @@ function TextField ({addMessage} : {addMessage: any}) {
         />
         <IoSend
           size="40"
-          onClick={handleClick}
+          onClick={handleMessage}
           className="cursor-pointer"
           />
       </div>
