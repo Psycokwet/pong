@@ -109,6 +109,15 @@ export class UsersService {
     );
   }
 
+  async getUserByIdWithMessages(id: number) {
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: {
+        messages: true,
+      },
+    });
+  }
+
   async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
     const user = await this.getById(userId);
 
