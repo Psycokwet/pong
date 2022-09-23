@@ -21,6 +21,7 @@ export const ROUTES_BASE = {
     TURN_OFF_2FA: 'turn_off_2fa',
     GET_2FA: 'get_2fa',
     GENERATE_2FA: 'generate_2fa',
+    CHECK_2FA: 'check_2fa',
   },
   ROOT: {
     ENDPOINT: '/',

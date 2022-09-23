@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Api } from "../../../api/api";
 import { PictureGetter } from "../../PictureForm/PictureGetter";
 
 const api = new Api();
 const LeaderBoard = () => {
+  const [code2fa, setCode2fa] = useState<string>("");
   const sendRequest = () => {
     api.add_friend("scarboni", "bob").then((res: Response) => {
       console.log("add_friend", res);
@@ -84,19 +85,6 @@ const LeaderBoard = () => {
       <button
         className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
         onClick={() => {
-          api.turn_on_2fa().then((res: Response) => {
-            console.log("turn_on_2fa", res);
-            res.json().then((content) => {
-              console.log("turn_on_2fa", content);
-            });
-          });
-        }}
-      >
-        turn on 2fa
-      </button>
-      <button
-        className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
-        onClick={() => {
           api.get_2fa().then((res: Response) => {
             console.log("get_2fa", res);
             res.json().then((content) => {
@@ -107,20 +95,24 @@ const LeaderBoard = () => {
       >
         get 2fa
       </button>
+      <PictureGetter apiCall={() => api.generate_2fa()} />
+      <input
+        value={code2fa}
+        onChange={(e) => setCode2fa(e.target.value)}
+      ></input>
       <button
         className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
         onClick={() => {
-          api.generate_2fa().then((res: Response) => {
-            console.log("generate_2fa", res);
+          api.turn_on_2fa(code2fa).then((res: Response) => {
+            console.log("turn_on_2fa", res);
             res.json().then((content) => {
-              console.log("generate_2fa", content);
+              console.log("turn_on_2fa", content);
             });
           });
         }}
       >
-        generate 2fa
+        turn on 2fa
       </button>
-      <PictureGetter apiCall={() => api.generate_2fa()} />
     </>
   );
 };
