@@ -130,3 +130,9 @@ dist
 
 # Remove .idea
 .idea
+
+# vscode config file
+.vscode/*
+
+# front/back shared folder
+frontend/shared/*
