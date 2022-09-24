@@ -21,6 +21,7 @@ export class Api {
       method: "GET",
     });
   }
+  
   setPicture(data: FormData) {
     return fetch(`${PREFIX}${FULL_ROUTE.USER.SET_PICTURE}`, {
       method: "POST",
