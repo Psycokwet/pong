@@ -114,7 +114,7 @@ function WebSocketCdaiTest() {
 
   /** JOIN CHANNEL */
   const handleJoinChannelClick = (channelId: number) => {
-    socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNE_REQUEST, channelId);
+    socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST, channelId);
   };
   const handleJoinChannel = (message: ChannelData) => {
     setConnectedChannel(message);

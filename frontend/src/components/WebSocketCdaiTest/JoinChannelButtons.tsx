@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { KeyboardEvent, useState } from "react";
 import { Socket } from "socket.io-client";
+import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
 
 interface ChannelData {
   channelName: string;
@@ -20,7 +21,7 @@ export default function JoinChannelButtons(
   }
   ) {
   const handleClick = (channelId: number) => {
-    socket?.emit("joinChannelRequest", {roomId: channelId, userPassword: privatePass});
+    socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST, {roomId: channelId, userPassword: privatePass});
 			setPrivateName("")
 			setPrivatePass("")
   }
@@ -29,9 +30,9 @@ export default function JoinChannelButtons(
     setConnectedChannel(message)
   }
   useEffect(()=> {
-    socket?.on("confirmChannelEntry", handleJoinChannel);
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, handleJoinChannel);
     return () => {
-      socket?.off("confirmChannelEntry", handleJoinChannel);
+      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, handleJoinChannel);
     };
   }, [handleJoinChannel]);
 
@@ -39,7 +40,7 @@ export default function JoinChannelButtons(
   const [privatePass, setPrivatePass] = useState<string>("");
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.code == 'Enter') {
-			socket?.emit("searchChannel", {ChannelName: privateName, inputPassword: privatePass});
+			socket?.emit(ROUTES_BASE.CHAT.SEARCH_CHANNEL_REQUEST, {ChannelName: privateName, inputPassword: privatePass});
 			setPrivateName("")
 			setPrivatePass("")
 		}
@@ -59,7 +60,7 @@ export default function JoinChannelButtons(
       <input
         type="text"
         placeholder="private password"
-        value={privatePass}
+        value={privatePass}channelName
         onChange={(e) => {
           setPrivatePass(e.target.value);
         }}
