@@ -9,7 +9,7 @@ const MAX_CHAR = 5;
 const SignInPage = () => {
   const [nickname, setNickName] = useState("thi-nguy"); // Todo : get 42login and put it as initial value
   const [selectedFile, setSelectedFile] = useState<File>();
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState(""); // Todo: need a route for default photo
   const [twoFactor, setTwoFactor] = useState("off");
 
   const handleSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
@@ -22,22 +22,20 @@ const SignInPage = () => {
       fileData.append("file", selectedFile);
       api.setPicture(fileData).then((res: Response) => {
         if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
-          console.log("set picture is not Ok");
+          console.log("set picture is NOT Ok");
         else console.log(`Set picture is ok, status is: ${res.status}`);
       });
     }
 
     if (nickname.length <= MAX_CHAR) {
       api.set_nickname(nickname).then((res: Response) => {
-        console.log("set_nickname is ok", res);
         if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
-          res.json().then((content) => {
-            console.log("set_nickname", content);
-          });
+          console.log("set nickname is NOT Ok");
+        else console.log(`Set nickname is ok, status is: ${res.status}`);
       });
     }
 
-    // Todo next: set 2Factor through api.
+    // Todo: set 2Factor through api.
     console.log(`twoFactor status is set to: ${twoFactor}`);
   };
 
@@ -53,7 +51,7 @@ const SignInPage = () => {
     return () => {
       avatar && URL.revokeObjectURL(avatar);
     };
-  }, [avatar]);
+  }, [avatar]); // to avoid memory leaks
 
   return (
     <div>
@@ -73,7 +71,6 @@ const SignInPage = () => {
         className="text-white bg-gray-900 h-screen flex flex-col"
         onSubmit={handleSubmitForm}
       >
-        {/* Should I add something to pre-display the photo? */}
         <h1>Change your avatar</h1>
         <input type="file" onChange={handlePreviewPhoto} />
 
@@ -93,14 +90,14 @@ const SignInPage = () => {
         ) : (
           ""
         )}
+
         <div className="flex flex-row">
           <span>Activate Two-Factor Authentication</span>
           <input
             type="checkbox"
             onChange={(e) => setTwoFactor(e.target.value)}
             className="text-gray-800 mx-4"
-          >
-          </input>
+          ></input>
         </div>
 
         <button
@@ -112,7 +109,7 @@ const SignInPage = () => {
         </button>
       </form>
 
-      {/* **********Testing Zone - to delete later ************* */}
+      {/* Testing Zone - to delete later - don't forget to scroll down */}
       <div>
         <PictureGetter />
         <NickNameGetter />
