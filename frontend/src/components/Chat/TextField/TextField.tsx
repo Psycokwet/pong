@@ -23,7 +23,6 @@ function TextField ({socket , chan}:{
       channelId: chan?.channelId,
       message,
     });
-    console.log(chan);
     setValue('');
   };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
