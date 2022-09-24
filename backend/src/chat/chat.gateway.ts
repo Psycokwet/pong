@@ -165,35 +165,35 @@ export class ChatGateway {
   }
 
   /* JOIN DM ROOM*/
-  /** Needs front routes to test */
-  @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_REQUEST)
-  async joinDMRoom(
-    @MessageBody() roomId: number,
-    @ConnectedSocket() client: Socket,
-    @UserPayload() payload: any,
-  ) {
-    const room = await this.chatService.getRoomsById(
-      { id: roomId, isDM: true },
-      {
-        members: true,
-      },
-    );
-    client.join(room.roomName);
-    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_ENTRY, {
-      channelId: room.id,
-      channelName: room.channelName,
-    });
+  /** Leaving right now, don't think I'll need it but I want to make sure */
+  // @UseGuards(JwtWsGuard)
+  // @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_REQUEST)
+  // async joinDMRoom(
+  //   @MessageBody() roomId: number,
+  //   @ConnectedSocket() client: Socket,
+  //   @UserPayload() payload: any,
+  // ) {
+  //   const room = await this.chatService.getRoomsById(
+  //     { id: roomId, isDM: true },
+  //     {
+  //       members: true,
+  //     },
+  //   );
+  //   client.join(room.roomName);
+  //   this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_ENTRY, {
+  //     channelId: room.id,
+  //     channelName: room.channelName,
+  //   });
 
-    const connectedUserIdList: number[] =
-      this.chatService.updateUserConnectedToRooms(
-        room.roomName,
-        payload.userId,
-      );
-    this.server
-      .in(room.roomName)
-      .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
-  }
+  //   const connectedUserIdList: number[] =
+  //     this.chatService.updateUserConnectedToRooms(
+  //       room.roomName,
+  //       payload.userId,
+  //     );
+  //   this.server
+  //     .in(room.roomName)
+  //     .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
+  // }
 
   /* GET USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
