@@ -36,7 +36,9 @@ export class ChatService {
     );
   }
 
-  public async getAllAttachedRooms(user: User) {
+  public async getAllAttachedRooms(userId: number) {
+    const user = await this.userService.getById(userId);
+
     return this.roomsRepository
       .find({
         relations: {
@@ -56,30 +58,21 @@ export class ChatService {
           };
         }),
       );
-
-    // return this.roomsRepository.find().then((rooms) =>
-    //   rooms
-    //     .filter((room) => room.members.includes(user))
-    //     .map((room) => {
-    //       return {
-    //         channelId: room.id,
-    //         channelName: room.channelName,
-    //       };
-    //     }),
-    // );
   }
 
-  public async getAllDMRooms(user: User) {
+  public async getAllDMRooms(userId: number) {
+    const user = await this.userService.getById(userId);
+
     return this.roomsRepository
       .find({
         relations: {
           members: true,
-          isDM: true,
         },
         where: {
           members: {
             id: user.id,
           },
+          isDM: true,
         },
       })
       .then((rooms) =>
@@ -111,6 +104,7 @@ export class ChatService {
       channelName: roomName,
       owner: user,
       members: [user],
+      isDM: false,
     });
 
     await newRoom.save();

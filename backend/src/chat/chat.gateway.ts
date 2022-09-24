@@ -31,13 +31,18 @@ export class ChatGateway {
   /** JOIN LOBBY -- ALL USERS CAN FREELY ENTER THESE LOBBIES */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
-  async joinChannelLobby(@ConnectedSocket() client: Socket) {
+  async joinChannelLobby(
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
     client.join(this.channelLobby);
     this.server
       .in(this.channelLobby)
       .emit(
         ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
         await this.chatService.getAllRooms(),
+        await this.chatService.getAllAttachedRooms(payload.userId),
+        await this.chatService.getAllDMRooms(payload.userId),
       );
   }
 
