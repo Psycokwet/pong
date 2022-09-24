@@ -1,18 +1,9 @@
 import { useRef } from "react";
 import UserPicture from "../../User Picture/UserPicture";
+import { Message } from "/shared/interfaces/Message";
+import { User } from "/shared/interfaces/User";
 
-type userType = {
-  login: string;
-  nickname: string;
-//  status: userStatusEnum;
-  link_to_profile: string;
-}
-type MessageType = {
-  content: string;
-  sender: userType;
-}
-
-const Messages = ({messages}: {messages:MessageType[]}) => {
+const Messages = ({messages}: {messages:Message[]}) => {
   const containerRef = useRef();
   const refAssignCallback = (ref: any) => {
     if (!containerRef.current && ref) {
@@ -27,14 +18,15 @@ const Messages = ({messages}: {messages:MessageType[]}) => {
   return (
     <div 
       ref={refAssignCallback}
-      className="row-span-5 col-span-3 scroll-smooth overflow-y-auto">
+      className="row-span-5 col-span-3 scroll-smooth overflow-y-auto"
+    >
       {messages.map((message, index) => {
       return (
         <div key={index} className="flex gap-3 py-4 px-10">
           <UserPicture width="50px"/>
           <div className="">
             <h6 className="text-lg font-semibold self-center">
-              {message.sender.nickname}
+              {message.author}
             </h6>
             <p className="break-all max-w-full whitespace-pre-wrap text-sm">
               {message.content}
