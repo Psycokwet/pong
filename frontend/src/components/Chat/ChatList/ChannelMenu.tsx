@@ -2,9 +2,9 @@ import { FaPlusCircle, FaMinusCircle } from "react-icons/fa";
 import { Socket } from "socket.io-client";
 import { useState } from "react";
 import { ChannelData } from "/shared/interfaces/ChannelData";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import Create from "./ChannelMenu/Create";
 import Join from "./ChannelMenu/Join";
-import { ROUTES_BASE } from "../../../../shared/websocketRoutes/routes";
 
 function ChannelMenu ({ socket , chanList}:{
     socket:Socket | undefined,

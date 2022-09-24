@@ -6,29 +6,15 @@ import TextField from "./TextField/TextField";
 import Messages from "./Messages/Messages";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
+import { Message } from "/shared/interfaces/Message";
+import { User } from "/shared/interfaces/User";
 const ENDPOINT = "http://localhost:8080";
 
-type userType = {
-  login: string;
-  nickname: string;
-  link_to_profile: string;
-}
-type MessageType = {
-  content: string;
-  sender: userType;
-}
-
 function Chat () {
-  const user:userType = {login:'Moot', nickname:'mescande', link_to_profile:'Profile'};
-  const [messages, setMessages] = useState<MessageType[]>([])
+  const user:User = {id:0, pongUsername:'Moot'};
+  const [messages, setMessages] = useState<Message[]>([])
   const [socket, setSocket] = useState<Socket>();
   const [connectedChannel, setConnectedChannel] = useState<ChannelData | undefined>(undefined);
-  const send = (message: string) => {
-    socket?.emit(ROUTES_BASE.CHAT.SEND_MESSAGE, {
-      channelId: connectedChannel?.channelId,
-      message,
-    });
-  };
   useEffect(() => {
     const newSocket = io(ENDPOINT, {
       transports: ["websocket"],
@@ -36,31 +22,50 @@ function Chat () {
     });
     setSocket(newSocket);
   }, []);
-  const addMessage = (newElem:MessageType) => {
-    setMessages((current_messages)=>{
-    return [...current_messages, newElem];
-    })
+  const addMessage = (newElem:Message) => {
+    console.log("add :", newElem);
+    setMessages([...messages, newElem]);
   }
-  const channelCreationListener = (confirmedConnectedChannel: ChannelData) => {
-    setConnectedChannel(confirmedConnectedChannel);
-  };
   useEffect(() => {
-    socket?.on(
-      ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION,
-      channelCreationListener
-    );
+    socket?.on(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, addMessage);
     return () => {
-      socket?.off(
-        ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION,
-        channelCreationListener
-      );
+      socket?.off(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, addMessage);
     };
-  }, [channelCreationListener]);
+  }, [addMessage]);
+  const resetMessages = (msgs:Message[]) => {
+    console.log("reset :", msgs);
+    setMessages(msgs);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.MESSAGE_HISTORY, resetMessages);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.MESSAGE_HISTORY, resetMessages);
+    };
+  }, [resetMessages]);
+
+
+  const channelListener = (channel: ChannelData) => {
+    setConnectedChannel(channel);
+  };
+  useEffect(() => { //
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelListener);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelListener);
+    };
+  }, [channelListener]);
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, channelListener);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, channelListener);
+    };
+  }, [channelListener]);
+
+
   return (
     <div className="bg-black text-white h-7/8 flex grid grid-cols-5 grid-rows-6 gap-4">
       <ChatList msg={messages[messages.length - 1]} socket={socket}/>
       <Messages messages={messages}/>
-      <TextField addMessage={addMessage} />
+      <TextField socket={socket} chan={connectedChannel} />
       <div className="row-start-1 row-span-6 col-start-5">
         <UserPicture />
       </div>
