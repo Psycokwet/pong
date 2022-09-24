@@ -110,6 +110,15 @@ export class UsersService {
     );
   }
 
+  async getUserByIdWithMessages(id: number) {
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: {
+        messages: true,
+      },
+    });
+  }
+
   async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
     const user = await this.getById(userId);
 
@@ -293,9 +302,13 @@ export class UsersService {
     const user = await this.findOne(login42);
 
     /* We use TypeORM's update function to update our entity */
-    await this.usersRepository.update(user.id, {
-      pongUsername: dto.newPongUsername,
-    });
+    try {
+      await this.usersRepository.update(user.id, {
+        pongUsername: dto.newPongUsername,
+      });
+    } catch (e) {
+      throw new BadRequestException({ error: 'Nickname already taken' });
+    }
   }
 
   async getPicture(dto: User) {

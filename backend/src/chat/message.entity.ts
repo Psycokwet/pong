@@ -22,8 +22,11 @@ class Message {
   @ManyToOne(() => Room)
   public room: Room;
 
-  @CreateDateColumn()
-  createdDate: Date;
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
+  createdAt: Date;
 }
 
 export default Message;
