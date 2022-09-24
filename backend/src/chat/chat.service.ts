@@ -11,6 +11,7 @@ import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatRoom } from 'shared/interfaces/ChatRoom';
+import ChannelData from 'shared/interfaces/ChannelData';
 @Injectable()
 export class ChatService {
   constructor(
@@ -25,15 +26,19 @@ export class ChatService {
   ) {}
   private static chatRoomList: ChatRoom[] = [];
 
-  public async getAllRooms() {
-    return this.roomsRepository.find().then((rooms) =>
-      rooms.map((room) => {
-        return {
-          channelId: room.id,
-          channelName: room.channelName,
-        };
-      }),
-    );
+  public async getAllPublicRooms(): Promise<ChannelData[]> {
+    return this.roomsRepository
+      .find({
+        where: { isChannelPrivate: false },
+      })
+      .then((rooms) =>
+        rooms.map((room) => {
+          return {
+            channelId: room.id,
+            channelName: room.channelName,
+          };
+        }),
+      );
   }
 
   public async getAllAttachedRooms(userId: number) {
@@ -96,15 +101,40 @@ export class ChatService {
     });
   }
 
-  async saveRoom(roomName: string, userId: number) {
+  public async getRoomByName(roomName: string) {
+    return this.roomsRepository.findOneBy({ roomName: roomName });
+  }
+
+  public async getRoomByNameWithRelations(roomName: string) {
+    return this.roomsRepository.findOne({
+      where: { channelName: roomName },
+      relations: {
+        members: true,
+      },
+    });
+  }
+
+  async saveRoom({
+    roomName,
+    userId,
+    isChannelPrivate,
+    password,
+  }: {
+    roomName: string;
+    userId: number;
+    isChannelPrivate: boolean;
+    password: string;
+  }) {
     const user = await this.userService.getById(userId);
 
     const newRoom = await Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: roomName,
+      password: password,
       owner: user,
       members: [user],
       isDM: false,
+      isChannelPrivate: isChannelPrivate,
     });
 
     await newRoom.save();
