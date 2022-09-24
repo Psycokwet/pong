@@ -6,6 +6,9 @@ import {
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -39,7 +42,7 @@ async function passwordCompare(
   transport: ['websocket'],
   cors: '*/*',
 })
-export class ChatGateway {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,
@@ -48,7 +51,38 @@ export class ChatGateway {
 
   @WebSocketServer()
   server: Server;
+  async handleConnection(client: Socket) {
+    console.log(`Client connected: ${client.id}`);
 
+    const user = await this.chatService.getUserFromSocket(client);
+
+    const isRegistered = ChatService.userWebsockets.find(
+      (element) => element.userId === user.id,
+    );
+
+    console.log(isRegistered);
+
+    if (!isRegistered) {
+      console.log('new registration');
+      const newWebsocket = { userId: user.id, socketId: client.id };
+      ChatService.userWebsockets = [
+        ...ChatService.userWebsockets,
+        newWebsocket,
+      ];
+    }
+
+    console.log(ChatService.userWebsockets);
+  }
+
+  handleDisconnect(client: Socket) {
+    console.log(`Client disconnected: ${client.id}`);
+
+    ChatService.userWebsockets = ChatService.userWebsockets.filter(
+      (websocket) => websocket.socketId !== client.id,
+    );
+
+    console.log(ChatService.userWebsockets);
+  }
   /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
@@ -131,7 +165,13 @@ export class ChatGateway {
       payload.userId,
     );
 
-    await client.join(newDMRoom.roomName);
+    const receiver = await this.chatService.getUserIdWebsocket(friendId);
+    console.log('receiver', receiver);
+
+    await client.join(client.id);
+    await client.join(receiver.socketId);
+
+    console.log(receiver);
 
     this.server
       .in(newDMRoom.roomName)
@@ -291,3 +331,12 @@ export class ChatGateway {
         .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageForFront);
   }
 }
+
+// @UseGuards(JwtWsGuard)
+// @SubscribeMessage(ROUTES_BASE.CHAT.BAN_USER_REQUEST)
+// async banUser(
+//   @MessageBody() data: { message: string; channelId: number },
+//   @UserPayload() payload: any,
+// ) {
+//
+// }
