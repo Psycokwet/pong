@@ -18,8 +18,7 @@ export const PictureGetter = () => {
   return (
     <div>
       <form>
-        <h1>React File Download</h1>
-        <button onClick={submitDownloadForm}>Submit</button>
+        <button onClick={submitDownloadForm}>Download Photo</button>
       </form>
       <img src={userPicture ? userPicture : ''} alt="user picture" hidden={!!userPicture} />
     </div>
