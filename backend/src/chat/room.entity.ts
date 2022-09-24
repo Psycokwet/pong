@@ -40,7 +40,7 @@ class Room extends BaseEntity {
   @JoinTable()
   public members: User[];
 
-  @Column()
+  @Column({ nullable: false, default: false })
   public isDM: boolean;
 
   @Column({ nullable: false, default: false })
