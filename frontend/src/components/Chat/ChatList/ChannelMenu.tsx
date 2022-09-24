@@ -6,9 +6,8 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import Create from "./ChannelMenu/Create";
 import Join from "./ChannelMenu/Join";
 
-function ChannelMenu ({ socket , chanList}:{
+function ChannelMenu ({ socket }:{
     socket:Socket | undefined,
-    chanList:ChannelData[],
 }){
   const [addChannel, setAddChannel] = useState<boolean>(false)
   const [joinChannel, setJoinChannel] = useState<boolean>(false)
@@ -46,7 +45,7 @@ function ChannelMenu ({ socket , chanList}:{
           }>Join
         </h1>
         {joinChannel?
-          <Join socket={socket} chanList={chanList}/> : <></>
+          <Join socket={socket}/> : <></>
         }
       </div>
         :
