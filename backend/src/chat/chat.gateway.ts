@@ -28,6 +28,7 @@ export class ChatGateway {
   @WebSocketServer()
   server: Server;
 
+  /** JOIN LOBBY -- ALL USERS CAN FREELY ENTER THESE LOBBIES */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
   async joinChannelLobby(@ConnectedSocket() client: Socket) {
@@ -39,7 +40,10 @@ export class ChatGateway {
         await this.chatService.getAllRooms(),
       );
   }
-  /** JOIN ATTACHED CHANNELS LOBBY */
+
+  /** JOIN ATTACHED CHANNELS LOBBY -- SHOWS ONLY THE CHANNELS THE USER
+   * IS ATTACHED TO
+   */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_ATTACHED_CHANNEL_LOBBY_REQUEST)
   async joinAttachedChannelLobby(
@@ -54,7 +58,7 @@ export class ChatGateway {
       );
   }
 
-  /** JOIN DM CHANNELS LOBBY */
+  /** JOIN DM CHANNELS LOBBY -- SHOWS ONLY THE DMs THE CURRENT USER HAS */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_LOBBY_REQUEST)
   async joinDMChannelLobby(
