@@ -7,15 +7,15 @@ const NickNameGetter = () => {
 
   const api = new Api();
 
-  const handleCick = (e: Event) => {
+  const handleCick = (e: React. MouseEvent<HTMLElement>) => {
     e.preventDefault();
 
     api.get_nickname("thi-nguy").then((res: Response) => {
       if (res.status == 200) {
         res.json().then((content) => {
           console.log("get_nickname is ok, result is: ", content);
+          setUserNickName(content.pongUsername);
         });
-        setUserNickName("  something !!!");
       } else console.log(res.status);
     });
   };

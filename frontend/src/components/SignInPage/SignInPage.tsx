@@ -12,8 +12,9 @@ const SignInPage = () => {
   const [avatar, setAvatar] = useState("");
   const [twoFactor, setTwoFactor] = useState("false");
 
-  const handleSubmitForm = (event: Event) => {
+  const handleSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
     const api = new Api();
+    if (event === undefined) return
     event.preventDefault();
 
     const fileData = new FormData();
@@ -40,7 +41,8 @@ const SignInPage = () => {
     // Todo next: set 2Factor through api.
   };
 
-  const handlePreviewPhoto = (e: Event) => {
+  const handlePreviewPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
     const file = e.target.files[0];
     const fileURL = URL.createObjectURL(file);
     setAvatar(fileURL);
