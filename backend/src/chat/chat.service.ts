@@ -176,7 +176,6 @@ export class ChatService {
     const user = await this.authService.getUserFromAuthenticationToken(
       authenticationToken,
     );
-    console.log(user);
     if (!user) {
       throw new WsException('Invalid credentials.');
     }
@@ -188,18 +187,4 @@ export class ChatService {
       (receiver) => receiver.userId === receiverId,
     );
   }
-
-  // removeUserConnectedToRooms(roomName: string, userId): number[] {
-  //   const chatRoomIndex = ChatService.chatRoomList.findIndex(
-  //     (chatRoom) => chatRoom.roomName == roomName,
-  //   );
-  //   if (ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)) {
-  //     ChatService.chatRoomList[chatRoomIndex].userIdList =
-  //       ChatService.chatRoomList[chatRoomIndex].userIdList.filter(
-  //         (id) => id !== userId,
-  //       );
-  //   }
-  //   return ChatService.chatRoomList[chatRoomIndex].userIdList;
-  // }
-  /** END ChatRoomConnectedUsers methods */
 }
