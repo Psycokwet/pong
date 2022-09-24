@@ -113,8 +113,6 @@ export class ChatService {
       members: [sender, receiver],
     });
 
-    console.log('newRoom', newRoom);
-
     await newRoom.save();
     return newRoom;
   }
@@ -129,8 +127,6 @@ export class ChatService {
         members: [{ id: senderId }, { id: receiverId }],
       },
     });
-
-    console.log(senderDMs);
 
     const DMExists = await senderDMs.filter((room) => {
       return (
