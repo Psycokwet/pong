@@ -45,7 +45,7 @@ export const NavBarPageList = [
   {
     url: "/practice",
     pageName: "practice",
-    // pageIcon: <IoMdSettings size="26" />,
+    pageIcon: <IoMdSettings size="26" />,
   },
 ];
 
@@ -57,7 +57,7 @@ type DisconnectionButtonProps = {
 const NavBar: React.FC<DisconnectionButtonProps> = ({ setDisconnected }) => {
   return (
     <div>
-      <nav className="border-b-8 border-sky-600 text-white">
+      <nav className="border-b-8 border-sky-600 text-white h-1/8 h-min">
         <ul className="flex p-6 uppercase bg-neutral-900">
           <li>
             <Link to="/" className="text-3xl font-bold ">
