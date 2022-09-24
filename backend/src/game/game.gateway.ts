@@ -46,7 +46,7 @@ export class GameGateway {
     @UserPayload() payload: any,
   ) {
     const user: User = await this.userService.getById(payload.userId);
-    const gameRoom:GameRoom = this.gameService.createGame(user);
+    const gameRoom: GameRoom = this.gameService.createGame(user);
 
     client.join(gameRoom.roomName);
 
@@ -60,7 +60,7 @@ export class GameGateway {
     @UserPayload() payload: any,
   ) {
     const user: User = await this.userService.getById(payload.userId);
-    const gameRoom:GameRoom = this.gameService.matchMaking(user);
+    const gameRoom: GameRoom = this.gameService.matchMaking(user);
 
     client.join(gameRoom.roomName);
 
