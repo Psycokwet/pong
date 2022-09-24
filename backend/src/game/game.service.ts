@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ChatRoom } from 'shared/interfaces/ChatRoom';
 import GameRoom from 'shared/interfaces/game/GameRoom';
 import GameData from 'shared/interfaces/game/GameData';
+import PlayerInput from 'shared/interfaces/game/PlayerInput';
 
 @Injectable()
 export class GameService {
@@ -104,21 +105,35 @@ export class GameService {
     return gameData;
   }
 
-  findUserRoom(userId: number): GameRoom {
+  findUserRoom(userId: number): GameRoom | undefined {
     const index = GameService.gameRoomList.findIndex(gameRoom => 
       gameRoom.gameData.player1.userId === userId
       ||
       gameRoom.gameData.player2.userId === userId
     )
-    return GameService.gameRoomList[index];
+    return GameService.gameRoomList[index]; // can be -1, so undefined
   }
 
   findIndex(copyGameRoom: GameRoom): number {
-    return GameService.gameRoomList.findIndex(gameRoom => gameRoom.roomName == copyGameRoom.roomName)
+    return GameService.gameRoomList.findIndex(gameRoom => gameRoom.roomName == copyGameRoom.roomName); // can return -1, warning
   }
 
-  updateGameRoom(roomIndex, gameRoom) {
-    GameService.gameRoomList[roomIndex] = gameRoom;
+  updatePlayerPosition(playerInput: PlayerInput, userId: number): void {
+    const gameRoom = this.findUserRoom(userId)
+    if (gameRoom === undefined) return;
+
+    const game = gameRoom.gameData;
+    const playerToUpdate = userId === game.player1.userId ? 'player1' : 'player2';
+    
+    if (playerInput.mouseLocation < this.PLAYER_HEIGHT / 2) {
+        game[playerToUpdate].y = 0;
+    } else if (playerInput.mouseLocation > playerInput.canvasLocation.height - this.PLAYER_HEIGHT / 2) {
+        game[playerToUpdate].y = playerInput.canvasLocation.height - this.PLAYER_HEIGHT;
+    } else {
+        game[playerToUpdate].y = playerInput.mouseLocation - this.PLAYER_HEIGHT / 2;
+    }
+
+    GameService.gameRoomList[this.findIndex(gameRoom)] = gameRoom;
   }
 
   /** GAME LOOP */
