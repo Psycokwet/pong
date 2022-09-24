@@ -23,7 +23,6 @@ function Chat () {
     setSocket(newSocket);
   }, []);
   const addMessage = (newElem:Message) => {
-    console.log("add :", newElem);
     setMessages([...messages, newElem]);
   }
   useEffect(() => {
@@ -33,7 +32,6 @@ function Chat () {
     };
   }, [addMessage]);
   const resetMessages = (msgs:Message[]) => {
-    console.log("reset :", msgs);
     setMessages(msgs);
   }
   useEffect(() => {
