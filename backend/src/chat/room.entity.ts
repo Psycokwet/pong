@@ -41,6 +41,9 @@ class Room extends BaseEntity {
   public members: User[];
 
   @Column({ nullable: false, default: false })
+  public isDM: boolean;
+
+  @Column({ nullable: false, default: false })
   public isChannelPrivate: boolean;
 }
 
