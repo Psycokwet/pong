@@ -1,4 +1,4 @@
-export class ChatRoom {
-  roomName: string;
-  userIdList: number[];
+export class UsersWebsockets {
+  userId: number;
+  socketId: string;
 }
