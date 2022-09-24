@@ -12,13 +12,13 @@ export const PictureGetter = () => {
     api.getPicture()
       .then(res => res.blob())
       .then(myBlob => setUserPicture(URL.createObjectURL(myBlob)))
-      .catch((err) => alert("File Download Error"));
+      .catch((err) => alert(`File Download Error ${err}`));
   }
 
   return (
     <div>
       <form>
-        <button onClick={submitDownloadForm}>Download Photo</button>
+        <button onClick={submitDownloadForm}>View Uploaded Photo</button>
       </form>
       <img src={userPicture ? userPicture : ''} alt="user picture" hidden={!!userPicture} />
     </div>
