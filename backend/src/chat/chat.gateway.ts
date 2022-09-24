@@ -1,4 +1,8 @@
-import { BadRequestException, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -9,10 +13,25 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
-
-import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import { UsersService } from 'src/user/user.service';
+import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import { User } from 'src/user/user.entity';
+import CreateChannel from '../../shared/interfaces/CreateChannel';
+import SearchChannel from '../../shared/interfaces/SearchChannel';
+
+import * as bcrypt from 'bcrypt';
+import JoinChannel from 'shared/interfaces/JoinChannel';
+
+async function crypt(password: string): Promise<string> {
+  return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
+}
+
+async function passwordCompare(
+  password: string,
+  hash: string,
+): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -37,7 +56,7 @@ export class ChatGateway {
       .in(this.channelLobby)
       .emit(
         ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
-        await this.chatService.getAllRooms(),
+        await this.chatService.getAllPublicRooms(),
       );
   }
 
@@ -45,25 +64,56 @@ export class ChatGateway {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST)
   async createRoom(
-    @MessageBody() roomName: string,
+    @MessageBody() data: CreateChannel,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    if (roomName === '') return;
+    if (data.channelName === '') {
+      throw new BadRequestException({
+        error: 'You must input a channel name',
+      });
+    }
+    /*  We first check if the channel name is already taken, if it is 
+        we throw a Bad Request exception */
+    const duplicateRoomCheck =
+      await this.chatService.getRoomByNameWithRelations(data.channelName);
 
-    const newRoom = await this.chatService.saveRoom(roomName, payload.userId);
+    if (duplicateRoomCheck) {
+      throw new BadRequestException({
+        error: 'Channel name is already taken',
+      });
+    }
+    /*  Then we check if the channel will be password protected, if it's not
+        then the password will be an empty string, if it is we hash the 
+        password */
+    let hashedPassword = '';
+
+    if (data.password !== '') hashedPassword = await crypt(data.password);
+
+    /*  Then we create the room in the db and then enter the channel we 
+        just created */
+    const newRoom = await this.chatService.saveRoom({
+      roomName: data.channelName,
+      userId: payload.userId,
+      isChannelPrivate: data.isChannelPrivate,
+      password: hashedPassword,
+    });
 
     await client.join(newRoom.roomName);
 
-    // this.server.in(this.channelLobby).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
     this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
     });
-    this.server.in('channelLobby').emit(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, {
-      channelId: newRoom.id,
-      channelName: newRoom.channelName,
-    });
+
+    if (newRoom.isChannelPrivate === false) {
+      this.server
+        .in(this.channelLobby)
+        .emit(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, {
+          channelId: newRoom.id,
+          channelName: newRoom.channelName,
+        });
+    }
 
     const connectedUserIdList: number[] =
       this.chatService.updateUserConnectedToRooms(
@@ -118,15 +168,15 @@ export class ChatGateway {
 
   /* JOIN ROOM */
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNE_REQUEST)
+  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST)
   async joinRoom(
-    @MessageBody() roomId: number,
+    @MessageBody() data: JoinChannel,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
     const room = await this.chatService.getRoomsById(
       {
-        id: roomId /*, isDM: false */,
+        id: data.roomId /*, isDM: false */,
       },
       {
         members: true,
@@ -135,6 +185,64 @@ export class ChatGateway {
         },
       },
     );
+
+    if (room.password !== '') {
+      const isGoodPassword = await passwordCompare(
+        data.inputPassword,
+        room.password,
+      );
+      if (!isGoodPassword)
+        throw new UnauthorizedException({
+          error:
+            'A password has been set for this channel. Please enter the correct password.',
+        });
+    }
+
+    client.join(room.roomName);
+    await this.chatService.addMemberToChannel(payload.userId, room);
+    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, {
+      channelId: room.id,
+      channelName: room.channelName,
+    });
+
+    const connectedUserIdList: number[] =
+      this.chatService.updateUserConnectedToRooms(
+        room.roomName,
+        payload.userId,
+      );
+    this.server
+      .in(room.roomName)
+      .emit('updateConnectedUsers', connectedUserIdList);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.SEARCH_CHANNEL_REQUEST)
+  async searchARoom(
+    @MessageBody() data: SearchChannel,
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
+    const room = await this.chatService.getRoomByNameWithRelations(
+      data.channelName,
+    );
+    if (!room) {
+      throw new BadRequestException({
+        error: 'You must specify which channel you want to join',
+      });
+    }
+
+    if (room.password !== '') {
+      const isGoodPassword = await passwordCompare(
+        data.inputPassword,
+        room.password,
+      );
+      if (!isGoodPassword)
+        throw new UnauthorizedException({
+          error:
+            'A password has been set for this channel. Please enter the correct password.',
+        });
+    }
+
     client.join(room.roomName);
     if (room.isDM === false)
       await this.chatService.addMemberToChannel(payload.userId, room);
@@ -165,7 +273,9 @@ export class ChatGateway {
   }
 
   /* JOIN DM ROOM*/
-  /** Leaving right now, don't think I'll need it but I want to make sure */
+  /** Leaving these comments right now, don't think I'll need it but
+   * I want to make sure */
+
   // @UseGuards(JwtWsGuard)
   // @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_REQUEST)
   // async joinDMRoom(
@@ -210,7 +320,7 @@ export class ChatGateway {
 
     this.server.in(room.roomName).emit(
       ROUTES_BASE.CHAT.CONNECTED_USER_LIST,
-      room.members.map((user) => {
+      room.members.map((user: User) => {
         return {
           id: user.id,
           pongUsername: this.userService.getFrontUsername(user),

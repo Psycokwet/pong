@@ -12,7 +12,7 @@ export const ROUTES_BASE = {
     CREATE_DM: 'createDMRequest',
     CONFIRM_DM_CHANNEL_CREATION: 'confirmDMChannelCreation',
     /** JOIN CHANNEL */
-    JOIN_CHANNE_REQUEST: 'joinChannelRequest',
+    JOIN_CHANNEL_REQUEST: 'joinChannelRequest',
     CONFIRM_CHANNEL_ENTRY: 'confirmChannelEntry',
     /** JOIN DM CHANNEL */
     JOIN_DM_CHANNEL_REQUEST: 'joinDMChannelRequest',
@@ -29,6 +29,8 @@ export const ROUTES_BASE = {
     GET_CONNECTED_USER_LIST_REQUEST: 'getConnectedUserListRequest',
     CONNECTED_USER_LIST: 'connectedUserList',
     UPDATE_CONNECTED_USERS: 'updateConnectedUsers',
+    /** SEARCH CHANNEL */
+    SEARCH_CHANNEL_REQUEST: 'searchChannelRequest',
     /** CHANNEL ATTACHED USER LIST */
     UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
   },
