@@ -5,7 +5,7 @@ import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
-import { Repository } from 'typeorm';
+import { FindOptionsRelations, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
@@ -36,16 +36,10 @@ export class ChatService {
     );
   }
 
-  public async getRoomById(id: number) {
-    return this.roomsRepository.findOneBy({ id });
-  }
-
-  public async getRoomByIdWithRelations(id: number) {
+  public async getRoomsById(id: number, options?: FindOptionsRelations<Room>) {
     return this.roomsRepository.findOne({
       where: { id },
-      relations: {
-        members: true,
-      },
+      relations: options,
     });
   }
 
@@ -65,7 +59,6 @@ export class ChatService {
 
   async addMemberToChannel(userId: number, room: Room) {
     const newMember = await this.userService.getById(userId);
-
     if (
       !room.members.filter(
         (member: User) => member.login42 === newMember.login42,
@@ -76,10 +69,11 @@ export class ChatService {
     room.save();
   }
 
-  async saveMessage(content: string, author: User) {
+  async saveMessage(content: string, author: User, channel: Room) {
     const newMessage = await this.messagesRepository.create({
-      content,
-      author,
+      content: content,
+      author: author,
+      room: channel,
     });
     await this.messagesRepository.save(newMessage);
     return newMessage;
