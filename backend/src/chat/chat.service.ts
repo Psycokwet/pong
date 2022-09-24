@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
-import { FindOptionsRelations, Repository } from 'typeorm';
+import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
@@ -41,10 +41,13 @@ export class ChatService {
       );
   }
 
-  public async getRoomsById(id: number, options?: FindOptionsRelations<Room>) {
+  public async getRoomWithRelations(
+    where: FindOptionsWhere<Room>,
+    relations?: FindOptionsRelations<Room>,
+  ) {
     return this.roomsRepository.findOne({
-      where: { id },
-      relations: options,
+      where: where,
+      relations: relations,
     });
   }
 
@@ -80,6 +83,7 @@ export class ChatService {
       password: password,
       owner: user,
       members: [user],
+      isDM: false,
       isChannelPrivate: isChannelPrivate,
     });
 
@@ -87,7 +91,58 @@ export class ChatService {
     return newRoom;
   }
 
-  async addMemberToChannel(userId: number, room: Room) {
+  async saveDMRoom(receiverId: number, senderId: number) {
+    if (receiverId === senderId) {
+      throw new BadRequestException({
+        error: "You're trying to send a DM to yourself",
+      });
+    }
+    const receiver = await this.userService.getById(receiverId);
+    const sender = await this.userService.getById(senderId);
+    const roomName = 'DM_' + uuidv4();
+
+    /** Making sure a DM channel between the receiver and the sender does not already exist, throws
+     * a Bad Request if there is
+     */
+    await this.doesDMChannelExist(receiverId, senderId);
+
+    const newRoom = await Room.create({
+      roomName: `channel:${roomName}:${uuidv4()}`,
+      channelName: uuidv4(),
+      isDM: true,
+      members: [sender, receiver],
+    });
+
+    await newRoom.save();
+    return newRoom;
+  }
+
+  private async doesDMChannelExist(receiverId: number, senderId: number) {
+    const senderDMs = await this.roomsRepository.find({
+      relations: {
+        members: true,
+      },
+      where: {
+        isDM: true,
+        members: [{ id: senderId }, { id: receiverId }],
+      },
+    });
+
+    const DMExists = await senderDMs.filter((room) => {
+      return (
+        room.members.find((user) => user.id === receiverId) &&
+        room.members.find((user) => user.id === senderId)
+      );
+    });
+
+    if (DMExists.length !== 0) {
+      throw new BadRequestException({
+        error: 'DM already exists',
+      });
+    }
+  }
+
+  async attachMemberToChannel(userId: number, room: Room) {
     const newMember = await this.userService.getById(userId);
     if (
       !room.members.filter(
@@ -125,31 +180,6 @@ export class ChatService {
       throw new WsException('Invalid credentials.');
     }
     return user;
-  }
-
-  /** ChatRoomConnectedUsers methods */
-  updateUserConnectedToRooms(roomName: string, userId): number[] {
-    let chatRoomIndex = ChatService.chatRoomList.findIndex(
-      (chatRoom) => chatRoom.roomName === roomName,
-    );
-    if (chatRoomIndex === -1) {
-      const newChatRoom = new ChatRoom();
-      newChatRoom.roomName = roomName;
-      newChatRoom.userIdList = [userId];
-
-      ChatService.chatRoomList = [...ChatService.chatRoomList, newChatRoom];
-      chatRoomIndex = ChatService.chatRoomList.findIndex(
-        (chatRoom) => chatRoom.roomName === roomName,
-      );
-    } else if (
-      !ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)
-    ) {
-      ChatService.chatRoomList[chatRoomIndex].userIdList = [
-        ...ChatService.chatRoomList[chatRoomIndex].userIdList,
-        userId,
-      ];
-    }
-    return ChatService.chatRoomList[chatRoomIndex].userIdList;
   }
 
   removeUserConnectedToRooms(roomName: string, userId): number[] {

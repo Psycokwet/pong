@@ -21,6 +21,8 @@ import SearchChannel from '../../shared/interfaces/SearchChannel';
 
 import * as bcrypt from 'bcrypt';
 import JoinChannel from 'shared/interfaces/JoinChannel';
+import ChannelData from 'shared/interfaces/ChannelData';
+import Message from 'shared/interfaces/Message';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -47,6 +49,7 @@ export class ChatGateway {
   @WebSocketServer()
   server: Server;
 
+  /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
   async joinChannelLobby(@ConnectedSocket() client: Socket) {
@@ -59,6 +62,7 @@ export class ChatGateway {
       );
   }
 
+  /* CREATE ROOM */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST)
   async createRoom(
@@ -112,69 +116,45 @@ export class ChatGateway {
           channelName: newRoom.channelName,
         });
     }
-
-    const connectedUserIdList: number[] =
-      this.chatService.updateUserConnectedToRooms(
-        newRoom.roomName,
-        payload.userId,
-      );
-    this.server
-      .in(newRoom.roomName)
-      .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
   }
 
+  /* CREATE DM ROOM*/
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST)
-  async joinRoom(
-    @MessageBody() data: JoinChannel,
-    @ConnectedSocket() client: Socket,
+  @SubscribeMessage(ROUTES_BASE.CHAT.CREATE_DM)
+  async createDM(
+    @MessageBody() friendId: number,
     @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
   ) {
-    const room = await this.chatService.getRoomsById(data.roomId, {
-      members: true,
-      messages: {
-        author: true,
-      },
-    });
+    const newDMRoom = await this.chatService.saveDMRoom(
+      friendId,
+      payload.userId,
+    );
 
-    if (room.password !== '') {
-      const isGoodPassword = await passwordCompare(
-        data.inputPassword,
-        room.password,
-      );
-      if (!isGoodPassword)
-        throw new UnauthorizedException({
-          error:
-            'A password has been set for this channel. Please enter the correct password.',
-        });
-    }
+    await client.join(newDMRoom.roomName);
 
-    client.join(room.roomName);
-    await this.chatService.addMemberToChannel(payload.userId, room);
-    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, {
-      channelId: room.id,
-      channelName: room.channelName,
-    });
-
-    const connectedUserIdList: number[] =
-      this.chatService.updateUserConnectedToRooms(
-        room.roomName,
-        payload.userId,
-      );
     this.server
-      .in(room.roomName)
-      .emit('updateConnectedUsers', connectedUserIdList);
+      .in(newDMRoom.roomName)
+      .emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_CREATION, {
+        channelId: newDMRoom.id,
+        channelName: newDMRoom.channelName,
+      });
   }
 
+  /* ATTACH USER TO CHANNEL */
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.SEARCH_CHANNEL_REQUEST)
-  async searchARoom(
+  @SubscribeMessage(ROUTES_BASE.CHAT.ATTACH_TO_CHANNEL_REQUEST)
+  async attachUserToChannel(
     @MessageBody() data: SearchChannel,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomByNameWithRelations(
-      data.channelName,
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      {
+        members: true,
+        messages: { author: true },
+      },
     );
     if (!room) {
       throw new BadRequestException({
@@ -193,44 +173,61 @@ export class ChatGateway {
             'A password has been set for this channel. Please enter the correct password.',
         });
     }
+    await this.chatService.attachMemberToChannel(payload.userId, room);
+    this.joinRoom({ roomId: room.id }, client);
+  }
+
+  /* JOIN ROOM */
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST)
+  async joinRoom(
+    @MessageBody() { roomId }: JoinChannel,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const room = await this.chatService.getRoomWithRelations(
+      { id: roomId },
+      {
+        members: true,
+        messages: { author: true },
+      },
+    );
 
     client.join(room.roomName);
-    await this.chatService.addMemberToChannel(payload.userId, room);
-    this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, {
+
+    const channelData: ChannelData = {
       channelId: room.id,
       channelName: room.channelName,
-    });
+    };
+    this.server
+      .in(client.id)
+      .emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, channelData);
 
     this.server.in(client.id).emit(
-      'messageHistory',
+      ROUTES_BASE.CHAT.MESSAGE_HISTORY,
       room.messages.map((message) => {
-        return {
+        const messageForFront: Message = {
           id: message.id,
           author: this.userService.getFrontUsername(message.author),
           time: message.createdAt,
           content: message.content,
         };
+        return messageForFront;
       }),
     );
-    const connectedUserIdList: number[] =
-      this.chatService.updateUserConnectedToRooms(
-        room.roomName,
-        payload.userId,
-      );
-    this.server
-      .in(room.roomName)
-      .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
   }
 
+  /* GET USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.GET_CONNECTED_USER_LIST_REQUEST)
   async getUsersInChannel(
     @MessageBody() roomId: number,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomsById(roomId, {
-      members: true,
-    });
+    const room = await this.chatService.getRoomWithRelations(
+      { id: roomId },
+      { members: true },
+    );
+    const caller = await this.userService.getById(payload.userId);
 
     this.server.in(room.roomName).emit(
       ROUTES_BASE.CHAT.CONNECTED_USER_LIST,
@@ -243,14 +240,14 @@ export class ChatGateway {
     );
   }
 
+  /* DISCONNECT FROM CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST)
   async disconnectFromChannel(
     @MessageBody() roomId: number,
-    @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
-    const room = await this.chatService.getRoomsById(roomId);
+    const room = await this.chatService.getRoomWithRelations({ id: roomId });
     client.leave(room.roomName);
     this.server
       .in(client.id)
@@ -258,26 +255,20 @@ export class ChatGateway {
         channelId: room.id,
         channelName: room.channelName,
       });
-
-    const connectedUserIdList: number[] =
-      this.chatService.removeUserConnectedToRooms(
-        room.roomName,
-        payload.userId,
-      );
-    this.server
-      .in(room.roomName)
-      .emit(ROUTES_BASE.CHAT.UPDATE_CONNECTED_USERS, connectedUserIdList);
   }
 
+  /*MESSAGE LISTENER */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.SEND_MESSAGE)
   async messageListener(
     @MessageBody() data: { message: string; channelId: number },
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomsById(data.channelId, {
-      messages: true,
-    });
+    if (data.message === '') return;
+    const room = await this.chatService.getRoomWithRelations(
+      { id: data.channelId },
+      { messages: true },
+    );
     const author = await this.userService.getUserByIdWithMessages(
       payload.userId,
     );
@@ -288,12 +279,15 @@ export class ChatGateway {
       room,
     );
 
+    const messageForFront: Message = {
+      id: newMessage.id,
+      author: this.userService.getFrontUsername(newMessage.author),
+      time: newMessage.createdAt,
+      content: newMessage.content,
+    };
     if (room)
-      this.server.in(room.roomName).emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, {
-        id: newMessage.id,
-        author: this.userService.getFrontUsername(newMessage.author),
-        time: newMessage.createdAt,
-        content: newMessage.content,
-      });
+      this.server
+        .in(room.roomName)
+        .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageForFront);
   }
 }
