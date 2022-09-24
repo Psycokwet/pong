@@ -2,18 +2,18 @@ import React from "react";
 import { useState } from "react";
 import { Api } from "../../api/api";
 
-const MAX_CHAR = 5;
+const MAX_CHAR = 20;
 const DEFAULT_PHOTO = "abc";
 
 const SignInPage = () => {
   
-  // Todo next: get 42login and put it as initial value
-  const [nickname, setNickName] = useState("");
+  
+  const [nickname, setNickName] = useState("thi-nguy");// Todo : get 42login and put it as initial value
   const [selectedPhoto, setPhoto] = useState(null);
   const [twoFactor, setTwoFactor] = useState("false");
   const [userPicture, setUserPicture] = useState<string | null>(null);
   
-  const handleSubmitForm = (event) => {
+  const handleSubmitForm = (event: Event) => {
     const api = new Api();
     event.preventDefault();
 
@@ -51,13 +51,13 @@ const SignInPage = () => {
   };
 
   
-  const getPhoto = (event) => {
+  const getPhoto = (event: Event) => {
     const api = new Api();
     event.preventDefault()
     api.getPicture()
       .then(res => res.blob())
       .then(myBlob => setUserPicture(URL.createObjectURL(myBlob)))
-      .catch((err) => alert("File Download Error"));
+      .catch((err) => alert(`File Download Error: ${err}`));
   }
 
   return (
@@ -71,6 +71,9 @@ const SignInPage = () => {
         className="text-white bg-gray-900 h-screen flex flex-col"
         onSubmit={handleSubmitForm}
       >
+        <h1>Choose your avatar</h1>
+        <input type="file" onChange={(e) => setPhoto(e.target.files[0])} />
+
         <h1>Choose your nickname</h1>
         <input
           type="text"
@@ -88,8 +91,7 @@ const SignInPage = () => {
           ""
         )}
         {/* Should I add something to pre-display the photo? */}
-        <h1>Choose your avatar</h1>
-        <input type="file" onChange={(e) => setPhoto(e.target.files[0])} />
+        
         <span>Activate Two-Factor Authentication</span>
         <select
           value={twoFactor}
@@ -99,7 +101,9 @@ const SignInPage = () => {
           <option value="false">false</option>
           <option value="true">true</option>
         </select>
+
         <button type="submit"> Submit all</button>
+
         <p>{nickname}</p>
         <p>{twoFactor}</p>
       </form>
