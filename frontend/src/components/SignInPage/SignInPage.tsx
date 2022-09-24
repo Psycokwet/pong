@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { Api } from "../../api/api";
+import { PictureGetter } from "../PictureForm/PictureGetter";
+import NickNameGetter from "../PictureForm/NickNameGetter";
 
 const MAX_CHAR = 20;
 const DEFAULT_PHOTO = "abc";
@@ -9,7 +11,6 @@ const SignInPage = () => {
   const [nickname, setNickName] = useState("thi-nguy"); // Todo : get 42login and put it as initial value
   const [selectedPhoto, setPhoto] = useState<File>();
   const [twoFactor, setTwoFactor] = useState("false");
-  const [userPicture, setUserPicture] = useState<string | null>(null);
   const [avatar, setAvatar] = useState();
 
   const handleSubmitForm = (event: Event) => {
@@ -34,60 +35,53 @@ const SignInPage = () => {
         });
     });
 
-    /****************************************************
-     * For testing in the console, to delete later
-     * Notes: it gets the current nickname, not the newly set one)
-     ****************************************************/
-    api.get_nickname("scarboni").then((res: Response) => {
-      console.log("get_nickname", res);
-      res.json().then((content) => {
-        console.log("get_nickname is ok, result:", content);
-      });
-    });
-    /******************************************************************* */
-
     // Todo next: set 2Factor through api.
   };
-
-  useEffect(() => {
-    return () => { avatar && URL.revokeObjectURL(avatar.preview)}
-  }, [avatar])
-
 
   const handlePreviewPhoto = (e: Event) => {
     const file = e.target.files[0];
 
     file.preview = URL.createObjectURL(file);
     setAvatar(file);
+    setPhoto(file);
   };
 
-  const getPhoto = (event: Event) => {
-    const api = new Api();
-    event.preventDefault();
-    api
-      .getPicture()
-      .then((res) => res.blob())
-      .then((myBlob) => setUserPicture(URL.createObjectURL(myBlob)))
-      .catch((err) => alert(`File Download Error: ${err}`));
-  };
+  useEffect(() => {
+    return () => {
+      avatar && URL.revokeObjectURL(avatar.preview);
+    };
+  }, [avatar]);
+
+  /****************************************************
+   *      TESTING ZONE - open Console
+   * For testing in the console, to delete later
+   * Notes: it gets the current nickname, not the newly set one)
+   ****************************************************/
+  // const getsetNickname = (event: Event) => {
+  //   const api = new Api();
+  //   event.preventDefault();
+  //   api.get_nickname(nickname).then((res: Response) => {
+  //     if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
+  //       res.json().then((content) => {
+  //         console.log("get_nickname is ok, result is: ", content);
+  //       });
+  //   });
+  // };
+  /******************************************************************* */
 
   return (
     <div>
-      <form>
-        <button onClick={getPhoto}>View uploaded photo</button>
-      </form>
-      <img
-        className="w-80 rounded-full"
-        src={userPicture ? userPicture : ""}
-        hidden={!!userPicture}
-        alt="random_avatar"
-      />
+      {/* ******************* * testing Zone ****************** */}
+      <div>
+        <PictureGetter />
+        <NickNameGetter />
+      </div>
+      {/* ****************************************************** */}
 
       <div>
-        <div>Preview selected photo</div>
+        <div>Selected photo</div>
         {avatar && <img src={avatar.preview} className="w-80 rounded-full" />}
       </div>
-
       <form
         className="text-white bg-gray-900 h-screen flex flex-col"
         onSubmit={handleSubmitForm}
