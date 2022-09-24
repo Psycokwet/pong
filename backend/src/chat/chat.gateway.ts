@@ -55,14 +55,17 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     client.join(this.channelLobby);
-    this.server
-      .in(this.channelLobby)
-      .emit(
-        ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
-        await this.chatService.getAllPublicRooms(),
-        await this.chatService.getAllAttachedRooms(payload.userId),
-        await this.chatService.getAllDMRooms(payload.userId),
-      );
+    this.server.in(this.channelLobby).emit(
+      ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
+      await this.chatService.getAllPublicRooms(),
+      await this.chatService.getAllAttachedRooms(payload.userId),
+      await this.chatService.getAllDMRooms(payload.userId),
+      /** Either we send all 3 objects in 1 call from JOIN_CHANNEL_LOBBY_REQUEST, or we
+       * use the below 2 routes along with this one individually.
+       * I don't know what Matthieu will need so I'm keeping it like this for now,
+       * will adapt when he's done.
+       */
+    );
   }
 
   /** JOIN ATTACHED CHANNELS LOBBY -- SHOWS ONLY THE CHANNELS THE USER
