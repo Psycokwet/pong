@@ -6,7 +6,7 @@ export const PictureGetter = () => {
 
   const api = new Api();
 
-  const submitDownloadForm = (e: Event) => {
+  const submitDownloadForm = (e: React. MouseEvent<HTMLElement>) => {
     e.preventDefault();
 
     api
