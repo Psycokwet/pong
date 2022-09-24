@@ -13,7 +13,6 @@ import { GameService } from './game.service';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import { UsersService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
-import Position from 'shared/interfaces/game/Position';
 import GameRoom from 'shared/interfaces/game/GameRoom';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
 

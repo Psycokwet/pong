@@ -17,17 +17,7 @@ import PlayerInput from 'shared/interfaces/game/PlayerInput';
 
 @Injectable()
 export class GameService {
-
-  constructor(
-    private readonly authService: AuthService,
-    // @InjectRepository(Message)
-    // private messagesRepository: Repository<Message>,
-    // @InjectRepository(Room)
-    // private roomsRepository: Repository<Room>,
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-    private userService: UsersService,
-  ) {}
+  constructor(private userService: UsersService) {}
 
   private static gameRoomList: GameRoom[] = [];
   public static gameIntervalList: number[] = [];
