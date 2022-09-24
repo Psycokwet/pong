@@ -1,22 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 
-function Join ({socket, chanList} : {
+function Join ({socket} : {
     socket:Socket|undefined,
-    chanList:ChannelData[],
 }){
   const [joinName, setJoinName] = useState<string>("");
   const [joinPass, setJoinPass] = useState<string>("");
   const [selectPass, setSelectPass] = useState<string>("");
-  let selected:ChannelData;
+  const [publicChanList, setPublicChanList] = useState<ChannelData[]>([]);
+  const [selected, setSelected] = useState<string>();
+
+  useEffect(()=> {
+    socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST);
+  }, []);
+  const resetChanList = (chans:ChannelData[]) => {
+    setPublicChanList(chans);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_CHANNELS, resetChanList);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_CHANNELS, resetChanList);
+    };
+  }, [resetChanList]);
+  const addChannel = (chan:ChannelData) => {
+    setPublicChanList([...publicChanList, chan]);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, addChannel);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, addChannel);
+    };
+  }, [addChannel]);
+
   const handleClickSelect = (name: string) => {
-    socket?.emit(ROUTES_BASE.CHAT.ATTACH_TO_CHANNEL_REQUEST, {ChannelName: name, userPassword: selectPass});
+    socket?.emit(ROUTES_BASE.CHAT.ATTACH_TO_CHANNEL_REQUEST, {channelName: name, userPassword: selectPass});
     setSelectPass("")
   }
   const handleClickByName = () => {
-    socket?.emit(ROUTES_BASE.CHAT.ATTACH_TO_CHANNEL_REQUEST, {ChannelName: joinName, inputPassword: joinPass});
+    socket?.emit(ROUTES_BASE.CHAT.ATTACH_TO_CHANNEL_REQUEST, {channelName: joinName, inputPassword: joinPass});
     setJoinName("")
     setJoinPass("")
   }
@@ -51,10 +74,10 @@ function Join ({socket, chanList} : {
               Join
             </button>
             <p>Or</p>
-            <select className="bg-slate-600" value={selected}>
-              <option value={selected} disabled selected hidden>Select Public Channel</option>
-              { chanList.map((chan, i) => {return (
-                <option key={i} value={chan}>{chan.channelName}</option>
+            <select className="bg-slate-600" value={selected} onChange={(e) => setSelected(e.target.value)}>
+              {/*<option disabled selected hidden>Select Public Channel</option>*/}
+              { publicChanList.map((chan, i) => {return (
+                <option key={i} value={chan.channelName}>{chan.channelName}</option>
               )})}
             </select>
             <input
@@ -68,7 +91,7 @@ function Join ({socket, chanList} : {
             ></input>
             <button
               className={`rounded-xl bg-gray-600 m-2 hover:bg-gray-800`}
-              onClick={()=>handleClickSelect(selected.channelName)}
+              onClick={()=>handleClickSelect(selected)}
             >
               Join
             </button>

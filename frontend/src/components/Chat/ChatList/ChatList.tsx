@@ -22,21 +22,53 @@ function ChatList({ msg , socket } : {
     socket:Socket | undefined,
 }){
   const [chanList, setChanList] = useState<ChannelData[]>([]);
-  const channelCreationListener = (newChan: ChannelData) => {
-    setChanList([...chanList, newChan])
+  const [dmList, setDmList] = useState<ChannelData[]>([]);
+
+  useEffect(()=> {
+    socket?.emit(ROUTES_BASE.CHAT.JOIN_ATTACHED_CHANNEL_LOBBY_REQUEST);
+  }, []);
+  useEffect(()=> {
+    socket?.emit(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_LOBBY_REQUEST);
+  }, []);
+
+  const resetChanList = (chans:ChannelData[]) => {
+    setChanList(chans);
   }
   useEffect(() => {
-    socket?.on(
-      ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION,
-      channelCreationListener
-    );
+    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChanList);
     return () => {
-      socket?.off(
-        ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION,
-        channelCreationListener
-      );
+      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChanList);
+    };
+  }, [resetChanList]);
+
+  const resetDmList = (chans:ChannelData[]) => {
+    setDmList(chans);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, resetDmList);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, resetDmList);
+    };
+  }, [resetDmList]);
+
+  const channelCreationListener = (newChan: ChannelData) => {
+    //if (!chanList.find(newChan))
+    console.log("bouh")
+      setChanList([...chanList, newChan])
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, channelCreationListener);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, channelCreationListener);
     };
   }, [channelCreationListener]);
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelCreationListener);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelCreationListener);
+    };
+  }, [channelCreationListener]);
+
   let DMList = [{name:"user"}, {name:"bis"}, {name:"Johny"}]
   return (
     <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end">

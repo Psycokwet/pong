@@ -35,13 +35,6 @@ function App() {
     connectionStatusEnum.Unknown
   );
   const [socket, setSocket] = useState<Socket>();
-  useEffect(() => {
-    const newSocket = io(ENDPOINT, {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-    setSocket(newSocket);
-  }, []);
 
 const webPageRoutes = [
   {
@@ -67,6 +60,14 @@ const webPageRoutes = [
 ];
 
 
+  useEffect (()=>{
+    const newSocket = io(ENDPOINT, {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
+    console.log("pouet");
+    setSocket(newSocket);
+    }, [setSocket]);
 
 
 
