@@ -52,36 +52,25 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
   async handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
-
     const user = await this.chatService.getUserFromSocket(client);
 
     const isRegistered = ChatService.userWebsockets.find(
       (element) => element.userId === user.id,
     );
 
-    console.log(isRegistered);
-
     if (!isRegistered) {
-      console.log('new registration');
       const newWebsocket = { userId: user.id, socketId: client.id };
       ChatService.userWebsockets = [
         ...ChatService.userWebsockets,
         newWebsocket,
       ];
     }
-
-    console.log(ChatService.userWebsockets);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
-
     ChatService.userWebsockets = ChatService.userWebsockets.filter(
       (websocket) => websocket.socketId !== client.id,
     );
-
-    console.log(ChatService.userWebsockets);
   }
   /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
@@ -166,12 +155,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     const receiver = await this.chatService.getUserIdWebsocket(friendId);
-    console.log('receiver', receiver);
 
     await client.join(client.id);
     await client.join(receiver.socketId);
-
-    console.log(receiver);
 
     this.server
       .in(newDMRoom.roomName)
