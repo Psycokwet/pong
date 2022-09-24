@@ -26,10 +26,14 @@ export const ROUTES_BASE = {
     /** SEND MESSAGE */
     SEND_MESSAGE: 'sendMessage',
     RECEIVE_MESSAGE: 'receiveMessage',
+    /** MESSAGE HISTORY */
+    MESSAGE_HISTORY: 'messageHistory',
     /** GET CONNECTED USER LIST */
     GET_CONNECTED_USER_LIST_REQUEST: 'getConnectedUserListRequest',
     CONNECTED_USER_LIST: 'connectedUserList',
     UPDATE_CONNECTED_USERS: 'updateConnectedUsers',
+    /** CHANNEL ATTACHED USER LIST */
+    UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
   },
 };
 const generate_full_routes = (routes_base) => {
