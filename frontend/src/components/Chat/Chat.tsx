@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import io, { Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import UserPicture from "../User Picture/UserPicture";
 import ChatList from "./ChatList/ChatList";
 import TextField from "./TextField/TextField";
@@ -8,20 +8,11 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
 import { User } from "/shared/interfaces/User";
-const ENDPOINT = "http://localhost:8080";
 
-function Chat () {
+function Chat ({socket}:{socket:Socket|undefined}) {
   const user:User = {id:0, pongUsername:'Moot'};
   const [messages, setMessages] = useState<Message[]>([])
-  const [socket, setSocket] = useState<Socket>();
   const [connectedChannel, setConnectedChannel] = useState<ChannelData | undefined>(undefined);
-  useEffect(() => {
-    const newSocket = io(ENDPOINT, {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-    setSocket(newSocket);
-  }, []);
   const addMessage = (newElem:Message) => {
     setMessages([...messages, newElem]);
   }
