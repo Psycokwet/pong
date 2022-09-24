@@ -15,6 +15,7 @@ import { UsersService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
 import Position from 'shared/interfaces/game/Position';
 import GameRoom from 'shared/interfaces/game/GameRoom';
+import PlayerInput from 'shared/interfaces/game/PlayerInput';
 
 
 @WebSocketGateway({
@@ -33,31 +34,10 @@ export class GameGateway {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.SEND_INPUT)
   async receiveInput(
-    @MessageBody() {
-      canvasLocation,
-      mouseLocation,
-    }: {
-      canvasLocation: any,
-      mouseLocation: number,
-    },
+    @MessageBody() playerInput: PlayerInput,
     @UserPayload() payload: any,
-    @ConnectedSocket() client: Socket,
   ) {
-    const PLAYER_HEIGHT = 100;
-    const gameRoom = this.gameService.findUserRoom(payload.userId)
-    const game = gameRoom.gameData;
-    const isPlayer1 = payload.userId === game.player1.userId;
-    
-    if (mouseLocation < PLAYER_HEIGHT / 2) {
-        game[isPlayer1 ? 'player1' : 'player2'].y = 0;
-    } else if (mouseLocation > canvasLocation.height - PLAYER_HEIGHT / 2) {
-        game[isPlayer1 ? 'player1' : 'player2'].y = canvasLocation.height - PLAYER_HEIGHT;
-    } else {
-        game[isPlayer1 ? 'player1' : 'player2'].y = mouseLocation - PLAYER_HEIGHT / 2;
-    }
-
-    const index = this.gameService.findIndex(gameRoom);
-    this.gameService.updateGameRoom(index, gameRoom);
+    this.gameService.updatePlayerPosition(playerInput, payload.userId);
   }
 
   @UseGuards(JwtWsGuard)
