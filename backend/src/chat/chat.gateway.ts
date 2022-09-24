@@ -22,7 +22,7 @@ export class ChatGateway {
   private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,
-    private userService: UsersService,
+    private readonly userService: UsersService,
   ) {}
 
   @WebSocketServer()
@@ -113,7 +113,12 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomByIdWithRelations(roomId);
+    const room = await this.chatService.getRoomsById(roomId, {
+      members: true,
+      messages: {
+        author: true,
+      },
+    });
     client.join(room.roomName);
     await this.chatService.addMemberToChannel(payload.userId, room);
     this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, {
@@ -121,6 +126,17 @@ export class ChatGateway {
       channelName: room.channelName,
     });
 
+    this.server.in(client.id).emit(
+      'messageHistory',
+      room.messages.map((message) => {
+        return {
+          id: message.id,
+          author: this.userService.getFrontUsername(message.author),
+          time: message.createdAt,
+          content: message.content,
+        };
+      }),
+    );
     const connectedUserIdList: number[] =
       this.chatService.updateUserConnectedToRooms(
         room.roomName,
@@ -137,13 +153,17 @@ export class ChatGateway {
     @MessageBody() roomId: number,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomByIdWithRelations(roomId);
-    const caller = await this.userService.getById(payload.userId);
+    const room = await this.chatService.getRoomsById(roomId, {
+      members: true,
+    });
 
     this.server.in(room.roomName).emit(
       ROUTES_BASE.CHAT.CONNECTED_USER_LIST,
-      room.members.map((user: User) => {
-        return { id: user.id, pongUsername: user.pongUsername };
+      room.members.map((user) => {
+        return {
+          id: user.id,
+          pongUsername: this.userService.getFrontUsername(user),
+        };
       }),
     );
   }
@@ -155,7 +175,7 @@ export class ChatGateway {
     @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
-    const room = await this.chatService.getRoomById(roomId);
+    const room = await this.chatService.getRoomsById(roomId);
     client.leave(room.roomName);
     this.server
       .in(client.id)
@@ -178,12 +198,27 @@ export class ChatGateway {
   @SubscribeMessage(ROUTES_BASE.CHAT.SEND_MESSAGE)
   async messageListener(
     @MessageBody() data: { message: string; channelId: number },
+    @UserPayload() payload: any,
   ) {
-    if (data.message === '') return;
-    const room = await this.chatService.getRoomById(data.channelId);
+    const room = await this.chatService.getRoomsById(data.channelId, {
+      messages: true,
+    });
+    const author = await this.userService.getUserByIdWithMessages(
+      payload.userId,
+    );
+
+    const newMessage = await this.chatService.saveMessage(
+      data.message,
+      author,
+      room,
+    );
+
     if (room)
-      this.server
-        .in(room.roomName)
-        .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, data.message);
+      this.server.in(room.roomName).emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, {
+        id: newMessage.id,
+        author: this.userService.getFrontUsername(newMessage.author),
+        time: newMessage.createdAt,
+        content: newMessage.content,
+      });
   }
 }
