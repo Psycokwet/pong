@@ -103,12 +103,15 @@ export class ChatGateway {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
     });
-    this.server
-      .in(this.channelLobby)
-      .emit(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, {
-        channelId: newRoom.id,
-        channelName: newRoom.channelName,
-      });
+
+    if (newRoom.isChannelPrivate === false) {
+      this.server
+        .in(this.channelLobby)
+        .emit(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, {
+          channelId: newRoom.id,
+          channelName: newRoom.channelName,
+        });
+    }
 
     const connectedUserIdList: number[] =
       this.chatService.updateUserConnectedToRooms(
