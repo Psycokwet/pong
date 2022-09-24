@@ -4,8 +4,8 @@ import UserPicture from "../User Picture/UserPicture";
 import ChatList from "./ChatList/ChatList";
 import TextField from "./TextField/TextField";
 import Messages from "./Messages/Messages";
-import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
-import ChannelData from "../../../shared/interfaces/ChannelData";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { ChannelData } from "/shared/interfaces/ChannelData";
 const ENDPOINT = "http://localhost:8080";
 
 type userType = {
@@ -41,9 +41,24 @@ function Chat () {
     return [...current_messages, newElem];
     })
   }
+  const channelCreationListener = (confirmedConnectedChannel: ChannelData) => {
+    setConnectedChannel(confirmedConnectedChannel);
+  };
+  useEffect(() => {
+    socket?.on(
+      ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION,
+      channelCreationListener
+    );
+    return () => {
+      socket?.off(
+        ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION,
+        channelCreationListener
+      );
+    };
+  }, [channelCreationListener]);
   return (
     <div className="bg-black text-white h-7/8 flex grid grid-cols-5 grid-rows-6 gap-4">
-      <ChatList msg={messages[messages.length - 1]}/>
+      <ChatList msg={messages[messages.length - 1]} socket={socket}/>
       <Messages messages={messages}/>
       <TextField addMessage={addMessage} />
       <div className="row-start-1 row-span-6 col-start-5">

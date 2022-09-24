@@ -1,9 +1,15 @@
 import { FaPlusCircle, FaMinusCircle } from "react-icons/fa";
-import { useState, useEffect } from "react";
+import { Socket } from "socket.io-client";
+import { useState } from "react";
+import { ChannelData } from "/shared/interfaces/ChannelData";
 import Create from "./ChannelMenu/Create";
 import Join from "./ChannelMenu/Join";
+import { ROUTES_BASE } from "../../../../shared/websocketRoutes/routes";
 
-function ChannelMenu () {
+function ChannelMenu ({ socket , chanList}:{
+    socket:Socket | undefined,
+    chanList:ChannelData[],
+}){
   const [addChannel, setAddChannel] = useState<boolean>(false)
   const [joinChannel, setJoinChannel] = useState<boolean>(false)
   const [createChannel, setCreateChannel] = useState<boolean>(false)
@@ -31,7 +37,7 @@ function ChannelMenu () {
           }>Create
         </h1>
         { createChannel ?
-          <Create /> : <></>
+          <Create socket={socket}/> : <></>
         }
         <h1 className="px-8 cursor-pointer"
           onClick={()=>{
@@ -40,7 +46,7 @@ function ChannelMenu () {
           }>Join
         </h1>
         {joinChannel?
-          <Join /> : <></>
+          <Join socket={socket} chanList={chanList}/> : <></>
         }
       </div>
         :
