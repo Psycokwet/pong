@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { Api } from "../../api/api";
 
@@ -6,26 +6,25 @@ const MAX_CHAR = 20;
 const DEFAULT_PHOTO = "abc";
 
 const SignInPage = () => {
-  
-  
-  const [nickname, setNickName] = useState("thi-nguy");// Todo : get 42login and put it as initial value
-  const [selectedPhoto, setPhoto] = useState(null);
+  const [nickname, setNickName] = useState("thi-nguy"); // Todo : get 42login and put it as initial value
+  const [selectedPhoto, setPhoto] = useState<File>();
   const [twoFactor, setTwoFactor] = useState("false");
   const [userPicture, setUserPicture] = useState<string | null>(null);
-  
+  const [avatar, setAvatar] = useState();
+
   const handleSubmitForm = (event: Event) => {
     const api = new Api();
     event.preventDefault();
 
     const fileData = new FormData();
-    selectedPhoto
-      ? fileData.append("file", selectedPhoto)
-      : fileData.append("file", DEFAULT_PHOTO);
-    api.setPicture(fileData).then((res: Response) => {
-      if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
-        console.log("set picture is not Ok");
-      else console.log(`Set picture is ok, status is: ${res.status}`);
-    });
+    if (selectedPhoto) {
+      fileData.append("file", selectedPhoto);
+      api.setPicture(fileData).then((res: Response) => {
+        if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
+          console.log("set picture is not Ok");
+        else console.log(`Set picture is ok, status is: ${res.status}`);
+      });
+    }
 
     api.set_nickname(nickname).then((res: Response) => {
       console.log("set_nickname is ok", res);
@@ -50,29 +49,52 @@ const SignInPage = () => {
     // Todo next: set 2Factor through api.
   };
 
-  
+  useEffect(() => {
+    return () => { avatar && URL.revokeObjectURL(avatar.preview)}
+  }, [avatar])
+
+
+  const handlePreviewPhoto = (e: Event) => {
+    const file = e.target.files[0];
+
+    file.preview = URL.createObjectURL(file);
+    setAvatar(file);
+  };
+
   const getPhoto = (event: Event) => {
     const api = new Api();
-    event.preventDefault()
-    api.getPicture()
-      .then(res => res.blob())
-      .then(myBlob => setUserPicture(URL.createObjectURL(myBlob)))
+    event.preventDefault();
+    api
+      .getPicture()
+      .then((res) => res.blob())
+      .then((myBlob) => setUserPicture(URL.createObjectURL(myBlob)))
       .catch((err) => alert(`File Download Error: ${err}`));
-  }
+  };
 
   return (
     <div>
       <form>
         <button onClick={getPhoto}>View uploaded photo</button>
       </form>
-      <img className="w-80 rounded-full" src={userPicture ? userPicture : ''} hidden={!!userPicture} alt="random_avatar"/>
-      
+      <img
+        className="w-80 rounded-full"
+        src={userPicture ? userPicture : ""}
+        hidden={!!userPicture}
+        alt="random_avatar"
+      />
+
+      <div>
+        <div>Preview selected photo</div>
+        {avatar && <img src={avatar.preview} className="w-80 rounded-full" />}
+      </div>
+
       <form
         className="text-white bg-gray-900 h-screen flex flex-col"
         onSubmit={handleSubmitForm}
       >
+        {/* Should I add something to pre-display the photo? */}
         <h1>Choose your avatar</h1>
-        <input type="file" onChange={(e) => setPhoto(e.target.files[0])} />
+        <input type="file" onChange={handlePreviewPhoto} />
 
         <h1>Choose your nickname</h1>
         <input
@@ -90,8 +112,7 @@ const SignInPage = () => {
         ) : (
           ""
         )}
-        {/* Should I add something to pre-display the photo? */}
-        
+
         <span>Activate Two-Factor Authentication</span>
         <select
           value={twoFactor}
