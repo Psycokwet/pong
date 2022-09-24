@@ -41,7 +41,7 @@ export class ChatService {
       );
   }
 
-  public async getRoomsById(
+  public async getRoomWithRelations(
     where: FindOptionsWhere<Room>,
     relations?: FindOptionsRelations<Room>,
   ) {
@@ -92,6 +92,11 @@ export class ChatService {
   }
 
   async saveDMRoom(receiverId: number, senderId: number) {
+    if (receiverId === senderId) {
+      throw new BadRequestException({
+        error: "You're trying to send a DM to yourself",
+      });
+    }
     const receiver = await this.userService.getById(receiverId);
     const sender = await this.userService.getById(senderId);
     const roomName = 'DM_' + uuidv4();
@@ -114,7 +119,7 @@ export class ChatService {
     return newRoom;
   }
 
-  async doesDMChannelExist(receiverId: number, senderId: number) {
+  private async doesDMChannelExist(receiverId: number, senderId: number) {
     const senderDMs = await this.roomsRepository.find({
       relations: {
         members: true,
@@ -125,23 +130,23 @@ export class ChatService {
       },
     });
 
-    console.log('senderDMs', senderDMs);
+    console.log(senderDMs);
 
     const DMExists = await senderDMs.filter((room) => {
-      return room.members.length === 2;
-    }).length;
+      return (
+        room.members.find((user) => user.id === receiverId) &&
+        room.members.find((user) => user.id === senderId)
+      );
+    });
 
-    console.log('DMExists', DMExists);
-
-    if (DMExists !== 0) {
-      console.log('DM already exists');
+    if (DMExists.length !== 0) {
       throw new BadRequestException({
         error: 'DM already exists',
       });
-    } else return false;
+    }
   }
 
-  async addMemberToChannel(userId: number, room: Room) {
+  async attachMemberToChannel(userId: number, room: Room) {
     const newMember = await this.userService.getById(userId);
     if (
       !room.members.filter(
@@ -179,31 +184,6 @@ export class ChatService {
       throw new WsException('Invalid credentials.');
     }
     return user;
-  }
-
-  /** ChatRoomConnectedUsers methods */
-  updateUserConnectedToRooms(roomName: string, userId): number[] {
-    let chatRoomIndex = ChatService.chatRoomList.findIndex(
-      (chatRoom) => chatRoom.roomName === roomName,
-    );
-    if (chatRoomIndex === -1) {
-      const newChatRoom = new ChatRoom();
-      newChatRoom.roomName = roomName;
-      newChatRoom.userIdList = [userId];
-
-      ChatService.chatRoomList = [...ChatService.chatRoomList, newChatRoom];
-      chatRoomIndex = ChatService.chatRoomList.findIndex(
-        (chatRoom) => chatRoom.roomName === roomName,
-      );
-    } else if (
-      !ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)
-    ) {
-      ChatService.chatRoomList[chatRoomIndex].userIdList = [
-        ...ChatService.chatRoomList[chatRoomIndex].userIdList,
-        userId,
-      ];
-    }
-    return ChatService.chatRoomList[chatRoomIndex].userIdList;
   }
 
   removeUserConnectedToRooms(roomName: string, userId): number[] {
