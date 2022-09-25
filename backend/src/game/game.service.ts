@@ -1,20 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service';
-import { Socket } from 'socket.io';
-import { parse } from 'cookie';
-import { WsException } from '@nestjs/websockets';
-import { InjectRepository } from '@nestjs/typeorm';
-// import Message from './message.entity';
-import { Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
-// import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
-import { v4 as uuidv4 } from 'uuid';
-import { ChatRoom } from 'shared/interfaces/ChatRoom';
 import GameRoom from 'shared/interfaces/game/GameRoom';
 import GameData from 'shared/interfaces/game/GameData';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
-
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class GameService {
   constructor(private userService: UsersService) {}
@@ -54,7 +44,7 @@ export class GameService {
 
   createGame(user: User): GameRoom {
     const newGameRoom: GameRoom = {
-      roomName: 'test',
+      roomName: `game:${user.login42}:${uuidv4()}`,
       started: false,
       gameData: { ...GameService.defaultGameData },
     }
@@ -78,7 +68,6 @@ export class GameService {
     gameToLaunch.gameData.player2.pongUsername = this.userService.getFrontUsername(user);
     gameToLaunch.started = true;
     gameToLaunch.gameData = this.gameStart(gameToLaunch.gameData);
-    // console.log(gameToLaunch.gameData)
 
     return gameToLaunch;
   }
@@ -163,7 +152,7 @@ export class GameService {
     return newGame;
   }
 
-  gameLoop(gameRoomName: string): GameRoom | undefined {
+  public gameLoop(gameRoomName: string): GameRoom | undefined {
     const index = GameService.gameRoomList.findIndex(gameRoom => gameRoom.roomName === gameRoomName)
 
     let newGame = GameService.gameRoomList[index].gameData
