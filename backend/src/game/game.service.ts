@@ -172,4 +172,12 @@ export class GameService {
     return GameService.gameRoomList[index];
   }
   /** END GAME LOOP */
+
+  isGameFinished(gameRoom: GameRoom): boolean {
+    return (
+      gameRoom.gameData.player1.score >= 10
+      ||
+      gameRoom.gameData.player2.score >= 10
+    )
+  }
 }
