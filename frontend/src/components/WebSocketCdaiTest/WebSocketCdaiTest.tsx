@@ -7,6 +7,7 @@ import JoinChannelButtons from "./JoinChannelButtons";
 import LeaveChannelButton from "./LeaveChannelButton";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
+import CreateDm from "./CreateDm";
 const ENDPOINT = "http://localhost:8080";
 import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
 import ChannelData from "../../../shared/interfaces/ChannelData";
@@ -21,16 +22,24 @@ function WebSocketCdaiTest() {
   >(undefined);
   const [connectedUserIdList, setConnectedUserIdList] = useState<number[]>([]);
   const [allChannel, setAllChannel] = useState<ChannelData[]>([]);
-  const [channelAttachedUserList, setChannelAttachedUserList] = useState<User[]>([]);
+  const [channelAttachedUserList, setChannelAttachedUserList] = useState<
+    User[]
+  >([]);
 
   /** CHANNEL ATTACHED USER LIST */
   const handleChannelAttachedUserList = (channelAttachedUserList: User[]) => {
     setChannelAttachedUserList(channelAttachedUserList);
   };
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST, handleChannelAttachedUserList);
+    socket?.on(
+      ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST,
+      handleChannelAttachedUserList
+    );
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST, handleChannelAttachedUserList);
+      socket?.off(
+        ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST,
+        handleChannelAttachedUserList
+      );
     };
   }, [handleChannelAttachedUserList]);
   /** END CHANNEL ATTACHED USER LIST */
@@ -91,6 +100,9 @@ function WebSocketCdaiTest() {
       );
     };
   }, [channelCreationListener]);
+  const handleCreateDM = (newDmName: string) => {
+    socket?.emit(ROUTES_BASE.CHAT.CREATE_DM, Number(newDmName.trim()));
+  };
   /** END CREATE CHANNEL */
 
   /** JOIN CHANNEL */
@@ -112,7 +124,8 @@ function WebSocketCdaiTest() {
   useEffect(() => {
     socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST);
   }, [socket]);
-  const getAllChannel = (message: []) => {
+  const getAllChannel = (message: [], arg2: [], arg3: []) => {
+    console.log(message, arg2, arg3);
     setAllChannel(message);
   };
   useEffect(() => {
@@ -181,6 +194,7 @@ function WebSocketCdaiTest() {
 
   return (
     <>
+      <CreateDm handleCreateDM={handleCreateDM} />
       {!connectedChannel ? (
         <>
           <CreateChannel handleCreateChannel={handleCreateChannel} />
@@ -202,7 +216,9 @@ function WebSocketCdaiTest() {
             channelName={connectedChannel.channelName}
             sendDisconnect={sendDisconnect}
           />
-          <ChannelAttachedUsers channelAttachedUserList={channelAttachedUserList} />
+          <ChannelAttachedUsers
+            channelAttachedUserList={channelAttachedUserList}
+          />
           <br />
 
           <MessageInput send={send} />
