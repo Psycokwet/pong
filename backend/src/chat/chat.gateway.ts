@@ -154,20 +154,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       payload.userId,
     );
 
-    const receiverSocketId = await this.chatService.getUserIdWebsocket(
-      friendId,
-    );
-
-    /** Retrieve receiver's socket with the socket ID
-     * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
-     */
-
-    const receiverSocket = await this.server.sockets.sockets.get(
-      receiverSocketId.socketId,
-    );
-
     await client.join(newDMRoom.roomName);
-    await receiverSocket.join(newDMRoom.roomName);
+
+    const receiverSocketId = this.chatService.getUserIdWebsocket(friendId);
+
+    if (receiverSocketId) {
+      /** Retrieve receiver's socket with the socket ID
+       * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
+       */
+
+      const receiverSocket = this.server.sockets.sockets.get(
+        receiverSocketId.socketId,
+      );
+
+      await receiverSocket.join(newDMRoom.roomName);
+    }
 
     this.server
       .in(newDMRoom.roomName)
