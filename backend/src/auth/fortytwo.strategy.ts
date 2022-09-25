@@ -18,7 +18,7 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
       user: {
         provider: '42',
         userId: profile.id,
-        username: profile.username,
+        login42: profile.username,
         email: profile.emails[0].value,
       },
       authInfo: {
