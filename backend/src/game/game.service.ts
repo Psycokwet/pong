@@ -19,9 +19,6 @@ import PlayerInput from 'shared/interfaces/game/PlayerInput';
 export class GameService {
   constructor(private userService: UsersService) {}
 
-  private static gameRoomList: GameRoom[] = [];
-  public static gameIntervalList: number[] = [];
-
   private static defaultGameData: GameData = {
     player1: {
       userId: 0,
@@ -45,6 +42,9 @@ export class GameService {
       }
     }
   }
+  private static gameRoomList: GameRoom[] = [];
+  public static gameIntervalList: number[] = [];
+
   private CANVAS_WIDTH = 640;
   private CANVAS_HEIGHT = 480;
   private PLAYER_HEIGHT = 100;
@@ -106,6 +106,13 @@ export class GameService {
 
   findIndex(copyGameRoom: GameRoom): number {
     return GameService.gameRoomList.findIndex(gameRoom => gameRoom.roomName == copyGameRoom.roomName); // can return -1, warning
+  }
+
+  findByRoomName(roomName: string): GameRoom | undefined {
+    const index = GameService.gameRoomList.findIndex(gameRoom => 
+      gameRoom.roomName === roomName
+    )
+    return GameService.gameRoomList[index];
   }
 
   updatePlayerPosition(playerInput: PlayerInput, userId: number): void {
@@ -183,4 +190,8 @@ export class GameService {
     return GameService.gameRoomList[index];
   }
   /** END GAME LOOP */
+
+  getSpectableGames() {
+    return GameService.gameRoomList.filter(gameRoom => gameRoom.started === true)
+  }
 }
