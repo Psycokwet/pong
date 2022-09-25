@@ -73,7 +73,6 @@ export class GameGateway {
 
           if (this.gameService.isGameFinished(newGameRoom))
           {
-
             clearInterval(GameService.gameIntervalList[gameRoom.roomName])
           }
           this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, newGameRoom);
