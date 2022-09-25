@@ -182,7 +182,7 @@ export class ChatService {
     return user;
   }
 
-  async getUserIdWebsocket(receiverId: number) {
+  getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
     return ChatService.userWebsockets.find(
       (receiver) => receiver.userId === receiverId,
     );
