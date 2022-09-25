@@ -6,7 +6,7 @@ import { User } from './user/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
 import { Friend } from './friend_list/friend.entity';
-import * as Joi from '@hapi/joi';
+import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 
 import Message from './chat/message.entity';
