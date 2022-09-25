@@ -44,7 +44,7 @@ export class GameService {
 
   createGame(user: User): GameRoom {
     const newGameRoom: GameRoom = {
-      roomName: `channel:${user.login42}:${uuidv4()}`,
+      roomName: `game:${user.login42}:${uuidv4()}`,
       started: false,
       gameData: { ...GameService.defaultGameData },
     }
