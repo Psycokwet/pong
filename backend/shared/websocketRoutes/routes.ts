@@ -1,4 +1,4 @@
-import { generate_full_routes } from 'shared/utils';
+import { generate_full_routes } from '../utils';
 
 export const ROUTES_BASE = {
   CHAT: {
