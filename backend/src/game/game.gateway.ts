@@ -71,6 +71,10 @@ export class GameGateway {
         () => {
           const newGameRoom = this.gameService.gameLoop(gameRoom.roomName);
 
+          if (this.gameService.isGameFinished(newGameRoom))
+          {
+            clearInterval(GameService.gameIntervalList[gameRoom.roomName])
+          }
           this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, newGameRoom);
         }, 10);
     }
