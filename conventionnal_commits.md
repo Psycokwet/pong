@@ -19,8 +19,9 @@ Though, please prefer separating commits if there truly need to be multiple type
 - feat : adding new feature
 - tests : writing/editing tests
 - refactor : code organisation, refactoring
-- clean : file organization, clean repository
-- update : small unconsequential changes to code (like removing comments, etc...)
+- clean : file organization, clean repository, removing comments
+- update : small unconsequential changes to code (not big enough to be a feat)
+- norm : linter commit
 - docs : writing/editing documentation
 - ! : Breaking change, this commit is particularly important, and need to be paid attention
 
