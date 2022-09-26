@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,7 +10,7 @@ import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
-import { ChatRoom } from 'shared/interfaces/ChatRoom';
+import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
 @Injectable()
 export class ChatService {
@@ -24,7 +24,7 @@ export class ChatService {
     private usersRepository: Repository<User>,
     private userService: UsersService,
   ) {}
-  private static chatRoomList: ChatRoom[] = [];
+  public static userWebsockets: UsersWebsockets[] = [];
 
   public async getAllPublicRooms(): Promise<ChannelData[]> {
     return this.roomsRepository
@@ -246,18 +246,9 @@ export class ChatService {
     return user;
   }
 
-  //Unused fct
-  removeUserConnectedToRooms(roomName: string, userId): number[] {
-    const chatRoomIndex = ChatService.chatRoomList.findIndex(
-      (chatRoom) => chatRoom.roomName == roomName,
+  getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
+    return ChatService.userWebsockets.find(
+      (receiver) => receiver.userId === receiverId,
     );
-    if (ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)) {
-      ChatService.chatRoomList[chatRoomIndex].userIdList =
-        ChatService.chatRoomList[chatRoomIndex].userIdList.filter(
-          (id) => id !== userId,
-        );
-    }
-    return ChatService.chatRoomList[chatRoomIndex].userIdList;
   }
-  /** END ChatRoomConnectedUsers methods */
 }
