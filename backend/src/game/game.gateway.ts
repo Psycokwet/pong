@@ -76,12 +76,16 @@ export class GameGateway {
         () => {
           const newGameRoom = this.gameService.gameLoop(gameRoom.roomName);
 
+          this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, newGameRoom);
           if (this.gameService.isGameFinished(newGameRoom))
           {
-            clearInterval(GameService.gameIntervalList[gameRoom.roomName])
-            this.gameService.handleGameOver(gameRoom)
+            clearInterval(GameService.gameIntervalList[newGameRoom.roomName]);
+            this.gameService.handleGameOver(newGameRoom);
+            this.gameService.removeGameFromGameRoomList(newGameRoom);
+            client.leave(gameRoom.roomName);
+            // mmissing other_player.leave(gameRoom.roomName)
+            // waiting for the structure with userId + socketId
           }
-          this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, newGameRoom);
         }, 10);
     }
   }

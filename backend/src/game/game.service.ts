@@ -53,7 +53,7 @@ export class GameService {
     const newGameRoom: GameRoom = {
       roomName: `game:${user.login42}:${uuidv4()}`,
       started: false,
-      gameData: { ...GameService.defaultGameData },
+      gameData: structuredClone(GameService.defaultGameData), // deep clone
     }
     newGameRoom.gameData.player1.userId = user.id;
     newGameRoom.gameData.player1.pongUsername = this.userService.getFrontUsername(user);
@@ -199,15 +199,16 @@ export class GameService {
     )
   }
 
-  public async handleGameOver(gameRoom: GameRoom) {
+  public async handleGameOver(gameRoom: GameRoom): Promise<void> {
     const player1 = await this.userService.getById(gameRoom.gameData.player1.userId);
     const player2 = await this.userService.getById(gameRoom.gameData.player2.userId);
+    const isPlayer1Won = gameRoom.gameData.player1.score > gameRoom.gameData.player2.score;
 
     const newGame = Game.create({
       player1_id: player1.id,
       player2_id: player2.id,
       winner: 
-        gameRoom.gameData.player1.score > gameRoom.gameData.player2.score ?
+      isPlayer1Won ?
           player1.id :
           player2.id,
       player1: player1,
@@ -219,11 +220,17 @@ export class GameService {
     await newGame.save();
 
     await this.usersRepository.update(player1.id, {
-      xp: player1.xp + (gameRoom.gameData.player1.score > gameRoom.gameData.player2.score ? 2 : 1),
+      xp: player1.xp + (isPlayer1Won ? 2 : 1),
     });
 
     await this.usersRepository.update(player2.id, {
-      xp: player2.xp + (gameRoom.gameData.player1.score > gameRoom.gameData.player2.score ? 1 : 2),
+      xp: player2.xp + (isPlayer1Won ? 1 : 2),
     });
+  }
+
+  public removeGameFromGameRoomList(gameRoomToRemove: GameRoom): void {
+    GameService.gameRoomList = GameService
+      .gameRoomList
+      .filter((gameRoom => gameRoom.roomName !== gameRoomToRemove.roomName));
   }
 }
