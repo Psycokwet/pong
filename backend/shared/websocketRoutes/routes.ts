@@ -38,6 +38,27 @@ export const ROUTES_BASE = {
     UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
     /** ATTACH TO CHANNEL REQUEST */
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
+    /** UNATTACH TO CHANNEL REQUEST */
+    UNATTACH_TO_CHANNEL_REQUEST: 'unattachToChannelRequest',
+  },
+  GAME: {
+    ENDPOINT: '/game/',
+    /** JOIN GAME LOBBY REQUEST */
+    JOIN_GAME_LOBBY_REQUEST: 'joinGameLobbyRequest',
+    /** CREATE GAME */
+    CREATE_GAME_REQUEST: 'createGameRequest',
+    // CONFIRM_GAME_CREATION: 'confirmGameCreation',
+    /** JOIN GAME */
+    JOIN_GAME_REQUEST: 'joinGameRequest',
+    CONFIRM_GAME_JOINED: 'confirmGameJoined',
+    /** SEND INPUT */
+    SEND_INPUT: 'sendInput',
+    /** GAME LOOP */
+    UPDATE_GAME: 'updateGame',
+    /** GET SPECTABLE GAME */
+    GET_SPECTABLE_GAMES_REQUEST: 'getSpectableGamesRequest',
+    UPDATE_SPECTABLE_GAMES: 'updateSpectableGames',
+    JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
   },
 };
 const generate_full_routes = (routes_base) => {
