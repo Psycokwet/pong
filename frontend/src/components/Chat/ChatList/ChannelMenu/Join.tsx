@@ -48,53 +48,53 @@ function Join ({socket} : {
       handleClickByName()
   }
   return (
-          <div className="flex flex-col gap-1 text-base font-light">
-            <input
-              className="bg-slate-600"
-              type="text"
-              placeholder="Channel Name"
-              value={joinName}
-              onChange={(e) => {
-                setJoinName(e.target.value);
-              }}
-            ></input>
-            <input
-              className="bg-slate-600"
-              type="text"
-              placeholder="Password (optionnal)"
-              value={joinPass}
-              onChange={(e) => {
-                setJoinPass(e.target.value);
-              }}
-            ></input>
-            <button
-              className="rounded-xl bg-gray-600 m-2 hover:bg-gray-800"
-              onClick={handleClickByName}
-            >
-              Join
-            </button>
-            <p>Or</p>
-            <select className="bg-slate-600" value={selected} onChange={(e) => setSelected(e.target.value)}>
-              { publicChanList.map((chan, i) => {return (
-                <option key={i} value={chan.channelName}>{chan.channelName}</option>
-              )})}
-            </select>
-            <input
-              className="bg-slate-600"
-              type="text"
-              placeholder="Password (optionnal)"
-              value={selectPass}
-              onChange={(e) => {
-                setSelectPass(e.target.value);
-              }}
-            ></input>
-            <button
-              className="rounded-xl bg-gray-600 m-2 hover:bg-gray-800"
-              onClick={()=>handleClickOnSelect(selected)}
-            >
-              Join
-            </button>
-          </div>
+    <div className="flex flex-col gap-1 text-base font-light">
+      <input
+        className="bg-slate-600"
+        type="text"
+        placeholder="Channel Name"
+        value={joinName}
+        onChange={(e) => {
+          setJoinName(e.target.value);
+        }}>
+      </input>
+      <input
+        className="bg-slate-600"
+        type="text"
+        placeholder="Password (optionnal)"
+        value={joinPass}
+        onChange={(e) => {
+          setJoinPass(e.target.value);
+        }}>
+      </input>
+      <button
+        className="rounded-xl bg-gray-600 m-2 hover:bg-gray-800"
+        onClick={handleClickByName}
+      >
+        Join
+      </button>
+      <p>Or</p>
+      <select className="bg-slate-600" value={selected} onChange={(e) => setSelected(e.target.value)}>
+        { publicChanList.map((chan, i) => {return (
+          <option key={i} value={chan.channelName}>{chan.channelName}</option>
+        )})}
+      </select>
+      <input
+        className="bg-slate-600"
+        type="text"
+        placeholder="Password (optionnal)"
+        value={selectPass}
+        onChange={(e) => {
+          setSelectPass(e.target.value);
+        }}>
+      </input>
+      <button
+        className="rounded-xl bg-gray-600 m-2 hover:bg-gray-800"
+        onClick={()=>handleClickOnSelect(selected)}
+      >
+        Join
+      </button>
+    </div>
   );
 }
 
