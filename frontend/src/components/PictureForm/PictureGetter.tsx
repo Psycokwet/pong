@@ -30,7 +30,7 @@ export const PictureGetter = () => {
       <img
         src={userPicture ? userPicture : ""}
         alt="user picture"
-        hidden={!!userPicture}
+        hidden={Boolean(userPicture)}
         className="w-40 rounded-full"
       />
     </div>
