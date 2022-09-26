@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import io, { Socket } from "socket.io-client";
-import Position from "/shared/interfaces/Position";
+import { useEffect, useState } from "react";
+import { Socket } from "socket.io-client";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import myConfig from '../../myConfig';
 
 const GameLobby = (
   {
@@ -27,7 +25,7 @@ const GameLobby = (
 
   const handleCreateGame = () => {
     socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST);
-    upgradeStep();
+    `upgradeStep`();
   }
 
   /** SPECTATE */
@@ -54,18 +52,20 @@ const GameLobby = (
   /** END UPDATE SPECTABLE GAMES */
 
   return <div>
+    <h2>PLAY</h2>
     <button onClick={handleCreateGame}>Create game</button>
     <div></div>
     <button onClick={handleJoinGame}>Join game</button>
+    <br />
 
-    <h2>SPECTATE CDAI TEST</h2>
-      {
-          spectableGames.map(tempGameRoom => 
-            <div key={tempGameRoom.roomName}>
-              <button onClick={() => handleSpectate(tempGameRoom.roomName)}>{tempGameRoom.roomName}</button>
-            </div>
-          )
-      }
+    <h2>SPECTATE</h2>
+    {
+      spectableGames.map(tempGameRoom => 
+        <div key={tempGameRoom.roomName}>
+          <button onClick={() => handleSpectate(tempGameRoom.roomName)}>{tempGameRoom.roomName}</button>
+        </div>
+      )
+    }
   </div>
 } 
 

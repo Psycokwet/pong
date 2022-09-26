@@ -123,6 +123,14 @@ export class GameService {
   }
 
   /** GAME LOOP */
+  /**
+   * DOCUMENTATION 
+   * https://blog.devoreve.com/2018/06/06/creer-un-pong-en-javascript/
+   * https://github.com/devoreve/pong/blob/master/js/main.js
+   * https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
+   * https://dirask.com/posts/React-mouse-button-press-and-hold-example-pzrAap
+   * 
+   */
   private changeDirection(game, playerPosition) {
     const impact = game.ball.y - playerPosition - this.PLAYER_HEIGHT / 2;
     const ratio = 100 / (this.PLAYER_HEIGHT / 2);

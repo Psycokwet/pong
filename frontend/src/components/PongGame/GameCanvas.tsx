@@ -9,16 +9,6 @@ const canvasHeight = 480
 const PLAYER_HEIGHT = 100;
 const PLAYER_WIDTH = 5;
 
-/**
- * 
- * documentation 
- * https://blog.devoreve.com/2018/06/06/creer-un-pong-en-javascript/
- * https://github.com/devoreve/pong/blob/master/js/main.js
- * https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
- * https://dirask.com/posts/React-mouse-button-press-and-hold-example-pzrAap
- * 
- */
-
 const GameCanvas = (
   {
     socket,
