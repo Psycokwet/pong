@@ -68,7 +68,7 @@ function ChatList({ msg , socket , connectedChannel} : {
               <DirectMessage
                 socket={socket}
                 channel={chan}
-                message={msg==undefined?"":msg}
+                message={msg===undefined?"":msg}
                 connectedChannel={connectedChannel}
               />
             </div>

@@ -1,22 +1,17 @@
 import { KeyboardEvent, useState } from "react";
 import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { CreateChannel } from "/shared/websocketRoutes/CreateChannel";
 
 function Create ({socket}:{socket:Socket|undefined})  {
   const [newChanName, setNewChanName] = useState<string>("");
   const [newChanPass, setNewChanPass] = useState<string>("");
   const [isPrivate, setIsPrivate] = useState<boolean>(false);
 
-  const handleCreateChannel = ({name, isPriv, pass} : {
-    name: string;
-    isPriv: boolean
-    pass: string;
+  const handleCreateChannel = ( newChannel : {
+    newChannel: CreateChannel
   }) => {
-    socket?.emit(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST, {
-      channelName: name,
-      isChannelPrivate: isPriv,
-      password: pass,
-    });
+    socket?.emit(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST, newChannel);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -24,8 +19,14 @@ function Create ({socket}:{socket:Socket|undefined})  {
       handleClick();
   }
   const handleClick = () => {
-    if (newChanName.trim() !== "")
-      handleCreateChannel({name:newChanName, isPriv:isPrivate, pass:newChanPass})
+    if (newChanName.trim() !== ""){
+      const newChannel:CreateChannel = {
+        channelName:newChanName,
+        isChannelPrivate:isPrivate,
+        password:newChanPass,
+      }
+      handleCreateChannel(newChannel);
+    }
     setNewChanName("")
     setNewChanPass("")
     setIsPrivate(false)
