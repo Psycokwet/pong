@@ -286,6 +286,10 @@ export class ChatService {
       );
     }
 
+    if (room.owner === futureAdmin) {
+      throw new BadRequestException('You are already an admin');
+    }
+
     room.admins = [...room.admins, futureAdmin];
 
     await room.save();
@@ -308,6 +312,10 @@ export class ChatService {
       throw new ForbiddenException(
         'You do not have the rights to set an admin',
       );
+    }
+
+    if (room.owner === firedAdmin) {
+      throw new BadRequestException('An owner has to be an admin');
     }
 
     room.admins = room.admins.filter(
