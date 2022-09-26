@@ -64,10 +64,6 @@ export class UsersService {
     return user.pongUsername;
   }
 
-  getLogin42(user: User) {
-    return user.login42;
-  }
-
   async signup(dto: UserDto) {
     // database operation
     const user = User.create({
@@ -300,6 +296,11 @@ export class UsersService {
   async getPongUsername(login42: string) {
     const user = await this.findOne(login42);
     return { pongUsername: this.getFrontUsername(user) };
+  }
+
+  async getLogin42(login42: string) {
+    const user = await this.findOne(login42);
+    return { login42: user.login42 };
   }
 
   async setPongUsername(dto: pongUsernameDto, login42: string) {
