@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import io, { Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import Position from "/shared/interfaces/Position";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-
-const ENDPOINT = "http://localhost:8080"; // please put in env file in the future
 
 const canvasWidth = 640
 const canvasHeight = 480
@@ -21,24 +19,23 @@ const PLAYER_WIDTH = 5;
  * 
  */
 
-function GameCanvas() {
+const GameCanvas = (
+  {
+    socket,
+    setGameRoom,
+    gameRoom,
+    upgradeStep,
+  }:
+  {
+    socket: Socket,
+    setGameRoom: any,
+    gameRoom: GameRoom,
+    upgradeStep: any,
+  }
+) => {
   const canvasRef = useRef(null);
   const [coords, setCoords] = useState<Position>({x: 0, y: 0});
-  const [mousePressing,setMousePressing] = useState(true);
   const [globalCoords, setGlobalCoords] = useState<Position>({x: 0, y: 0});
-  // const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined)
-
-  // /** WEBSOCKET */
-  // const [socket, setSocket] = useState<Socket>();
-
-  useEffect(() => {
-    const newSocket = io(ENDPOINT, {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-    setSocket(newSocket);
-  }, []);
-  /** END WEBSOCKET */
 
   /** MOUSE HANDLER */
   useEffect(() => {
@@ -101,6 +98,16 @@ function GameCanvas() {
   }
 
   const handleGameUpdate = (gameRoom: GameRoom) => {
+    // game finished
+    if (
+      gameRoom.gameData.player1.score >= 10
+      ||
+      gameRoom.gameData.player2.score >= 10
+    ) 
+    {
+      upgradeStep()
+      return ;
+    }
     if (gameRoom.started === true) {
       const canvas = canvasRef.current
       draw(canvas, gameRoom)
@@ -115,56 +122,12 @@ function GameCanvas() {
   }, [handleGameUpdate]);
   /** END GAME LOOP */
 
-  /** GAME CREATION */
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, handleGameUpdate);
-    return () => {
-      socket?.off(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, handleGameUpdate);
-    };
-  }, [handleGameUpdate]);
-
-  const handleCreateGame = () => {
-    socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST);
-  }
-  /** END GAME CREATION */
-
-
-
-
-  
-  /** GAME JOIN */
-  const handleJoinGame = () => {
-    socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST);
-  }
-  /** END GAME JOIN */
-
-  // const displayPlayername = () => {
-  //   const playerPongUsernames = [];
-  //   if (gameRoom.gameData.player1.pongUsername !== '')
-  //     playerPongUsernames.push(
-  //       <p key={gameRoom.gameData.player1.pongUsername}>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
-  //     )
-  //   if (gameRoom.gameData.player2.pongUsername !== '')
-  //     playerPongUsernames.push(
-  //       <p key={gameRoom.gameData.player2.pongUsername}>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
-  //     )
-  //   return playerPongUsernames;
-  // }
-
   return (
     <div
       style={{padding: '3rem', backgroundColor: 'lightgray'}}
     >
-      {/* {
-        gameRoom ? 
-          displayPlayername()
-          :
-          <>
-            <button onClick={handleCreateGame}>Create game</button>
-            <div></div>
-            <button onClick={handleJoinGame}>Join game</button>
-          </>
-      } */}
+      <p>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
+      <p>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
       <br />
       <canvas
         onMouseMove={handleMouseMove}
