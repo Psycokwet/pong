@@ -10,7 +10,6 @@ import { Message } from "/shared/interfaces/Message";
 import { User } from "/shared/interfaces/User";
 
 function Chat ({socket}:{socket:Socket|undefined}) {
-  const user:User = {id:0, pongUsername:'Moot'};
   const [messages, setMessages] = useState<Message[]>([])
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
   const addMessage = (newElem:Message) => {
@@ -36,7 +35,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   const channelListener = (channel: ChannelData) => {
     setConnectedChannel(channel);
   };
-  useEffect(() => { //
+  useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelListener);
     return () => {
       socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelListener);
@@ -52,7 +51,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
 
   return (
     <div className="bg-black text-white h-7/8 flex grid grid-cols-5 grid-rows-6 gap-4">
-      <ChatList msg={messages[messages.length - 1]} socket={socket} connectedChannel={connectedChannel}l/>
+      <ChatList msg={messages[messages.length - 1]} socket={socket} connectedChannel={connectedChannel}/>
       <Messages messages={messages}/>
       <TextField socket={socket} chan={connectedChannel} />
       <div className="row-start-1 row-span-6 col-start-5">

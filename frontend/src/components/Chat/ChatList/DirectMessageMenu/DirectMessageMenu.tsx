@@ -1,11 +1,11 @@
 import { FaPlusCircle, FaMinusCircle } from "react-icons/fa";
 import { Socket } from "socket.io-client";
-import { useState } from "react";
+import { KeyboardEvent, useState } from "react";
 import Create from "./Create";
 import Join from "./Join";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 
-function DmMenu ({ socket }:{
+function DirectMessageMenu ({ socket }:{
     socket:Socket | undefined,
 }){
   const [addChannel, setAddChannel] = useState<boolean>(false)
@@ -26,7 +26,7 @@ function DmMenu ({ socket }:{
         onClick={() => {
           setAddChannel(!addChannel);}
         }>
-        <h1 className="grow">DMs</h1>
+        <h1 className="grow">Direct Messages</h1>
         {addChannel ?
           <FaMinusCircle className="cursor-pointer" onClick={() => setAddChannel(false)}/>
           :
@@ -58,4 +58,4 @@ function DmMenu ({ socket }:{
     </div>
   );
 }
-export default DmMenu
+export default DirectMessageMenu

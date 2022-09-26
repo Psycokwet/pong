@@ -3,7 +3,7 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 
 
-function Channel ({channel, socket, connectedChannel}:{
+const Channel = function ({channel, socket, connectedChannel}:{
   channel:ChannelData,
   socket:Socket|undefined,
   connectedChannel:ChannelData|undefined,

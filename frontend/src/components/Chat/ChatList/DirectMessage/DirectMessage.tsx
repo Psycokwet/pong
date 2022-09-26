@@ -12,16 +12,21 @@ type Props = {
   connectedChannel: ChannelData|undefined
 };
 
-const Dm: React.FC<Props> = ({socket, channel, message, connectedChannel}) => {
+const DirectMessage: React.FC<Props> = ({socket, channel, message, connectedChannel}) => {
   const [lastMessage, setLastMessage] = useState<Message>();
   const handleClick = () => {
     socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST, {roomId: channel.channelId});
   }
-  if (connectedChannel !== undefined && connectedChannel.channelId === channel.channelId)
-    setLastMessage(message);
+
+  let style:string = "max-w-full truncate text-lg font-semibold self-center py-4 px-10 hover:bg-slate-800 cursor-pointer";
+  if (connectedChannel !== undefined && connectedChannel.channelId === channel.channelId) {
+    if (lastMessage !== message)
+      setLastMessage(message);
+    style=style + "bg-slate-600";
+  }
 
   return (
-    <div className={("max-w-full truncate text-lg font-semibold self-center py-4 px-10 hover:bg-slate-800 cursor-pointer"+ ((connectedChannel !== undefined && connectedChannel.channelId === channel.channelId) ? ' bg-slate-600':''))}
+    <div className={style}
       onClick={handleClick}>
       <UserPicture width="50px"/>
       <div className="max-width-full">
@@ -36,4 +41,4 @@ const Dm: React.FC<Props> = ({socket, channel, message, connectedChannel}) => {
   )
 };
 
-export default Dm
+export default DirectMessage

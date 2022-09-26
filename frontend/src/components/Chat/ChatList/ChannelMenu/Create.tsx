@@ -36,7 +36,7 @@ function Create ({socket}:{socket:Socket|undefined})  {
             <input
               className="bg-slate-600"
               type="text"
-              placeholder="Serveur Name"
+              placeholder="Channel Name"
               value={newChanName}
               onChange={(e) => {
                 setNewChanName(e.target.value);

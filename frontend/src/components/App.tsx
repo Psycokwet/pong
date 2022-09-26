@@ -36,28 +36,28 @@ function App() {
   );
   const [socket, setSocket] = useState<Socket>();
 
-const webPageRoutes = [
-  {
-    url: "/play",
-    element: <Play />,
-  },
-  {
-    url: "/leaderboard",
-    element: <LeaderBoard />,
-  },
-  {
-    url: "/chat",
-    element: <Chat socket={socket}/>,
-  },
-  {
-    url: "/settings",
-    element: <Settings />,
-  },
-  {
-    url: "/practice",
-    element: <PracticeJwt />,
-  },
-];
+  const webPageRoutes = [
+    {
+      url: "/play",
+      element: <Play />,
+    },
+    {
+      url: "/leaderboard",
+      element: <LeaderBoard />,
+    },
+    {
+      url: "/chat",
+      element: <Chat socket={socket}/>,
+    },
+    {
+      url: "/settings",
+      element: <Settings />,
+    },
+    {
+      url: "/practice",
+      element: <PracticeJwt />,
+    },
+  ];
 
 
   useEffect (()=>{
@@ -65,7 +65,6 @@ const webPageRoutes = [
       transports: ["websocket"],
       withCredentials: true,
     });
-    console.log("pouet");
     setSocket(newSocket);
     }, [setSocket]);
 
