@@ -11,11 +11,12 @@ const GameLobby = (
     upgradeStep,
   }:
   {
-    socket: Socket,
-    upgradeStep: () => void
+    socket: Socket;
+    upgradeStep: () => void;
   }
 ) => {
   
+  const [spectableGames, setSpectableGames] = useState<GameRoom[]>([])
 
   /** GAME JOIN */
   const handleJoinGame = () => {
@@ -29,10 +30,42 @@ const GameLobby = (
     upgradeStep();
   }
 
+  /** SPECTATE */
+  const handleSpectate = (roomName: string) => {
+    socket?.emit(ROUTES_BASE.GAME.JOIN_SPECTATE_REQUEST, roomName);
+    upgradeStep()
+  }
+  /** END SPECTACTE */
+
+  useEffect(() => {
+    socket?.emit(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST)
+  }, [socket]);
+
+  /** UPDATE SPECTABLE GAMES */
+  const updateSpectableGames = (spectableGames: GameRoom[]) => {
+    setSpectableGames(spectableGames);
+  };
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
+    return () => {
+      socket?.off(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
+    };
+  }, [updateSpectableGames]);
+  /** END UPDATE SPECTABLE GAMES */
+
   return <div>
     <button onClick={handleCreateGame}>Create game</button>
     <div></div>
     <button onClick={handleJoinGame}>Join game</button>
+
+    <h2>SPECTATE CDAI TEST</h2>
+      {
+          spectableGames.map(tempGameRoom => 
+            <div key={tempGameRoom.roomName}>
+              <button onClick={() => handleSpectate(tempGameRoom.roomName)}>{tempGameRoom.roomName}</button>
+            </div>
+          )
+      }
   </div>
 } 
 

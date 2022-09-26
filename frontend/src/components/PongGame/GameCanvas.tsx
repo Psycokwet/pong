@@ -122,47 +122,12 @@ const GameCanvas = (
   }, []);
   /** END GAMEOVER */
 
-  /** SPECTATE */
-  const handleSpectate = (roomName: string) => {
-    socket?.emit(ROUTES_BASE.GAME.JOIN_SPECTATE_REQUEST, roomName);
-  }
-  /** END SPECTACTE */
-
-  useEffect(() => {
-    socket?.emit(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST)
-  }, [socket]);
-
-  /** UPDATE SPECTABLE GAMES */
-  const updateSpectableGames = (spectableGames: GameRoom[]) => {
-    setSpectableGames(spectableGames);
-  };
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
-    return () => {
-      socket?.off(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
-    };
-  }, [updateSpectableGames]);
-  /** END UPDATE SPECTABLE GAMES */
-
-
   return (
     <div
       style={{padding: '3rem', backgroundColor: 'lightgray'}}
     >
       <p>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
       <p>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
-      <br />
-      <h2>SPECTATE CDAI TEST</h2>
-      {
-        gameRoom ?
-          <></>
-          :
-          spectableGames.map(tempGameRoom => 
-            <div key={tempGameRoom.roomName}>
-              <button onClick={() => handleSpectate(tempGameRoom.roomName)}>{tempGameRoom.roomName}</button>
-            </div>
-          )
-      }
       <br />
       <canvas
         onMouseMove={handleMouseMove}

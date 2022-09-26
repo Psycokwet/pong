@@ -44,7 +44,10 @@ const Play = () => {
   }
 
   const gameSteps = [
-    <GameLobby socket={socket} upgradeStep={upgradeStep} />,
+    <GameLobby
+      socket={socket}
+      upgradeStep={upgradeStep}
+    />,
     <GameQueue
       socket={socket}
       upgradeStep={upgradeStep}
