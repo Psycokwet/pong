@@ -25,17 +25,19 @@ const LeaderBoard = () => {
         });
     });
     api.get_login42().then((res: Response) => {
-      console.log("get_login42", res);
       if ((res.status / 200 >= 1 && res.status / 200 <= 2))
         res.json().then((content) => {
-          console.log("get_login42", content);
+          console.log("get_login42 is ok", content);
         });
+        else
+          console.log("get_login42 is NOT ok. Response is: ", res);
     });
     api.get_pong_username().then((res: Response) => {
       console.log("get_pong_username", res);
-      res.json().then((content) => {
-        console.log("get_pong_username is ok, result:", content);
-      });
+      if ((res.status / 200 >= 1 && res.status / 200 <= 2))
+        res.json().then((content) => {
+          console.log("get_pong_username is ok, result:", content);
+        });
     });
   };
 

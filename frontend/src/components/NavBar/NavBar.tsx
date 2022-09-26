@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { Api } from "../../api/api";
+import { useState, useEffect } from "react";
 
 // Components
 import APage from "./APage";
@@ -12,9 +14,17 @@ import { RiPingPongFill } from "react-icons/ri";
 import { IoMdSettings } from "react-icons/io";
 import { DisconnectionButton } from "../ConnectionButton/DisconnectionButton";
 
-/***************** To change with real data ******************************************/
 let connected_user = "scarboni";
-
+const api = new Api();
+api.get_login42().then((res: Response) => {
+  if ((res.status / 200 >= 1 && res.status / 200 <= 2))
+    res.json().then((content) => {
+      console.log("get_login42 is ok", content);
+      // Put connected_user here
+    });
+    else
+      console.log("get_login42 is NOT ok. Response is: ", res);
+});
 /***************** List of Pages ******************************************/
 export const NavBarPageList = [
   {
