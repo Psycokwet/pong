@@ -209,6 +209,16 @@ export class ChatService {
     room.save();
   }
 
+  async unattachMemberToChannel(userId: number, room: Room) {
+    const leavingUser = await this.userService.getById(userId);
+
+    room.members = room.members.filter(
+      (member: User) => member.login42 !== leavingUser.login42,
+    );
+
+    room.save();
+  }
+
   async saveMessage(content: string, author: User, channel: Room) {
     const newMessage = await this.messagesRepository.create({
       content: content,
