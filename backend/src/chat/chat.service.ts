@@ -44,7 +44,7 @@ export class ChatService {
   public async getAllAttachedRooms(userId: number) {
     const user = await this.userService.getById(userId);
 
-    return this.roomsRepository
+    const bouh = await this.roomsRepository
       .find({
         relations: {
           members: true,
@@ -63,6 +63,8 @@ export class ChatService {
           };
         }),
       );
+      console.log(bouh);
+      return bouh;
   }
 
   public async getAllDMRooms(userId: number) {
@@ -204,7 +206,7 @@ export class ChatService {
     )
       room.members = [...room.members, newMember];
 
-    room.save();
+    await room.save();
   }
 
   async saveMessage(content: string, author: User, channel: Room) {

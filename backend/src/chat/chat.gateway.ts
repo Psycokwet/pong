@@ -156,6 +156,7 @@ export class ChatGateway {
           channelName: newRoom.channelName,
         });
     }
+    this.joinAttachedChannelLobby(client, payload);
   }
 
   /* CREATE DM ROOM*/
@@ -179,6 +180,7 @@ export class ChatGateway {
         channelId: newDMRoom.id,
         channelName: newDMRoom.channelName,
       });
+    this.joinDMChannelLobby(client, payload);
   }
 
   /* ATTACH USER TO CHANNEL */
@@ -214,6 +216,7 @@ export class ChatGateway {
         });
     }
     await this.chatService.attachMemberToChannel(payload.userId, room);
+    this.joinAttachedChannelLobby(client, payload);
     this.joinRoom({ roomId: room.id }, client);
   }
 

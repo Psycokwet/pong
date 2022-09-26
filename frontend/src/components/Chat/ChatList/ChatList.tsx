@@ -51,23 +51,6 @@ function ChatList({ msg , socket } : {
     };
   }, [resetDmList]);
 
-  const channelCreationListener = (newChan: ChannelData) => {
-    //if (!chanList.find(newChan))
-    console.log("bouh")
-      setChanList([...chanList, newChan])
-  }
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, channelCreationListener);
-    return () => {
-      socket?.off(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, channelCreationListener);
-    };
-  }, [channelCreationListener]);
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelCreationListener);
-    return () => {
-      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelCreationListener);
-    };
-  }, [channelCreationListener]);
 
   let DMList = [{name:"user"}, {name:"bis"}, {name:"Johny"}]
   return (
