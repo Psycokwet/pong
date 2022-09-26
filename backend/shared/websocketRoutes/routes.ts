@@ -41,6 +41,7 @@ export const ROUTES_BASE = {
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
     /** SET / UNSET ADMIN */
     SET_ADMIN: 'setAdmin',
+    UNSET_ADMIN: 'unsetAdmin',
     /** UNATTACH TO CHANNEL REQUEST */
     UNATTACH_TO_CHANNEL_REQUEST: 'unattachToChannelRequest',
   },
