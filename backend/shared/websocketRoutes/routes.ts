@@ -41,6 +41,8 @@ export const ROUTES_BASE = {
     UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
     /** ATTACH TO CHANNEL REQUEST */
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
+    /** UNATTACH TO CHANNEL REQUEST */
+    UNATTACH_TO_CHANNEL_REQUEST: 'unattachToChannelRequest',
   },
   GAME: {
     ENDPOINT: '/game/',
@@ -60,6 +62,6 @@ export const ROUTES_BASE = {
     GET_SPECTABLE_GAMES_REQUEST: 'getSpectableGamesRequest',
     UPDATE_SPECTABLE_GAMES: 'updateSpectableGames',
     JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
-  }
+  },
 };
 export const FULL_ROUTE = generate_full_routes(ROUTES_BASE);
