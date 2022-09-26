@@ -93,11 +93,13 @@ const SignInPage = () => {
 
         <div className="flex flex-row">
           <span>Activate Two-Factor Authentication</span>
-          <input
-            type="checkbox"
+          <select
             onChange={(e) => setTwoFactor(e.target.value)}
             className="text-gray-800 mx-4"
-          ></input>
+          >
+            <option value="on">On</option>
+            <option value="off">Off</option>
+          </select>
         </div>
 
         <button
