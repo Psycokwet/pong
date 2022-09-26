@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import io, { Socket } from "socket.io-client";
-import Position from "/shared/interfaces/Position";
+
+import { Socket } from "socket.io-client";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import myConfig from '../../myConfig';
 
 const GameOver = ({
     socket,
@@ -24,10 +22,8 @@ const GameOver = ({
       gameRoom.gameData.player2.pongUsername
   }
   const joinNewGame = () => {
-      /** GAME JOIN */
     socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST);
     setStep(1);
-  /** END GAME JOIN */
   }
   const redirectToLobby = () => {
     setStep(0);
