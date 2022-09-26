@@ -52,7 +52,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer()
   server: Server;
-  async handleConnection(client: Socket) {
+  async handleConnection(@ConnectedSocket() client: Socket) {
     const user = await this.chatService.getUserFromSocket(client);
 
     const isRegistered = ChatService.userWebsockets.find(
@@ -68,7 +68,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(@ConnectedSocket() client: Socket) {
     ChatService.userWebsockets = ChatService.userWebsockets.filter(
       (websocket) => websocket.socketId !== client.id,
     );
@@ -394,12 +394,3 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageForFront);
   }
 }
-
-// @UseGuards(JwtWsGuard)
-// @SubscribeMessage(ROUTES_BASE.CHAT.BAN_USER_REQUEST)
-// async banUser(
-//   @MessageBody() data: { message: string; channelId: number },
-//   @UserPayload() payload: any,
-// ) {
-//
-// }
