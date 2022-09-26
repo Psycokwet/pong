@@ -13,6 +13,7 @@ import { ChatModule } from './chat/chat.module';
 import { Game } from './game/game.entity';
 import LocalFile from './localFiles/localFile.entity';
 import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
+import { GameModule } from './game/game.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
     FortyTwoModule,
     AuthModule,
     ChatModule,
+    GameModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       // host: 'localhost',

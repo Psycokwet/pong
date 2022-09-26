@@ -42,5 +42,18 @@ export const ROUTES_BASE = {
     /** ATTACH TO CHANNEL REQUEST */
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
   },
+  GAME: {
+    ENDPOINT: '/game/',
+    /** CREATE GAME */
+    CREATE_GAME_REQUEST: 'createGameRequest',
+    // CONFIRM_GAME_CREATION: 'confirmGameCreation',
+    /** JOIN GAME */
+    JOIN_GAME_REQUEST: 'joinGameRequest',
+    CONFIRM_GAME_JOINED: 'confirmGameJoined',
+    /** SEND INPUT */
+    SEND_INPUT: 'sendInput',
+    /** GAME LOOP */
+    UPDATE_GAME: 'updateGame',
+  }
 };
 export const FULL_ROUTE = generate_full_routes(ROUTES_BASE);
