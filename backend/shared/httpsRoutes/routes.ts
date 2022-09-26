@@ -9,6 +9,7 @@ export const ROUTES_BASE = {
     ADD_FRIEND: 'add_friend',
     GET_FRIEND_LIST: 'get_friends_list',
     SET_NICKNAME: 'set_pong_username',
+    GET_LOGIN42: 'get_login42',
     GET_NICKNAME: 'get_pong_username',
     GET_USER_RANK: 'get_user_rank',
     GET_USER_HISTORY: 'get_user_history',

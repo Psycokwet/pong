@@ -44,6 +44,8 @@ export const ROUTES_BASE = {
   },
   GAME: {
     ENDPOINT: '/game/',
+    /** JOIN GAME LOBBY REQUEST */
+    JOIN_GAME_LOBBY_REQUEST: 'joinGameLobbyRequest',
     /** CREATE GAME */
     CREATE_GAME_REQUEST: 'createGameRequest',
     // CONFIRM_GAME_CREATION: 'confirmGameCreation',
@@ -54,6 +56,10 @@ export const ROUTES_BASE = {
     SEND_INPUT: 'sendInput',
     /** GAME LOOP */
     UPDATE_GAME: 'updateGame',
+    /** GET SPECTABLE GAME */
+    GET_SPECTABLE_GAMES_REQUEST: 'getSpectableGamesRequest',
+    UPDATE_SPECTABLE_GAMES: 'updateSpectableGames',
+    JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
   }
 };
 export const FULL_ROUTE = generate_full_routes(ROUTES_BASE);

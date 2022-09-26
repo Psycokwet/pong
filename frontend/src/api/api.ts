@@ -69,6 +69,16 @@ export class Api {
     );
   }
 
+  get_login42() {
+    return fetch(
+      `${PREFIX}${FULL_ROUTE.USER.GET_LOGIN42}`,
+      {
+        method: "GET",
+        // headers: this._headers,
+      }
+    );
+  }
+
   get_nickname(login42: string) {
     return fetch(
       `${PREFIX}${FULL_ROUTE.USER.GET_NICKNAME}` +
