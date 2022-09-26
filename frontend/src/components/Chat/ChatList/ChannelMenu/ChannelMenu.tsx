@@ -12,12 +12,13 @@ function ChannelMenu ({ socket }:{
   const [createChannel, setCreateChannel] = useState<boolean>(false)
   return (
     <div className="flex flex-col sticky top-0 px-4 py-3 flex font-semibold text-xl text-slate-200 bg-slate-700/90 backdrop-blur-sm ring-1 ring-black/10">
-      <div className={("flex flex-row"+ (addChannel ? ' cursor-pointer':''))}
+      <div
+        className={("flex flex-row"+ (addChannel ? ' cursor-pointer':''))}
         onClick={() => {
           setAddChannel(!addChannel);
           setJoinChannel(false);
-          setCreateChannel(false)}
-        }>
+          setCreateChannel(false)
+        }}>
         <h1 className="grow">Channels</h1>
         {addChannel ?
           <FaMinusCircle className="cursor-pointer" onClick={() => setAddChannel(false)}/>
@@ -26,28 +27,32 @@ function ChannelMenu ({ socket }:{
         }
       </div>
       {addChannel ?
-      <div className="text-lg font-medium">
-        <h1 className="px-8 cursor-pointer"
-          onClick={()=>{
-            setJoinChannel(false);
-            setCreateChannel(!createChannel);}
-          }>Create
-        </h1>
-        { createChannel ?
-          <Create socket={socket}/> : <></>
-        }
-        <h1 className="px-8 cursor-pointer"
-          onClick={()=>{
-            setJoinChannel(!joinChannel);
-            setCreateChannel(false);}
-          }>Join
-        </h1>
-        {joinChannel?
-          <Join socket={socket}/> : <></>
-        }
-      </div>
-        :
-      <></>
+        <div className="text-lg font-medium">
+          <h1
+            className="px-8 cursor-pointer"
+            onClick={()=>{
+              setJoinChannel(false);
+              setCreateChannel(!createChannel);
+          }}>
+              Create
+          </h1>
+          { createChannel ?
+            <Create socket={socket}/> : <></>
+          }
+          <h1
+            className="px-8 cursor-pointer"
+            onClick={()=>{
+              setJoinChannel(!joinChannel);
+              setCreateChannel(false);
+          }}>
+            Join
+          </h1>
+          { joinChannel ?
+            <Join socket={socket}/> : <></>
+          }
+        </div>
+          :
+        <></>
       }
     </div>
   );
