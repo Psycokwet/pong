@@ -70,21 +70,29 @@ export class Api {
     );
   }
 
-  get_nickname(login42: string) {
+  get_login42() {
     return fetch(
-      `${PREFIX}${FULL_ROUTE.USER.GET_NICKNAME}` +
-        "?" +
-        new URLSearchParams({ login42 }),
+      `${PREFIX}${FULL_ROUTE.USER.GET_LOGIN42}`,
       {
         method: "GET",
         // headers: this._headers,
       }
     );
   }
-  set_nickname(newPongUsername: string) {
+
+  get_pong_username() {
+    return fetch(
+      `${PREFIX}${FULL_ROUTE.USER.GET_PONG_USERNAME}` ,
+      {
+        method: "GET",
+        // headers: this._headers,
+      }
+    );
+  }
+  set_pong_username(newPongUsername: string) {
     let headers = new Headers();
     headers.set(HeadersFields.ContentType, "application/json");
-    return fetch(`${PREFIX}${FULL_ROUTE.USER.SET_NICKNAME}`, {
+    return fetch(`${PREFIX}${FULL_ROUTE.USER.SET_PONG_USERNAME}`, {
       method: "POST",
       headers: headers,
       body: JSON.stringify({ newPongUsername }),
