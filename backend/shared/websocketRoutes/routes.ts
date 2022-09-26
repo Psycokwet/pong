@@ -44,6 +44,9 @@ export const ROUTES_BASE = {
     UNSET_ADMIN_REQUEST: 'unsetAdminRequest',
     /** UNATTACH TO CHANNEL REQUEST */
     UNATTACH_TO_CHANNEL_REQUEST: 'unattachToChannelRequest',
+    /** USER PRIVILEGES */
+    USER_PRIVILEGES_REQUEST: 'userPrivilegesRequest',
+    USER_PRIVILEGES_CONFIRMATION: 'userPrivilegesConfirmation',
   },
   GAME: {
     ENDPOINT: '/game/',

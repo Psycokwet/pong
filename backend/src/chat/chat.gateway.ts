@@ -384,4 +384,18 @@ export class ChatGateway {
     }
     this.chatService.unsetAdmin(payload.userId, data);
   }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
+  async getUserPrivileges(
+    @MessageBody() data: JoinChannel,
+    @UserPayload() payload: any,
+  ) {
+    const privilege = await this.chatService.getUserPrivileges(
+      data.roomId,
+      payload.userId,
+    );
+
+    this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
+  }
 }
