@@ -39,6 +39,8 @@ export const ROUTES_BASE = {
     UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
     /** ATTACH TO CHANNEL REQUEST */
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
+    /** SET / UNSET ADMIN */
+    SET_ADMIN: 'setAdmin',
   },
   GAME: {
     ENDPOINT: '/game/',
@@ -52,7 +54,7 @@ export const ROUTES_BASE = {
     SEND_INPUT: 'sendInput',
     /** GAME LOOP */
     UPDATE_GAME: 'updateGame',
-  }
+  },
 };
 const generate_full_routes = (routes_base) => {
   let accumulator = {};
