@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Socket } from 'socket.io-client';
+import io, { Socket } from "socket.io-client";
 import GameCanvas from '/src/components/PongGame/GameCanvas'
 import GameLobby from '/src/components/PongGame/GameLobby';
 import GameOver from '/src/components/PongGame/GameOver';
@@ -15,7 +15,16 @@ const Play = () => {
   const [socket, setSocket] = useState<Socket>();
   const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined)
 
-  const handleGameUpdate = (gameRoom: GameRoom) => {
+
+  useEffect(() => {
+    const newSocket = io(myConfig.domain, {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
+    setSocket(newSocket);
+  }, []);
+
+  const handleGameConfirm = (gameRoom: GameRoom) => {
     // if (gameRoom.started === true) {
     //   const canvas = canvasRef.current
     //   draw(canvas, gameRoom)
@@ -24,11 +33,11 @@ const Play = () => {
   };
   /** GAME CREATION */
   useEffect(() => {
-    socket?.on(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, handleGameUpdate);
+    socket?.on(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, handleGameConfirm);
     return () => {
-      socket?.off(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, handleGameUpdate);
+      socket?.off(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, handleGameConfirm);
     };
-  }, [handleGameUpdate]);
+  }, [handleGameConfirm]);
 
   const upgradeStep = () => {
     setStep(step + 1);
@@ -36,8 +45,17 @@ const Play = () => {
 
   const gameSteps = [
     <GameLobby socket={socket} upgradeStep={upgradeStep} />,
-    <GameQueue/>,
-    <GameCanvas/>,
+    <GameQueue
+      socket={socket}
+      upgradeStep={upgradeStep}
+      setGameRoom={setGameRoom}
+    />,
+    <GameCanvas
+      socket={socket}
+      setGameRoom={setGameRoom}
+      upgradeStep={upgradeStep}
+      gameRoom={gameRoom}
+    />,
     <GameOver/>,
   ];
 
