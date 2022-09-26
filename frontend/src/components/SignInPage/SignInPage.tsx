@@ -11,7 +11,7 @@ const api = new Api();
 const SignInPage = () => {
   const [pongUsername, setPongUsername] = useState<string>("anonymous");
   const [selectedFile, setSelectedFile] = useState<File>();
-  const [avatar, setAvatar] = useState(""); // Todo: need a route for default photo
+  const [avatar, setAvatar] = useState("");
   const [twoFactor, setTwoFactor] = useState("off");
 
   useEffect(() => {
