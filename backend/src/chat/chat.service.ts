@@ -10,7 +10,7 @@ import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
-import { UsersWebsockets } from 'shared/interfaces/ChatRoom';
+import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
 @Injectable()
 export class ChatService {
