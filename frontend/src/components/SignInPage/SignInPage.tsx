@@ -104,7 +104,6 @@ const SignInPage = () => {
           type="submit"
           className="w-fit bg-sky-500 hover:bg-sky-700 text-xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
         >
-          {""}
           Submit
         </button>
       </form>
