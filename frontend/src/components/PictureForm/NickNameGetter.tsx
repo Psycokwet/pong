@@ -7,7 +7,7 @@ const NickNameGetter = () => {
 
   const api = new Api();
 
-  const handleCick = (e: React. MouseEvent<HTMLElement>) => {
+  const handleClick = (e: React. MouseEvent<HTMLElement>) => {
     e.preventDefault();
 
     api.get_nickname("thi-nguy").then((res: Response) => {
@@ -23,7 +23,7 @@ const NickNameGetter = () => {
   return (
     <div>
       <button
-        onClick={handleCick}
+        onClick={handleClick}
         className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
       >
         View Uploaded NickName:{" "}
