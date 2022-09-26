@@ -265,13 +265,10 @@ export class ChatService {
       { channelName: data.channelName },
       { owner: true, admins: true },
     );
-    console.log('room', room);
-    console.log('userId', userId);
+
     const verifyOwner = await this.userService.getById(userId);
     const futureAdmin = await this.userService.getById(data.userId);
-    console.log('verifyOwner', verifyOwner);
-    console.log('room.owner', room.owner);
-    console.log('futureAdmin', futureAdmin);
+
     if (!room) {
       throw new BadRequestException('Channel does not exist');
     }
@@ -301,15 +298,8 @@ export class ChatService {
       { owner: true, admins: true },
     );
 
-    console.log('room', room);
-    console.log('userId', userId);
-
     const verifyOwner = await this.userService.getById(userId);
     const firedAdmin = await this.userService.getById(data.userId);
-
-    console.log('verifyOwner', verifyOwner);
-    console.log('room.owner', room.owner);
-    console.log('firedAdmin', firedAdmin);
 
     if (!room) {
       throw new BadRequestException('Channel does not exist');
@@ -346,7 +336,6 @@ export class ChatService {
       throw new BadRequestException('Channel does not exist');
     }
 
-    console.log(room.members);
     return room.members;
   }
 
