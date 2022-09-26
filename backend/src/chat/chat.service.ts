@@ -197,12 +197,29 @@ export class ChatService {
 
   async attachMemberToChannel(userId: number, room: Room) {
     const newMember = await this.userService.getById(userId);
+
     if (
       !room.members.filter(
         (member: User) => member.login42 === newMember.login42,
       ).length
     )
       room.members = [...room.members, newMember];
+
+    room.save();
+  }
+
+  async unattachMemberToChannel(userId: number, room: Room) {
+    const leavingUser = await this.userService.getById(userId);
+
+    //There's probably a more elegant way to do this...
+    if (
+      room.members.filter(
+        (member: User) => member.login42 === leavingUser.login42,
+      ).length
+    )
+      room.members = room.members.filter(
+        (member: User) => member.login42 !== leavingUser.login42,
+      );
 
     room.save();
   }
@@ -235,6 +252,7 @@ export class ChatService {
     return user;
   }
 
+  //Unused fct
   removeUserConnectedToRooms(roomName: string, userId): number[] {
     const chatRoomIndex = ChatService.chatRoomList.findIndex(
       (chatRoom) => chatRoom.roomName == roomName,
