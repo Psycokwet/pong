@@ -24,6 +24,13 @@ const LeaderBoard = () => {
           console.log("set_nickname", content);
         });
     });
+    api.get_login42().then((res: Response) => {
+      console.log("get_login42", res);
+      if ((res.status / 200 >= 1 && res.status / 200 <= 2))
+        res.json().then((content) => {
+          console.log("get_login42", content);
+        });
+    });
     api.get_nickname("scarboni").then((res: Response) => {
       console.log("get_nickname", res);
       res.json().then((content) => {
