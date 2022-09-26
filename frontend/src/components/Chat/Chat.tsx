@@ -12,7 +12,7 @@ import { User } from "/shared/interfaces/User";
 function Chat ({socket}:{socket:Socket|undefined}) {
   const user:User = {id:0, pongUsername:'Moot'};
   const [messages, setMessages] = useState<Message[]>([])
-  const [connectedChannel, setConnectedChannel] = useState<ChannelData | undefined>(undefined);
+  const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
   const addMessage = (newElem:Message) => {
     setMessages([...messages, newElem]);
   }
@@ -52,7 +52,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
 
   return (
     <div className="bg-black text-white h-7/8 flex grid grid-cols-5 grid-rows-6 gap-4">
-      <ChatList msg={messages[messages.length - 1]} socket={socket}/>
+      <ChatList msg={messages[messages.length - 1]} socket={socket} connectedChannel={connectedChannel}l/>
       <Messages messages={messages}/>
       <TextField socket={socket} chan={connectedChannel} />
       <div className="row-start-1 row-span-6 col-start-5">
