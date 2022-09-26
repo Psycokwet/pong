@@ -23,6 +23,7 @@ import * as bcrypt from 'bcrypt';
 import JoinChannel from 'shared/interfaces/JoinChannel';
 import ChannelData from 'shared/interfaces/ChannelData';
 import Message from 'shared/interfaces/Message';
+import ActionOnUser from 'shared/interfaces/ActionOnUser';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -329,5 +330,21 @@ export class ChatGateway {
       this.server
         .in(room.roomName)
         .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageForFront);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.SET_ADMIN)
+  async setAdmin(
+    @MessageBody() data: ActionOnUser,
+    @UserPayload() payload: any,
+  ) {
+    const newAdmin = this.userService.getById(data.userId);
+    if (!newAdmin) {
+      throw new BadRequestException({
+        error: 'The user you want to set as admin does not exist',
+      });
+    }
+
+    this.chatService.setAdmin(payload.userId, data);
   }
 }

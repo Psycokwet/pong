@@ -12,6 +12,7 @@ import { UsersService } from 'src/user/user.service';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatRoom } from 'shared/interfaces/ChatRoom';
 import ChannelData from 'shared/interfaces/ChannelData';
+import ActionOnUser from 'shared/interfaces/ActionOnUser';
 @Injectable()
 export class ChatService {
   constructor(
@@ -138,6 +139,7 @@ export class ChatService {
       members: [user],
       isDM: false,
       isChannelPrivate: isChannelPrivate,
+      admins: [user],
     });
 
     await newRoom.save();
@@ -248,4 +250,6 @@ export class ChatService {
     return ChatService.chatRoomList[chatRoomIndex].userIdList;
   }
   /** END ChatRoomConnectedUsers methods */
+
+  async setAdmin(userId: number, data: ActionOnUser) {}
 }
