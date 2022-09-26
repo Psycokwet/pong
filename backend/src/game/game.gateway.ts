@@ -92,8 +92,18 @@ export class GameGateway {
             if (receiverSocketId) {
               const receiverSocket = this.server.sockets.sockets.get(
                 receiverSocketId.socketId,
-              );receiverSocket.leave(gameRoom.roomName);
+              );
+              receiverSocket.leave(gameRoom.roomName);
             }
+            gameRoom.spectatorsId
+              .map(spectatorId => this.chatService.getUserIdWebsocket(spectatorId))
+              .map(clientId => this.server.sockets.sockets.get(
+                clientId.socketId
+              ))
+              .map(clientSocket => clientSocket.leave(gameRoom.roomName));
+            
+            console.log(client.id, receiverSocketId.socketId, this.server.sockets.adapter.rooms)
+
           }
         }, 10);
     }
@@ -126,6 +136,9 @@ export class GameGateway {
       return;
     }
 
+    gameRoom.spectatorsId.push(payload.userId);
+
     client.join(gameRoom.roomName);
+    console.log(client.id, this.server.sockets.adapter.rooms)
   }
 }
