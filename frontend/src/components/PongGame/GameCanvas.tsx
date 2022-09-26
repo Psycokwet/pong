@@ -24,9 +24,9 @@ const PLAYER_WIDTH = 5;
 function GameCanvas() {
   const canvasRef = useRef(null);
   const [coords, setCoords] = useState<Position>({x: 0, y: 0});
-  const [mousePressing,setMousePressing] = useState(true);
   const [globalCoords, setGlobalCoords] = useState<Position>({x: 0, y: 0});
   const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined)
+  const [spectableGames, setSpectableGames] = useState<GameRoom[]>([])
 
   /** WEBSOCKET */
   const [socket, setSocket] = useState<Socket>();
@@ -151,6 +151,29 @@ function GameCanvas() {
     return playerPongUsernames;
   }
 
+  /** SPECTATE */
+  const handleSpectate = (roomName: string) => {
+    socket?.emit(ROUTES_BASE.GAME.JOIN_SPECTATE_REQUEST, roomName);
+  }
+  /** END SPECTACTE */
+
+  useEffect(() => {
+    socket?.emit(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST)
+  }, [socket]);
+
+  /** UPDATE SPECTABLE GAMES */
+  const updateSpectableGames = (spectableGames: GameRoom[]) => {
+    setSpectableGames(spectableGames);
+  };
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
+    return () => {
+      socket?.off(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
+    };
+  }, [updateSpectableGames]);
+  /** END UPDATE SPECTABLE GAMES */
+
+
   return (
     <div
       style={{padding: '3rem', backgroundColor: 'lightgray'}}
@@ -165,6 +188,18 @@ function GameCanvas() {
             <div></div>
             <button onClick={handleJoinGame}>Join game</button>
           </>
+      }
+      <br />
+      <h2>SPECTATE CDAI TEST</h2>
+      {
+        gameRoom ?
+          <></>
+          :
+          spectableGames.map(tempGameRoom => 
+            <div key={tempGameRoom.roomName}>
+              <button onClick={() => handleSpectate(tempGameRoom.roomName)}>{tempGameRoom.roomName}</button>
+            </div>
+          )
       }
       <br />
       <canvas
