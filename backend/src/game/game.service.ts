@@ -37,7 +37,7 @@ export class GameService {
         x: 0,
         y: 0,
       }
-    }
+    },
   }
   private static gameRoomList: GameRoom[] = [];
   public static gameIntervalList: number[] = [];
@@ -54,6 +54,7 @@ export class GameService {
       roomName: `game:${user.login42}:${uuidv4()}`,
       started: false,
       gameData: structuredClone(GameService.defaultGameData), // deep clone
+      spectatorsId: [],
     }
     newGameRoom.gameData.player1.userId = user.id;
     newGameRoom.gameData.player1.pongUsername = this.userService.getFrontUsername(user);
