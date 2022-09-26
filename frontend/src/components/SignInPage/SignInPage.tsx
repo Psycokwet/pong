@@ -3,18 +3,27 @@ import { useState } from "react";
 import { Api } from "../../api/api";
 import { PictureGetter } from "../PictureForm/PictureGetter";
 import NickNameGetter from "../PictureForm/NickNameGetter";
+import ProfilePic from "../Common/ProfilePic";
 
-const MAX_CHAR = 5;
+const MAX_CHAR = 15;
 
+const api = new Api();
 const SignInPage = () => {
-  const [nickname, setNickName] = useState("thi-nguy"); // Todo : get 42login and put it as initial value
+  const [pongUsername, setPongUsername] = useState<string>("anonymous");
   const [selectedFile, setSelectedFile] = useState<File>();
-  const [avatar, setAvatar] = useState(""); // Todo: need a route for default photo
+  const [avatar, setAvatar] = useState("");
   const [twoFactor, setTwoFactor] = useState("off");
 
+  useEffect(() => {
+    api.get_pong_username().then((res: Response) => {
+      res.json().then((content) => {
+        setPongUsername(content.pongUsername);
+      });
+    });
+  }, []);
+
   const handleSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
-    const api = new Api();
-    if (event === undefined) return;
+    if (event === undefined) return; //not sure it may happen
     event.preventDefault();
 
     const fileData = new FormData();
@@ -27,11 +36,11 @@ const SignInPage = () => {
       });
     }
 
-    if (nickname.length <= MAX_CHAR) {
-      api.set_nickname(nickname).then((res: Response) => {
+    if (pongUsername.length <= MAX_CHAR) {
+      api.set_pong_username(pongUsername).then((res: Response) => {
         if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
-          console.log("set nickname is NOT Ok");
-        else console.log(`Set nickname is ok, status is: ${res.status}`);
+          console.log("set pongUsername is NOT Ok");
+        else console.log(`Set pongUsername is ok, status is: ${res.status}`);
       });
     }
 
@@ -47,24 +56,10 @@ const SignInPage = () => {
     setSelectedFile(file);
   };
 
-  useEffect(() => {
-    return () => {
-      avatar && URL.revokeObjectURL(avatar);
-    };
-  }, [avatar]); // to avoid memory leaks
-
   return (
     <div>
       <div className="bg-gray-900">
-        {avatar ? (
-          <img src={avatar} className="w-40 rounded-full" />
-        ) : (
-          <img
-            src="https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg"
-            alt="Preview selected photo"
-            className="w-40 rounded-full"
-          />
-        )}
+        <ProfilePic avatar={avatar} setAvatar={setAvatar}></ProfilePic>
       </div>
 
       <form
@@ -74,16 +69,16 @@ const SignInPage = () => {
         <h1>Change your avatar</h1>
         <input type="file" onChange={handlePreviewPhoto} />
 
-        <h1>Change your nickname</h1>
+        <h1>Change your pongUsername</h1>
         <input
           type="text"
-          name="nickname"
-          value={nickname}
-          onChange={(e) => setNickName(e.target.value)}
+          name="pongUsername"
+          value={pongUsername}
+          onChange={(e) => setPongUsername(e.target.value)}
           placeholder={`name less than ${MAX_CHAR} letters`}
           className="text-gray-900 placeholder:text-gray-400 placeholder:px-4 outline_none rounded-xl w-60"
         />
-        {nickname.length > MAX_CHAR ? (
+        {pongUsername.length > MAX_CHAR ? (
           <label className="text-yellow-400">
             * Nickname can't be over {MAX_CHAR} characters
           </label>
@@ -111,11 +106,10 @@ const SignInPage = () => {
       </form>
 
       {/* Testing Zone - to delete later - don't forget to scroll down */}
-      <div>
+      {/* <div>
         <PictureGetter />
         <NickNameGetter />
-      </div>
-      {/* ****************************************************** */}
+      </div> */}
     </div>
   );
 };
