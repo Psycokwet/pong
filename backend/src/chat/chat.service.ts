@@ -13,6 +13,7 @@ import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
+import { Privileges } from 'shared/interfaces/UserPrivileges';
 import { v4 as uuidv4 } from 'uuid';
 import { ChatRoom } from 'shared/interfaces/ChatRoom';
 import ChannelData from 'shared/interfaces/ChannelData';
@@ -355,5 +356,20 @@ export class ChatService {
 
     console.log(room.members);
     return room.members;
+  }
+
+  async getUserPrivileges(roomId: number, userId: number) {
+    const room = await this.getRoomWithRelations(
+      { id: roomId },
+      { owner: true, admins: true, members: true },
+    );
+
+    if (userId === room.owner.id) return { privilege: Privileges.OWNER };
+
+    if (room.admins.filter((admin) => admin.id === userId).length) {
+      return { privilege: Privileges.ADMIN };
+    }
+
+    return { privilege: Privileges.MEMBER };
   }
 }
