@@ -15,7 +15,6 @@ function TextField ({socket , chan}:{
     socket:Socket|undefined,
     chan:ChannelData,
 }){
-  const user:userType = {login:'Moot', nickname:'mescande', link_to_profile:'Profile'};
   const [message, setValue] = useState<string>('')
 
   const sendMessage = () => {
