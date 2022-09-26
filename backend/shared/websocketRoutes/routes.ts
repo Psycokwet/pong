@@ -26,23 +26,22 @@ export const ROUTES_BASE = {
     /** DISCONNECT FROM CHANNEL */
     DISCONNECT_FROM_CHANNEL_REQUEST: 'disconnectFromChannelRequest',
     CONFIRM_CHANNEL_DISCONNECTION: 'confirmChannelDisconnection',
+    /** GET ATTACHED USERS IN CHANNEL */
+    ATTACHED_USERS_LIST_REQUEST: 'attachedUsersListRequest',
+    ATTACHED_USERS_LIST_CONFIRMATION: 'attachedUsersListConfirmation',
     /** SEND MESSAGE */
     SEND_MESSAGE: 'sendMessage',
     RECEIVE_MESSAGE: 'receiveMessage',
     /** MESSAGE HISTORY */
     MESSAGE_HISTORY: 'messageHistory',
-    /** GET CONNECTED USER LIST */
-    GET_CONNECTED_USER_LIST_REQUEST: 'getConnectedUserListRequest',
-    CONNECTED_USER_LIST: 'connectedUserList',
-    UPDATE_CONNECTED_USERS: 'updateConnectedUsers',
     /** CHANNEL ATTACHED USER LIST */
     UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
     ATTACHED_USER_LIST_SENT: 'attachedUserListSent',
     /** ATTACH TO CHANNEL REQUEST */
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
     /** SET / UNSET ADMIN */
-    SET_ADMIN: 'setAdmin',
-    UNSET_ADMIN: 'unsetAdmin',
+    SET_ADMIN_REQUEST: 'setAdminRequest',
+    UNSET_ADMIN_REQUEST: 'unsetAdminRequest',
     /** UNATTACH TO CHANNEL REQUEST */
     UNATTACH_TO_CHANNEL_REQUEST: 'unattachToChannelRequest',
   },

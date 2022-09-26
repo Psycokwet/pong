@@ -286,30 +286,6 @@ export class ChatGateway {
     );
   }
 
-  /* GET USERS IN CHANNEL */
-  @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.GET_CONNECTED_USER_LIST_REQUEST)
-  async getUsersInChannel(
-    @MessageBody() roomId: number,
-    @UserPayload() payload: any,
-  ) {
-    const room = await this.chatService.getRoomWithRelations(
-      { id: roomId },
-      { members: true },
-    );
-    const caller = await this.userService.getById(payload.userId);
-
-    this.server.in(room.roomName).emit(
-      ROUTES_BASE.CHAT.CONNECTED_USER_LIST,
-      room.members.map((user: User) => {
-        return {
-          id: user.id,
-          pongUsername: this.userService.getFrontUsername(user),
-        };
-      }),
-    );
-  }
-
   /* DISCONNECT FROM CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST)
@@ -329,20 +305,20 @@ export class ChatGateway {
 
   /** GET ATTACHED USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST)
-  async getAttachedUsersInChannel(
-    @MessageBody() roomId: number,
-    @ConnectedSocket() client: Socket,
-  ) {
+  @SubscribeMessage(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
+  async getAttachedUsersInChannel(@MessageBody() roomId: number) {
+    console.log(roomId);
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
     console.log(room);
     const attachedUsers = await this.chatService.getAttachedUsersInChannel(
       roomId,
     );
 
+    console.log(attachedUsers);
+
     this.server
       .in(room.roomName)
-      .emit(ROUTES_BASE.CHAT.ATTACHED_USER_LIST_SENT, attachedUsers);
+      .emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, attachedUsers);
   }
 
   /*MESSAGE LISTENER */
@@ -380,7 +356,7 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.SET_ADMIN)
+  @SubscribeMessage(ROUTES_BASE.CHAT.SET_ADMIN_REQUEST)
   async setAdmin(
     @MessageBody() data: ActionOnUser,
     @UserPayload() payload: any,
@@ -395,7 +371,7 @@ export class ChatGateway {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.UNSET_ADMIN)
+  @SubscribeMessage(ROUTES_BASE.CHAT.UNSET_ADMIN_REQUEST)
   async unsetAdmin(
     @MessageBody() data: ActionOnUser,
     @UserPayload() payload: any,
