@@ -335,7 +335,10 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
   ) {
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
-    const attachedUsers = this.chatService.getAttachedUsersInChannel(roomId);
+    console.log(room);
+    const attachedUsers = await this.chatService.getAttachedUsersInChannel(
+      roomId,
+    );
 
     this.server
       .in(room.roomName)
