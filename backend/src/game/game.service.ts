@@ -5,9 +5,16 @@ import GameRoom from 'shared/interfaces/game/GameRoom';
 import GameData from 'shared/interfaces/game/GameData';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
 import { v4 as uuidv4 } from 'uuid';
+import { Game } from './game.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class GameService {
-  constructor(private userService: UsersService) {}
+  constructor(
+    private userService: UsersService,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
 
   private static defaultGameData: GameData = {
     player1: {
@@ -190,5 +197,33 @@ export class GameService {
       ||
       gameRoom.gameData.player2.score >= 10
     )
+  }
+
+  public async handleGameOver(gameRoom: GameRoom) {
+    const player1 = await this.userService.getById(gameRoom.gameData.player1.userId);
+    const player2 = await this.userService.getById(gameRoom.gameData.player2.userId);
+
+    const newGame = Game.create({
+      player1_id: player1.id,
+      player2_id: player2.id,
+      winner: 
+        gameRoom.gameData.player1.score > gameRoom.gameData.player2.score ?
+          player1.id :
+          player2.id,
+      player1: player1,
+      player2: player2,
+      player1Score: gameRoom.gameData.player1.score,
+      player2Score: gameRoom.gameData.player2.score,
+    });
+
+    await newGame.save();
+
+    await this.usersRepository.update(player1.id, {
+      xp: player1.xp + (gameRoom.gameData.player1.score > gameRoom.gameData.player2.score ? 2 : 1),
+    });
+
+    await this.usersRepository.update(player2.id, {
+      xp: player2.xp + (gameRoom.gameData.player1.score > gameRoom.gameData.player2.score ? 1 : 2),
+    });
   }
 }

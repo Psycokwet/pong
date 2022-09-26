@@ -15,7 +15,6 @@ import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
-import { PlayGameDto } from './play-game.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 
@@ -194,50 +193,6 @@ export class UsersService {
       user,
       games,
     };
-  }
-
-  async playGame(dto: PlayGameDto) {
-    const player1 = await this.findOne(dto.player1);
-    const player2 = await this.findOne(dto.player2);
-    const winner = await this.findOne(dto.winner);
-
-    if (winner.id !== player1.id && winner.id !== player2.id) {
-      throw new BadRequestException({
-        error: 'Winner has to either be player 1 or player 2',
-      });
-    }
-
-    const loser =
-      winner.id === player1.id
-        ? await this.findOne(player2.login42)
-        : await this.findOne(player1.login42);
-
-    const newGame = Game.create({
-      player1_id: player1.id,
-      player2_id: player2.id,
-      winner: winner.id,
-      player1: player1,
-      player2: player2,
-    });
-
-    await newGame.save();
-
-    /* Always increase the winner's XP by 2 */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(winner)
-      .set({ xp: winner.xp + 2 })
-      .where({ id: winner.id })
-      .execute();
-
-    /* If the loser's xp is > 0, increases only by 1 */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(loser)
-      .set({ xp: loser.xp + 1 })
-      .where('id = :id', { id: loser.id })
-      .andWhere('xp > 0', { xp: loser.xp })
-      .execute();
   }
 
   async addFriend(dto: AddFriendDto, login42: string) {
