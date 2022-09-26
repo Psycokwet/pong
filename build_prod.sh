@@ -12,7 +12,7 @@ do
     rsync -av ${i}/ dist_project/${i} --exclude node_modules --exclude Dockerfile.local --exclude .env --exclude '*.git*' --exclude '*.md' --exclude 'dist' --exclude 'test'
     mv dist_project/${i}/.dockerignore.production dist_project/${i}/.dockerignore
 done
-echo $LINE Getting locals files for dist... $LINE
+echo $LINE Getting locals files for dist... Omitting directories is wanted. $LINE
 cp ./* dist_project/ 
 echo $LINE Cleaning unused files in dist... $LINE
 rm  dist_project/*.md
