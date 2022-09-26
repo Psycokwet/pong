@@ -21,7 +21,6 @@ import { join } from 'path';
 import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
-import { PlayGameDto } from './play-game.dto';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
@@ -46,9 +45,10 @@ export class UserController {
 
     if (!userHistory) return {};
 
-    /*  Manipulating userHistory array so we get exactly what we want.
-        The sort ensures the latest games are returned first. */
-
+    /**
+     * Manipulating userHistory array so we get exactly what we want.
+     * The sort ensures the latest games are returned first.
+     */
     const nbGames = userHistory.games.length;
     const nbWins = userHistory.games.filter((game) => {
       return game.winner == userHistory.user.id;
@@ -73,12 +73,6 @@ export class UserController {
         })
         .sort((a, b) => b.id - a.id),
     };
-  }
-
-  @Post(ROUTES_BASE.USER.PLAY_GAME)
-  @UseGuards(JwtAuthGuard)
-  async playGame(@Body() dto: PlayGameDto) {
-    await this.usersService.playGame(dto);
   }
 
   @Post(ROUTES_BASE.USER.ADD_FRIEND)
