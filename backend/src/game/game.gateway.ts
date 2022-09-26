@@ -22,6 +22,7 @@ import PlayerInput from 'shared/interfaces/game/PlayerInput';
   cors: '*/*',
 })
 export class GameGateway {
+
   constructor(
     private userService: UsersService,
     private gameService: GameService,
@@ -67,6 +68,10 @@ export class GameGateway {
     this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, gameRoom);
 
     if (gameRoom.started === true) {
+      this.server.emit(
+        ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
+        this.gameService.getSpectableGames(),
+      );
       GameService.gameIntervalList[gameRoom.roomName] = setInterval(
         () => {
           const newGameRoom = this.gameService.gameLoop(gameRoom.roomName);
@@ -78,5 +83,35 @@ export class GameGateway {
           this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, newGameRoom);
         }, 10);
     }
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST)
+  async getSpectableGames(
+    // @MessageBody() roomName: any,
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
+    this.server.in(client.id).emit(
+      ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
+      this.gameService.getSpectableGames(),
+    );
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.GAME.JOIN_SPECTATE_REQUEST)
+  async joinSpectateRequest(
+    @MessageBody() roomName: string,
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
+    const gameRoom: GameRoom = this.gameService.findByRoomName(roomName);
+
+    if (gameRoom === undefined) {
+      // error
+      return;
+    }
+
+    client.join(gameRoom.roomName);
   }
 }

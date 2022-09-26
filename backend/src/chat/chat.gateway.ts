@@ -24,6 +24,7 @@ import JoinChannel from 'shared/interfaces/JoinChannel';
 import ChannelData from 'shared/interfaces/ChannelData';
 import Message from 'shared/interfaces/Message';
 import ActionOnUser from 'shared/interfaces/ActionOnUser';
+import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -216,6 +217,31 @@ export class ChatGateway {
     }
     await this.chatService.attachMemberToChannel(payload.userId, room);
     this.joinRoom({ roomId: room.id }, client);
+  }
+
+  /** UNATTACH USER TO CHANNEL */
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST)
+  async unattachUserToChannel(
+    @MessageBody() data: UnattachFromChannel,
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      {
+        members: true,
+        messages: { author: true },
+      },
+    );
+    if (!room) {
+      throw new BadRequestException({
+        error: 'You must specify which channel you want to leave',
+      });
+    }
+
+    await this.chatService.unattachMemberToChannel(payload.userId, room);
+    this.disconnectFromChannel(room.id, client);
   }
 
   /* JOIN ROOM */
