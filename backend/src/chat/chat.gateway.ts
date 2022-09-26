@@ -346,12 +346,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async getAttachedUsersInChannel(@MessageBody() roomId: number) {
     console.log(roomId);
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
-    console.log(room);
+
     const attachedUsers = await this.chatService.getAttachedUsersInChannel(
       roomId,
     );
-
-    console.log(attachedUsers);
 
     this.server
       .in(room.roomName)
