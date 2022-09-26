@@ -5,6 +5,13 @@ export const ROUTES_BASE = {
     JOIN_CHANNEL_LOBBY_REQUEST: 'joinChannelLobbyRequest',
     LIST_ALL_CHANNELS: 'listAllChannels',
     NEW_CHANNEL_CREATED: 'newChannelCreated',
+    /** ATTACHED CHANNELS LOBBY */
+    JOIN_ATTACHED_CHANNEL_LOBBY_REQUEST: 'joinAttachedChannelLobbyRequest',
+    LIST_ALL_ATTACHED_CHANNELS: 'listAllAttachedChannels',
+    /** DM CHANNELS LOBBY */
+    JOIN_DM_CHANNEL_LOBBY_REQUEST: 'joinDMChannelLobbyRequest',
+    LIST_ALL_DM_CHANNELS: 'listAllDMChannels',
+    NEW_DM_CHANNEL_CREATED: 'newDMChannelCreated',
     /** CREATE CHANNEL */
     CREATE_CHANNEL_REQUEST: 'createChannelRequest',
     CONFIRM_CHANNEL_CREATION: 'confirmChannelCreation',
@@ -14,6 +21,8 @@ export const ROUTES_BASE = {
     /** JOIN CHANNEL */
     JOIN_CHANNEL_REQUEST: 'joinChannelRequest',
     CONFIRM_CHANNEL_ENTRY: 'confirmChannelEntry',
+    /** JOIN ATTACHED CHANNELS LOBBY */
+    /** JOIN DM CHANNELS LOBBY */
     /** DISCONNECT FROM CHANNEL */
     DISCONNECT_FROM_CHANNEL_REQUEST: 'disconnectFromChannelRequest',
     CONFIRM_CHANNEL_DISCONNECTION: 'confirmChannelDisconnection',
@@ -31,6 +40,19 @@ export const ROUTES_BASE = {
     /** ATTACH TO CHANNEL REQUEST */
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
   },
+  GAME: {
+    ENDPOINT: '/game/',
+    /** CREATE GAME */
+    CREATE_GAME_REQUEST: 'createGameRequest',
+    // CONFIRM_GAME_CREATION: 'confirmGameCreation',
+    /** JOIN GAME */
+    JOIN_GAME_REQUEST: 'joinGameRequest',
+    CONFIRM_GAME_JOINED: 'confirmGameJoined',
+    /** SEND INPUT */
+    SEND_INPUT: 'sendInput',
+    /** GAME LOOP */
+    UPDATE_GAME: 'updateGame',
+  }
 };
 const generate_full_routes = (routes_base) => {
   let accumulator = {};

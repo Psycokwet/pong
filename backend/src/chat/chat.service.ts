@@ -41,6 +41,59 @@ export class ChatService {
       );
   }
 
+  public async getAllAttachedRooms(userId: number) {
+    const user = await this.userService.getById(userId);
+
+    return this.roomsRepository
+      .find({
+        relations: {
+          members: true,
+        },
+        where: {
+          members: {
+            id: user.id,
+          },
+        },
+      })
+      .then((rooms) =>
+        rooms.map((room) => {
+          return {
+            channelId: room.id,
+            channelName: room.channelName,
+          };
+        }),
+      );
+  }
+
+  public async getAllDMRooms(userId: number) {
+    const user = await this.userService.getById(userId);
+
+    return this.roomsRepository
+      .find({
+        relations: {
+          members: true,
+        },
+        where: {
+          members: {
+            id: user.id,
+          },
+          isDM: true,
+        },
+      })
+      .then((rooms) =>
+        rooms.map((room) => {
+          return {
+            id: room.id,
+            targetName: room.members.find((target) => target.id !== user.id),
+          };
+        }),
+      );
+  }
+
+  public async getRoomById(id: number) {
+    return this.roomsRepository.findOneBy({ id });
+  }
+
   public async getRoomWithRelations(
     where: FindOptionsWhere<Room>,
     relations?: FindOptionsRelations<Room>,
