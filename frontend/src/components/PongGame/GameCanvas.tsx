@@ -100,9 +100,9 @@ const GameCanvas = (
   const handleGameUpdate = (gameRoom: GameRoom) => {
     // game finished
     if (
-      gameRoom.gameData.player1.score >= 10
+      gameRoom.gameData.player1.score >= 1
       ||
-      gameRoom.gameData.player2.score >= 10
+      gameRoom.gameData.player2.score >= 1
     ) 
     {
       upgradeStep()

@@ -56,7 +56,11 @@ const Play = () => {
       upgradeStep={upgradeStep}
       gameRoom={gameRoom}
     />,
-    <GameOver/>,
+    <GameOver
+      socket={socket}
+      setStep={setStep}
+      gameRoom={gameRoom}
+    />,
   ];
 
   return (
