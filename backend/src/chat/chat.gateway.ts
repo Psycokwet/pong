@@ -6,6 +6,9 @@ import {
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -23,6 +26,7 @@ import * as bcrypt from 'bcrypt';
 import JoinChannel from 'shared/interfaces/JoinChannel';
 import ChannelData from 'shared/interfaces/ChannelData';
 import Message from 'shared/interfaces/Message';
+import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -39,7 +43,7 @@ async function passwordCompare(
   transport: ['websocket'],
   cors: '*/*',
 })
-export class ChatGateway {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,
@@ -48,7 +52,27 @@ export class ChatGateway {
 
   @WebSocketServer()
   server: Server;
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    const user = await this.chatService.getUserFromSocket(client);
 
+    const isRegistered = ChatService.userWebsockets.find(
+      (element) => element.userId === user.id,
+    );
+
+    if (!isRegistered) {
+      const newWebsocket = { userId: user.id, socketId: client.id };
+      ChatService.userWebsockets = [
+        ...ChatService.userWebsockets,
+        newWebsocket,
+      ];
+    }
+  }
+
+  handleDisconnect(@ConnectedSocket() client: Socket) {
+    ChatService.userWebsockets = ChatService.userWebsockets.filter(
+      (websocket) => websocket.socketId !== client.id,
+    );
+  }
   /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
@@ -173,6 +197,20 @@ export class ChatGateway {
 
     await client.join(newDMRoom.roomName);
 
+    const receiverSocketId = this.chatService.getUserIdWebsocket(friendId);
+
+    if (receiverSocketId) {
+      /** Retrieve receiver's socket with the socket ID
+       * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
+       */
+
+      const receiverSocket = this.server.sockets.sockets.get(
+        receiverSocketId.socketId,
+      );
+
+      await receiverSocket.join(newDMRoom.roomName);
+    }
+
     this.server
       .in(newDMRoom.roomName)
       .emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_CREATION, {
@@ -215,6 +253,31 @@ export class ChatGateway {
     }
     await this.chatService.attachMemberToChannel(payload.userId, room);
     this.joinRoom({ roomId: room.id }, client);
+  }
+
+  /** UNATTACH USER TO CHANNEL */
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST)
+  async unattachUserToChannel(
+    @MessageBody() data: UnattachFromChannel,
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      {
+        members: true,
+        messages: { author: true },
+      },
+    );
+    if (!room) {
+      throw new BadRequestException({
+        error: 'You must specify which channel you want to leave',
+      });
+    }
+
+    await this.chatService.unattachMemberToChannel(payload.userId, room);
+    this.disconnectFromChannel(room.id, client);
   }
 
   /* JOIN ROOM */
