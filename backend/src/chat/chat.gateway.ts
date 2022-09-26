@@ -150,14 +150,15 @@ export class ChatGateway {
       channelName: newRoom.channelName,
     });
 
-    if (newRoom.isChannelPrivate === false) {
-      this.server
-        .in(this.channelLobby)
-        .emit(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, {
-          channelId: newRoom.id,
-          channelName: newRoom.channelName,
-        });
-    }
+    // if (newRoom.isChannelPrivate === false) {
+    //   this.server
+    //     .in(this.channelLobby)
+    //     .emit(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, {
+    //       channelId: newRoom.id,
+    //       channelName: newRoom.channelName,
+    //     });
+    // }
+    this.joinAttachedChannelLobby(client, payload);
   }
 
   /* CREATE DM ROOM*/
@@ -216,7 +217,8 @@ export class ChatGateway {
         });
     }
     await this.chatService.attachMemberToChannel(payload.userId, room);
-    this.joinRoom({ roomId: room.id }, client);
+    await this.joinAttachedChannelLobby(client, payload);
+    await this.joinRoom({ roomId: room.id }, client, payload);
   }
 
   /** UNATTACH USER TO CHANNEL */
@@ -250,6 +252,7 @@ export class ChatGateway {
   async joinRoom(
     @MessageBody() { roomId }: JoinChannel,
     @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
   ) {
     const room = await this.chatService.getRoomWithRelations(
       { id: roomId },
@@ -370,7 +373,21 @@ export class ChatGateway {
         error: 'The user you want to set as admin does not exist',
       });
     }
-
     this.chatService.setAdmin(payload.userId, data);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.UNSET_ADMIN)
+  async unsetAdmin(
+    @MessageBody() data: ActionOnUser,
+    @UserPayload() payload: any,
+  ) {
+    const oldAdmin = this.userService.getById(data.userId);
+    if (!oldAdmin) {
+      throw new BadRequestException({
+        error: 'The user you want to set as admin does not exist',
+      });
+    }
+    this.chatService.unsetAdmin(payload.userId, data);
   }
 }

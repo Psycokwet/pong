@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
@@ -207,7 +211,7 @@ export class ChatService {
     )
       room.members = [...room.members, newMember];
 
-    room.save();
+    await room.save();
   }
 
   async unattachMemberToChannel(userId: number, room: Room) {
@@ -263,5 +267,53 @@ export class ChatService {
   }
   /** END ChatRoomConnectedUsers methods */
 
-  async setAdmin(userId: number, data: ActionOnUser) {}
+  async setAdmin(userId: number, data: ActionOnUser) {
+    const room = await this.getRoomByNameWithRelations(data.channelName);
+    const verifyOwner = await this.userService.getById(userId);
+    const futureAdmin = await this.userService.getById(data.userId);
+
+    if (!room) {
+      throw new BadRequestException('Channel does not exist');
+    }
+
+    if (!verifyOwner) {
+      throw new BadRequestException('Owner not found');
+    }
+
+    if (room.owner != verifyOwner) {
+      throw new ForbiddenException(
+        'You do not have the rights to set an admin',
+      );
+    }
+
+    room.admins = [...room.admins, futureAdmin];
+
+    await room.save();
+  }
+
+  async unsetAdmin(userId: number, data: ActionOnUser) {
+    const room = await this.getRoomByNameWithRelations(data.channelName);
+    const verifyOwner = await this.userService.getById(userId);
+    const firedAdmin = await this.userService.getById(data.userId);
+
+    if (!room) {
+      throw new BadRequestException('Channel does not exist');
+    }
+
+    if (!verifyOwner) {
+      throw new BadRequestException('Owner not found');
+    }
+
+    if (room.owner != verifyOwner) {
+      throw new ForbiddenException(
+        'You do not have the rights to set an admin',
+      );
+    }
+
+    room.admins = room.admins.filter(
+      (admin: User) => firedAdmin.id !== admin.id,
+    );
+
+    await room.save();
+  }
 }
