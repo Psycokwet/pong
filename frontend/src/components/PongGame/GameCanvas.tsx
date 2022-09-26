@@ -26,10 +26,10 @@ function GameCanvas() {
   const [coords, setCoords] = useState<Position>({x: 0, y: 0});
   const [mousePressing,setMousePressing] = useState(true);
   const [globalCoords, setGlobalCoords] = useState<Position>({x: 0, y: 0});
-  const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined)
+  // const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined)
 
-  /** WEBSOCKET */
-  const [socket, setSocket] = useState<Socket>();
+  // /** WEBSOCKET */
+  // const [socket, setSocket] = useState<Socket>();
 
   useEffect(() => {
     const newSocket = io(ENDPOINT, {
@@ -39,7 +39,6 @@ function GameCanvas() {
     setSocket(newSocket);
   }, []);
   /** END WEBSOCKET */
-
 
   /** MOUSE HANDLER */
   useEffect(() => {
@@ -131,6 +130,7 @@ function GameCanvas() {
 
 
 
+
   
   /** GAME JOIN */
   const handleJoinGame = () => {
@@ -138,25 +138,24 @@ function GameCanvas() {
   }
   /** END GAME JOIN */
 
-  const displayPlayername = () => {
-    const playerPongUsernames = [];
-    if (gameRoom.gameData.player1.pongUsername !== '')
-      playerPongUsernames.push(
-        <p key={gameRoom.gameData.player1.pongUsername}>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
-      )
-    if (gameRoom.gameData.player2.pongUsername !== '')
-      playerPongUsernames.push(
-        <p key={gameRoom.gameData.player2.pongUsername}>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
-      )
-    return playerPongUsernames;
-  }
+  // const displayPlayername = () => {
+  //   const playerPongUsernames = [];
+  //   if (gameRoom.gameData.player1.pongUsername !== '')
+  //     playerPongUsernames.push(
+  //       <p key={gameRoom.gameData.player1.pongUsername}>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
+  //     )
+  //   if (gameRoom.gameData.player2.pongUsername !== '')
+  //     playerPongUsernames.push(
+  //       <p key={gameRoom.gameData.player2.pongUsername}>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
+  //     )
+  //   return playerPongUsernames;
+  // }
 
   return (
     <div
       style={{padding: '3rem', backgroundColor: 'lightgray'}}
     >
-      <h2>Final Game</h2>
-      {
+      {/* {
         gameRoom ? 
           displayPlayername()
           :
@@ -165,7 +164,7 @@ function GameCanvas() {
             <div></div>
             <button onClick={handleJoinGame}>Join game</button>
           </>
-      }
+      } */}
       <br />
       <canvas
         onMouseMove={handleMouseMove}
