@@ -22,7 +22,6 @@ import PlayerInput from 'shared/interfaces/game/PlayerInput';
   cors: '*/*',
 })
 export class GameGateway {
-  private gameLobby = 'gameLobby';
 
   constructor(
     private userService: UsersService,
@@ -31,18 +30,6 @@ export class GameGateway {
 
   @WebSocketServer()
   server: Server;
-
-  // @UseGuards(JwtWsGuard)
-  // @SubscribeMessage(ROUTES_BASE.GAME.JOIN_GAME_LOBBY_REQUEST)
-  // async joinGameLobby(@ConnectedSocket() client: Socket) {
-  //   client.join(this.gameLobby);
-  //   this.server
-  //     .in(this.gameLobby)
-  //     .emit(
-  //       ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
-  //       await this.gameService.getSpectableGames(),
-  //     );
-  // }
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.SEND_INPUT)
