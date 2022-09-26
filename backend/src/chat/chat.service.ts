@@ -211,15 +211,9 @@ export class ChatService {
   async unattachMemberToChannel(userId: number, room: Room) {
     const leavingUser = await this.userService.getById(userId);
 
-    //There's probably a more elegant way to do this...
-    if (
-      room.members.filter(
-        (member: User) => member.login42 === leavingUser.login42,
-      ).length
-    )
-      room.members = room.members.filter(
-        (member: User) => member.login42 !== leavingUser.login42,
-      );
+    room.members = room.members.filter(
+      (member: User) => member.login42 !== leavingUser.login42,
+    );
 
     room.save();
   }
