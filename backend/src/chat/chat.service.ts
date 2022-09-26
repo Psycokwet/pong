@@ -102,7 +102,7 @@ export class ChatService {
   public async getRoomWithRelations(
     where: FindOptionsWhere<Room>,
     relations?: FindOptionsRelations<Room>,
-  ) {
+  ): Promise<Room | undefined> {
     return this.roomsRepository.findOne({
       where: where,
       relations: relations,
@@ -268,10 +268,17 @@ export class ChatService {
   /** END ChatRoomConnectedUsers methods */
 
   async setAdmin(userId: number, data: ActionOnUser) {
-    const room = await this.getRoomByNameWithRelations(data.channelName);
+    const room = await this.getRoomWithRelations(
+      { channelName: data.channelName },
+      { owner: true, admins: true },
+    );
+    console.log('room', room);
+    console.log('userId', userId);
     const verifyOwner = await this.userService.getById(userId);
     const futureAdmin = await this.userService.getById(data.userId);
-
+    console.log('verifyOwner', verifyOwner);
+    console.log('room.owner', room.owner);
+    console.log('futureAdmin', futureAdmin);
     if (!room) {
       throw new BadRequestException('Channel does not exist');
     }
@@ -280,13 +287,13 @@ export class ChatService {
       throw new BadRequestException('Owner not found');
     }
 
-    if (room.owner != verifyOwner) {
+    if (room.owner.id !== verifyOwner.id) {
       throw new ForbiddenException(
         'You do not have the rights to set an admin',
       );
     }
 
-    if (room.owner === futureAdmin) {
+    if (room.owner.id === futureAdmin.id) {
       throw new BadRequestException('You are already an admin');
     }
 
@@ -296,9 +303,20 @@ export class ChatService {
   }
 
   async unsetAdmin(userId: number, data: ActionOnUser) {
-    const room = await this.getRoomByNameWithRelations(data.channelName);
+    const room = await this.getRoomWithRelations(
+      { channelName: data.channelName },
+      { owner: true, admins: true },
+    );
+
+    console.log('room', room);
+    console.log('userId', userId);
+
     const verifyOwner = await this.userService.getById(userId);
     const firedAdmin = await this.userService.getById(data.userId);
+
+    console.log('verifyOwner', verifyOwner);
+    console.log('room.owner', room.owner);
+    console.log('firedAdmin', firedAdmin);
 
     if (!room) {
       throw new BadRequestException('Channel does not exist');
@@ -308,13 +326,13 @@ export class ChatService {
       throw new BadRequestException('Owner not found');
     }
 
-    if (room.owner != verifyOwner) {
+    if (room.owner.id !== verifyOwner.id) {
       throw new ForbiddenException(
         'You do not have the rights to set an admin',
       );
     }
 
-    if (room.owner === firedAdmin) {
+    if (room.owner.id === firedAdmin.id) {
       throw new BadRequestException('An owner has to be an admin');
     }
 
