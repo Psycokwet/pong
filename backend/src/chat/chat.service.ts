@@ -199,6 +199,7 @@ export class ChatService {
 
   async attachMemberToChannel(userId: number, room: Room) {
     const newMember = await this.userService.getById(userId);
+
     if (
       !room.members.filter(
         (member: User) => member.login42 === newMember.login42,
@@ -247,6 +248,7 @@ export class ChatService {
     return user;
   }
 
+  //Unused fct
   removeUserConnectedToRooms(roomName: string, userId): number[] {
     const chatRoomIndex = ChatService.chatRoomList.findIndex(
       (chatRoom) => chatRoom.roomName == roomName,
