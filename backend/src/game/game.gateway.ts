@@ -15,6 +15,8 @@ import { UsersService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
 import GameRoom from 'shared/interfaces/game/GameRoom';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
+import { ChatService } from 'src/chat/chat.service';
+import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 
 
 @WebSocketGateway({
@@ -26,6 +28,7 @@ export class GameGateway {
   constructor(
     private userService: UsersService,
     private gameService: GameService,
+    private chatService: ChatService,
   ) {}
 
   @WebSocketServer()
@@ -83,8 +86,14 @@ export class GameGateway {
             this.gameService.handleGameOver(newGameRoom);
             this.gameService.removeGameFromGameRoomList(newGameRoom);
             client.leave(gameRoom.roomName);
-            // mmissing other_player.leave(gameRoom.roomName)
-            // waiting for the structure with userId + socketId
+
+            const opponentId = gameRoom.gameData.player1.userId === user.id ? gameRoom.gameData.player2.userId : gameRoom.gameData.player1.userId
+            const receiverSocketId: UsersWebsockets = this.chatService.getUserIdWebsocket(opponentId);
+            if (receiverSocketId) {
+              const receiverSocket = this.server.sockets.sockets.get(
+                receiverSocketId.socketId,
+              );receiverSocket.leave(gameRoom.roomName);
+            }
           }
         }, 10);
     }
