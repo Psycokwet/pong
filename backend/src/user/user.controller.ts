@@ -99,6 +99,12 @@ export class UserController {
     });
   }
 
+  @Get(ROUTES_BASE.USER.GET_LOGIN42)
+  @UseGuards(JwtAuthGuard)
+  async getLogin42(@Request() req) {
+    return await this.usersService.getLogin42(req.user.login42);
+  }
+
   @Get(ROUTES_BASE.USER.GET_PONG_USERNAME)
   @UseGuards(JwtAuthGuard)
   async getPongUsername(@Request() req) {

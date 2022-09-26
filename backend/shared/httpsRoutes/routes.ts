@@ -6,6 +6,7 @@ export const ROUTES_BASE = {
     GET_PICTURE: 'get_picture',
     ADD_FRIEND: 'add_friend',
     GET_FRIEND_LIST: 'get_friends_list',
+    GET_LOGIN42: 'get_login42',
     SET_PONG_USERNAME: 'set_pong_username',
     GET_PONG_USERNAME: 'get_pong_username',
     GET_USER_RANK: 'get_user_rank',
