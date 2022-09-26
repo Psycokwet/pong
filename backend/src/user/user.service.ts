@@ -64,6 +64,10 @@ export class UsersService {
     return user.pongUsername;
   }
 
+  getLogin42(user: User) {
+    return user.login42;
+  }
+
   async signup(dto: UserDto) {
     // database operation
     const user = User.create({
