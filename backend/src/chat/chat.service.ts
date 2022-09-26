@@ -316,4 +316,18 @@ export class ChatService {
 
     await room.save();
   }
+
+  async getAttachedUsersInChannel(roomId: number) {
+    const room = await this.getRoomWithRelations(
+      { id: roomId },
+      { members: true },
+    );
+
+    if (!room) {
+      throw new BadRequestException('Channel does not exist');
+    }
+
+    console.log(room.members);
+    return room.members;
+  }
 }

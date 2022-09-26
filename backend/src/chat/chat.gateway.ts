@@ -327,6 +327,21 @@ export class ChatGateway {
       });
   }
 
+  /** GET ATTACHED USERS IN CHANNEL */
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.UPDATE_CHANNEL_ATTACHED_USER_LIST)
+  async getAttachedUsersInChannel(
+    @MessageBody() roomId: number,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const room = await this.chatService.getRoomWithRelations({ id: roomId });
+    const attachedUsers = this.chatService.getAttachedUsersInChannel(roomId);
+
+    this.server
+      .in(room.roomName)
+      .emit(ROUTES_BASE.CHAT.ATTACHED_USER_LIST_SENT, attachedUsers);
+  }
+
   /*MESSAGE LISTENER */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.SEND_MESSAGE)
