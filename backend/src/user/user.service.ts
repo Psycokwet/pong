@@ -319,6 +319,11 @@ export class UsersService {
     return { pongUsername: this.getFrontUsername(user) };
   }
 
+  async getLogin42(login42: string) {
+    const user = await this.findOne(login42);
+    return { login42: user.login42 };
+  }
+
   async setPongUsername(dto: pongUsernameDto, login42: string) {
     const user = await this.findOne(login42);
 
