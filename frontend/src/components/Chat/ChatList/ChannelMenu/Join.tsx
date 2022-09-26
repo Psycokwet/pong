@@ -34,8 +34,8 @@ function Join ({socket} : {
     };
   }, [addChannel]);
 
-  const handleClickSelect = (name: string) => {
-    socket?.emit(ROUTES_BASE.CHAT.ATTACH_TO_CHANNEL_REQUEST, {channelName: name, userPassword: selectPass});
+  const handleClickOnSelect = (name: string | undefined) => {
+    socket?.emit(ROUTES_BASE.CHAT.ATTACH_TO_CHANNEL_REQUEST, {channelName: name, inputPassword: selectPass});
     setSelectPass("")
   }
   const handleClickByName = () => {
@@ -52,7 +52,7 @@ function Join ({socket} : {
             <input
               className="bg-slate-600"
               type="text"
-              placeholder="Serveur Name"
+              placeholder="Channel Name"
               value={joinName}
               onChange={(e) => {
                 setJoinName(e.target.value);
@@ -68,14 +68,13 @@ function Join ({socket} : {
               }}
             ></input>
             <button
-              className={`rounded-xl bg-gray-600 m-2 hover:bg-gray-800`}
+              className="rounded-xl bg-gray-600 m-2 hover:bg-gray-800"
               onClick={handleClickByName}
             >
               Join
             </button>
             <p>Or</p>
             <select className="bg-slate-600" value={selected} onChange={(e) => setSelected(e.target.value)}>
-              {/*<option disabled selected hidden>Select Public Channel</option>*/}
               { publicChanList.map((chan, i) => {return (
                 <option key={i} value={chan.channelName}>{chan.channelName}</option>
               )})}
@@ -90,8 +89,8 @@ function Join ({socket} : {
               }}
             ></input>
             <button
-              className={`rounded-xl bg-gray-600 m-2 hover:bg-gray-800`}
-              onClick={()=>handleClickSelect(selected)}
+              className="rounded-xl bg-gray-600 m-2 hover:bg-gray-800"
+              onClick={()=>handleClickOnSelect(selected)}
             >
               Join
             </button>

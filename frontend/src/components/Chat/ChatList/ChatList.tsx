@@ -1,9 +1,9 @@
 import { Socket } from "socket.io-client";
 import { useEffect, useState } from "react";
 import Channel from "./Channel/Channel";
-import Dm from "./Dm/Dm";
+import DirectMessage from "./DirectMessage/DirectMessage";
 import ChannelMenu from "./ChannelMenu/ChannelMenu";
-import DmMenu from "./DmMenu/DmMenu";
+import DirectMessageMenu from "./DirectMessageMenu/DirectMessageMenu";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
@@ -14,7 +14,7 @@ function ChatList({ msg , socket , connectedChannel} : {
     connectedChannel: ChannelData | undefined,
 }){
   const [chanList, setChanList] = useState<ChannelData[]>([]);
-  const [dmList, setDmList] = useState<ChannelData[]>([]);
+  const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
 
   useEffect(()=> {
     socket?.emit(ROUTES_BASE.CHAT.JOIN_ATTACHED_CHANNEL_LOBBY_REQUEST);
@@ -33,20 +33,20 @@ function ChatList({ msg , socket , connectedChannel} : {
     };
   }, [resetChanList]);
 
-  const resetDmList = (chans:ChannelData[]) => {
-    setDmList(chans);
+  const resetDirectMessageList = (chans:ChannelData[]) => {
+    setDirectMessageList(chans);
   }
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, resetDmList);
+    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, resetDirectMessageList);
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, resetDmList);
+      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, resetDirectMessageList);
     };
-  }, [resetDmList]);
+  }, [resetDirectMessageList]);
 
 
   return (
-    <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end">
-      <div className="relative">
+    <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end relative">
+      <div>
         <ChannelMenu socket={socket}/>
         {chanList.map((chan, i) => {
           return (
@@ -60,12 +60,12 @@ function ChatList({ msg , socket , connectedChannel} : {
           );
         })}
       </div>
-      <div className="relative">
-        <DmMenu socket={socket}/>
-        {dmList.map((chan, i) => {
+      <div>
+        <DirectMessageMenu socket={socket}/>
+        {directMessageList.map((chan, i) => {
           return (
             <div key={i}>
-              <Dm
+              <DirectMessage
                 socket={socket}
                 channel={chan}
                 message={msg==undefined?"":msg}

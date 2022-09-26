@@ -44,7 +44,7 @@ export class ChatService {
   public async getAllAttachedRooms(userId: number) {
     const user = await this.userService.getById(userId);
 
-    const bouh = await this.roomsRepository
+    const attachedRoomList = await this.roomsRepository
       .find({
         relations: {
           members: true,
@@ -63,8 +63,7 @@ export class ChatService {
           };
         }),
       );
-      console.log(bouh);
-      return bouh;
+      return attachedRoomList;
   }
 
   public async getAllDMRooms(userId: number) {
