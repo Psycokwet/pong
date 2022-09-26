@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Api } from "../../api/api";
 import { PictureGetter } from "../PictureForm/PictureGetter";
 import NickNameGetter from "../PictureForm/NickNameGetter";
+import ProfilePic from "../Common/ProfilePic";
 
 const MAX_CHAR = 5;
 
@@ -56,15 +57,7 @@ const SignInPage = () => {
   return (
     <div>
       <div className="bg-gray-900">
-        {avatar ? (
-          <img src={avatar} className="w-40 rounded-full" />
-        ) : (
-          <img
-            src="https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg"
-            alt="Preview selected photo"
-            className="w-40 rounded-full"
-          />
-        )}
+        <ProfilePic avatar={avatar}></ProfilePic>
       </div>
 
       <form
