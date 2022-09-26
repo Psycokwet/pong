@@ -98,20 +98,8 @@ const GameCanvas = (
   }
 
   const handleGameUpdate = (gameRoom: GameRoom) => {
-    // game finished
-    if (
-      gameRoom.gameData.player1.score >= 1
-      ||
-      gameRoom.gameData.player2.score >= 1
-    ) 
-    {
-      upgradeStep()
-      return ;
-    }
-    if (gameRoom.started === true) {
-      const canvas = canvasRef.current
-      draw(canvas, gameRoom)
-    }
+    const canvas = canvasRef.current
+    draw(canvas, gameRoom)
     setGameRoom(gameRoom)
   };
   useEffect(() => {
@@ -119,8 +107,20 @@ const GameCanvas = (
     return () => {
       socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, handleGameUpdate);
     };
-  }, [handleGameUpdate]);
+  }, []);
   /** END GAME LOOP */
+
+  /** GAMEOVER */
+  const handleGameover = () => {
+    upgradeStep()
+  }
+    useEffect(() => {
+      socket?.on(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, handleGameover);
+      return () => {
+        socket?.off(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, handleGameover);
+    };
+  }, []);
+  /** END GAMEOVER */
 
   return (
     <div

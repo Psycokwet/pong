@@ -52,6 +52,7 @@ export const ROUTES_BASE = {
     SEND_INPUT: 'sendInput',
     /** GAME LOOP */
     UPDATE_GAME: 'updateGame',
+    GAMEOVER_CONFIRM: 'gameoverConfirm',
   }
 };
 const generate_full_routes = (routes_base) => {
