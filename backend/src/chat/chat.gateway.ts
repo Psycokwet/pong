@@ -55,16 +55,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleConnection(@ConnectedSocket() client: Socket) {
     const user = await this.chatService.getUserFromSocket(client);
 
-    const isRegistered = ChatService.userWebsockets.find(
-      (element) => element.userId === user.id,
-    );
-
-    if (!isRegistered) {
-      const newWebsocket = { userId: user.id, socketId: client.id };
-      ChatService.userWebsockets = [
-        ...ChatService.userWebsockets,
-        newWebsocket,
-      ];
+    if (user !== undefined) {
+      const isRegistered = ChatService.userWebsockets.find(
+        (element) => element.userId === user.id,
+      );
+      
+      if (!isRegistered) {
+        const newWebsocket = { userId: user.id, socketId: client.id };
+        ChatService.userWebsockets = [
+          ...ChatService.userWebsockets,
+          newWebsocket,
+        ];
+      }
     }
   }
 
