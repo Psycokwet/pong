@@ -15,12 +15,14 @@ const GameCanvas = (
     setGameRoom,
     gameRoom,
     upgradeStep,
+    canvasSize,
   }:
   {
     socket: Socket,
     setGameRoom: any,
     gameRoom: GameRoom,
     upgradeStep: any,
+    canvasSize: Position,
   }
 ) => {
   const canvasRef = useRef(null);
@@ -31,6 +33,7 @@ const GameCanvas = (
   useEffect(() => {
     // 👇️ get global mouse coordinates
     const handleWindowMouseMove = event => {
+      console.log(canvasSize)
       setGlobalCoords({
         x: event.screenX,
         y: event.screenY,
@@ -63,27 +66,37 @@ const GameCanvas = (
 
   /** GAME LOOP */
   const draw = (canvas, gameRoom: GameRoom) => {
+
+    // console.log(canvasSize)
     const context = canvas.getContext('2d')
     // Draw field
     context.fillStyle = 'black';
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillRect(0, 0, canvasSize.x, canvasSize.y);
     // Draw middle line
     context.strokeStyle = 'white';
     context.beginPath();
-    context.moveTo(canvas.width / 2, 0);
-    context.lineTo(canvas.width / 2, canvas.height);
+    context.moveTo(canvasSize.x / 2, 0);
+    context.lineTo(canvasSize.x / 2, canvasSize.y);
     context.stroke();
 
 
     // Draw players
     context.fillStyle = 'white';
-    context.fillRect(0, gameRoom.gameData.player1.y, PLAYER_WIDTH, PLAYER_HEIGHT);
-    context.fillRect(canvas.width - PLAYER_WIDTH, gameRoom.gameData.player2.y, PLAYER_WIDTH, PLAYER_HEIGHT);
+    const player1position = gameRoom.gameData.player1.y / gameRoom.gameData.player1.canvasPosition.y * canvasSize.y;
+    context.fillRect(0, player1position, PLAYER_WIDTH, PLAYER_HEIGHT);
+    const player2position = gameRoom.gameData.player2.y / gameRoom.gameData.player2.canvasPosition.y * canvasSize.y;
+    context.fillRect(canvas.width - PLAYER_WIDTH, player2position, PLAYER_WIDTH, PLAYER_HEIGHT);
 
+    const ballPosition: Position = {
+      x: gameRoom.gameData.ball.x,
+      y: gameRoom.gameData.ball.y,
+    }
+    ballPosition.x = gameRoom.gameData.ball.x / canvasWidth * canvasSize.x
+    ballPosition.y = gameRoom.gameData.ball.y / canvasHeight * canvasSize.y
     // Draw ball
     context.beginPath();
     context.fillStyle = 'white';
-    context.arc(gameRoom.gameData.ball.x, gameRoom.gameData.ball.y, gameRoom.gameData.ball.rayon, 0, Math.PI * 2, false);
+    context.arc(ballPosition.x, ballPosition.y, gameRoom.gameData.ball.rayon, 0, Math.PI * 2, false);
     context.fill();
   }
 
@@ -102,7 +115,7 @@ const GameCanvas = (
 
   /** GAMEOVER */
   const handleGameover = () => {
-    upgradeStep()
+    // upgradeStep()
   }
     useEffect(() => {
       socket?.on(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, handleGameover);
@@ -114,18 +127,22 @@ const GameCanvas = (
 
   return (
     <div
-      style={{padding: '3rem', backgroundColor: 'lightgray'}}
+      className="w-full"
+      style={{backgroundColor: 'lightgray'}}
     >
       <p>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
       <p>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
       <br />
-      <canvas
-        onMouseMove={handleMouseMove}
-        ref={canvasRef}
-        id="canvas"
-        width={canvasWidth}
-        height={canvasHeight}
-      ></canvas>
+      <div className="flex justify-center">
+
+        <canvas
+          onMouseMove={handleMouseMove}
+          ref={canvasRef}
+          id="canvas"
+          width={canvasSize.x}
+          height={canvasSize.y}
+        ></canvas>
+      </div>
       <h2>DEV INFORMATIONS</h2>
       <h2>Coords: X: {coords.x} -- Y: {coords.y}</h2>
       <hr />
