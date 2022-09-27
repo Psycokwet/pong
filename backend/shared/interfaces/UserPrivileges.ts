@@ -1,5 +1,3 @@
-export enum Privileges {
-  MEMBER,
-  ADMIN,
-  OWNER,
+export default interface UserPrivileges {
+  roomId: number;
 }
