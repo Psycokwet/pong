@@ -11,7 +11,7 @@ function ChannelMenu ({ socket }:{
   const [joinChannel, setJoinChannel] = useState<boolean>(false)
   const [createChannel, setCreateChannel] = useState<boolean>(false)
   return (
-    <div className="flex flex-col sticky top-0 px-4 py-3 flex font-semibold text-xl text-slate-200 bg-slate-700/90 backdrop-blur-sm ring-1 ring-black/10">
+    <div className="flex flex-col sticky top-0 px-4 py-3 font-semibold text-xl text-slate-200 bg-slate-700/90 backdrop-blur-sm ring-1 ring-black/10">
       <div
         className={("flex flex-row"+ (addChannel ? ' cursor-pointer':''))}
         onClick={() => {
@@ -27,9 +27,9 @@ function ChannelMenu ({ socket }:{
         }
       </div>
       {addChannel ?
-        <div className="text-lg font-medium">
+        <div className="text-lg font-medium border-gray-500">
           <h1
-            className="px-8 cursor-pointer"
+            className="px-8 cursor-pointer border-inherit border-t-2 border-x-2"
             onClick={()=>{
               setJoinChannel(false);
               setCreateChannel(!createChannel);
@@ -40,7 +40,7 @@ function ChannelMenu ({ socket }:{
             <Create socket={socket}/> : <></>
           }
           <h1
-            className="px-8 cursor-pointer"
+            className={("px-8 cursor-pointer border-inherit border-t-2 border-x-2" + (joinChannel ? "" : " border-b-2"))}
             onClick={()=>{
               setJoinChannel(!joinChannel);
               setCreateChannel(false);

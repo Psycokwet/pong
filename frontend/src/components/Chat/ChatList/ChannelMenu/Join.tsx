@@ -48,7 +48,7 @@ function Join ({socket} : {
       handleClickByName()
   }
   return (
-    <div className="flex flex-col gap-1 text-base font-light">
+    <div className="flex flex-col gap-1 text-base font-light border-b-2 border-x-2 border-inherit">
       <input
         className="bg-slate-600"
         type="text"
