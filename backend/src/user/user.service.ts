@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -16,7 +18,6 @@ import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { PlayGameDto } from './play-game.dto';
-import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
@@ -53,8 +54,8 @@ export class UsersService {
 
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
-    private jwtService: JwtService,
     private localFilesService: LocalFilesService,
+    @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
   ) {}
 
