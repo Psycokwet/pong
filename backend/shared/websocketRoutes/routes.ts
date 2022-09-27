@@ -11,7 +11,6 @@ export const ROUTES_BASE = {
     /** DM CHANNELS LOBBY */
     JOIN_DM_CHANNEL_LOBBY_REQUEST: 'joinDMChannelLobbyRequest',
     LIST_ALL_DM_CHANNELS: 'listAllDMChannels',
-    NEW_DM_CHANNEL_CREATED: 'newDMChannelCreated',
     /** CREATE CHANNEL */
     CREATE_CHANNEL_REQUEST: 'createChannelRequest',
     CONFIRM_CHANNEL_CREATION: 'confirmChannelCreation',
