@@ -259,67 +259,14 @@ export class ChatService {
   }
   /** END ChatRoomConnectedUsers methods */
 
-  async setAdmin(userId: number, data: ActionOnUser) {
-    const room = await this.getRoomWithRelations(
-      { channelName: data.channelName },
-      { owner: true, admins: true },
-    );
-    const verifyOwner = await this.userService.getById(userId);
-    const futureAdmin = await this.userService.getById(data.userId);
-
-    if (!room) {
-      throw new BadRequestException('Channel does not exist');
-    }
-
-    if (!verifyOwner) {
-      throw new BadRequestException('Owner not found');
-    }
-
-    if (room.owner.id !== verifyOwner.id) {
-      throw new ForbiddenException(
-        'You do not have the rights to set an admin',
-      );
-    }
-
-    if (room.owner.id === futureAdmin.id) {
-      throw new BadRequestException('You are already an admin');
-    }
-
-    room.admins = [...room.admins, futureAdmin];
+  async setAdmin(room: Room, newAdmin: User) {
+    room.admins = [...room.admins, newAdmin];
 
     await room.save();
   }
 
-  async unsetAdmin(userId: number, data: ActionOnUser) {
-    const room = await this.getRoomWithRelations(
-      { channelName: data.channelName },
-      { owner: true, admins: true },
-    );
-
-    const verifyOwner = await this.userService.getById(userId);
-    const firedAdmin = await this.userService.getById(data.userId);
-
-    if (!room) {
-      throw new BadRequestException('Channel does not exist');
-    }
-
-    if (!verifyOwner) {
-      throw new BadRequestException('Owner not found');
-    }
-
-    if (room.owner.id !== verifyOwner.id) {
-      throw new ForbiddenException(
-        'You do not have the rights to set an admin',
-      );
-    }
-
-    if (room.owner.id === firedAdmin.id) {
-      throw new BadRequestException('An owner has to be an admin');
-    }
-
-    room.admins = room.admins.filter(
-      (admin: User) => firedAdmin.id !== admin.id,
-    );
+  async unsetAdmin(room: Room, oldAdmin: User) {
+    room.admins = room.admins.filter((admin: User) => oldAdmin.id !== admin.id);
 
     await room.save();
   }
