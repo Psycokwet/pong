@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   Logger,
   Post,
   Request,
@@ -22,6 +20,9 @@ import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { PlayGameDto } from './play-game.dto';
+import { UserInterface } from 'shared/interfaces/User';
+import { User } from './user.entity';
+import { GetUserProfileDto } from './get-user-profile.dto';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
@@ -29,50 +30,26 @@ export class UserController {
 
   constructor(private readonly usersService: UsersService) {}
 
+  @Get(ROUTES_BASE.USER.GET_USER_PROFILE)
+  @UseGuards(JwtAuthGuard)
+  async getUserProfile(@Body() dto: GetUserProfileDto) {
+    const profile = await this.usersService.findOneByPongUsername(
+      dto.pongUsername,
+    );
+
+    return await this.usersService.getUserProfile(profile);
+  }
+
   @Get(ROUTES_BASE.USER.GET_USER_RANK)
   @UseGuards(JwtAuthGuard)
   async getUserRank(@Request() req) {
-    const user_rank = await this.usersService.getUserRank(req.user.login42);
-
-    return user_rank;
+    return await this.usersService.getUserRank(req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_USER_HISTORY)
   @UseGuards(JwtAuthGuard)
   async getUserHistory(@Request() req) {
-    const userHistory = await this.usersService.getUserHistory(
-      req.user.login42,
-    );
-
-    if (!userHistory) return {};
-
-    /*  Manipulating userHistory array so we get exactly what we want.
-        The sort ensures the latest games are returned first. */
-
-    const nbGames = userHistory.games.length;
-    const nbWins = userHistory.games.filter((game) => {
-      return game.winner == userHistory.user.id;
-    }).length;
-    return {
-      nbGames,
-      nbWins,
-      games: userHistory.games
-        .map((game) => {
-          return {
-            time: game.createdAt.toString().slice(4, 24),
-            opponent:
-              game.player1.id === userHistory.user.id
-                ? this.usersService.getFrontUsername(game.player2)
-                : this.usersService.getFrontUsername(game.player1),
-            winner:
-              game.winner === game.player1.id
-                ? this.usersService.getFrontUsername(game.player1)
-                : this.usersService.getFrontUsername(game.player2),
-            id: game.id,
-          };
-        })
-        .sort((a, b) => b.id - a.id),
-    };
+    return await this.usersService.getUserHistory(req.user);
   }
 
   @Post(ROUTES_BASE.USER.PLAY_GAME)
@@ -83,20 +60,17 @@ export class UserController {
 
   @Post(ROUTES_BASE.USER.ADD_FRIEND)
   @UseGuards(JwtAuthGuard)
-  async addFriend(@Body() friend: AddFriendDto, @Request() req) {
-    await this.usersService.addFriend(friend, req.user.login42);
+  async addFriend(@Body() dto: AddFriendDto, @Request() req) {
+    const friend = await this.usersService.findOneByPongUsername(
+      dto.friend_to_add,
+    );
+    await this.usersService.addFriend(friend, req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)
   @UseGuards(JwtAuthGuard)
   async getFriendsList(@Request() req) {
-    const friendList = await this.usersService.getFriendsList(req.user.login42);
-
-    return friendList.map((friend) => {
-      return {
-        login42: this.usersService.getFrontUsername(friend.user),
-      };
-    });
+    return await this.usersService.getFriendsList(req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_LOGIN42)
@@ -117,7 +91,10 @@ export class UserController {
     @Body() newPongUsername: pongUsernameDto,
     @Request() req,
   ) {
-    await this.usersService.setPongUsername(newPongUsername, req.user.login42);
+    return await this.usersService.setPongUsername(
+      newPongUsername,
+      req.user.login42,
+    );
   }
   @Get(ROUTES_BASE.USER.GET_PICTURE)
   @UseGuards(JwtAuthGuard)

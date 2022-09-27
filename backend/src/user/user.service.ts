@@ -18,6 +18,7 @@ import { pongUsernameDto } from './set-pongusername.dto';
 import { PlayGameDto } from './play-game.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
+import { UserInterface } from 'shared/interfaces/User';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -56,6 +57,16 @@ export class UsersService {
       login42: login42,
     });
     if (!user) throw new BadRequestException({ error: 'User not found' });
+    return user;
+  }
+
+  async findOneByPongUsername(pongUsername: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({
+      pongUsername: pongUsername,
+    });
+
+    if (!user) throw new BadRequestException({ error: 'User not found' });
+
     return user;
   }
 
@@ -138,9 +149,18 @@ export class UsersService {
     });
   }
 
-  async getUserRank(login42: string) {
-    const user = await this.findOne(login42);
+  async getUserProfile(profile: User) {
+    const profileElements = [
+      { pongUsername: profile.pongUsername },
+      { userRank: await this.getUserRank(profile) },
+      { userHistory: await this.getUserHistory(profile) },
+      { profilePicture: await this.getPicture(profile) },
+    ];
 
+    return profileElements;
+  }
+
+  async getUserRank(user: User) {
     const level = Math.log(user.xp);
 
     /* Keeping the below 2 comments to remind myself of queries */
@@ -164,22 +184,7 @@ export class UsersService {
     return { level, userRank };
   }
 
-  async getUserHistory(login42: string) {
-    /*  Get calling user's object */
-    const user = await this.usersRepository.findOne({
-      where: { login42: login42 },
-    });
-
-    if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User not found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
+  async getUserHistory(user: User) {
     /*  Get a games object where player 1 and player 2 exist and the calling user
         is either one or the other (where: ...) */
     const games = await this.gameRepository.find({
@@ -190,9 +195,32 @@ export class UsersService {
       where: [{ player1_id: user.id }, { player2_id: user.id }],
     });
 
+    if (!games) return {};
+
+    const nbGames = games.length;
+    const nbWins = games.filter((game) => {
+      return game.winner == user.id;
+    }).length;
+
     return {
-      user,
-      games,
+      nbGames,
+      nbWins,
+      games: games
+        .map((game) => {
+          return {
+            time: game.createdAt.toString().slice(4, 24),
+            opponent:
+              game.player1.id === user.id
+                ? this.getFrontUsername(game.player2)
+                : this.getFrontUsername(game.player1),
+            winner:
+              game.winner === game.player1.id
+                ? this.getFrontUsername(game.player1)
+                : this.getFrontUsername(game.player2),
+            id: game.id,
+          };
+        })
+        .sort((a, b) => b.id - a.id),
     };
   }
 
@@ -240,14 +268,8 @@ export class UsersService {
       .execute();
   }
 
-  async addFriend(dto: AddFriendDto, login42: string) {
-    /* First we get the caller (person who is initiating the friend request) 
-    and friend in our db */
-    const caller = await this.findOne(login42);
-    const friend = await this.findOne(dto.friend_to_add);
-
-    /* Checking if the caller is adding himself (I think this should never 
-      happen on the front side) */
+  async addFriend(friend: User, caller: User) {
+    /* Checking if the caller is adding himself */
     if (caller.id === friend.id) {
       throw new BadRequestException({
         error: 'You cannot add yourself',
@@ -279,18 +301,25 @@ export class UsersService {
     await addFriend.save();
   }
 
-  async getFriendsList(login42: string) {
+  async getFriendsList(caller: User) {
     /* Same logic as getUserHistory */
-    const user = await this.findOne(login42);
-
-    const friendsList = await this.friendRepository.find({
+    const rawFriendsList = await this.friendRepository.find({
       relations: {
         user: true,
       },
-      where: { user_id: user.id },
+      where: { user_id: caller.id },
     });
 
-    return friendsList;
+    const orderedFriendsList: UserInterface[] = await rawFriendsList.map(
+      (friend) => {
+        return {
+          id: friend.user.id,
+          pongUsername: this.getFrontUsername(friend.user),
+        };
+      },
+    );
+
+    return orderedFriendsList;
   }
 
   async getPongUsername(login42: string) {
