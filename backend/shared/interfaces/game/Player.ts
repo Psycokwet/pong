@@ -5,5 +5,4 @@ export default interface Player {
   pongUsername: string;
   score: number;
   y: number;
-  canvasPosition: Position;
 }
