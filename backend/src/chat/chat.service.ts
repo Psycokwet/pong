@@ -236,18 +236,18 @@ export class ChatService {
 
   async getUserFromSocket(socket: Socket) {
     const cookie = socket.handshake.headers.cookie;
-
-    if (cookie !== undefined) {
+    console.log(socket.handshake.headers, cookie)
+    if (cookie) {
       const { Authentication: authenticationToken } = parse(cookie);
       const user = await this.authService.getUserFromAuthenticationToken(
         authenticationToken,
-        );
+      );
       if (!user) {
         throw new WsException('Invalid credentials.');
       }
       return user;
     }
-}
+  }
 
   getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
     return ChatService.userWebsockets.find(
