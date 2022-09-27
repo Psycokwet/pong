@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Api } from "../../api/api";
 
 export const PictureGetter = () => {
-  const [userPicture, setUserPicture] = useState<string | null>(null);
+  const [userPicture, setUserPicture] = useState<string>("");
 
   const api = new Api();
 
