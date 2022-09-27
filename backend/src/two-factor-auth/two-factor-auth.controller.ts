@@ -13,6 +13,8 @@ import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import JwtRefreshGuard from 'src/auth/jwtRefresh.guard';
 import RequestWithUser from 'src/auth/requestWithUser.interface';
+import { FortytwoService } from 'src/fortytwo/fortytwo.service';
+import { User } from 'src/user/user.entity';
 import { UsersService } from 'src/user/user.service';
 import { TwoFactorAuthService } from './two-factor-auth.service';
 
@@ -33,7 +35,11 @@ export class TwoFactorAuthController {
     if (!isValid) {
       throw new UnauthorizedException('Wrong authentication code');
     }
-    await this.userService.set2fa(req.user.login42, true);
+
+    req.res.setHeader(
+      'Set-Cookie',
+      await this.userService.set2fa(req.user.login42, true),
+    );
   }
   @Put(ROUTES_BASE.AUTH.TURN_OFF_2FA)
   @UseGuards(JwtRefreshGuard)
@@ -52,7 +58,7 @@ export class TwoFactorAuthController {
     @Res() response: Response,
     @Req() request: RequestWithUser,
   ) {
-    this.userService.set2fa(request.user.login42, false); //We change the secret, previous 2fa ain't valid anymore
+    this.userService.set2faFromLogin42(request.user.login42, false); //We change the secret, previous 2fa ain't valid anymore
     const { otpauthUrl } =
       await this.twoFactorAuthService.generateTwoFactorAuthenticationSecret(
         request.user,

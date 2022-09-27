@@ -15,6 +15,7 @@ import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
 import { GameModule } from './game/game.module';
 import { FortytwoService } from './fortytwo/fortytwo.service';
 import { FortyTwoModule } from './fortytwo/fortytwo.module';
+import { UsersModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { FortyTwoModule } from './fortytwo/fortytwo.module';
       }),
     }),
     FortyTwoModule,
+    UsersModule,
     AuthModule,
     ChatModule,
     GameModule,

@@ -31,4 +31,6 @@ export class TwoFactorAuthService {
       secret: user.twoFactorAuthenticationSecret,
     });
   }
+
+  public async updateCookiesWithValid2FA(userId: number, user: User) {}
 }
