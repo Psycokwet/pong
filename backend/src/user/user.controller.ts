@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   Logger,
   Post,
   Request,
@@ -22,6 +20,7 @@ import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { PlayGameDto } from './play-game.dto';
+import { TwoFactorAuthGuard } from 'src/two-factor-auth/two-factor-auth.guard';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
@@ -30,7 +29,7 @@ export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get(ROUTES_BASE.USER.GET_USER_RANK)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getUserRank(@Request() req) {
     const user_rank = await this.usersService.getUserRank(req.user.login42);
 
@@ -38,7 +37,7 @@ export class UserController {
   }
 
   @Get(ROUTES_BASE.USER.GET_USER_HISTORY)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getUserHistory(@Request() req) {
     const userHistory = await this.usersService.getUserHistory(
       req.user.login42,
@@ -76,19 +75,19 @@ export class UserController {
   }
 
   @Post(ROUTES_BASE.USER.PLAY_GAME)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async playGame(@Body() dto: PlayGameDto) {
     await this.usersService.playGame(dto);
   }
 
   @Post(ROUTES_BASE.USER.ADD_FRIEND)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async addFriend(@Body() friend: AddFriendDto, @Request() req) {
     await this.usersService.addFriend(friend, req.user.login42);
   }
 
   @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getFriendsList(@Request() req) {
     const friendList = await this.usersService.getFriendsList(req.user.login42);
 
@@ -100,19 +99,19 @@ export class UserController {
   }
 
   @Get(ROUTES_BASE.USER.GET_LOGIN42)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getLogin42(@Request() req) {
     return await this.usersService.getLogin42(req.user.login42);
   }
 
   @Get(ROUTES_BASE.USER.GET_NICKNAME)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getPongUsername(@Request() req) {
     return await this.usersService.getPongUsername(req.user.login42);
   }
 
   @Post(ROUTES_BASE.USER.SET_NICKNAME)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async setPongUsername(
     @Body() newPongUsername: pongUsernameDto,
     @Request() req,
@@ -120,7 +119,7 @@ export class UserController {
     await this.usersService.setPongUsername(newPongUsername, req.user.login42);
   }
   @Get(ROUTES_BASE.USER.GET_PICTURE)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getPicture(@Request() req): Promise<StreamableFile> {
     const picture_path = await this.usersService.getPicture(req.user);
 
@@ -130,7 +129,7 @@ export class UserController {
   }
 
   @Post(ROUTES_BASE.USER.SET_PICTURE)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   @UseInterceptors(
     LocalFilesInterceptor({
       fieldName: 'file',
