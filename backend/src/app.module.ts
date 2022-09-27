@@ -14,6 +14,7 @@ import { Game } from './game/game.entity';
 import LocalFile from './localFiles/localFile.entity';
 import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
 import { GameModule } from './game/game.module';
+import { FortytwoService } from './fortytwo/fortytwo.service';
 
 @Module({
   imports: [
@@ -45,6 +46,6 @@ import { GameModule } from './game/game.module';
     TwoFactorAuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, FortytwoService],
 })
 export class AppModule {}
