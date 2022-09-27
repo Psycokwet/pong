@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -12,15 +13,16 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
 import { UsersService } from 'src/user/user.service';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
-import { User } from 'src/user/user.entity';
 import CreateChannel from '../../shared/interfaces/CreateChannel';
 import SearchChannel from '../../shared/interfaces/SearchChannel';
+import { User } from 'shared/interfaces/User';
 
 import * as bcrypt from 'bcrypt';
 import JoinChannel from 'shared/interfaces/JoinChannel';
@@ -54,18 +56,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
   async handleConnection(@ConnectedSocket() client: Socket) {
-    const user = await this.chatService.getUserFromSocket(client);
+    try {
+      const user = await this.chatService.getUserFromSocket(client);
 
-    const isRegistered = ChatService.userWebsockets.find(
-      (element) => element.userId === user.id,
-    );
-
-    if (!isRegistered) {
-      const newWebsocket = { userId: user.id, socketId: client.id };
-      ChatService.userWebsockets = [
-        ...ChatService.userWebsockets,
-        newWebsocket,
-      ];
+      if (!user) return;
+      const isRegistered = ChatService.userWebsockets.find(
+        (element) => element.userId === user.id,
+      );
+      
+      if (!isRegistered) {
+        const newWebsocket = { userId: user.id, socketId: client.id };
+        ChatService.userWebsockets = [
+          ...ChatService.userWebsockets,
+          newWebsocket,
+        ];
+      }
+    } catch (e) {
+      console.error(e.message)
     }
   }
 
@@ -173,14 +180,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       channelName: newRoom.channelName,
     });
 
-    // if (newRoom.isChannelPrivate === false) {
-    //   this.server
-    //     .in(this.channelLobby)
-    //     .emit(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, {
-    //       channelId: newRoom.id,
-    //       channelName: newRoom.channelName,
-    //     });
-    // }
+    if (newRoom.isChannelPrivate === false) {
+      this.server
+        .in(this.channelLobby)
+        .emit(ROUTES_BASE.CHAT.NEW_CHANNEL_CREATED, {
+          channelId: newRoom.id,
+          channelName: newRoom.channelName,
+        });
+    }
     this.joinAttachedChannelLobby(client, payload);
   }
 
@@ -344,7 +351,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
   async getAttachedUsersInChannel(@MessageBody() roomId: number) {
-    console.log(roomId);
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
 
     const attachedUsers = await this.chatService.getAttachedUsersInChannel(
@@ -396,13 +402,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: ActionOnUser,
     @UserPayload() payload: any,
   ) {
-    const newAdmin = this.userService.getById(data.userId);
-    if (!newAdmin) {
-      throw new BadRequestException({
-        error: 'The user you want to set as admin does not exist',
-      });
-    }
-    this.chatService.setAdmin(payload.userId, data);
+    if (data.userIdToUpdate === payload.userId)
+      throw new BadRequestException('You cannot update yourself');
+
+    const newAdmin = await this.userService.getById(data.userIdToUpdate);
+
+    if (!newAdmin)
+      throw new BadRequestException(
+        'The user you want to set as admin does not exist',
+      );
+
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      { owner: true, admins: true },
+    );
+
+    if (!room) throw new BadRequestException('Channel does not exist');
+
+    if (room.owner.id !== payload.userId)
+      throw new ForbiddenException(
+        'You do not have the rights to set an admin',
+      );
+
+    this.chatService.setAdmin(room, newAdmin);
+
+    const promotedUser: User = {
+      id: newAdmin.id,
+      pongUsername: newAdmin.pongUsername,
+    };
+    this.server
+      .in(room.roomName)
+      .emit(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, promotedUser);
   }
 
   @UseGuards(JwtWsGuard)
@@ -411,13 +441,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: ActionOnUser,
     @UserPayload() payload: any,
   ) {
-    const oldAdmin = this.userService.getById(data.userId);
-    if (!oldAdmin) {
-      throw new BadRequestException({
-        error: 'The user you want to set as admin does not exist',
-      });
-    }
-    this.chatService.unsetAdmin(payload.userId, data);
+    if (data.userIdToUpdate === payload.userId)
+      throw new BadRequestException('You cannot update yourself');
+
+    const oldAdmin = await this.userService.getById(data.userIdToUpdate);
+
+    if (!oldAdmin)
+      throw new BadRequestException(
+        'The user you want to unset as admin does not exist',
+      );
+
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      { owner: true, admins: true },
+    );
+    if (!room) throw new BadRequestException('Channel does not exist');
+
+    if (room.owner.id !== payload.userId)
+      throw new ForbiddenException(
+        'You do not have the rights to unset an admin',
+      );
+
+    this.chatService.unsetAdmin(room, oldAdmin);
+
+    const demotedUser: User = {
+      id: oldAdmin.id,
+      pongUsername: oldAdmin.pongUsername,
+    };
+
+    this.server
+      .in(data.channelName)
+      .emit(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, demotedUser);
   }
 
   @UseGuards(JwtWsGuard)
