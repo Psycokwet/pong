@@ -16,7 +16,6 @@ import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { PlayGameDto } from './play-game.dto';
-import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 
 async function crypt(password: string): Promise<string> {
@@ -44,7 +43,6 @@ export class UsersService {
 
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
-    private jwtService: JwtService,
     private localFilesService: LocalFilesService,
   ) {}
 
@@ -303,10 +301,14 @@ export class UsersService {
 
     return user.is_2fa_activated;
   }
-  async set2fa(login42: string, value: boolean) {
+  async set2faFromLogin42(login42: string, value: boolean) {
     const user = await this.findOne(login42);
+    await this.usersRepository.update(user.id, {
+      is_2fa_activated: value,
+    });
+  }
 
-    /* We use TypeORM's update function to update our entity */
+  async set2fa(user: User, value: boolean) {
     await this.usersRepository.update(user.id, {
       is_2fa_activated: value,
     });
