@@ -27,6 +27,7 @@ import { User } from 'shared/interfaces/User';
 import * as bcrypt from 'bcrypt';
 import JoinChannel from 'shared/interfaces/JoinChannel';
 import ChannelData from 'shared/interfaces/ChannelData';
+import UserPrivileges from 'shared/interfaces/UserPrivileges';
 import Message from 'shared/interfaces/Message';
 import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
@@ -63,7 +64,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const isRegistered = ChatService.userWebsockets.find(
         (element) => element.userId === user.id,
       );
-      
+
       if (!isRegistered) {
         const newWebsocket = { userId: user.id, socketId: client.id };
         ChatService.userWebsockets = [
@@ -72,7 +73,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         ];
       }
     } catch (e) {
-      console.error(e.message)
+      console.error(e.message);
     }
   }
 
@@ -350,7 +351,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /** GET ATTACHED USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
-  async getAttachedUsersInChannel(@MessageBody() roomId: number) {
+  async attachedUsersList(@MessageBody() roomId: number) {
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
 
     const attachedUsers = await this.chatService.getAttachedUsersInChannel(
@@ -477,7 +478,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
   async getUserPrivileges(
-    @MessageBody() data: JoinChannel,
+    @MessageBody() data: UserPrivileges,
     @UserPayload() payload: any,
   ) {
     const privilege = await this.chatService.getUserPrivileges(

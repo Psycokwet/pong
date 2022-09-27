@@ -13,7 +13,7 @@ import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
-import { Privileges } from 'shared/interfaces/UserPrivileges';
+import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
