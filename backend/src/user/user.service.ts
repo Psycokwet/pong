@@ -18,6 +18,12 @@ import { pongUsernameDto } from './set-pongusername.dto';
 import { PlayGameDto } from './play-game.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
+import { Socket } from 'socket.io';
+import { AuthService } from 'src/auth/auth.service';
+import { parse } from 'cookie';
+import { WsException } from '@nestjs/websockets';
+import { UserGateway } from './user.gateway';
+import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -49,6 +55,7 @@ export class UsersService {
     private friendRepository: Repository<Friend>,
     private jwtService: JwtService,
     private localFilesService: LocalFilesService,
+    private readonly authService: AuthService,
   ) {}
 
   async findOne(login42: string): Promise<User> {
@@ -345,5 +352,25 @@ export class UsersService {
     await this.usersRepository.update(user.id, {
       pictureId: picture.id,
     });
+  }
+
+  async getUserFromSocket(socket: Socket) {
+    const cookie = socket.handshake.headers.cookie;
+    if (cookie) {
+      const { Authentication: authenticationToken } = parse(cookie);
+      const user = await this.authService.getUserFromAuthenticationToken(
+        authenticationToken,
+      );
+      if (!user) {
+        throw new WsException('Invalid credentials.');
+      }
+      return user;
+    }
+  }
+
+  getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
+    return UserGateway.userWebsockets.find(
+      (receiver) => receiver.userId === receiverId,
+    );
   }
 }
