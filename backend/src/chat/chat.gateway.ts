@@ -13,6 +13,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
@@ -55,18 +56,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
   async handleConnection(@ConnectedSocket() client: Socket) {
-    const user = await this.chatService.getUserFromSocket(client);
+    try {
+      const user = await this.chatService.getUserFromSocket(client);
 
-    const isRegistered = ChatService.userWebsockets.find(
-      (element) => element.userId === user.id,
-    );
-
-    if (!isRegistered) {
-      const newWebsocket = { userId: user.id, socketId: client.id };
-      ChatService.userWebsockets = [
-        ...ChatService.userWebsockets,
-        newWebsocket,
-      ];
+      if (!user) return;
+      const isRegistered = ChatService.userWebsockets.find(
+        (element) => element.userId === user.id,
+      );
+      
+      if (!isRegistered) {
+        const newWebsocket = { userId: user.id, socketId: client.id };
+        ChatService.userWebsockets = [
+          ...ChatService.userWebsockets,
+          newWebsocket,
+        ];
+      }
+    } catch (e) {
+      console.error(e.message)
     }
   }
 
