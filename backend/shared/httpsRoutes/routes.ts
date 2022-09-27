@@ -11,6 +11,7 @@ export const ROUTES_BASE = {
     GET_PONG_USERNAME: 'get_pong_username',
     GET_USER_RANK: 'get_user_rank',
     GET_USER_HISTORY: 'get_user_history',
+    GET_USER_PROFILE: 'get_user_profile',
     PLAY_GAME: 'play_game',
   },
   AUTH: {
