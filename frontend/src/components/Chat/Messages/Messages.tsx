@@ -7,8 +7,8 @@ const Messages = ({messages}: {messages:Message[]}) => {
   const containerRef = useRef();
   const refAssignCallback = (ref: any) => {
     if (!containerRef.current && ref) {
+      ref.scrollTop = ref.scrollHeight - ref.getBoundingClientRect().height;
       containerRef.current = ref;
-      containerRef.current.scrollTop = containerRef.current.scrollHeight - containerRef.current.getBoundingClientRect().height;
     } else {
       //otherwise just assign/unassigned
       containerRef.current = ref;
