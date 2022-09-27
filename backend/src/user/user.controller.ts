@@ -22,6 +22,8 @@ import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { PlayGameDto } from './play-game.dto';
+import { UserInterface } from 'shared/interfaces/User';
+import { User } from './user.entity';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
@@ -83,20 +85,17 @@ export class UserController {
 
   @Post(ROUTES_BASE.USER.ADD_FRIEND)
   @UseGuards(JwtAuthGuard)
-  async addFriend(@Body() friend: AddFriendDto, @Request() req) {
-    await this.usersService.addFriend(friend, req.user.login42);
+  async addFriend(@Body() dto: AddFriendDto, @Request() req) {
+    const friend = await this.usersService.findOneByPongUsername(
+      dto.friend_to_add,
+    );
+    await this.usersService.addFriend(friend, req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)
   @UseGuards(JwtAuthGuard)
   async getFriendsList(@Request() req) {
-    const friendList = await this.usersService.getFriendsList(req.user.login42);
-
-    return friendList.map((friend) => {
-      return {
-        login42: this.usersService.getFrontUsername(friend.user),
-      };
-    });
+    return await this.usersService.getFriendsList(req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_LOGIN42)
