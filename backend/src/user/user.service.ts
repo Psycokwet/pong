@@ -19,9 +19,6 @@ import { PlayGameDto } from './play-game.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 
-// This should be a real class/interface representing a user entity
-export type UserLocal = { userId: number; login42: string; password: string };
-
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
 }
