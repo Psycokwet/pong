@@ -150,9 +150,7 @@ export class UsersService {
     });
   }
 
-  async getUserRank(@Request() req) {
-    const user = await this.findOne(req.user);
-
+  async getUserRank(user: User) {
     const level = Math.log(user.xp);
 
     /* Keeping the below 2 comments to remind myself of queries */
@@ -176,22 +174,7 @@ export class UsersService {
     return { level, userRank };
   }
 
-  async getUserHistory(login42: string) {
-    /*  Get calling user's object */
-    const user = await this.usersRepository.findOne({
-      where: { login42: login42 },
-    });
-
-    if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User not found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
+  async getUserHistory(user: User) {
     /*  Get a games object where player 1 and player 2 exist and the calling user
         is either one or the other (where: ...) */
     const games = await this.gameRepository.find({
@@ -202,9 +185,32 @@ export class UsersService {
       where: [{ player1_id: user.id }, { player2_id: user.id }],
     });
 
+    if (!games) return {};
+
+    const nbGames = games.length;
+    const nbWins = games.filter((game) => {
+      return game.winner == user.id;
+    }).length;
+
     return {
-      user,
-      games,
+      nbGames,
+      nbWins,
+      games: games
+        .map((game) => {
+          return {
+            time: game.createdAt.toString().slice(4, 24),
+            opponent:
+              game.player1.id === user.id
+                ? this.getFrontUsername(game.player2)
+                : this.getFrontUsername(game.player1),
+            winner:
+              game.winner === game.player1.id
+                ? this.getFrontUsername(game.player1)
+                : this.getFrontUsername(game.player2),
+            id: game.id,
+          };
+        })
+        .sort((a, b) => b.id - a.id),
     };
   }
 
