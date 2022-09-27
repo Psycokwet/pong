@@ -106,10 +106,10 @@ const SignInPage = () => {
       </form>
 
       {/* Testing Zone - to delete later - don't forget to scroll down */}
-      {/* <div>
+      <div>
         <PictureGetter />
-        <NickNameGetter />
-      </div> */}
+        {/* <NickNameGetter /> */}
+      </div>
     </div>
   );
 };

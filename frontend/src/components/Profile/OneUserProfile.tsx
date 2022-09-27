@@ -67,7 +67,6 @@ const OneUserProfile: React.FC<OneUserProfileProps> = ({ nickname }) => {
 
       <div className="col-span-10" />
 
-      <PictureForm></PictureForm>
     </>
   );
 };

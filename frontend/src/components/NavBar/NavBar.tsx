@@ -23,11 +23,11 @@ const api = new Api();
 /***************** Component NavBar ******************************************/
 const NavBar: React.FC<DisconnectionButtonProps> = ({ setDisconnected }) => {
 
-  const [connected_user, setConnectedUser] = useState("");
+  const [login42, setLogin42] = useState("");
   api.get_login42().then((res: Response) => {
     if ((res.status / 200 >= 1 && res.status / 200 <= 2))
     res.json().then((content) => {
-      setConnectedUser(content.login42)
+      setLogin42(content.login42)
     });
     else
     console.log("get_login42 is NOT ok. Response is: ", res);
@@ -51,8 +51,8 @@ const NavBar: React.FC<DisconnectionButtonProps> = ({ setDisconnected }) => {
       pageIcon: <FaComments size="28" />,
     },
     {
-      url: `/profile/${connected_user}`,
-      pageName: `profile ${connected_user}`,
+      url: `/profile/${login42}`,
+      pageName: `profile ${login42}`,
       pageIcon: <FaUser size="26" />,
     },
     {

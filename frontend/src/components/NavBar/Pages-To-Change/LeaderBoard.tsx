@@ -43,11 +43,15 @@ const LeaderBoard = () => {
 
   const sendRequestHisRank = () => {
     api.get_user_rank().then((res: Response) => {
-      console.log("get_user_rank", res);
-      res.json().then((content) => {
-        console.log("get_user_rank", content);
-      });
+      console.log("get_user_rank is OK, here's the Response", res);
+      if ((res.status / 200 >= 1 && res.status / 200 <= 2))
+        res.json().then((content) => {
+          console.log("get_user_rank is OK, here's the content", content);
+          console.log(`level is: ${content.level}`)
+          console.log(`rank is: ${content.userRank.rank}`)
+        });
     });
+
     api.get_user_history().then((res: Response) => {
       console.log("get_user_history", res);
       res.json().then((content) => {
