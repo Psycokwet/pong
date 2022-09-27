@@ -51,8 +51,12 @@ export class FortyTwoController {
 
     const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
       userFromDb.id,
+      false,
     );
-    const refreshToken = this.authService.getJwtRefreshToken(userFromDb.id);
+    const refreshToken = this.authService.getJwtRefreshToken(
+      userFromDb.id,
+      false,
+    );
     const refreshTokenCookie =
       this.authService.getCookieWithJwtRefreshToken(refreshToken);
 
@@ -74,6 +78,7 @@ export class FortyTwoController {
   refresh(@Req() request: RequestWithUser) {
     const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
       request.user.id,
+      false,
     );
 
     request.res.setHeader('Set-Cookie', accessTokenCookie);
