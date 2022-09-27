@@ -22,12 +22,23 @@ import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { PlayGameDto } from './play-game.dto';
 import { UserInterface } from 'shared/interfaces/User';
 import { User } from './user.entity';
+import { GetUserProfileDto } from './get-user-profile.dto';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
   constructor(private readonly usersService: UsersService) {}
+
+  @Get(ROUTES_BASE.USER.GET_USER_PROFILE)
+  @UseGuards(JwtAuthGuard)
+  async getUserProfile(@Body() dto: GetUserProfileDto) {
+    const profile = await this.usersService.findOneByPongUsername(
+      dto.pongUsername,
+    );
+
+    return await this.usersService.getUserProfile(profile);
+  }
 
   @Get(ROUTES_BASE.USER.GET_USER_RANK)
   @UseGuards(JwtAuthGuard)
@@ -81,7 +92,7 @@ export class UserController {
     @Request() req,
   ) {
     return await this.usersService.setPongUsername(
-      req.user.pongUsername,
+      newPongUsername,
       req.user.login42,
     );
   }
