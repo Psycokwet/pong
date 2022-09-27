@@ -33,7 +33,6 @@ const GameCanvas = (
   useEffect(() => {
     // 👇️ get global mouse coordinates
     const handleWindowMouseMove = event => {
-      console.log(canvasSize)
       setGlobalCoords({
         x: event.screenX,
         y: event.screenY,
@@ -56,8 +55,8 @@ const GameCanvas = (
     const mouseLocation = event.clientY - canvasLocation.y;
 
     socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
-      canvasLocation: canvasLocation,
-      mouseLocation: mouseLocation,
+      canvasLocation: canvasLocation.height / canvasSize.y * canvasHeight,
+      mouseLocation: mouseLocation / canvasSize.y * canvasHeight,
     });
   };
 
@@ -66,8 +65,6 @@ const GameCanvas = (
 
   /** GAME LOOP */
   const draw = (canvas, gameRoom: GameRoom) => {
-
-    // console.log(canvasSize)
     const context = canvas.getContext('2d')
     // Draw field
     context.fillStyle = 'black';
@@ -82,10 +79,10 @@ const GameCanvas = (
 
     // Draw players
     context.fillStyle = 'white';
-    const player1position = gameRoom.gameData.player1.y / gameRoom.gameData.player1.canvasPosition.y * canvasSize.y;
-    context.fillRect(0, player1position, PLAYER_WIDTH, PLAYER_HEIGHT);
-    const player2position = gameRoom.gameData.player2.y / gameRoom.gameData.player2.canvasPosition.y * canvasSize.y;
-    context.fillRect(canvas.width - PLAYER_WIDTH, player2position, PLAYER_WIDTH, PLAYER_HEIGHT);
+    const player1position = gameRoom.gameData.player1.y * canvasSize.y / canvasHeight;
+    context.fillRect(0, player1position, PLAYER_WIDTH, PLAYER_HEIGHT * canvasSize.y / canvasHeight);
+    const player2position = gameRoom.gameData.player2.y * canvasSize.y / canvasHeight;
+    context.fillRect(canvas.width - PLAYER_WIDTH, player2position, PLAYER_WIDTH, PLAYER_HEIGHT * canvasSize.y / canvasHeight);
 
     const ballPosition: Position = {
       x: gameRoom.gameData.ball.x,
@@ -115,7 +112,7 @@ const GameCanvas = (
 
   /** GAMEOVER */
   const handleGameover = () => {
-    // upgradeStep()
+    upgradeStep()
   }
     useEffect(() => {
       socket?.on(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, handleGameover);

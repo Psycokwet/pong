@@ -16,14 +16,12 @@ export class GameService {
       pongUsername: '',
       score: 0,
       y: 0,
-      canvasPosition: {x: 0, y: 0},
     },
     player2: {
       userId: 0,
       pongUsername: '',
       score: 0,
       y: 0,
-      canvasPosition: {x: 0, y: 0},
     },
     ball: {
       x: 0,
@@ -44,8 +42,9 @@ export class GameService {
   private PLAYER_WIDTH = 5;
   private MAX_SPEED = 10;
   private DEFAULT_RAYON = 5;
+  private ENDGAME_POINT = 10;
 
-  createGame(user: User, canvasPosition: Position): GameRoom {
+  createGame(user: User): GameRoom {
     const newGameRoom: GameRoom = {
       roomName: `game:${user.login42}:${uuidv4()}`,
       started: false,
@@ -53,8 +52,6 @@ export class GameService {
     }
     newGameRoom.gameData.player1.userId = user.id;
     newGameRoom.gameData.player1.pongUsername = this.userService.getFrontUsername(user);
-    newGameRoom.gameData.player1.canvasPosition.y = canvasPosition.y;
-    newGameRoom.gameData.player1.canvasPosition.x = canvasPosition.x;
 
 
     GameService.gameRoomList = [...GameService.gameRoomList, newGameRoom];
@@ -62,17 +59,15 @@ export class GameService {
     return newGameRoom;
   }
 
-  matchMaking(user: User, canvasPosition: Position): GameRoom {
+  matchMaking(user: User): GameRoom {
     const gamesToLaunch:GameRoom[] = GameService.gameRoomList.filter(gameRoom => !gameRoom.started);
 
     const gameToLaunch = gamesToLaunch.length ? gamesToLaunch[0] : undefined;
 
-    if (!gameToLaunch) return this.createGame(user, canvasPosition);
+    if (!gameToLaunch) return this.createGame(user);
 
     gameToLaunch.gameData.player2.userId = user.id;
     gameToLaunch.gameData.player2.pongUsername = this.userService.getFrontUsername(user);
-    gameToLaunch.gameData.player2.canvasPosition.y = canvasPosition.y;
-    gameToLaunch.gameData.player2.canvasPosition.x = canvasPosition.x;
 
     gameToLaunch.started = true;
     gameToLaunch.gameData = this.gameStart(gameToLaunch.gameData);
@@ -81,8 +76,8 @@ export class GameService {
   }
 
   gameStart(gameData: GameData): GameData {
-    gameData.player1.y = gameData.player1.canvasPosition.y / 2 - this.PLAYER_HEIGHT / 2;
-    gameData.player2.y = gameData.player2.canvasPosition.y / 2 - this.PLAYER_HEIGHT / 2;
+    gameData.player1.y = this.CANVAS_HEIGHT / 2 - this.PLAYER_HEIGHT / 2;
+    gameData.player2.y = this.CANVAS_HEIGHT / 2 - this.PLAYER_HEIGHT / 2;
     gameData.ball.x = this.CANVAS_WIDTH / 2;
     gameData.ball.y = this.CANVAS_HEIGHT / 2;
     gameData.ball.rayon = this.DEFAULT_RAYON;
@@ -121,8 +116,8 @@ export class GameService {
     
     if (playerInput.mouseLocation < this.PLAYER_HEIGHT / 2) {
         game[playerToUpdate].y = 0;
-    } else if (playerInput.mouseLocation > playerInput.canvasLocation.height - this.PLAYER_HEIGHT / 2) {
-        game[playerToUpdate].y = playerInput.canvasLocation.height - this.PLAYER_HEIGHT;
+    } else if (playerInput.mouseLocation > playerInput.canvasLocation - this.PLAYER_HEIGHT / 2) {
+        game[playerToUpdate].y = playerInput.canvasLocation - this.PLAYER_HEIGHT;
     } else {
         game[playerToUpdate].y = playerInput.mouseLocation - this.PLAYER_HEIGHT / 2;
     }
@@ -150,11 +145,7 @@ export class GameService {
 
   private collide(player1, newGame) {
     // The player does not hit the ball
-    if (
-      newGame.ball.y < (player1.y / player1.canvasPosition.y * this.CANVAS_HEIGHT) 
-      ||
-      newGame.ball.y >  (player1.y / player1.canvasPosition.y * this.CANVAS_HEIGHT) + this.PLAYER_HEIGHT) {
-
+    if ( newGame.ball.y < player1.y || newGame.ball.y >  player1.y + this.PLAYER_HEIGHT) {
       newGame.ball.x = this.CANVAS_WIDTH / 2;
       newGame.ball.y = this.CANVAS_HEIGHT / 2;
       newGame.ball.speed.x = (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
@@ -168,7 +159,7 @@ export class GameService {
     } else {
       // Change direction
       newGame.ball.speed.x *= -1;
-      newGame = this.changeDirection(newGame, (player1.y / player1.canvasPosition.y * this.CANVAS_HEIGHT));
+      newGame = this.changeDirection(newGame, player1.y);
 
       // Increase speed if it has not reached max speed
       if (Math.abs(newGame.ball.speed.x) < this.MAX_SPEED) {
@@ -205,9 +196,9 @@ export class GameService {
 
   isGameFinished(gameRoom: GameRoom): boolean {
     return (
-      gameRoom.gameData.player1.score >= 100
+      gameRoom.gameData.player1.score >= this.ENDGAME_POINT
       ||
-      gameRoom.gameData.player2.score >= 100
+      gameRoom.gameData.player2.score >= this.ENDGAME_POINT
     )
   }
 }
