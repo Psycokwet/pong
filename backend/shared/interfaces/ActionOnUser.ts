@@ -1,4 +1,4 @@
 export default interface ActionOnUser {
-  userId: number;
+  userIdToUpdate: number;
   channelName: string;
 }
