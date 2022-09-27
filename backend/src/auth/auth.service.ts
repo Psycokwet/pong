@@ -57,9 +57,7 @@ export class AuthService {
   }
 
   public async getUserFromAuthenticationToken(token: string) {
-    console.log(token)
-    if (token) {
-
+    if (token !== undefined && token !== '') {
       const payload: TokenPayload = this.jwtService.verify(token, {
         secret: jwtConstants.JWT_ACCESS_TOKEN_SECRET,
       });
