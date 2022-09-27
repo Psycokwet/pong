@@ -17,6 +17,7 @@ import RequestWithUser from 'src/auth/requestWithUser.interface';
 import JwtRefreshGuard from 'src/auth/jwtRefresh.guard';
 import { FortytwoService } from './fortytwo.service';
 import { User } from 'src/user/user.entity';
+import { TwoFactorAuthService } from 'src/two-factor-auth/two-factor-auth.service';
 
 @Injectable()
 @Controller(ROUTES_BASE.AUTH.ENDPOINT)
@@ -27,6 +28,7 @@ export class FortyTwoController {
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
     private readonly fortyTwoService: FortytwoService,
+    private readonly twoFactorAuthService: TwoFactorAuthService,
   ) {}
 
   @Get()
@@ -51,7 +53,7 @@ export class FortyTwoController {
 
     req.res.setHeader(
       'Set-Cookie',
-      await this.fortyTwoService.getCookiesWith2FAValue(user, false),
+      await this.twoFactorAuthService.getCookiesWith2FAValue(user, false),
     );
   }
 

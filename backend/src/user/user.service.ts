@@ -301,18 +301,13 @@ export class UsersService {
 
     return user.is_2fa_activated;
   }
-  async set2faFromLogin42(login42: string, value: boolean) {
-    const user = await this.findOne(login42);
-    await this.usersRepository.update(user.id, {
-      is_2fa_activated: value,
-    });
-  }
 
   async set2fa(user: User, value: boolean) {
     await this.usersRepository.update(user.id, {
       is_2fa_activated: value,
     });
   }
+
   async getPongUsername(login42: string) {
     const user = await this.findOne(login42);
     return { pongUsername: this.getFrontUsername(user) };
