@@ -25,6 +25,7 @@ import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { UserGateway } from './user.gateway';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
+import { UserInterface } from 'shared/interfaces/UserInterface';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -64,6 +65,16 @@ export class UsersService {
       login42: login42,
     });
     if (!user) throw new BadRequestException({ error: 'User not found' });
+    return user;
+  }
+
+  async findOneByPongUsername(pongUsername: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({
+      pongUsername: pongUsername,
+    });
+
+    if (!user) throw new BadRequestException({ error: 'User not found' });
+
     return user;
   }
 
@@ -248,11 +259,11 @@ export class UsersService {
       .execute();
   }
 
-  async addFriend(dto: AddFriendDto, login42: string) {
+  async addFriend(friend: User, caller: User) {
     /* First we get the caller (person who is initiating the friend request) 
     and friend in our db */
-    const caller = await this.findOne(login42);
-    const friend = await this.findOne(dto.friend_to_add);
+    // const caller = await this.findOne(login42);
+    // const friend = await this.findOne(dto.friend_to_add);
 
     /* Checking if the caller is adding himself (I think this should never 
       happen on the front side) */
@@ -287,18 +298,26 @@ export class UsersService {
     await addFriend.save();
   }
 
-  async getFriendsList(login42: string) {
+  async getFriendsList(caller: User) {
     /* Same logic as getUserHistory */
-    const user = await this.findOne(login42);
 
-    const friendsList = await this.friendRepository.find({
+    const rawFriendsList = await this.friendRepository.find({
       relations: {
         user: true,
       },
-      where: { user_id: user.id },
+      where: { user_id: caller.id },
     });
 
-    return friendsList;
+    const orderedFriendsList: UserInterface[] = await rawFriendsList.map(
+      (friend) => {
+        return {
+          id: friend.user.id,
+          pongUsername: this.getFrontUsername(friend.user),
+        };
+      },
+    );
+
+    return orderedFriendsList;
   }
 
   async getPongUsername(login42: string) {
