@@ -15,6 +15,7 @@ import { Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { UsersService } from './user.service';
 import AddFriend from 'shared/interfaces/AddFriend';
+import { Status, UserInterface } from 'shared/interfaces/UserInterface';
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -44,16 +45,32 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
           ...UserGateway.userWebsockets,
           newWebsocket,
         ];
+        const newUserConnected: UserInterface = {
+          id: user.id,
+          pongUsername: user.pongUsername,
+          status: Status.ONLINE,
+        };
+        this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, newUserConnected);
       }
     } catch (e) {
       console.error(e.message);
     }
   }
 
-  handleDisconnect(@ConnectedSocket() client: Socket) {
+  async handleDisconnect(@ConnectedSocket() client: Socket) {
+    const user = await this.userService.getUserFromSocket(client);
+
     UserGateway.userWebsockets = UserGateway.userWebsockets.filter(
       (websocket) => websocket.socketId !== client.id,
     );
+
+    const disconnectingUser: UserInterface = {
+      id: user.id,
+      pongUsername: user.pongUsername,
+      status: Status.OFFLINE,
+    };
+    this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, disconnectingUser);
+
     console.log(UserGateway.userWebsockets);
   }
 
@@ -91,4 +108,11 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .in(client.id)
       .emit(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, orderedFriendsList);
   }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.USER.GET_STATUS_REQUEST)
+  async getStatus(
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {}
 }
