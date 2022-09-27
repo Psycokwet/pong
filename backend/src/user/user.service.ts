@@ -25,7 +25,7 @@ import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { UserGateway } from './user.gateway';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
-import { UserInterface } from 'shared/interfaces/UserInterface';
+import { Status, UserInterface } from 'shared/interfaces/UserInterface';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -313,6 +313,7 @@ export class UsersService {
         return {
           id: friend.user.id,
           pongUsername: this.getFrontUsername(friend.user),
+          status: this.getStatus(friend.user),
         };
       },
     );
@@ -392,5 +393,12 @@ export class UsersService {
     return UserGateway.userWebsockets.find(
       (receiver) => receiver.userId === receiverId,
     );
+  }
+
+  getStatus(user: User) {
+    const isConnected = this.getUserIdWebsocket(user.id);
+
+    if (isConnected) return Status.ONLINE;
+    else return Status.OFFLINE;
   }
 }
