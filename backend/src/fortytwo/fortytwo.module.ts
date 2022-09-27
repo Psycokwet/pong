@@ -9,6 +9,7 @@ import { FortyTwoStrategy } from './fortytwo.strategy';
 import { JwtAuthModule } from 'src/auth/jwt.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { FortytwoService } from './fortytwo.service';
+import { TwoFactorAuthModule } from 'src/two-factor-auth/two-factor-auth.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { FortytwoService } from './fortytwo.service';
     JwtAuthModule,
     UsersModule,
     AuthModule,
+    TwoFactorAuthModule,
   ],
   controllers: [FortyTwoController],
   providers: [FortyTwoStrategy, FortytwoService],

@@ -27,24 +27,30 @@ export class TwoFactorAuthController {
 
   @UseGuards(JwtRefreshGuard)
   @Post(ROUTES_BASE.AUTH.TURN_ON_2FA) // to use after generate, with the code
-  async turn_on_2FA(@Req() req, @Body() { code }: TwoFactorAuthCodeDto) {
-    const isValid = await this.twoFactorAuthService.is2FACodeValid(
-      code,
-      req.user,
-    );
+  async turn_on_2FA(
+    @Req() { user }: RequestWithUser,
+    @Res() response,
+    @Body() { code }: TwoFactorAuthCodeDto,
+  ) {
+    console.log('Ah que cc bob');
+    const isValid = await this.twoFactorAuthService.is2FACodeValid(code, user);
     if (!isValid) {
       throw new UnauthorizedException('Wrong authentication code');
     }
 
-    req.res.setHeader(
+    response.setHeader(
       'Set-Cookie',
-      await this.userService.set2fa(req.user.login42, true),
+      await this.twoFactorAuthService.set2fa(user.login42, true),
     );
+    console.log('Ah que bubye bob');
   }
   @Put(ROUTES_BASE.AUTH.TURN_OFF_2FA)
   @UseGuards(JwtRefreshGuard)
-  turn_off_2FA(@Req() req) {
-    this.userService.set2fa(req.user.login42, false);
+  async turn_off_2FA(@Req() { user }: RequestWithUser, @Res() response) {
+    response.setHeader(
+      'Set-Cookie',
+      await this.twoFactorAuthService.set2fa(user.login42, false),
+    );
   }
   @Get(ROUTES_BASE.AUTH.GET_2FA)
   @UseGuards(JwtRefreshGuard)
@@ -58,7 +64,10 @@ export class TwoFactorAuthController {
     @Res() response: Response,
     @Req() request: RequestWithUser,
   ) {
-    this.userService.set2faFromLogin42(request.user.login42, false); //We change the secret, previous 2fa ain't valid anymore
+    request.res.setHeader(
+      'Set-Cookie',
+      await this.twoFactorAuthService.set2fa(request.user.login42, false),
+    );
     const { otpauthUrl } =
       await this.twoFactorAuthService.generateTwoFactorAuthenticationSecret(
         request.user,
