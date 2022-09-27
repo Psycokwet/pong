@@ -6,6 +6,9 @@ import {
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -40,7 +43,7 @@ async function passwordCompare(
   transport: ['websocket'],
   cors: '*/*',
 })
-export class ChatGateway {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,
@@ -49,7 +52,27 @@ export class ChatGateway {
 
   @WebSocketServer()
   server: Server;
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    const user = await this.chatService.getUserFromSocket(client);
 
+    const isRegistered = ChatService.userWebsockets.find(
+      (element) => element.userId === user.id,
+    );
+
+    if (!isRegistered) {
+      const newWebsocket = { userId: user.id, socketId: client.id };
+      ChatService.userWebsockets = [
+        ...ChatService.userWebsockets,
+        newWebsocket,
+      ];
+    }
+  }
+
+  handleDisconnect(@ConnectedSocket() client: Socket) {
+    ChatService.userWebsockets = ChatService.userWebsockets.filter(
+      (websocket) => websocket.socketId !== client.id,
+    );
+  }
   /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
@@ -173,6 +196,20 @@ export class ChatGateway {
     );
 
     await client.join(newDMRoom.roomName);
+
+    const receiverSocketId = this.chatService.getUserIdWebsocket(friendId);
+
+    if (receiverSocketId) {
+      /** Retrieve receiver's socket with the socket ID
+       * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
+       */
+
+      const receiverSocket = this.server.sockets.sockets.get(
+        receiverSocketId.socketId,
+      );
+
+      await receiverSocket.join(newDMRoom.roomName);
+    }
 
     this.server
       .in(newDMRoom.roomName)
