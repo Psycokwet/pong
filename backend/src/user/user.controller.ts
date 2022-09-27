@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   Logger,
   Post,
   Request,
@@ -83,7 +81,7 @@ export class UserController {
     @Request() req,
   ) {
     return await this.usersService.setPongUsername(
-      newPongUsername,
+      req.user.pongUsername,
       req.user.login42,
     );
   }
