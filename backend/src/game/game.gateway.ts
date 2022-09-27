@@ -15,6 +15,7 @@ import { UsersService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
 import GameRoom from 'shared/interfaces/game/GameRoom';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
+import Position from 'shared/interfaces/game/Position';
 
 
 @WebSocketGateway({
@@ -43,11 +44,13 @@ export class GameGateway {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.CREATE_GAME_REQUEST)
   async createGame(
+    @MessageBody() canvasSize: Position,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
+    console.log(canvasSize)
     const user: User = await this.userService.getById(payload.userId);
-    const gameRoom: GameRoom = this.gameService.createGame(user);
+    const gameRoom: GameRoom = this.gameService.createGame(user, canvasSize);
 
     client.join(gameRoom.roomName);
 
@@ -57,11 +60,14 @@ export class GameGateway {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.JOIN_GAME_REQUEST)
   async joinGame(
+    @MessageBody() canvasSize: Position,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
+    console.log(canvasSize)
+
     const user: User = await this.userService.getById(payload.userId);
-    const gameRoom: GameRoom = this.gameService.matchMaking(user);
+    const gameRoom: GameRoom = this.gameService.matchMaking(user, canvasSize);
 
     client.join(gameRoom.roomName);
 
