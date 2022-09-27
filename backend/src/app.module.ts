@@ -3,7 +3,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './user/user.entity';
-import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
@@ -15,6 +14,7 @@ import LocalFile from './localFiles/localFile.entity';
 import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
 import { GameModule } from './game/game.module';
 import { FortytwoService } from './fortytwo/fortytwo.service';
+import { FortyTwoModule } from './fortytwo/fortytwo.module';
 
 @Module({
   imports: [

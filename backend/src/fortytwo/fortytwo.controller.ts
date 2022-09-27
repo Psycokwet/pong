@@ -7,14 +7,14 @@ import {
   Injectable,
   Redirect,
 } from '@nestjs/common';
-import { FortyTwoGuard } from 'src/auth/fortytwo.guard';
 import { UsersService } from 'src/user/user.service';
-import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import RequestWithUser from './requestWithUser.interface';
-import JwtRefreshGuard from './jwtRefresh.guard';
 
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
+import { FortyTwoGuard } from './fortytwo.guard';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import RequestWithUser from 'src/auth/requestWithUser.interface';
+import JwtRefreshGuard from 'src/auth/jwtRefresh.guard';
 
 @Injectable()
 @Controller(ROUTES_BASE.AUTH.ENDPOINT)

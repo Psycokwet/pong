@@ -5,10 +5,10 @@ import { User } from 'src/user/user.entity';
 import { Friend } from 'src/friend_list/friend.entity';
 import { UsersModule } from 'src/user/user.module';
 import { UsersService } from 'src/user/user.service';
-import { AuthService } from './auth.service';
 import { FortyTwoController } from './fortytwo.controller';
 import { FortyTwoStrategy } from './fortytwo.strategy';
-import { JwtAuthModule } from './jwt.module';
+import { JwtAuthModule } from 'src/auth/jwt.module';
+import { AuthService } from 'src/auth/auth.service';
 
 @Module({
   imports: [
