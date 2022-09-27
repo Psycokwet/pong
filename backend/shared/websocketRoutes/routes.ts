@@ -61,6 +61,9 @@ export const ROUTES_BASE = {
     UPDATE_SPECTABLE_GAMES: 'updateSpectableGames',
     JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
   },
+  USER: {
+    ERROR: 'error',
+  }
 };
 const generate_full_routes = (routes_base) => {
   let accumulator = {};
