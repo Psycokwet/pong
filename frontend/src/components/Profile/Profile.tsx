@@ -6,16 +6,16 @@ import ProfileName from "./ProfileName";
 import OneUserProfile from "./OneUserProfile";
 
 const Profile = () => {
-  const { user_login } = useParams();
+  const { login42 } = useParams();
 
   return (
-    <div className="bg-black text-white h-screen flex grid grid-cols-10 grid-rows-6 gap-8">
+    <div className="bg-black text-white h-screen grid grid-cols-10 grid-rows-6 gap-8">
       <div className="col-start-2 col-span-3 row-start-2">
-        <ProfileName nickname={user_login} />
+        <ProfileName nickname={login42} />
       </div>
 
       {/* This part will change according to each user. Need to look into how to pass data */}
-      <OneUserProfile nickname={user_login} />
+      <OneUserProfile nickname={login42} />
     </div>
   );
 };
