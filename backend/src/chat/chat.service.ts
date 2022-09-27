@@ -236,7 +236,6 @@ export class ChatService {
 
   async getUserFromSocket(socket: Socket) {
     const cookie = socket.handshake.headers.cookie;
-    console.log(socket.handshake.headers, cookie)
     if (cookie) {
       const { Authentication: authenticationToken } = parse(cookie);
       const user = await this.authService.getUserFromAuthenticationToken(

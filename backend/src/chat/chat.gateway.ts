@@ -71,7 +71,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         ];
       }
     } catch (e) {
-      console.log(e)
+      console.error(e.message)
     }
   }
 
