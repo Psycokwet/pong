@@ -1,3 +1,4 @@
+import { forwardRef, Inject } from '@nestjs/common';
 import {
   ConnectedSocket,
   OnGatewayConnection,
@@ -15,7 +16,10 @@ import { UsersService } from './user.service';
   cors: '*/*',
 })
 export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private readonly userService: UsersService) {}
+  constructor(
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService
+  ) {}
   public static userWebsockets: UsersWebsockets[] = [];
 
   @WebSocketServer()
