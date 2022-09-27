@@ -32,7 +32,7 @@ export class TwoFactorAuthController {
     @Res() response,
     @Body() { code }: TwoFactorAuthCodeDto,
   ) {
-    console.log('Ah que cc bob');
+    console.log('turn_on_2FA Ah que cc bob');
     const isValid = await this.twoFactorAuthService.is2FACodeValid(code, user);
     if (!isValid) {
       throw new UnauthorizedException('Wrong authentication code');
@@ -42,15 +42,17 @@ export class TwoFactorAuthController {
       'Set-Cookie',
       await this.twoFactorAuthService.set2fa(user.login42, true),
     );
-    console.log('Ah que bubye bob');
+    console.log('turn_on_2FA Ah que bubye bob');
   }
   @Put(ROUTES_BASE.AUTH.TURN_OFF_2FA)
   @UseGuards(JwtRefreshGuard)
   async turn_off_2FA(@Req() { user }: RequestWithUser, @Res() response) {
+    console.log('turn_off_2FA Ah que cc bob');
     response.setHeader(
       'Set-Cookie',
       await this.twoFactorAuthService.set2fa(user.login42, false),
     );
+    console.log('turn_off_2FA Ah que bubye bob');
   }
   @Get(ROUTES_BASE.AUTH.GET_2FA)
   @UseGuards(JwtRefreshGuard)
