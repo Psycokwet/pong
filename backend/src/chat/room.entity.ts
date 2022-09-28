@@ -33,6 +33,10 @@ class Room extends BaseEntity {
   @ManyToOne(() => User, (user) => user.rooms)
   public owner: User;
 
+  @ManyToMany(() => User, (user) => user.channels, { cascade: true })
+  @JoinTable()
+  public admins: User[];
+
   @OneToMany(() => Message, (message) => message.room)
   public messages: Message[];
 

@@ -14,6 +14,43 @@ import { RiPingPongFill } from "react-icons/ri";
 import { IoMdSettings } from "react-icons/io";
 import { DisconnectionButton } from "../ConnectionButton/DisconnectionButton";
 
+/***************** To change with real data ******************************************/
+let connected_user = "scarboni";
+
+/***************** List of Pages ******************************************/
+export const NavBarPageList = [
+  {
+    url: "/play",
+    pageName: "play",
+    pageIcon: <RiPingPongFill size="28" />,
+  },
+  {
+    url: "/leaderboard",
+    pageName: "leader board",
+    pageIcon: <HiChartBar size="28" />,
+  },
+  {
+    url: "/chat",
+    pageName: "chat",
+    pageIcon: <FaComments size="28" />,
+  },
+  {
+    url: `/profile/${connected_user}`, // to change with real user
+    pageName: `profile ${connected_user}`, // to change with real user
+    pageIcon: <FaUser size="26" />,
+  },
+  {
+    url: "/settings",
+    pageName: "settings",
+    pageIcon: <IoMdSettings size="26" />,
+  },
+  {
+    url: "/practice",
+    pageName: "practice",
+    pageIcon: <IoMdSettings size="26" />,
+  },
+];
+
 type DisconnectionButtonProps = {
   setDisconnected: CallableFunction;
 };
@@ -33,39 +70,6 @@ const NavBar: React.FC<DisconnectionButtonProps> = ({ setDisconnected }) => {
     console.log("get_login42 is NOT ok. Response is: ", res);
   });
   
-  /***************** List of Pages ******************************************/
-  const NavBarPageList = [
-    {
-      url: "/play",
-      pageName: "play",
-      pageIcon: <RiPingPongFill size="28" />,
-    },
-    {
-      url: "/leaderboard",
-      pageName: "leader board",
-      pageIcon: <HiChartBar size="28" />,
-    },
-    {
-      url: "/community",
-      pageName: "community",
-      pageIcon: <FaComments size="28" />,
-    },
-    {
-      url: `/profile/${login42}`,
-      pageName: `profile ${login42}`,
-      pageIcon: <FaUser size="26" />,
-    },
-    {
-      url: "/settings",
-      pageName: "settings",
-      pageIcon: <IoMdSettings size="26" />,
-    },
-    {
-      url: "/practice",
-      pageName: "practice",
-      pageIcon: <IoMdSettings size="26" />,
-    },
-  ];
   return (
     <div>
       <nav className="border-b-8 border-sky-600 text-white h-min">

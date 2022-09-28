@@ -51,7 +51,18 @@ const LeaderBoard = () => {
           console.log(`rank is: ${content.userRank.rank}`)
         });
     });
-
+    api.get_user_profile('pony').then((res: Response) => {
+      console.log("get_user_profile", res);
+      res.json().then((content) => {
+        console.log("get_user_profile", content);
+      });
+    });
+    api.get_user_profile(undefined).then((res: Response) => {
+      console.log("get_user_profile", res);
+      res.json().then((content) => {
+        console.log("get_user_profile", content);
+      });
+    });
     api.get_user_history().then((res: Response) => {
       console.log("get_user_history", res);
       res.json().then((content) => {
