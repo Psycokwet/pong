@@ -506,8 +506,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!room) throw new BadRequestException('Channel does not exist');
 
     if (
-      payload.userId !== room.owner.id ||
-      !room.admins.filter((admin) => payload.userId === admin.id).length
+      payload.userId !== room.owner.id &&
+      room.admins.filter((admin) => payload.userId === admin.id).length === 0
     )
       throw new ForbiddenException('You do not have the rights to ban a user');
 
