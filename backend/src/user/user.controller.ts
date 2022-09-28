@@ -2,8 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
-  HttpStatus,
   Logger,
   Post,
   Request,
@@ -11,6 +9,7 @@ import {
   StreamableFile,
   UseInterceptors,
   UploadedFile,
+  Param,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -21,6 +20,9 @@ import { join } from 'path';
 import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
+import { User } from './user.entity';
+import { GetUserProfileDto } from './get-user-profile.dto';
+import RequestWithUser from 'src/auth/requestWithUser.interface';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
@@ -28,51 +30,31 @@ export class UserController {
 
   constructor(private readonly usersService: UsersService) {}
 
+  @Get(ROUTES_BASE.USER.GET_USER_PROFILE)
+  @UseGuards(JwtAuthGuard)
+  async getUserProfile(
+    // @Body() dto: GetUserProfileDto, Pas de body dans un get merci :)
+    @Request() req: RequestWithUser,
+    @Param() params: GetUserProfileDto,
+  ) {
+    let user: User = null;
+    if (!params.pongUsername)
+      user = await this.usersService.findOne(req.user.login42);
+    else
+      user = await this.usersService.findOneByPongUsername(params.pongUsername);
+    return await this.usersService.getUserProfile(user);
+  }
+
   @Get(ROUTES_BASE.USER.GET_USER_RANK)
   @UseGuards(JwtAuthGuard)
   async getUserRank(@Request() req) {
-    const user_rank = await this.usersService.getUserRank(req.user.login42);
-
-    return user_rank;
+    return await this.usersService.getUserRank(req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_USER_HISTORY)
   @UseGuards(JwtAuthGuard)
   async getUserHistory(@Request() req) {
-    const userHistory = await this.usersService.getUserHistory(
-      req.user.login42,
-    );
-
-    if (!userHistory) return {};
-
-    /**
-     * Manipulating userHistory array so we get exactly what we want.
-     * The sort ensures the latest games are returned first.
-     */
-    const nbGames = userHistory.games.length;
-    const nbWins = userHistory.games.filter((game) => {
-      return game.winner == userHistory.user.id;
-    }).length;
-    return {
-      nbGames,
-      nbWins,
-      games: userHistory.games
-        .map((game) => {
-          return {
-            time: game.createdAt.toString().slice(4, 24),
-            opponent:
-              game.player1.id === userHistory.user.id
-                ? this.usersService.getFrontUsername(game.player2)
-                : this.usersService.getFrontUsername(game.player1),
-            winner:
-              game.winner === game.player1.id
-                ? this.usersService.getFrontUsername(game.player1)
-                : this.usersService.getFrontUsername(game.player2),
-            id: game.id,
-          };
-        })
-        .sort((a, b) => b.id - a.id),
-    };
+    return await this.usersService.getUserHistory(req.user);
   }
 
   @Post(ROUTES_BASE.USER.ADD_FRIEND)
@@ -108,7 +90,10 @@ export class UserController {
     @Body() newPongUsername: pongUsernameDto,
     @Request() req,
   ) {
-    await this.usersService.setPongUsername(newPongUsername, req.user.login42);
+    return await this.usersService.setPongUsername(
+      newPongUsername,
+      req.user.login42,
+    );
   }
   @Get(ROUTES_BASE.USER.GET_PICTURE)
   @UseGuards(JwtAuthGuard)
