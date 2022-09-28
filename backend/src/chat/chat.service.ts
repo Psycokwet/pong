@@ -1,6 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,9 +13,11 @@ import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
+import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 import { v4 as uuidv4 } from 'uuid';
-import { ChatRoom } from 'shared/interfaces/ChatRoom';
+import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
+import ActionOnUser from 'shared/interfaces/ActionOnUser';
 @Injectable()
 export class ChatService {
   constructor(
@@ -24,7 +30,7 @@ export class ChatService {
     private usersRepository: Repository<User>,
     private userService: UsersService,
   ) {}
-  private static chatRoomList: ChatRoom[] = [];
+  public static userWebsockets: UsersWebsockets[] = [];
 
   public async getAllPublicRooms(): Promise<ChannelData[]> {
     return this.roomsRepository
@@ -44,7 +50,7 @@ export class ChatService {
   public async getAllAttachedRooms(userId: number) {
     const user = await this.userService.getById(userId);
 
-    return this.roomsRepository
+    const attachedRoomList = await this.roomsRepository
       .find({
         relations: {
           members: true,
@@ -63,6 +69,7 @@ export class ChatService {
           };
         }),
       );
+    return attachedRoomList;
   }
 
   public async getAllDMRooms(userId: number) {
@@ -97,7 +104,7 @@ export class ChatService {
   public async getRoomWithRelations(
     where: FindOptionsWhere<Room>,
     relations?: FindOptionsRelations<Room>,
-  ) {
+  ): Promise<Room | undefined> {
     return this.roomsRepository.findOne({
       where: where,
       relations: relations,
@@ -138,6 +145,7 @@ export class ChatService {
       members: [user],
       isDM: false,
       isChannelPrivate: isChannelPrivate,
+      admins: [user],
     });
 
     await newRoom.save();
@@ -197,12 +205,23 @@ export class ChatService {
 
   async attachMemberToChannel(userId: number, room: Room) {
     const newMember = await this.userService.getById(userId);
+
     if (
       !room.members.filter(
         (member: User) => member.login42 === newMember.login42,
       ).length
     )
       room.members = [...room.members, newMember];
+
+    await room.save();
+  }
+
+  async unattachMemberToChannel(userId: number, room: Room) {
+    const leavingUser = await this.userService.getById(userId);
+
+    room.members = room.members.filter(
+      (member: User) => member.login42 !== leavingUser.login42,
+    );
 
     room.save();
   }
@@ -225,27 +244,59 @@ export class ChatService {
 
   async getUserFromSocket(socket: Socket) {
     const cookie = socket.handshake.headers.cookie;
-    const { Authentication: authenticationToken } = parse(cookie);
-    const user = await this.authService.getUserFromAuthenticationToken(
-      authenticationToken,
-    );
-    if (!user) {
-      throw new WsException('Invalid credentials.');
+    if (cookie) {
+      const { Authentication: authenticationToken } = parse(cookie);
+      const user = await this.authService.getUserFromAuthenticationToken(
+        authenticationToken,
+      );
+      if (!user) {
+        throw new WsException('Invalid credentials.');
+      }
+      return user;
     }
-    return user;
   }
 
-  removeUserConnectedToRooms(roomName: string, userId): number[] {
-    const chatRoomIndex = ChatService.chatRoomList.findIndex(
-      (chatRoom) => chatRoom.roomName == roomName,
+  getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
+    return ChatService.userWebsockets.find(
+      (receiver) => receiver.userId === receiverId,
     );
-    if (ChatService.chatRoomList[chatRoomIndex].userIdList.includes(userId)) {
-      ChatService.chatRoomList[chatRoomIndex].userIdList =
-        ChatService.chatRoomList[chatRoomIndex].userIdList.filter(
-          (id) => id !== userId,
-        );
-    }
-    return ChatService.chatRoomList[chatRoomIndex].userIdList;
   }
   /** END ChatRoomConnectedUsers methods */
+
+  async setAdmin(room: Room, newAdmin: User) {
+    room.admins = [...room.admins, newAdmin];
+
+    await room.save();
+  }
+
+  async unsetAdmin(room: Room, oldAdmin: User) {
+    room.admins = room.admins.filter((admin: User) => oldAdmin.id !== admin.id);
+
+    await room.save();
+  }
+
+  async getAttachedUsersInChannel(roomId: number) {
+    const room = await this.getRoomWithRelations(
+      { id: roomId },
+      { members: true },
+    );
+
+    if (!room) {
+      throw new BadRequestException('Channel does not exist');
+    }
+
+    return room.members;
+  }
+
+  getUserPrivileges(room: Room, userId: number): { privilege: Privileges } {
+    if (room.isDM === true) return { privilege: Privileges.MEMBER };
+
+    if (userId === room.owner.id) return { privilege: Privileges.OWNER };
+
+    if (room.admins.filter((admin) => admin.id === userId).length) {
+      return { privilege: Privileges.ADMIN };
+    }
+
+    return { privilege: Privileges.MEMBER };
+  }
 }
