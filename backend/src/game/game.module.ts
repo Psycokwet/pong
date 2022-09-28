@@ -9,6 +9,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/user/user.module';
 import { User } from 'src/user/user.entity';
 import { AuthService } from 'src/auth/auth.service';
+import { ChatModule } from 'src/chat/chat.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthService } from 'src/auth/auth.service';
     AuthModule,
     JwtModule,
     UsersModule,
+    ChatModule,
   ],
   providers: [GameGateway, GameService],
   exports: [GameGateway, GameService],

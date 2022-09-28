@@ -46,10 +46,6 @@ const Play = () => {
   }, []);
 
   const handleGameConfirm = (gameRoom: GameRoom) => {
-    // if (gameRoom.started === true) {
-    //   const canvas = canvasRef.current
-    //   draw(canvas, gameRoom)
-    // }
     setGameRoom(gameRoom)
   };
   /** GAME CREATION */
