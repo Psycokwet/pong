@@ -72,7 +72,18 @@ export const ROUTES_BASE = {
   },
   USER: {
     ERROR: 'error',
-  }
+    /** ADD FRIEND */
+    ADD_FRIEND_REQUEST: 'addFriendRequest',
+    ADD_FRIEND_CONFIRMATION: 'addFriendConfirmation',
+    /** FRIENDS LIST */
+    FRIEND_LIST_REQUEST: 'friendListRequest',
+    FRIEND_LIST_CONFIRMATION: 'friendListConfirmation',
+    /** GET STATUS */
+    GET_STATUS_REQUEST: 'getStatusRequest',
+    GET_STATUS_CONFIRMATION: 'getStatusConfirmation',
+    /** CONNECTION NOTIFICATION */
+    CONNECTION_CHANGE: 'connectionChange',
+  },
 };
 const generate_full_routes = (routes_base) => {
   let accumulator = {};
