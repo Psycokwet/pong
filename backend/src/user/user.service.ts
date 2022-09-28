@@ -74,11 +74,6 @@ export class UsersService {
     return user;
   }
 
-  getFrontUsername(user: User) {
-    if (!user.pongUsername) return user.login42;
-    return user.pongUsername;
-  }
-
   async signup(dto: UserDto) {
     // database operation
     const user = User.create({
@@ -229,12 +224,12 @@ export class UsersService {
             time: game.createdAt.toString().slice(4, 24),
             opponent:
               game.player1.id === user.id
-                ? this.getFrontUsername(game.player2)
-                : this.getFrontUsername(game.player1),
+                ? game.player2.pongUsername
+                : game.player1.pongUsername,
             winner:
               game.winner === game.player1.id
-                ? this.getFrontUsername(game.player1)
-                : this.getFrontUsername(game.player2),
+                ? game.player1.pongUsername
+                : game.player2.pongUsername,
             id: game.id,
           };
         })
@@ -294,7 +289,7 @@ export class UsersService {
       (friend) => {
         return {
           id: friend.user.id,
-          pongUsername: this.getFrontUsername(friend.user),
+          pongUsername: friend.user.pongUsername,
         };
       },
     );
@@ -304,7 +299,7 @@ export class UsersService {
 
   async getPongUsername(login42: string) {
     const user = await this.findOne(login42);
-    return { pongUsername: this.getFrontUsername(user) };
+    return { pongUsername: user.pongUsername };
   }
 
   async getLogin42(login42: string) {

@@ -324,7 +324,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room.messages.map((message) => {
         const messageForFront: Message = {
           id: message.id,
-          author: this.userService.getFrontUsername(message.author),
+          author: message.author.pongUsername,
           time: message.createdAt,
           content: message.content,
         };
@@ -389,7 +389,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const messageForFront: Message = {
       id: newMessage.id,
-      author: this.userService.getFrontUsername(newMessage.author),
+      author: newMessage.author.pongUsername,
       time: newMessage.createdAt,
       content: newMessage.content,
     };
