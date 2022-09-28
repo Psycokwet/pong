@@ -81,24 +81,6 @@ export class UserController {
     await this.usersService.playGame(dto);
   }
 
-  // @Post(ROUTES_BASE.USER.ADD_FRIEND)
-  // @UseGuards(JwtAuthGuard)
-  // async addFriend(@Body() friend: AddFriendDto, @Request() req) {
-  //   await this.usersService.addFriend(friend, req.user.login42);
-  // }
-
-  // @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)
-  // @UseGuards(JwtAuthGuard)
-  // async getFriendsList(@Request() req) {
-  //   const friendList = await this.usersService.getFriendsList(req.user.login42);
-
-  //   return friendList.map((friend) => {
-  //     return {
-  //       login42: this.usersService.getFrontUsername(friend.user),
-  //     };
-  //   });
-  // }
-
   @Get(ROUTES_BASE.USER.GET_LOGIN42)
   @UseGuards(JwtAuthGuard)
   async getLogin42(@Request() req) {
