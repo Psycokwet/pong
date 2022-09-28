@@ -25,21 +25,29 @@ export const ROUTES_BASE = {
     /** DISCONNECT FROM CHANNEL */
     DISCONNECT_FROM_CHANNEL_REQUEST: 'disconnectFromChannelRequest',
     CONFIRM_CHANNEL_DISCONNECTION: 'confirmChannelDisconnection',
+    /** GET ATTACHED USERS IN CHANNEL */
+    ATTACHED_USERS_LIST_REQUEST: 'attachedUsersListRequest',
+    ATTACHED_USERS_LIST_CONFIRMATION: 'attachedUsersListConfirmation',
     /** SEND MESSAGE */
     SEND_MESSAGE: 'sendMessage',
     RECEIVE_MESSAGE: 'receiveMessage',
     /** MESSAGE HISTORY */
     MESSAGE_HISTORY: 'messageHistory',
-    /** GET CONNECTED USER LIST */
-    GET_CONNECTED_USER_LIST_REQUEST: 'getConnectedUserListRequest',
-    CONNECTED_USER_LIST: 'connectedUserList',
-    UPDATE_CONNECTED_USERS: 'updateConnectedUsers',
     /** CHANNEL ATTACHED USER LIST */
     UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
+    ATTACHED_USER_LIST_SENT: 'attachedUserListSent',
     /** ATTACH TO CHANNEL REQUEST */
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
+    /** SET / UNSET ADMIN */
+    SET_ADMIN_REQUEST: 'setAdminRequest',
+    UNSET_ADMIN_REQUEST: 'unsetAdminRequest',
+    SET_ADMIN_CONFIRMATION: 'setAdminConfirmation',
+    UNSET_ADMIN_CONFIRMATION: 'unsetAdminConfirmation',
     /** UNATTACH TO CHANNEL REQUEST */
     UNATTACH_TO_CHANNEL_REQUEST: 'unattachToChannelRequest',
+    /** USER PRIVILEGES */
+    USER_PRIVILEGES_REQUEST: 'userPrivilegesRequest',
+    USER_PRIVILEGES_CONFIRMATION: 'userPrivilegesConfirmation',
   },
   GAME: {
     ENDPOINT: '/game/',
@@ -58,11 +66,16 @@ export const ROUTES_BASE = {
     SEND_INPUT: 'sendInput',
     /** GAME LOOP */
     UPDATE_GAME: 'updateGame',
+    /** GAMEOVER CONFIRM */
+    GAMEOVER_CONFIRM: 'gameoverConfirm',
     /** GET SPECTABLE GAME */
     GET_SPECTABLE_GAMES_REQUEST: 'getSpectableGamesRequest',
     UPDATE_SPECTABLE_GAMES: 'updateSpectableGames',
     JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
   },
+  USER: {
+    ERROR: 'error',
+  }
 };
 const generate_full_routes = (routes_base) => {
   let accumulator = {};

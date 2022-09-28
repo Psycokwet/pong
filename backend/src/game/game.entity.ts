@@ -15,13 +15,13 @@ export class Game extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: false })
   player1_id: number;
 
-  @Column()
+  @Column({ nullable: false })
   player2_id: number;
 
-  @Column()
+  @Column({ nullable: false })
   winner: number;
 
   @ManyToOne(() => User, (user) => user.games_player1)
@@ -35,4 +35,10 @@ export class Game extends BaseEntity {
     default: () => 'CURRENT_TIMESTAMP(6)',
   })
   createdAt: Date;
+
+  @Column({ default: 0, nullable: false })
+  player1Score: number;
+
+  @Column({ default: 0, nullable: false })
+  player2Score: number;
 }
