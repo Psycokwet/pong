@@ -13,9 +13,11 @@ import { Game } from './game/game.entity';
 import LocalFile from './localFiles/localFile.entity';
 import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
 import { GameModule } from './game/game.module';
+import Room from './chat/room.entity';
+import { UsersModule } from './user/user.module';
+import { Friend } from './friend_list/friend.entity';
 import { FortytwoService } from './fortytwo/fortytwo.service';
 import { FortyTwoModule } from './fortytwo/fortytwo.module';
-import { UsersModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -32,6 +34,7 @@ import { UsersModule } from './user/user.module';
     AuthModule,
     ChatModule,
     GameModule,
+    UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       // host: 'localhost',
@@ -42,9 +45,8 @@ import { UsersModule } from './user/user.module';
       database: 'db',
       autoLoadEntities: true,
       synchronize: true, // to disable in prod
-      entities: [User, Game, LocalFile],
+      entities: [User, Game, LocalFile, Message, Room, Friend],
     }),
-    TypeOrmModule.forFeature([Message]),
     TwoFactorAuthModule,
   ],
   controllers: [AppController],
