@@ -8,7 +8,7 @@ export const PictureForm = () => {
   return (
     <div>
       <PictureSetter />
-      <PictureGetter apiCall={() => api.getPicture()} />
+      <PictureGetter />
     </div>
   );
 };
