@@ -66,7 +66,7 @@ export class User extends BaseEntity {
   @Column({
     nullable: false,
   })
-  public is_2fa_activated: boolean;
+  public isTwoFactorAuthenticationActivated: boolean;
 
   @Column({
     nullable: true,
