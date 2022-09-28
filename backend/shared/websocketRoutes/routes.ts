@@ -63,6 +63,8 @@ export const ROUTES_BASE = {
     SEND_INPUT: 'sendInput',
     /** GAME LOOP */
     UPDATE_GAME: 'updateGame',
+    /** GAMEOVER CONFIRM */
+    GAMEOVER_CONFIRM: 'gameoverConfirm',
     /** GET SPECTABLE GAME */
     GET_SPECTABLE_GAMES_REQUEST: 'getSpectableGamesRequest',
     UPDATE_SPECTABLE_GAMES: 'updateSpectableGames',

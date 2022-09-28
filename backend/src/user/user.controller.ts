@@ -20,7 +20,6 @@ import { join } from 'path';
 import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
-import { PlayGameDto } from './play-game.dto';
 import { User } from './user.entity';
 import { GetUserProfileDto } from './get-user-profile.dto';
 import RequestWithUser from 'src/auth/requestWithUser.interface';
@@ -58,19 +57,13 @@ export class UserController {
     return await this.usersService.getUserHistory(req.user);
   }
 
-  @Post(ROUTES_BASE.USER.PLAY_GAME)
-  @UseGuards(JwtAuthGuard)
-  async playGame(@Body() dto: PlayGameDto) {
-    await this.usersService.playGame(dto);
-  }
-
   @Post(ROUTES_BASE.USER.ADD_FRIEND)
   @UseGuards(JwtAuthGuard)
   async addFriend(@Body() dto: AddFriendDto, @Request() req) {
     const friend = await this.usersService.findOneByPongUsername(
       dto.friend_to_add,
     );
-    await this.usersService.addFriend(friend, req.user);
+    await this.usersService.addFriend(dto, req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)
