@@ -109,11 +109,10 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.USER.FRIEND_LIST_REQUEST)
   async friendList(
-    @MessageBody() userId: number,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const caller = await this.userService.getById(/*payload.*/ userId);
+    const caller = await this.userService.getById(payload.userId);
 
     const orderedFriendsList = await this.userService.getFriendsList(caller);
 
@@ -121,11 +120,4 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .in(client.id)
       .emit(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, orderedFriendsList);
   }
-
-  @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.USER.GET_STATUS_REQUEST)
-  async getStatus(
-    @ConnectedSocket() client: Socket,
-    @UserPayload() payload: any,
-  ) {}
 }
