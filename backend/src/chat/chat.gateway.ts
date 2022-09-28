@@ -33,6 +33,7 @@ import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 import roomId from 'shared/interfaces/JoinChannel';
 import RoomId from 'shared/interfaces/JoinChannel';
+import { User } from 'src/user/user.entity';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -323,7 +324,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room.messages.map((message) => {
         const messageForFront: Message = {
           id: message.id,
-          author: this.userService.getFrontUsername(message.author),
+          author: message.author.pongUsername,
           time: message.createdAt,
           content: message.content,
         };
@@ -388,7 +389,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const messageForFront: Message = {
       id: newMessage.id,
-      author: this.userService.getFrontUsername(newMessage.author),
+      author: newMessage.author.pongUsername,
       time: newMessage.createdAt,
       content: newMessage.content,
     };

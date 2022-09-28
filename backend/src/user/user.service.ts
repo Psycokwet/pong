@@ -5,7 +5,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  Request,
+  StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -20,6 +20,9 @@ import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import { UserInterface } from 'shared/interfaces/User';
 import { v4 as uuidv4 } from 'uuid';
+import { createReadStream } from 'fs';
+import { join } from 'path';
+import UserProfile from 'shared/interfaces/UserProfile';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -69,11 +72,6 @@ export class UsersService {
     if (!user) throw new BadRequestException({ error: 'User not found' });
 
     return user;
-  }
-
-  getFrontUsername(user: User) {
-    if (!user.pongUsername) return user.login42;
-    return user.pongUsername;
   }
 
   async signup(dto: UserDto) {
@@ -151,10 +149,27 @@ export class UsersService {
     });
   }
 
-  async getUserRank(@Request() req) {
-    const user = await this.findOne(req.user);
+  async getUserProfile(user: User) {
+    let profilePicture: StreamableFile | null = null;
+    try {
+      const picture_path = await this.getPicture(user);
+      const file = createReadStream(join(process.cwd(), `${picture_path}`));
+      profilePicture = new StreamableFile(file);
+    } catch (error) {}
+    const profileElements: UserProfile = {
+      pongUsername: user.pongUsername,
+      userRank: await await this.getUserRank(user),
+      userHistory: await this.getUserHistory(user),
+      profilePicture: profilePicture,
+    };
+    return profileElements;
+  }
 
-    const level = Math.log(user.xp);
+  async getUserRank(user: User) {
+    let level: number;
+
+    if (user.xp !== 0) level = Math.log(user.xp);
+    else level = 0;
 
     /* Keeping the below 2 comments to remind myself of queries */
     // SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) Rank FROM "user"  --  subquery
@@ -177,22 +192,7 @@ export class UsersService {
     return { level, userRank };
   }
 
-  async getUserHistory(login42: string) {
-    /*  Get calling user's object */
-    const user = await this.usersRepository.findOne({
-      where: { login42: login42 },
-    });
-
-    if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User not found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
+  async getUserHistory(user: User) {
     /*  Get a games object where player 1 and player 2 exist and the calling user
         is either one or the other (where: ...) */
     const games = await this.gameRepository.find({
@@ -203,9 +203,37 @@ export class UsersService {
       where: [{ player1_id: user.id }, { player2_id: user.id }],
     });
 
+    if (!games)
+      return {
+        nbGames: 0,
+        nbWins: 0,
+        games: [],
+      };
+
+    const nbGames = games.length;
+    const nbWins = games.filter((game) => {
+      return game.winner == user.id;
+    }).length;
+
     return {
-      user,
-      games,
+      nbGames,
+      nbWins,
+      games: games
+        .map((game) => {
+          return {
+            time: game.createdAt.toString().slice(4, 24),
+            opponent:
+              game.player1.id === user.id
+                ? game.player2.pongUsername
+                : game.player1.pongUsername,
+            winner:
+              game.winner === game.player1.id
+                ? game.player1.pongUsername
+                : game.player2.pongUsername,
+            id: game.id,
+          };
+        })
+        .sort((a, b) => b.id - a.id),
     };
   }
 
@@ -261,7 +289,7 @@ export class UsersService {
       (friend) => {
         return {
           id: friend.user.id,
-          pongUsername: this.getFrontUsername(friend.user),
+          pongUsername: friend.user.pongUsername,
         };
       },
     );
@@ -271,7 +299,7 @@ export class UsersService {
 
   async getPongUsername(login42: string) {
     const user = await this.findOne(login42);
-    return { pongUsername: this.getFrontUsername(user) };
+    return { pongUsername: user.pongUsername };
   }
 
   async getLogin42(login42: string) {
