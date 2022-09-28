@@ -1,30 +1,28 @@
 import React from "react";
 import { BsCircleFill } from "react-icons/bs";
 import { UserInterface } from "/shared/interfaces/UserInterface";
-import Friend, { UserMenu } from "./Friend"
+import UserInList from "../UserInList/UserInList"
+import { MenuSettingsType } from "../UserInList/MenuSettings"
 import { UserStatus } from "../Common/Sublist"
 import { Socket } from "socket.io-client";
 
-type SubFriendListProps = {
-  userFriendList: UserInterface[];
-  input: string;
+type UserListByStatusProps = {
+  userList: UserInterface[];
+  inputFilter: string;
   subList: UserStatus;
   socket: Socket | undefined,
   roomId: number
-  menu: UserMenu
+  menuSettings: MenuSettingsType
 };
 
-const SubFriendList: React.FC<SubFriendListProps> = ({
-  userFriendList,
-  input,
+const UserListByStatus: React.FC<UserListByStatusProps> = ({
+  userList,
+  inputFilter,
   subList,
   socket,
   roomId,
-  menu,
+  menuSettings,
 }) => {
-  const filterList = (value:UserInterface) => {
-    return (value.status === subList.status)
-  }
   return (
     <>
       {/* Group Name */}
@@ -32,16 +30,16 @@ const SubFriendList: React.FC<SubFriendListProps> = ({
         <span className="px-2">
           <BsCircleFill size="15" className={`${subList.color}`} />
         </span>
-        {subList.groupName}
+        <p>{subList.groupName}</p>
       </div>
 
-      {userFriendList?.filter(filterList).map((friend) => {
+      {userList?.filter((value) => value.status === subList.status).map((user) => {
         return (
-          <Friend
-            friend={friend}
-            input={input}
+          <UserInList
+            user={user}
+            inputFilter={inputFilter}
             socket={socket}
-            menu={menu}
+            menuSettings={menuSettings}
           />
         );
       })}
@@ -49,4 +47,4 @@ const SubFriendList: React.FC<SubFriendListProps> = ({
   );
 };
 
-export default SubFriendList;
+export default UserListByStatus;
