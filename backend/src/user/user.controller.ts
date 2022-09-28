@@ -67,13 +67,13 @@ export class UserController {
     return await this.usersService.getLogin42(req.user.login42);
   }
 
-  @Get(ROUTES_BASE.USER.GET_NICKNAME)
+  @Get(ROUTES_BASE.USER.GET_PONG_USERNAME)
   @UseGuards(JwtAuthGuard)
   async getPongUsername(@Request() req) {
     return await this.usersService.getPongUsername(req.user.login42);
   }
 
-  @Post(ROUTES_BASE.USER.SET_NICKNAME)
+  @Post(ROUTES_BASE.USER.SET_PONG_USERNAME)
   @UseGuards(JwtAuthGuard)
   async setPongUsername(
     @Body() newPongUsername: pongUsernameDto,
