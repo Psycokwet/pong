@@ -114,7 +114,7 @@ const GameCanvas = (
 
   return (
     <div
-      style={{padding: '3rem', backgroundColor: 'lightgray'}}
+      className="p-12 bg-gray-400"
     >
       <p>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
       <p>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
