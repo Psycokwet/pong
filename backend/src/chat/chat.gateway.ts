@@ -34,6 +34,7 @@ import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 import roomId from 'shared/interfaces/JoinChannel';
 import RoomId from 'shared/interfaces/JoinChannel';
 import { User } from 'src/user/user.entity';
+import MuteUser from 'shared/interfaces/MuteUser';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -352,6 +353,21 @@ export class ChatGateway {
       { id: data.channelId },
       { messages: true },
     );
+
+    const isUserMuted = await this.chatService.getMutedUser(
+      payload.userId,
+      room.id,
+    );
+    console.log('isUserMuted', isUserMuted);
+    console.log('now', Date.now());
+    //console.log('unmuteAt', isUserMuted.unmuteAt);
+    if (isUserMuted) {
+      if (isUserMuted.unmuteAt > Date.now()) {
+        console.log('dsa');
+        return;
+      } else this.chatService.unmuteUser(payload.userId, room.id);
+    }
+
     const author = await this.userService.getUserByIdWithMessages(
       payload.userId,
     );
@@ -368,6 +384,7 @@ export class ChatGateway {
       time: newMessage.createdAt,
       content: newMessage.content,
     };
+
     if (room)
       this.server
         .in(room.roomName)
@@ -499,5 +516,29 @@ export class ChatGateway {
       );
       this.disconnectFromChannel(room.id, bannedSocket);
     }
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.MUTE_USER_REQUEST)
+  async muteUser(@MessageBody() data: MuteUser, @UserPayload() payload: any) {
+    const userToMute = await this.userService.getById(data.userIdToMute);
+
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      { owner: true, admins: true, members: true },
+    );
+
+    if (!room) throw new BadRequestException('Channel does not exist');
+
+    if (
+      payload.userId !== room.owner.id &&
+      room.admins.filter((admin) => payload.userId === admin.id).length === 0
+    )
+      throw new ForbiddenException('You do not have the rights to mute a user');
+
+    if (userToMute.id === room.owner.id)
+      throw new ForbiddenException('An owner cannot be muted');
+
+    await this.chatService.addMutedUser(userToMute, room, data.muteTime);
   }
 }

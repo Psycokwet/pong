@@ -62,4 +62,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Message, (message) => message.author)
   public messages: Message[];
+
+  @Column({ nullable: true })
+  public mutedAt: number;
 }
