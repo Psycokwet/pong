@@ -5,6 +5,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -20,6 +21,8 @@ import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import { UserInterface } from 'shared/interfaces/User';
 import { v4 as uuidv4 } from 'uuid';
+import { createReadStream } from 'fs';
+import { join } from 'path';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -151,14 +154,19 @@ export class UsersService {
     });
   }
 
-  async getUserProfile(profile: User) {
-    const profileElements = [
-      { pongUsername: profile.pongUsername },
-      { userRank: await this.getUserRank(profile) },
-      { userHistory: await this.getUserHistory(profile) },
-      { profilePicture: await this.getPicture(profile) },
-    ];
-
+  async getUserProfile(user: User) {
+    let profilePicture: StreamableFile | null = null;
+    try {
+      const picture_path = await this.getPicture(user);
+      const file = createReadStream(join(process.cwd(), `${picture_path}`));
+      profilePicture = new StreamableFile(file);
+    } catch (error) {}
+    const profileElements = {
+      pongUsername: user.pongUsername,
+      userRank: await (await this.getUserRank(user)).userRank,
+      userHistory: await this.getUserHistory(user),
+      profilePicture: profilePicture,
+    };
     return profileElements;
   }
 
