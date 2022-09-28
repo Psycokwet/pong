@@ -10,10 +10,10 @@ import {
   UseInterceptors,
   UploadedFile,
   Param,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { createReadStream } from 'fs';
 import { join } from 'path';
@@ -42,6 +42,10 @@ export class UserController {
       user = await this.usersService.findOne(req.user.login42);
     else
       user = await this.usersService.findOneByPongUsername(params.pongUsername);
+
+    if (!user) {
+      throw new BadRequestException({ error: 'User not found' });
+    }
     return await this.usersService.getUserProfile(user);
   }
 
@@ -57,34 +61,19 @@ export class UserController {
     return await this.usersService.getUserHistory(req.user);
   }
 
-  @Post(ROUTES_BASE.USER.ADD_FRIEND)
-  @UseGuards(JwtAuthGuard)
-  async addFriend(@Body() dto: AddFriendDto, @Request() req) {
-    const friend = await this.usersService.findOneByPongUsername(
-      dto.friend_to_add,
-    );
-    await this.usersService.addFriend(dto, req.user);
-  }
-
-  @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)
-  @UseGuards(JwtAuthGuard)
-  async getFriendsList(@Request() req) {
-    return await this.usersService.getFriendsList(req.user);
-  }
-
   @Get(ROUTES_BASE.USER.GET_LOGIN42)
   @UseGuards(JwtAuthGuard)
   async getLogin42(@Request() req) {
     return await this.usersService.getLogin42(req.user.login42);
   }
 
-  @Get(ROUTES_BASE.USER.GET_NICKNAME)
+  @Get(ROUTES_BASE.USER.GET_PONG_USERNAME)
   @UseGuards(JwtAuthGuard)
   async getPongUsername(@Request() req) {
     return await this.usersService.getPongUsername(req.user.login42);
   }
 
-  @Post(ROUTES_BASE.USER.SET_NICKNAME)
+  @Post(ROUTES_BASE.USER.SET_PONG_USERNAME)
   @UseGuards(JwtAuthGuard)
   async setPongUsername(
     @Body() newPongUsername: pongUsernameDto,
