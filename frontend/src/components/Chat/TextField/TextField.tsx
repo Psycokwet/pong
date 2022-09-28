@@ -1,5 +1,8 @@
+import { Socket } from "socket.io-client";
 import { useState } from "react";
 import { IoSend } from "react-icons/io5"
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { ChannelData } from "/shared/interfaces/ChannelData";
 
 type userType = {
   login: string;
@@ -8,20 +11,24 @@ type userType = {
   link_to_profile: string;
 }
 
-function TextField ({addMessage} : {addMessage: any}) {
-  const user:userType = {login:'Moot', nickname:'mescande', link_to_profile:'Profile'};
-  const [value, setValue] = useState<string>('')
+function TextField ({socket , chan}:{
+    socket:Socket|undefined,
+    chan:ChannelData,
+}){
+  const [message, setValue] = useState<string>('')
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    e.preventDefault();
-    if (e.code == 'Enter')
-      handleMessage();
-  }
-
-  const handleMessage = () => {
-    if (value.trim() !== '')
-      addMessage({content:value, sender:user});
+  const sendMessage = () => {
+    socket?.emit(ROUTES_BASE.CHAT.SEND_MESSAGE, {
+      channelId: chan?.channelId,
+      message,
+    });
     setValue('');
+  };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.code == 'Enter') {
+      e.preventDefault();
+      sendMessage();
+    }
   }
 
   return (
@@ -31,7 +38,7 @@ function TextField ({addMessage} : {addMessage: any}) {
           placeholder="Type your message..."
           autoFocus={true}
           rows={3}
-          value={value}
+          value={message}
           className="w-full bg-slate-700 resize-none"
           id="chat"
           onChange={(e) => setValue(e.target.value)}
@@ -39,7 +46,7 @@ function TextField ({addMessage} : {addMessage: any}) {
         />
         <IoSend
           size="40"
-          onClick={handleMessage}
+          onClick={sendMessage}
           className="cursor-pointer"
           />
       </div>
