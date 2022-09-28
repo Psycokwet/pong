@@ -16,6 +16,7 @@ import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
 import { GameModule } from './game/game.module';
 import Room from './chat/room.entity';
 import { UsersModule } from './user/user.module';
+import { Friend } from './friend_list/friend.entity';
 
 @Module({
   imports: [
