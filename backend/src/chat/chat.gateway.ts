@@ -22,7 +22,7 @@ import { UsersService } from 'src/user/user.service';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import CreateChannel from '../../shared/interfaces/CreateChannel';
 import SearchChannel from '../../shared/interfaces/SearchChannel';
-import { User } from 'shared/interfaces/User';
+import { UserInterface } from 'shared/interfaces/User';
 
 import * as bcrypt from 'bcrypt';
 import JoinChannel from 'shared/interfaces/JoinChannel';
@@ -428,7 +428,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.chatService.setAdmin(room, newAdmin);
 
-    const promotedUser: User = {
+    const promotedUser: UserInterface = {
       id: newAdmin.id,
       pongUsername: newAdmin.pongUsername,
     };
@@ -466,7 +466,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.chatService.unsetAdmin(room, oldAdmin);
 
-    const demotedUser: User = {
+    const demotedUser: UserInterface = {
       id: oldAdmin.id,
       pongUsername: oldAdmin.pongUsername,
     };

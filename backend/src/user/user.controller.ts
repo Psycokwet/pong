@@ -81,7 +81,7 @@ export class UserController {
     const friend = await this.usersService.findOneByPongUsername(
       dto.friend_to_add,
     );
-    await this.usersService.addFriend(friend, req.user);
+    await this.usersService.addFriend(dto, req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)
