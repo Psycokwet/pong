@@ -16,7 +16,6 @@ import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
-import { PlayGameDto } from './play-game.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import { UserInterface } from 'shared/interfaces/User';
@@ -210,52 +209,14 @@ export class UsersService {
     };
   }
 
-  async playGame(dto: PlayGameDto) {
-    const player1 = await this.findOne(dto.player1);
-    const player2 = await this.findOne(dto.player2);
-    const winner = await this.findOne(dto.winner);
+  async addFriend(dto: AddFriendDto, login42: string) {
+    /* First we get the caller (person who is initiating the friend request) 
+    and friend in our db */
+    const caller = await this.findOne(login42);
+    const friend = await this.findOne(dto.friend_to_add);
 
-    if (winner.id !== player1.id && winner.id !== player2.id) {
-      throw new BadRequestException({
-        error: 'Winner has to either be player 1 or player 2',
-      });
-    }
-
-    const loser =
-      winner.id === player1.id
-        ? await this.findOne(player2.login42)
-        : await this.findOne(player1.login42);
-
-    const newGame = Game.create({
-      player1_id: player1.id,
-      player2_id: player2.id,
-      winner: winner.id,
-      player1: player1,
-      player2: player2,
-    });
-
-    await newGame.save();
-
-    /* Always increase the winner's XP by 2 */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(winner)
-      .set({ xp: winner.xp + 2 })
-      .where({ id: winner.id })
-      .execute();
-
-    /* If the loser's xp is > 0, increases only by 1 */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(loser)
-      .set({ xp: loser.xp + 1 })
-      .where('id = :id', { id: loser.id })
-      .andWhere('xp > 0', { xp: loser.xp })
-      .execute();
-  }
-
-  async addFriend(friend: User, caller: User) {
-    /* Checking if the caller is adding himself */
+    /* Checking if the caller is adding himself (I think this should never 
+      happen on the front side) */
     if (caller.id === friend.id) {
       throw new BadRequestException({
         error: 'You cannot add yourself',

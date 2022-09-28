@@ -5,10 +5,16 @@ import GameRoom from 'shared/interfaces/game/GameRoom';
 import GameData from 'shared/interfaces/game/GameData';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
 import { v4 as uuidv4 } from 'uuid';
-import Position from 'shared/interfaces/game/Position';
+import { Game } from './game.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class GameService {
-  constructor(private userService: UsersService) {}
+  constructor(
+    private userService: UsersService,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+  ) {}
 
   private static defaultGameData: GameData = {
     player1: {
@@ -31,7 +37,7 @@ export class GameService {
         x: 0,
         y: 0,
       }
-    }
+    },
   }
   private static gameRoomList: GameRoom[] = [];
   public static gameIntervalList: number[] = [];
@@ -48,7 +54,8 @@ export class GameService {
     const newGameRoom: GameRoom = {
       roomName: `game:${user.login42}:${uuidv4()}`,
       started: false,
-      gameData: { ...GameService.defaultGameData },
+      gameData: structuredClone(GameService.defaultGameData), // deep clone
+      spectatorsId: [],
     }
     newGameRoom.gameData.player1.userId = user.id;
     newGameRoom.gameData.player1.pongUsername = this.userService.getFrontUsername(user);
@@ -200,5 +207,40 @@ export class GameService {
       ||
       gameRoom.gameData.player2.score >= this.ENDGAME_POINT
     )
+  }
+
+  public async handleGameOver(gameRoom: GameRoom): Promise<void> {
+    const player1 = await this.userService.getById(gameRoom.gameData.player1.userId);
+    const player2 = await this.userService.getById(gameRoom.gameData.player2.userId);
+    const isPlayer1Won = gameRoom.gameData.player1.score > gameRoom.gameData.player2.score;
+
+    const newGame = Game.create({
+      player1_id: player1.id,
+      player2_id: player2.id,
+      winner: 
+      isPlayer1Won ?
+          player1.id :
+          player2.id,
+      player1: player1,
+      player2: player2,
+      player1Score: gameRoom.gameData.player1.score,
+      player2Score: gameRoom.gameData.player2.score,
+    });
+
+    await newGame.save();
+
+    await this.usersRepository.update(player1.id, {
+      xp: player1.xp + (isPlayer1Won ? 2 : 1),
+    });
+
+    await this.usersRepository.update(player2.id, {
+      xp: player2.xp + (isPlayer1Won ? 1 : 2),
+    });
+  }
+
+  public removeGameFromGameRoomList(gameRoomToRemove: GameRoom): void {
+    GameService.gameRoomList = GameService
+      .gameRoomList
+      .filter((gameRoom => gameRoom.roomName !== gameRoomToRemove.roomName));
   }
 }
