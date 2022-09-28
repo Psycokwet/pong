@@ -7,6 +7,7 @@ import GameQueue from '/src/components/PongGame/GameQueue';
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 
+const ENDPOINT = "http://localhost:8080/"
 
 const Play = () => {
   const [step, setStep] = useState<number>(0);
@@ -17,7 +18,7 @@ const Play = () => {
 
 
   useEffect(() => {
-    const newSocket = io(myConfig.domain, {
+    const newSocket = io(ENDPOINT, {
       transports: ["websocket"],
       withCredentials: true,
     });
@@ -25,10 +26,6 @@ const Play = () => {
   }, []);
 
   const handleGameConfirm = (gameRoom: GameRoom) => {
-    // if (gameRoom.started === true) {
-    //   const canvas = canvasRef.current
-    //   draw(canvas, gameRoom)
-    // }
     setGameRoom(gameRoom)
   };
   /** GAME CREATION */
