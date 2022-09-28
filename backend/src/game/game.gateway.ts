@@ -86,6 +86,7 @@ export class GameGateway {
             clearInterval(GameService.gameIntervalList[newGameRoom.roomName]);
             this.gameService.handleGameOver(newGameRoom);
             this.gameService.removeGameFromGameRoomList(newGameRoom);
+            this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, newGameRoom);
             client.leave(gameRoom.roomName);
 
             const opponentId = gameRoom.gameData.player1.userId === user.id ?
