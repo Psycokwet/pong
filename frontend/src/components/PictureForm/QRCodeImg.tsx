@@ -28,7 +28,6 @@ export const QRCodeImg: React.FC<QRCodeImgProps> = ({ apiCall }) => {
         src={userPicture ? userPicture : ""}
         alt="user picture"
         hidden={Boolean(userPicture)}
-        className="w-40 rounded-full"
       />
     </div>
   );
