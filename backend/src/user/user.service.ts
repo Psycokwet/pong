@@ -5,6 +5,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -15,8 +16,12 @@ import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
-import { PlayGameDto } from './play-game.dto';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
+import { UserInterface } from 'shared/interfaces/User';
+import { v4 as uuidv4 } from 'uuid';
+import { createReadStream } from 'fs';
+import { join } from 'path';
+import UserProfile from 'shared/interfaces/UserProfile';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -54,18 +59,24 @@ export class UsersService {
     return user;
   }
 
-  getFrontUsername(user: User) {
-    if (!user.pongUsername) return user.login42;
-    return user.pongUsername;
+  async findOneByPongUsername(pongUsername: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({
+      pongUsername: pongUsername,
+    });
+
+    if (!user) throw new BadRequestException({ error: 'User not found' });
+
+    return user;
   }
 
   async signup(dto: UserDto) {
     // database operation
     const user = User.create({
       login42: dto.login42,
+      pongUsername: uuidv4(),
       email: dto.email,
       xp: 0,
-      is_2fa_activated: false,
+      isTwoFactorAuthenticationActivated: false,
     });
 
     try {
@@ -132,10 +143,27 @@ export class UsersService {
     });
   }
 
-  async getUserRank(login42: string) {
-    const user = await this.findOne(login42);
+  async getUserProfile(user: User) {
+    let profilePicture: StreamableFile | null = null;
+    try {
+      const picture_path = await this.getPicture(user);
+      const file = createReadStream(join(process.cwd(), `${picture_path}`));
+      profilePicture = new StreamableFile(file);
+    } catch (error) {}
+    const profileElements: UserProfile = {
+      pongUsername: user.pongUsername,
+      userRank: await await this.getUserRank(user),
+      userHistory: await this.getUserHistory(user),
+      profilePicture: profilePicture,
+    };
+    return profileElements;
+  }
 
-    const level = Math.log(user.xp);
+  async getUserRank(user: User) {
+    let level: number;
+
+    if (user.xp !== 0) level = Math.log(user.xp);
+    else level = 0;
 
     /* Keeping the below 2 comments to remind myself of queries */
     // SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) Rank FROM "user"  --  subquery
@@ -158,22 +186,7 @@ export class UsersService {
     return { level, userRank };
   }
 
-  async getUserHistory(login42: string) {
-    /*  Get calling user's object */
-    const user = await this.usersRepository.findOne({
-      where: { login42: login42 },
-    });
-
-    if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'User not found',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
+  async getUserHistory(user: User) {
     /*  Get a games object where player 1 and player 2 exist and the calling user
         is either one or the other (where: ...) */
     const games = await this.gameRepository.find({
@@ -184,54 +197,38 @@ export class UsersService {
       where: [{ player1_id: user.id }, { player2_id: user.id }],
     });
 
+    if (!games)
+      return {
+        nbGames: 0,
+        nbWins: 0,
+        games: [],
+      };
+
+    const nbGames = games.length;
+    const nbWins = games.filter((game) => {
+      return game.winner == user.id;
+    }).length;
+
     return {
-      user,
-      games,
+      nbGames,
+      nbWins,
+      games: games
+        .map((game) => {
+          return {
+            time: game.createdAt.toString().slice(4, 24),
+            opponent:
+              game.player1.id === user.id
+                ? game.player2.pongUsername
+                : game.player1.pongUsername,
+            winner:
+              game.winner === game.player1.id
+                ? game.player1.pongUsername
+                : game.player2.pongUsername,
+            id: game.id,
+          };
+        })
+        .sort((a, b) => b.id - a.id),
     };
-  }
-
-  async playGame(dto: PlayGameDto) {
-    const player1 = await this.findOne(dto.player1);
-    const player2 = await this.findOne(dto.player2);
-    const winner = await this.findOne(dto.winner);
-
-    if (winner.id !== player1.id && winner.id !== player2.id) {
-      throw new BadRequestException({
-        error: 'Winner has to either be player 1 or player 2',
-      });
-    }
-
-    const loser =
-      winner.id === player1.id
-        ? await this.findOne(player2.login42)
-        : await this.findOne(player1.login42);
-
-    const newGame = Game.create({
-      player1_id: player1.id,
-      player2_id: player2.id,
-      winner: winner.id,
-      player1: player1,
-      player2: player2,
-    });
-
-    await newGame.save();
-
-    /* Always increase the winner's XP by 2 */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(winner)
-      .set({ xp: winner.xp + 2 })
-      .where({ id: winner.id })
-      .execute();
-
-    /* If the loser's xp is > 0, increases only by 1 */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(loser)
-      .set({ xp: loser.xp + 1 })
-      .where('id = :id', { id: loser.id })
-      .andWhere('xp > 0', { xp: loser.xp })
-      .execute();
   }
 
   async addFriend(dto: AddFriendDto, login42: string) {
@@ -273,18 +270,25 @@ export class UsersService {
     await addFriend.save();
   }
 
-  async getFriendsList(login42: string) {
+  async getFriendsList(caller: User) {
     /* Same logic as getUserHistory */
-    const user = await this.findOne(login42);
-
-    const friendsList = await this.friendRepository.find({
+    const rawFriendsList = await this.friendRepository.find({
       relations: {
         user: true,
       },
-      where: { user_id: user.id },
+      where: { user_id: caller.id },
     });
 
-    return friendsList;
+    const orderedFriendsList: UserInterface[] = await rawFriendsList.map(
+      (friend) => {
+        return {
+          id: friend.user.id,
+          pongUsername: friend.user.pongUsername,
+        };
+      },
+    );
+
+    return orderedFriendsList;
   }
 
   async setTwoFactorAuthenticationSecret(secret: string, login42: string) {
@@ -296,21 +300,21 @@ export class UsersService {
     });
   }
 
-  async get2fa(login42: string) {
+  async getTwoFactorAuthentication(login42: string) {
     const user = await this.findOne(login42);
 
-    return user.is_2fa_activated;
+    return user.isTwoFactorAuthenticationActivated;
   }
 
-  async set2fa(user: User, value: boolean) {
+  async setTwoFactorAuthentication(user: User, value: boolean) {
     await this.usersRepository.update(user.id, {
-      is_2fa_activated: value,
+      isTwoFactorAuthenticationActivated: value,
     });
   }
 
   async getPongUsername(login42: string) {
     const user = await this.findOne(login42);
-    return { pongUsername: this.getFrontUsername(user) };
+    return { pongUsername: user.pongUsername };
   }
 
   async getLogin42(login42: string) {

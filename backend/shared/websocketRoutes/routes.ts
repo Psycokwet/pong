@@ -47,6 +47,9 @@ export const ROUTES_BASE = {
     UNSET_ADMIN_CONFIRMATION: 'unsetAdminConfirmation',
     /** UNATTACH TO CHANNEL REQUEST */
     UNATTACH_TO_CHANNEL_REQUEST: 'unattachToChannelRequest',
+    /** USER PRIVILEGES */
+    USER_PRIVILEGES_REQUEST: 'userPrivilegesRequest',
+    USER_PRIVILEGES_CONFIRMATION: 'userPrivilegesConfirmation',
   },
   GAME: {
     ENDPOINT: '/game/',
@@ -62,6 +65,8 @@ export const ROUTES_BASE = {
     SEND_INPUT: 'sendInput',
     /** GAME LOOP */
     UPDATE_GAME: 'updateGame',
+    /** GAMEOVER CONFIRM */
+    GAMEOVER_CONFIRM: 'gameoverConfirm',
     /** GET SPECTABLE GAME */
     GET_SPECTABLE_GAMES_REQUEST: 'getSpectableGamesRequest',
     UPDATE_SPECTABLE_GAMES: 'updateSpectableGames',

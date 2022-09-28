@@ -36,11 +36,11 @@ export class TwoFactorAuthService {
     });
   }
 
-  async set2fa(login42: string, value: boolean) {
+  async setTwoFactorAuthentication(login42: string, value: boolean) {
     const user = await this.usersService.findOne(login42);
 
     /* We use TypeORM's update function to update our entity */
-    await this.usersService.set2fa(user, value);
+    await this.usersService.setTwoFactorAuthentication(user, value);
 
     return await this.getCookiesWith2FAValue(user, value);
   }

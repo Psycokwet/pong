@@ -13,6 +13,7 @@ import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
+import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
@@ -68,7 +69,7 @@ export class ChatService {
           };
         }),
       );
-      return attachedRoomList;
+    return attachedRoomList;
   }
 
   public async getAllDMRooms(userId: number) {
@@ -285,5 +286,17 @@ export class ChatService {
     }
 
     return room.members;
+  }
+
+  getUserPrivileges(room: Room, userId: number): { privilege: Privileges } {
+    if (room.isDM === true) return { privilege: Privileges.MEMBER };
+
+    if (userId === room.owner.id) return { privilege: Privileges.OWNER };
+
+    if (room.admins.filter((admin) => admin.id === userId).length) {
+      return { privilege: Privileges.ADMIN };
+    }
+
+    return { privilege: Privileges.MEMBER };
   }
 }

@@ -39,7 +39,10 @@ export class TwoFactorAuthController {
 
     response.setHeader(
       'Set-Cookie',
-      await this.twoFactorAuthService.set2fa(user.login42, true),
+      await this.twoFactorAuthService.setTwoFactorAuthentication(
+        user.login42,
+        true,
+      ),
     );
   }
   @Put(ROUTES_BASE.AUTH.TURN_OFF_2FA)
@@ -50,13 +53,18 @@ export class TwoFactorAuthController {
   ) {
     response.setHeader(
       'Set-Cookie',
-      await this.twoFactorAuthService.set2fa(user.login42, false),
+      await this.twoFactorAuthService.setTwoFactorAuthentication(
+        user.login42,
+        false,
+      ),
     );
   }
   @Get(ROUTES_BASE.AUTH.GET_2FA)
   @UseGuards(JwtRefreshGuard)
   async get_2FA(@Req() req) {
-    const result = await this.userService.get2fa(req.user.login42);
+    const result = await this.userService.getTwoFactorAuthentication(
+      req.user.login42,
+    );
     return result;
   }
   @Post(ROUTES_BASE.AUTH.GENERATE_2FA)
@@ -67,7 +75,10 @@ export class TwoFactorAuthController {
   ) {
     request.res.setHeader(
       'Set-Cookie',
-      await this.twoFactorAuthService.set2fa(request.user.login42, false),
+      await this.twoFactorAuthService.setTwoFactorAuthentication(
+        request.user.login42,
+        false,
+      ),
     );
     const { otpauthUrl } =
       await this.twoFactorAuthService.generateTwoFactorAuthenticationSecret(
