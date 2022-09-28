@@ -118,9 +118,9 @@ export class Api {
   get_user_profile(pongUsername: string | undefined) {
     if (pongUsername != undefined) {
       return fetch(
-        `${PREFIX}${FULL_ROUTE.USER.GET_USER_PROFILE}?${new URLSearchParams(
-          new URLSearchParams({ pongUsername }).toString()
-        )}`,
+        `${PREFIX}${FULL_ROUTE.USER.GET_USER_PROFILE}?${new URLSearchParams({
+          pongUsername,
+        }).toString()}`,
         {
           method: "GET",
         }
