@@ -96,7 +96,7 @@ function App() {
             return result;
           })
         });
-    }, 1_000);
+    }, 600_000);
 
     return () => {
       clearInterval(interval);
