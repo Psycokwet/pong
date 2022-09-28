@@ -87,7 +87,9 @@ export class GameGateway {
             this.gameService.removeGameFromGameRoomList(newGameRoom);
             client.leave(gameRoom.roomName);
 
-            const opponentId = gameRoom.gameData.player1.userId === user.id ? gameRoom.gameData.player2.userId : gameRoom.gameData.player1.userId
+            const opponentId = gameRoom.gameData.player1.userId === user.id ?
+              gameRoom.gameData.player2.userId :
+              gameRoom.gameData.player1.userId;
             const receiverSocketId: UsersWebsockets = this.chatService.getUserIdWebsocket(opponentId);
             if (receiverSocketId) {
               const receiverSocket = this.server.sockets.sockets.get(
@@ -101,9 +103,6 @@ export class GameGateway {
                 clientId.socketId
               ))
               .map(clientSocket => clientSocket.leave(gameRoom.roomName));
-            
-            console.log(client.id, receiverSocketId.socketId, this.server.sockets.adapter.rooms)
-
           }
         }, 10);
     }
@@ -139,6 +138,5 @@ export class GameGateway {
     gameRoom.spectatorsId.push(payload.userId);
 
     client.join(gameRoom.roomName);
-    console.log(client.id, this.server.sockets.adapter.rooms)
   }
 }
