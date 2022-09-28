@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { Server, Socket } from 'socket.io';
 import { parse } from 'cookie';
@@ -9,9 +13,11 @@ import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
+import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
+import ActionOnUser from 'shared/interfaces/ActionOnUser';
 @Injectable()
 export class ChatService {
   constructor(
@@ -63,7 +69,7 @@ export class ChatService {
           };
         }),
       );
-      return attachedRoomList;
+    return attachedRoomList;
   }
 
   public async getAllDMRooms(userId: number) {
@@ -98,7 +104,7 @@ export class ChatService {
   public async getRoomWithRelations(
     where: FindOptionsWhere<Room>,
     relations?: FindOptionsRelations<Room>,
-  ) {
+  ): Promise<Room | undefined> {
     return this.roomsRepository.findOne({
       where: where,
       relations: relations,
@@ -139,6 +145,7 @@ export class ChatService {
       members: [user],
       isDM: false,
       isChannelPrivate: isChannelPrivate,
+      admins: [user],
     });
 
     await newRoom.save();
@@ -253,5 +260,43 @@ export class ChatService {
     return ChatService.userWebsockets.find(
       (receiver) => receiver.userId === receiverId,
     );
+  }
+  /** END ChatRoomConnectedUsers methods */
+
+  async setAdmin(room: Room, newAdmin: User) {
+    room.admins = [...room.admins, newAdmin];
+
+    await room.save();
+  }
+
+  async unsetAdmin(room: Room, oldAdmin: User) {
+    room.admins = room.admins.filter((admin: User) => oldAdmin.id !== admin.id);
+
+    await room.save();
+  }
+
+  async getAttachedUsersInChannel(roomId: number) {
+    const room = await this.getRoomWithRelations(
+      { id: roomId },
+      { members: true },
+    );
+
+    if (!room) {
+      throw new BadRequestException('Channel does not exist');
+    }
+
+    return room.members;
+  }
+
+  getUserPrivileges(room: Room, userId: number): { privilege: Privileges } {
+    if (room.isDM === true) return { privilege: Privileges.MEMBER };
+
+    if (userId === room.owner.id) return { privilege: Privileges.OWNER };
+
+    if (room.admins.filter((admin) => admin.id === userId).length) {
+      return { privilege: Privileges.ADMIN };
+    }
+
+    return { privilege: Privileges.MEMBER };
   }
 }

@@ -14,6 +14,8 @@ import { ChatModule } from './chat/chat.module';
 import { Game } from './game/game.entity';
 import LocalFile from './localFiles/localFile.entity';
 import { GameModule } from './game/game.module';
+import Room from './chat/room.entity';
+import { UsersModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { GameModule } from './game/game.module';
     AuthModule,
     ChatModule,
     GameModule,
+    UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       // host: 'localhost',
@@ -39,9 +42,8 @@ import { GameModule } from './game/game.module';
       database: 'db',
       autoLoadEntities: true,
       synchronize: true, // to disable in prod
-      entities: [User, Game, LocalFile],
+      entities: [User, Game, LocalFile, Message, Room, Friend],
     }),
-    TypeOrmModule.forFeature([Message]),
   ],
   controllers: [AppController],
   providers: [AppService],

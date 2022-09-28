@@ -1,10 +1,13 @@
 import {
   BadRequestException,
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
+  StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -15,10 +18,19 @@ import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
-import { PlayGameDto } from './play-game.dto';
-import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
-import { UserInterface } from 'shared/interfaces/User';
+import { Socket } from 'socket.io';
+import { AuthService } from 'src/auth/auth.service';
+import { parse } from 'cookie';
+import { WsException } from '@nestjs/websockets';
+import { UserGateway } from './user.gateway';
+import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
+import { Status, UserInterface } from 'shared/interfaces/UserInterface';
+import { JwtService } from '@nestjs/jwt';
+import { v4 as uuidv4 } from 'uuid';
+import { createReadStream } from 'fs';
+import { join } from 'path';
+import UserProfile from 'shared/interfaces/UserProfile';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -48,8 +60,9 @@ export class UsersService {
 
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
-    private jwtService: JwtService,
     private localFilesService: LocalFilesService,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
   ) {}
 
   async findOne(login42: string): Promise<User> {
@@ -61,24 +74,16 @@ export class UsersService {
   }
 
   async findOneByPongUsername(pongUsername: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({
+    return await this.usersRepository.findOneBy({
       pongUsername: pongUsername,
     });
-
-    if (!user) throw new BadRequestException({ error: 'User not found' });
-
-    return user;
-  }
-
-  getFrontUsername(user: User) {
-    if (!user.pongUsername) return user.login42;
-    return user.pongUsername;
   }
 
   async signup(dto: UserDto) {
     // database operation
     const user = User.create({
       login42: dto.login42,
+      pongUsername: uuidv4(),
       email: dto.email,
       xp: 0,
     });
@@ -149,19 +154,27 @@ export class UsersService {
     });
   }
 
-  async getUserProfile(profile: User) {
-    const profileElements = [
-      { pongUsername: profile.pongUsername },
-      { userRank: await this.getUserRank(profile) },
-      { userHistory: await this.getUserHistory(profile) },
-      { profilePicture: await this.getPicture(profile) },
-    ];
-
+  async getUserProfile(user: User) {
+    let profilePicture: StreamableFile | null = null;
+    try {
+      const picture_path = await this.getPicture(user);
+      const file = createReadStream(join(process.cwd(), `${picture_path}`));
+      profilePicture = new StreamableFile(file);
+    } catch (error) {}
+    const profileElements: UserProfile = {
+      pongUsername: user.pongUsername,
+      userRank: await await this.getUserRank(user),
+      userHistory: await this.getUserHistory(user),
+      profilePicture: profilePicture,
+    };
     return profileElements;
   }
 
   async getUserRank(user: User) {
-    const level = Math.log(user.xp);
+    let level: number;
+
+    if (user.xp !== 0) level = Math.log(user.xp);
+    else level = 0;
 
     /* Keeping the below 2 comments to remind myself of queries */
     // SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) Rank FROM "user"  --  subquery
@@ -195,7 +208,12 @@ export class UsersService {
       where: [{ player1_id: user.id }, { player2_id: user.id }],
     });
 
-    if (!games) return {};
+    if (!games)
+      return {
+        nbGames: 0,
+        nbWins: 0,
+        games: [],
+      };
 
     const nbGames = games.length;
     const nbWins = games.filter((game) => {
@@ -211,12 +229,12 @@ export class UsersService {
             time: game.createdAt.toString().slice(4, 24),
             opponent:
               game.player1.id === user.id
-                ? this.getFrontUsername(game.player2)
-                : this.getFrontUsername(game.player1),
+                ? game.player2.pongUsername
+                : game.player1.pongUsername,
             winner:
               game.winner === game.player1.id
-                ? this.getFrontUsername(game.player1)
-                : this.getFrontUsername(game.player2),
+                ? game.player1.pongUsername
+                : game.player2.pongUsername,
             id: game.id,
           };
         })
@@ -224,52 +242,9 @@ export class UsersService {
     };
   }
 
-  async playGame(dto: PlayGameDto) {
-    const player1 = await this.findOne(dto.player1);
-    const player2 = await this.findOne(dto.player2);
-    const winner = await this.findOne(dto.winner);
-
-    if (winner.id !== player1.id && winner.id !== player2.id) {
-      throw new BadRequestException({
-        error: 'Winner has to either be player 1 or player 2',
-      });
-    }
-
-    const loser =
-      winner.id === player1.id
-        ? await this.findOne(player2.login42)
-        : await this.findOne(player1.login42);
-
-    const newGame = Game.create({
-      player1_id: player1.id,
-      player2_id: player2.id,
-      winner: winner.id,
-      player1: player1,
-      player2: player2,
-    });
-
-    await newGame.save();
-
-    /* Always increase the winner's XP by 2 */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(winner)
-      .set({ xp: winner.xp + 2 })
-      .where({ id: winner.id })
-      .execute();
-
-    /* If the loser's xp is > 0, increases only by 1 */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(loser)
-      .set({ xp: loser.xp + 1 })
-      .where('id = :id', { id: loser.id })
-      .andWhere('xp > 0', { xp: loser.xp })
-      .execute();
-  }
-
   async addFriend(friend: User, caller: User) {
-    /* Checking if the caller is adding himself */
+    /* Checking if the caller is adding himself (I think this should never 
+      happen on the front side) */
     if (caller.id === friend.id) {
       throw new BadRequestException({
         error: 'You cannot add yourself',
@@ -314,7 +289,8 @@ export class UsersService {
       (friend) => {
         return {
           id: friend.user.id,
-          pongUsername: this.getFrontUsername(friend.user),
+          pongUsername: friend.user.pongUsername,
+          status: this.getStatus(friend.user),
         };
       },
     );
@@ -324,7 +300,7 @@ export class UsersService {
 
   async getPongUsername(login42: string) {
     const user = await this.findOne(login42);
-    return { pongUsername: this.getFrontUsername(user) };
+    return { pongUsername: user.pongUsername };
   }
 
   async getLogin42(login42: string) {
@@ -374,5 +350,37 @@ export class UsersService {
     await this.usersRepository.update(user.id, {
       pictureId: picture.id,
     });
+  }
+
+  async getUserFromSocket(socket: Socket) {
+    const cookie = socket.handshake.headers.cookie;
+    if (cookie) {
+      const { Authentication: authenticationToken } = parse(cookie);
+      try {
+        const user = await this.authService.getUserFromAuthenticationToken(
+          authenticationToken,
+        );
+        if (!user) {
+          throw new WsException('Invalid credentials.');
+        }
+        return user;
+      } catch (e) {
+        console.error(e.message);
+        throw new WsException('Invalid credentials.');
+      }
+    }
+  }
+
+  getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
+    return UserGateway.userWebsockets.find(
+      (receiver) => receiver.userId === receiverId,
+    );
+  }
+
+  getStatus(user: User) {
+    const isConnected = this.getUserIdWebsocket(user.id);
+
+    if (isConnected) return Status.ONLINE;
+    else return Status.OFFLINE;
   }
 }
