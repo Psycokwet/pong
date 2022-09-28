@@ -5,6 +5,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Request,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -18,6 +19,8 @@ import { pongUsernameDto } from './set-pongusername.dto';
 import { PlayGameDto } from './play-game.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
+import { UserInterface } from 'shared/interfaces/User';
+import { v4 as uuidv4 } from 'uuid';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -59,6 +62,16 @@ export class UsersService {
     return user;
   }
 
+  async findOneByPongUsername(pongUsername: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({
+      pongUsername: pongUsername,
+    });
+
+    if (!user) throw new BadRequestException({ error: 'User not found' });
+
+    return user;
+  }
+
   getFrontUsername(user: User) {
     if (!user.pongUsername) return user.login42;
     return user.pongUsername;
@@ -68,6 +81,7 @@ export class UsersService {
     // database operation
     const user = User.create({
       login42: dto.login42,
+      pongUsername: uuidv4(),
       email: dto.email,
       xp: 0,
     });
@@ -138,8 +152,8 @@ export class UsersService {
     });
   }
 
-  async getUserRank(login42: string) {
-    const user = await this.findOne(login42);
+  async getUserRank(@Request() req) {
+    const user = await this.findOne(req.user);
 
     const level = Math.log(user.xp);
 
@@ -240,14 +254,8 @@ export class UsersService {
       .execute();
   }
 
-  async addFriend(dto: AddFriendDto, login42: string) {
-    /* First we get the caller (person who is initiating the friend request) 
-    and friend in our db */
-    const caller = await this.findOne(login42);
-    const friend = await this.findOne(dto.friend_to_add);
-
-    /* Checking if the caller is adding himself (I think this should never 
-      happen on the front side) */
+  async addFriend(friend: User, caller: User) {
+    /* Checking if the caller is adding himself */
     if (caller.id === friend.id) {
       throw new BadRequestException({
         error: 'You cannot add yourself',
@@ -279,18 +287,25 @@ export class UsersService {
     await addFriend.save();
   }
 
-  async getFriendsList(login42: string) {
+  async getFriendsList(caller: User) {
     /* Same logic as getUserHistory */
-    const user = await this.findOne(login42);
-
-    const friendsList = await this.friendRepository.find({
+    const rawFriendsList = await this.friendRepository.find({
       relations: {
         user: true,
       },
-      where: { user_id: user.id },
+      where: { user_id: caller.id },
     });
 
-    return friendsList;
+    const orderedFriendsList: UserInterface[] = await rawFriendsList.map(
+      (friend) => {
+        return {
+          id: friend.user.id,
+          pongUsername: this.getFrontUsername(friend.user),
+        };
+      },
+    );
+
+    return orderedFriendsList;
   }
 
   async getPongUsername(login42: string) {
