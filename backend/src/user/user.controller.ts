@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Param,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -41,6 +42,10 @@ export class UserController {
       user = await this.usersService.findOne(req.user.login42);
     else
       user = await this.usersService.findOneByPongUsername(params.pongUsername);
+
+    if (!user) {
+      throw new BadRequestException({ error: 'User not found' });
+    }
     return await this.usersService.getUserProfile(user);
   }
 
