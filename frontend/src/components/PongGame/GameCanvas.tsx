@@ -60,6 +60,21 @@ const GameCanvas = (
     });
   };
 
+  const onTouchMove = event => {
+    console.log(event)
+    const position: Position = {
+      x: event.touches[0].clientX - event.touches[0].target.offsetLeft,
+      y: event.touches[0].clientY - event.touches[0].target.offsetTop,
+    }
+    setCoords(position);
+
+    const canvasLocation = canvasRef.current.getBoundingClientRect();
+    const mouseLocation = event.touches[0].clientY - canvasLocation.y;
+    socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
+      canvasLocation: canvasLocation.height / canvasSize.y * canvasHeight,
+      mouseLocation: mouseLocation / canvasSize.y * canvasHeight,
+    });
+  }
   /** END MOUSE HANDLER */
 
 
@@ -124,8 +139,7 @@ const GameCanvas = (
 
   return (
     <div
-      className="w-full"
-      style={{backgroundColor: 'lightgray'}}
+      className="w-full bg-gray-400"
     >
       <p>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
       <p>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
@@ -133,6 +147,7 @@ const GameCanvas = (
       <div className="flex justify-center">
 
         <canvas
+          onTouchMove={onTouchMove}
           onMouseMove={handleMouseMove}
           ref={canvasRef}
           id="canvas"
