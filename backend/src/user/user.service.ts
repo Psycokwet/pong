@@ -74,13 +74,9 @@ export class UsersService {
   }
 
   async findOneByPongUsername(pongUsername: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({
+    return await this.usersRepository.findOneBy({
       pongUsername: pongUsername,
     });
-
-    if (!user) throw new BadRequestException({ error: 'User not found' });
-
-    return user;
   }
 
   async signup(dto: UserDto) {
