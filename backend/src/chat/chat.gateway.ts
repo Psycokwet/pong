@@ -519,10 +519,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const bannedSocketId = this.chatService.getUserIdWebsocket(userToBan.id);
 
     if (bannedSocketId) {
-      /** Retrieve receiver's socket with the socket ID
-       * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
-       */
-
       const bannedSocket = this.server.sockets.sockets.get(
         bannedSocketId.socketId,
       );
