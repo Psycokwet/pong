@@ -19,6 +19,7 @@ import { PlayGameDto } from './play-game.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import { UserInterface } from 'shared/interfaces/User';
+import { v4 as uuidv4 } from 'uuid';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -79,6 +80,7 @@ export class UsersService {
     // database operation
     const user = User.create({
       login42: dto.login42,
+      pongUsername: uuidv4(),
       email: dto.email,
       xp: 0,
     });

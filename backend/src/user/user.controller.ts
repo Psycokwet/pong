@@ -20,7 +20,6 @@ import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { PlayGameDto } from './play-game.dto';
-import { UserInterface } from 'shared/interfaces/User';
 import { User } from './user.entity';
 import { GetUserProfileDto } from './get-user-profile.dto';
 
