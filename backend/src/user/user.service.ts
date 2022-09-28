@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
@@ -16,9 +18,15 @@ import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
-import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
-import { UserInterface } from 'shared/interfaces/User';
+import { Socket } from 'socket.io';
+import { AuthService } from 'src/auth/auth.service';
+import { parse } from 'cookie';
+import { WsException } from '@nestjs/websockets';
+import { UserGateway } from './user.gateway';
+import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
+import { Status, UserInterface } from 'shared/interfaces/UserInterface';
+import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
 import { createReadStream } from 'fs';
 import { join } from 'path';
@@ -52,8 +60,9 @@ export class UsersService {
 
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
-    private jwtService: JwtService,
     private localFilesService: LocalFilesService,
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
   ) {}
 
   async findOne(login42: string): Promise<User> {
@@ -65,13 +74,9 @@ export class UsersService {
   }
 
   async findOneByPongUsername(pongUsername: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({
+    return await this.usersRepository.findOneBy({
       pongUsername: pongUsername,
     });
-
-    if (!user) throw new BadRequestException({ error: 'User not found' });
-
-    return user;
   }
 
   async signup(dto: UserDto) {
@@ -237,12 +242,7 @@ export class UsersService {
     };
   }
 
-  async addFriend(dto: AddFriendDto, login42: string) {
-    /* First we get the caller (person who is initiating the friend request) 
-    and friend in our db */
-    const caller = await this.findOne(login42);
-    const friend = await this.findOne(dto.friend_to_add);
-
+  async addFriend(friend: User, caller: User) {
     /* Checking if the caller is adding himself (I think this should never 
       happen on the front side) */
     if (caller.id === friend.id) {
@@ -290,6 +290,7 @@ export class UsersService {
         return {
           id: friend.user.id,
           pongUsername: friend.user.pongUsername,
+          status: this.getStatus(friend.user),
         };
       },
     );
@@ -349,5 +350,37 @@ export class UsersService {
     await this.usersRepository.update(user.id, {
       pictureId: picture.id,
     });
+  }
+
+  async getUserFromSocket(socket: Socket) {
+    const cookie = socket.handshake.headers.cookie;
+    if (cookie) {
+      const { Authentication: authenticationToken } = parse(cookie);
+      try {
+        const user = await this.authService.getUserFromAuthenticationToken(
+          authenticationToken,
+        );
+        if (!user) {
+          throw new WsException('Invalid credentials.');
+        }
+        return user;
+      } catch (e) {
+        console.error(e.message);
+        throw new WsException('Invalid credentials.');
+      }
+    }
+  }
+
+  getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
+    return UserGateway.userWebsockets.find(
+      (receiver) => receiver.userId === receiverId,
+    );
+  }
+
+  getStatus(user: User) {
+    const isConnected = this.getUserIdWebsocket(user.id);
+
+    if (isConnected) return Status.ONLINE;
+    else return Status.OFFLINE;
   }
 }
