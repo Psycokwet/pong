@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import UserPicture from "../../User Picture/UserPicture";
+import UserPicture from "../../UserPicture/UserPicture";
 import { Message } from "/shared/interfaces/Message";
 import { UserInterface } from "/shared/interfaces/UserInterface";
 

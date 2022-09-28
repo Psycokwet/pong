@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import SubFriendList from "./SubFriendList";
+import UserListByStatus from "./UserListByStatus";
 import { Socket } from "socket.io-client";
 import { UserInterface, Status } from "/shared/interfaces/UserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
@@ -16,7 +16,7 @@ const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
   socket,
   userFriendList,
 }) => {
-  const [inputValue, setInputValue] = useState("");
+  const [inputFilter, setInputFilter] = useState("");
 
   return (
     <div className="rounded-b-md overflow-none">
@@ -27,8 +27,8 @@ const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
         </span>
         <input
           type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          value={inputFilter}
+          onChange={(e) => setInputFilter(e.target.value)}
           placeholder="Search a name"
           className="text-white-900 placeholder:text-gray-400 p-2 outline-none rounded-xl bg-gray-600"
         />
@@ -38,14 +38,14 @@ const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
       <div>
         {subList?.map((aSubList) => {
           return (
-            <SubFriendList
+            <UserListByStatus
               key={aSubList.status}
-              userFriendList={userFriendList}
-              input={inputValue}
+              userList={userFriendList}
+              inputFilter={inputFilter}
               subList={aSubList}
               socket={socket}
               roomId={0}
-              menu={({
+              menuSettings={({
                 challenge:aSubList.status===Status.ONLINE,
                 watch:aSubList.status===Status.PLAYING,
                 privileges:Privileges.MEMBER,

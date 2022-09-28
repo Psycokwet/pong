@@ -36,9 +36,12 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
   }, []);
 
   const UserStatusChange = (user:UserInterface) => {
-    const old:UserInterface = userFriendList.find(user);
-    if (old)
-      setUserFriendList([userFriendList.filter((value) => { value.pongUsername !== old.pongUsername }), old])
+    const old:UserInterface = userFriendList.find((val) => val === user);
+    if (old) {
+      setUserFriendList([...userFriendList.filter((value) => { value.pongUsername !== old.pongUsername }), old])
+      console.log("in", old); }
+    else
+      console.log("out", old);
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, UserStatusChange);
@@ -46,15 +49,12 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
       socket?.off(ROUTES_BASE.USER.CONNECTION_CHANGE, UserStatusChange);}
   }, []);
 
-  const showList = () => {
-    setActive(!active);
-  };
 
   return (
     <div className="absolute top-[120px] right-0 text-white bg-gray-800 rounded-b-md">
       <div
         className="p-2 flex flex-row-reverse items-center text-2xl font-bold"
-        onClick={showList}
+        onClick={() => setActive(!active)}
       >
         <BiChevronDown size={20} className={`${active && "rotate-180"}`} />
         <span className="px-4">Friend List</span>

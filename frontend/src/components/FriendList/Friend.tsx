@@ -8,53 +8,46 @@ import { Link } from "react-router-dom";
 import { UserInterface } from "/shared/interfaces/UserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
-export type UserMenu = {
+export type MenuSettingsType = {
   challenge:boolean,
   watch:boolean,
   privileges:number,
   friend:boolean,
 }
 
-const Friend = ({friend, input, socket, menu} :{
+const Friend = ({friend, inputFilter, socket, menuSettings} :{
   friend: UserInterface,
-  input: string,
+  inputFilter: string,
   socket: Socket|undefined
-  menu: UserMenu
+  menuSettings: MenuSettingsType,
 }) => {
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
   const [userOwnership, setOwnership] = useState<number>(Privileges.MEMBER);
 
-  const SendDirectMessage = () => {
+  const sendDirectMessage = () => {
     socket?.emit(ROUTES_BASE.CHAT.CREATE_DM, friend.id)
   }
-  const Challenge = () => {
+  const challenge = () => {
     socket?.emit(ROUTES_BASE.CHAT.CREATE_CHALLENGE_REQUEST, friend.id)
   }
-  const Mute = () => {
+  const mute = () => {
   }
-  const Ban = () => {
+  const ban = () => {
   }
-  const SetAdmin = () => {
+  const setAdmin = () => {
   }
-  const AddFriend = () => {
+  const addFriend = () => {
     socket?.emit(ROUTES_BASE.USER.ADD_FRIEND_REQUEST, friend.pongUsername);
   }
-  const SetupOwnership = (val:number) => {
+  const setupOwnership = (val:number) => {
     setOwnership(val);
   }
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, SetupOwnership);
+    socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupOwnership);
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, SetupOwnership);
+      socket?.off(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupOwnership);
   }}, []);
-  const handleClick = () => {
-    console.log("Redirect to User Page");
-    return (
-      <>
-      </>
-    )
-  }
   return (
     <div
       key={friend.pongUsername}
@@ -65,7 +58,7 @@ const Friend = ({friend, input, socket, menu} :{
           socket?.emit(ROUTES_BASE.USER);
       }}
       className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
-      ${friend.pongUsername.startsWith(input) ? "block" : "hidden"}`}
+      ${friend.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
     >
       {/* Avatar and Nickname */}
       <div
@@ -87,32 +80,32 @@ const Friend = ({friend, input, socket, menu} :{
           <Link to={`/profile/${friend.pongUsername}`}>SeeProfile</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/chat" onClick={SendDirectMessage}>Send a Direct Message</Link>
+          <Link to="/chat" onClick={sendDirectMessage}>Send a Direct Message</Link>
         </MenuItem>
-        <MenuItem className={ menu.challenge ? "" : "hidden" }>
-          <Link to="/play" onClick={Challenge}>Challenge</Link>
+        <MenuItem className={ menuSettings.challenge ? "" : "hidden" }>
+          <Link to="/play" onClick={challenge}>Challenge</Link>
         </MenuItem>
-        <MenuItem className={ menu.watch ? "" : "hidden" }>
+        <MenuItem className={ menuSettings.watch ? "" : "hidden" }>
           <Link to="/play">Watch</Link>
         </MenuItem>
-        <MenuItem className={ menu.friend ? "hidden" : "" }>
-          <div onClick={AddFriend}>Add as Friend</div>
+        <MenuItem className={ menuSettings.friend ? "hidden" : "" }>
+          <div onClick={addFriend}>Add as Friend</div>
         </MenuItem>
         <MenuItem>
           <div>Block</div>
         </MenuItem>
-        <MenuItem className={ menu.privileges === Privileges.MEMBER ? "hidden" : "" }
-          disabled={ userOwnership > menu.privileges }
+        <MenuItem className={ menuSettings.privileges === Privileges.MEMBER ? "hidden" : "" }
+          disabled={ userOwnership >= menuSettings.privileges }
         >
-          <div onClick={Mute}>Mute</div>
+          <div onClick={mute}>Mute</div>
         </MenuItem>
-        <MenuItem className={ menu.privileges === Privileges.MEMBER ? "hidden" : "" }
-          disabled={ userOwnership > menu.privileges }
+        <MenuItem className={ menuSettings.privileges === Privileges.MEMBER ? "hidden" : "" }
+          disabled={ userOwnership >= menuSettings.privileges }
         >
-          <div onClick={Ban}>Ban from Channel</div>
+          <div onClick={ban}>Ban from Channel</div>
         </MenuItem>
-        <MenuItem className={ menu.privileges === Privileges.OWNER ? "" : "hidden" }>
-          <div onClick={SetAdmin}>Give Admin Rights</div>
+        <MenuItem className={ menuSettings.privileges === Privileges.OWNER ? "" : "hidden" }>
+          <div onClick={setAdmin}>Give Admin Rights</div>
         </MenuItem>
       </ControlledMenu>
     </div>
