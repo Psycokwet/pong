@@ -1,16 +1,17 @@
 import React from "react";
 import { BsCircleFill } from "react-icons/bs";
-import { User } from "/shared/interfaces/User";
-import Friend from "./Friend"
+import { UserInterface } from "/shared/interfaces/User";
+import Friend, { UserMenu } from "./Friend"
 import { UserStatus } from "./DropDownFriendList"
 import { Socket } from "socket.io-client";
-import { UserMenu } from "./Friend"
 
 type SubFriendListProps = {
-  userFriendList: User[];
+  userFriendList: UserInterface[];
   input: string;
   subList: UserStatus;
-  socket: Socket | undefined
+  socket: Socket | undefined,
+  roomId: number
+  menu: UserMenu
 };
 
 const SubFriendList: React.FC<SubFriendListProps> = ({
@@ -18,17 +19,11 @@ const SubFriendList: React.FC<SubFriendListProps> = ({
   input,
   subList,
   socket,
+  roomId,
+  menu,
 }) => {
-  const filterList = (value:User) => {
+  const filterList = (value:UserInterface) => {
     return (value.status === subList.status)
-  }
-  const menu:UserMenu = {
-    challenge:subList.status===online,
-    watch:subList.status===playing,
-    ban:false,
-    mute:false,
-    setAdmin:false,
-    isAdmin:false,
   }
   return (
     <>

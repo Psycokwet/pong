@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import { User } from "/shared/interfaces/User";
+import { UserInterface } from "/shared/interfaces/User";
 import { Api } from '../../api/api';
 
 import { BiChevronDown } from "react-icons/bi";
@@ -27,7 +27,7 @@ const sendMessage = () => {
 
 const FriendList = ({socket} : {socket:Socket | undefined}) => {
   const [active, setActive] = useState(false);
-  const [userFriendList, setUserFriendList] = useState<User[]>([
+  const [userFriendList, setUserFriendList] = useState<UserInterface[]>([
     {id:0, pongUsername:"mescande", status:1},
     {id:1, pongUsername:"cdai", status:2},
     {id:2, pongUsername:"nader", status:0},
