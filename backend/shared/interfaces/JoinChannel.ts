@@ -1,3 +1,3 @@
-export default interface JoinChannel {
+export default interface RoomId {
   roomId: number;
 }

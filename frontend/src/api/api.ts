@@ -70,13 +70,10 @@ export class Api {
   }
 
   get_login42() {
-    return fetch(
-      `${PREFIX}${FULL_ROUTE.USER.GET_LOGIN42}`,
-      {
-        method: "GET",
-        // headers: this._headers,
-      }
-    );
+    return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_LOGIN42}`, {
+      method: "GET",
+      // headers: this._headers,
+    });
   }
 
   get_nickname(login42: string) {
@@ -116,6 +113,21 @@ export class Api {
       method: "POST",
       headers: headers,
       body: JSON.stringify({ player1, player2, winner }),
+    });
+  }
+  get_user_profile(pongUsername: string | undefined) {
+    if (pongUsername != undefined) {
+      return fetch(
+        `${PREFIX}${FULL_ROUTE.USER.GET_USER_PROFILE}?${new URLSearchParams({
+          pongUsername,
+        }).toString()}`,
+        {
+          method: "GET",
+        }
+      );
+    }
+    return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_USER_PROFILE}`, {
+      method: "GET",
     });
   }
 }

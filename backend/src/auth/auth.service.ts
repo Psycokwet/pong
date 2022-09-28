@@ -57,11 +57,13 @@ export class AuthService {
   }
 
   public async getUserFromAuthenticationToken(token: string) {
-    const payload: TokenPayload = this.jwtService.verify(token, {
-      secret: jwtConstants.JWT_ACCESS_TOKEN_SECRET,
-    });
-    if (payload.userId) {
-      return this.userService.getById(payload.userId);
+    if (token !== undefined && token !== '') {
+      const payload: TokenPayload = this.jwtService.verify(token, {
+        secret: jwtConstants.JWT_ACCESS_TOKEN_SECRET,
+      });
+      if (payload.userId) {
+        return this.userService.getById(payload.userId);
+      }
     }
   }
 }
