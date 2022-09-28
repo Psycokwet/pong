@@ -360,13 +360,18 @@ export class UsersService {
     const cookie = socket.handshake.headers.cookie;
     if (cookie) {
       const { Authentication: authenticationToken } = parse(cookie);
-      const user = await this.authService.getUserFromAuthenticationToken(
-        authenticationToken,
-      );
-      if (!user) {
+      try {
+        const user = await this.authService.getUserFromAuthenticationToken(
+          authenticationToken,
+        );
+        if (!user) {
+          throw new WsException('Invalid credentials.');
+        }
+        return user;
+      } catch (e) {
+        console.error(e.message);
         throw new WsException('Invalid credentials.');
       }
-      return user;
     }
   }
 

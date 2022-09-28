@@ -63,18 +63,23 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
-    const user = await this.userService.getUserFromSocket(client);
+    try {
+      const user = await this.userService.getUserFromSocket(client);
 
-    UserGateway.userWebsockets = UserGateway.userWebsockets.filter(
-      (websocket) => websocket.socketId !== client.id,
-    );
+      UserGateway.userWebsockets = UserGateway.userWebsockets.filter(
+        (websocket) => websocket.socketId !== client.id,
+      );
 
-    const disconnectingUser: UserInterface = {
-      id: user.id,
-      pongUsername: user.pongUsername,
-      status: Status.OFFLINE,
-    };
-    this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, disconnectingUser);
+      const disconnectingUser: UserInterface = {
+        id: user.id,
+        pongUsername: user.pongUsername,
+        status: Status.OFFLINE,
+      };
+      this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, disconnectingUser);
+    } catch (e) {
+      console.error(e.message);
+      return;
+    }
   }
 
   @UseGuards(JwtWsGuard)
