@@ -126,13 +126,10 @@ const GameCanvas = (
   /** END GAME LOOP */
 
   /** GAMEOVER */
-  const handleGameover = () => {
-    upgradeStep()
-  }
   useEffect(() => {
-    socket?.on(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, handleGameover);
+    socket?.on(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, upgradeStep);
     return () => {
-      socket?.off(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, handleGameover);
+      socket?.off(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, upgradeStep);
     };
   }, []);
   /** END GAMEOVER */
