@@ -15,6 +15,8 @@ import { UsersService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
 import GameRoom from 'shared/interfaces/game/GameRoom';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
+import { ChatService } from 'src/chat/chat.service';
+import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 
 
 @WebSocketGateway({
@@ -26,6 +28,7 @@ export class GameGateway {
   constructor(
     private userService: UsersService,
     private gameService: GameService,
+    private chatService: ChatService,
   ) {}
 
   @WebSocketServer()
@@ -76,11 +79,31 @@ export class GameGateway {
         () => {
           const newGameRoom = this.gameService.gameLoop(gameRoom.roomName);
 
+          this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, newGameRoom);
           if (this.gameService.isGameFinished(newGameRoom))
           {
-            clearInterval(GameService.gameIntervalList[gameRoom.roomName])
+            clearInterval(GameService.gameIntervalList[newGameRoom.roomName]);
+            this.gameService.handleGameOver(newGameRoom);
+            this.gameService.removeGameFromGameRoomList(newGameRoom);
+            client.leave(gameRoom.roomName);
+
+            const opponentId = gameRoom.gameData.player1.userId === user.id ?
+              gameRoom.gameData.player2.userId :
+              gameRoom.gameData.player1.userId;
+            const receiverSocketId: UsersWebsockets = this.chatService.getUserIdWebsocket(opponentId);
+            if (receiverSocketId) {
+              const receiverSocket = this.server.sockets.sockets.get(
+                receiverSocketId.socketId,
+              );
+              receiverSocket.leave(gameRoom.roomName);
+            }
+            gameRoom.spectatorsId
+              .map(spectatorId => this.chatService.getUserIdWebsocket(spectatorId))
+              .map(clientId => this.server.sockets.sockets.get(
+                clientId.socketId
+              ))
+              .map(clientSocket => clientSocket.leave(gameRoom.roomName));
           }
-          this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, newGameRoom);
         }, 10);
     }
   }
@@ -111,6 +134,8 @@ export class GameGateway {
       // error
       return;
     }
+
+    gameRoom.spectatorsId.push(payload.userId);
 
     client.join(gameRoom.roomName);
   }
