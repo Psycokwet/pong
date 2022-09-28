@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
 import ActionOnUser from 'shared/interfaces/ActionOnUser';
+import { Muted } from './mute-list.entity';
 @Injectable()
 export class ChatService {
   constructor(
@@ -28,6 +29,8 @@ export class ChatService {
     private roomsRepository: Repository<Room>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Muted)
+    private mutedRepository: Repository<Muted>,
     private userService: UsersService,
   ) {}
   public static userWebsockets: UsersWebsockets[] = [];
@@ -121,6 +124,12 @@ export class ChatService {
       relations: {
         members: true,
       },
+    });
+  }
+
+  public async getMutedUser(userId: number, roomId: number) {
+    return this.mutedRepository.findOne({
+      where: { user_id: userId, room_id: roomId },
     });
   }
 
@@ -224,6 +233,23 @@ export class ChatService {
     );
 
     room.save();
+  }
+
+  async addMutedUser(userToMute: User, room: Room, muteTime: number) {
+    const addMuted = Muted.create({
+      room_id: room.id,
+      user_id: userToMute.id,
+      unmuteAt: Date.now() + muteTime,
+    });
+
+    await addMuted.save();
+  }
+
+  async unmuteUser(userIdToUnmute: number, roomId: number) {
+    return await Muted.delete({
+      user_id: userIdToUnmute,
+      room_id: roomId,
+    });
   }
 
   async saveMessage(content: string, author: User, channel: Room) {
