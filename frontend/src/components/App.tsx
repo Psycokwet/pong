@@ -85,14 +85,18 @@ function App() {
       api
         .refreshToken()
         .then(res => {
-          if (res.status !== 200) {
-            setConnectedState(() => {
+          setConnectedState(current => {
+            let result = current;
+            if (res.status !== 200 && current!== connectionStatusEnum.Disconnected) {
               console.error(res);
-              return connectionStatusEnum.Disconnected;
-            })
-          }
+              result = connectionStatusEnum.Disconnected
+            } else if (res.status === 200 && current!== connectionStatusEnum.Connected) {
+              result = connectionStatusEnum.Connected
+            }
+            return result;
+          })
         });
-    }, 600_000);
+    }, 1_000);
 
     return () => {
       clearInterval(interval);
