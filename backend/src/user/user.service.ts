@@ -23,6 +23,7 @@ import { UserInterface } from 'shared/interfaces/User';
 import { v4 as uuidv4 } from 'uuid';
 import { createReadStream } from 'fs';
 import { join } from 'path';
+import UserProfile from 'shared/interfaces/UserProfile';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -161,7 +162,7 @@ export class UsersService {
       const file = createReadStream(join(process.cwd(), `${picture_path}`));
       profilePicture = new StreamableFile(file);
     } catch (error) {}
-    const profileElements = {
+    const profileElements: UserProfile = {
       pongUsername: user.pongUsername,
       userRank: await await this.getUserRank(user),
       userHistory: await this.getUserHistory(user),
@@ -208,7 +209,12 @@ export class UsersService {
       where: [{ player1_id: user.id }, { player2_id: user.id }],
     });
 
-    if (!games) return {};
+    if (!games)
+      return {
+        nbGames: 0,
+        nbWins: 0,
+        games: [],
+      };
 
     const nbGames = games.length;
     const nbWins = games.filter((game) => {
