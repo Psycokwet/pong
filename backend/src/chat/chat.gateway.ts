@@ -63,7 +63,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const isRegistered = ChatService.userWebsockets.find(
         (element) => element.userId === user.id,
       );
-      
+
       if (!isRegistered) {
         const newWebsocket = { userId: user.id, socketId: client.id };
         ChatService.userWebsockets = [
@@ -72,7 +72,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         ];
       }
     } catch (e) {
-      console.error(e.message)
+      console.error(e.message);
     }
   }
 
@@ -92,8 +92,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.in(this.channelLobby).emit(
       ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
       await this.chatService.getAllPublicRooms(),
-      await this.chatService.getAllAttachedRooms(payload.userId),
-      await this.chatService.getAllDMRooms(payload.userId),
       /** Either we send all 3 objects in 1 call from JOIN_CHANNEL_LOBBY_REQUEST, or we
        * use the below 2 routes along with this one individually.
        * I don't know what Matthieu will need so I'm keeping it like this for now,
@@ -226,6 +224,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         channelId: newDMRoom.id,
         channelName: newDMRoom.channelName,
       });
+    this.joinDMChannelLobby(client, payload);
   }
 
   /* ATTACH USER TO CHANNEL */
