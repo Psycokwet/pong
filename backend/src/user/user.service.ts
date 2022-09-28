@@ -163,7 +163,7 @@ export class UsersService {
     } catch (error) {}
     const profileElements = {
       pongUsername: user.pongUsername,
-      userRank: await (await this.getUserRank(user)).userRank,
+      userRank: await await this.getUserRank(user),
       userHistory: await this.getUserHistory(user),
       profilePicture: profilePicture,
     };
@@ -171,7 +171,10 @@ export class UsersService {
   }
 
   async getUserRank(user: User) {
-    const level = Math.log(user.xp);
+    let level: number;
+
+    if (user.xp !== 0) level = Math.log(user.xp);
+    else level = 0;
 
     /* Keeping the below 2 comments to remind myself of queries */
     // SELECT id, username, RANK() OVER(ORDER BY public.user.xp DESC) Rank FROM "user"  --  subquery
