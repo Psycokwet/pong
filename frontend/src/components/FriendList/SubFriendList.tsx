@@ -1,79 +1,54 @@
 import React from "react";
-import { userStatusEnum } from "./FriendList";
 import { BsCircleFill } from "react-icons/bs";
-import { Routes, Link } from "react-router-dom";
+import { User } from "/shared/interfaces/User";
+import Friend from "./Friend"
+import { UserStatus } from "./DropDownFriendList"
+import { Socket } from "socket.io-client";
+import { UserMenu } from "./Friend"
 
 type SubFriendListProps = {
-  friend_list: {
-    login: string;
-    nickname: string;
-    status: userStatusEnum;
-    image_url: string;
-  }[];
+  userFriendList: User[];
   input: string;
-  group_status: userStatusEnum;
-  color: string;
-  group_name: string;
-  handle_click?: React.MouseEventHandler<HTMLButtonElement>;
-  group_button_name?: string;
+  subList: UserStatus;
+  socket: Socket | undefined
 };
 
 const SubFriendList: React.FC<SubFriendListProps> = ({
-  friend_list,
+  userFriendList,
   input,
-  group_status,
-  color,
-  group_name,
-  handle_click,
-  group_button_name,
+  subList,
+  socket,
 }) => {
-
+  const filterList = (value:User) => {
+    return (value.status === subList.status)
+  }
+  const menu:UserMenu = {
+    challenge:subList.status===online,
+    watch:subList.status===playing,
+    ban:false,
+    mute:false,
+    setAdmin:false,
+    isAdmin:false,
+  }
   return (
     <>
       {/* Group Name */}
       <div className="flex items-center font-bold">
         <span className="px-2">
-          <BsCircleFill size="15" className={`${color}`} />
+          <BsCircleFill size="15" className={`${subList.color}`} />
         </span>
-        {group_name}
+        {subList.groupName}
       </div>
 
-      {friend_list?.map((friend) => {
-        if (friend.status === group_status)
-          return (
-            <ul
-              key={friend.login}
-              className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer
-              ${friend.nickname.startsWith(input) ? "block" : "hidden"}`}
-            >
-              {/* Avatar and Nickname */}
-              <li>
-                <Link
-                  to={`/profile/${friend.login}`}
-                  className="grid grid-cols-2 m-2"
-                >
-                  <img
-                    src={friend.image_url}
-                    alt="Avatar"
-                    className="w-10 rounded-3xl"
-                  />
-                  <strong>{friend.nickname}</strong>
-                </Link>
-              </li>
-
-              {/* Button */}
-              {group_button_name ? (
-                <button
-                  className={`rounded-xl bg-gray-600 m-2 hover:bg-gray-800 ${color}`}
-                  onClick={handle_click}
-                >
-                  {group_button_name}
-                </button>
-              ) : (
-                ""
-              )}
-            </ul>
-          );
+      {userFriendList?.filter(filterList).map((friend) => {
+        return (
+          <Friend
+            friend={friend}
+            input={input}
+            socket={socket}
+            menu={menu}
+          />
+        );
       })}
     </>
   );

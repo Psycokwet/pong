@@ -7,7 +7,6 @@ import Messages from "./Messages/Messages";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
-import { User } from "/shared/interfaces/User";
 
 function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])

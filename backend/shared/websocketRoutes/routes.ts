@@ -47,6 +47,9 @@ export const ROUTES_BASE = {
     JOIN_GAME_LOBBY_REQUEST: 'joinGameLobbyRequest',
     /** CREATE GAME */
     CREATE_GAME_REQUEST: 'createGameRequest',
+    /** CREATE CHALLENGE */
+    CREATE_CHALLENGE_REQUEST: 'createChallengeRequest',
+    NOTIF_CHALLENGE_CONFIRM: 'notifChallengeConfirm',
     // CONFIRM_GAME_CREATION: 'confirmGameCreation',
     /** JOIN GAME */
     JOIN_GAME_REQUEST: 'joinGameRequest',
