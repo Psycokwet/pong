@@ -152,13 +152,12 @@ export class UsersService {
   }
 
   async getUserProfile(profile: User) {
-    const profileElements = [
-      { pongUsername: profile.pongUsername },
-      { userRank: await this.getUserRank(profile) },
-      { userHistory: await this.getUserHistory(profile) },
-      { profilePicture: await this.getPicture(profile) },
-    ];
-
+    const profileElements = {
+      pongUsername: profile.pongUsername,
+      userRank: await this.getUserRank(profile),
+      userHistory: await this.getUserHistory(profile),
+      profilePicture: await this.getPicture(profile),
+    };
     return profileElements;
   }
 
