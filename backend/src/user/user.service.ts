@@ -83,7 +83,7 @@ export class UsersService {
       pongUsername: uuidv4(),
       email: dto.email,
       xp: 0,
-      is_2fa_activated: false,
+      isTwoFactorAuthenticationActivated: false,
     });
 
     try {
@@ -277,17 +277,17 @@ export class UsersService {
     });
   }
 
-  async get2fa(login42: string) {
+  async getTwoFactorAuthentication(login42: string) {
     const user = await this.findOne(login42);
 
-    return user.is_2fa_activated;
+    return user.isTwoFactorAuthenticationActivated;
   }
-  async set2fa(login42: string, value: boolean) {
+  async setTwoFactorAuthentication(login42: string, value: boolean) {
     const user = await this.findOne(login42);
 
     /* We use TypeORM's update function to update our entity */
     await this.usersRepository.update(user.id, {
-      is_2fa_activated: value,
+      isTwoFactorAuthenticationActivated: value,
     });
   }
   async getPongUsername(login42: string) {
