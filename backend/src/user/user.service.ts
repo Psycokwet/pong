@@ -5,6 +5,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Request,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -15,9 +16,10 @@ import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
 import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
-import { PlayGameDto } from './play-game.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
+import { UserInterface } from 'shared/interfaces/User';
+import { v4 as uuidv4 } from 'uuid';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -59,6 +61,16 @@ export class UsersService {
     return user;
   }
 
+  async findOneByPongUsername(pongUsername: string): Promise<User> {
+    const user = await this.usersRepository.findOneBy({
+      pongUsername: pongUsername,
+    });
+
+    if (!user) throw new BadRequestException({ error: 'User not found' });
+
+    return user;
+  }
+
   getFrontUsername(user: User) {
     if (!user.pongUsername) return user.login42;
     return user.pongUsername;
@@ -68,6 +80,7 @@ export class UsersService {
     // database operation
     const user = User.create({
       login42: dto.login42,
+      pongUsername: uuidv4(),
       email: dto.email,
       xp: 0,
       is_2fa_activated: false,
@@ -137,8 +150,8 @@ export class UsersService {
     });
   }
 
-  async getUserRank(login42: string) {
-    const user = await this.findOne(login42);
+  async getUserRank(@Request() req) {
+    const user = await this.findOne(req.user);
 
     const level = Math.log(user.xp);
 
@@ -195,50 +208,6 @@ export class UsersService {
     };
   }
 
-  async playGame(dto: PlayGameDto) {
-    const player1 = await this.findOne(dto.player1);
-    const player2 = await this.findOne(dto.player2);
-    const winner = await this.findOne(dto.winner);
-
-    if (winner.id !== player1.id && winner.id !== player2.id) {
-      throw new BadRequestException({
-        error: 'Winner has to either be player 1 or player 2',
-      });
-    }
-
-    const loser =
-      winner.id === player1.id
-        ? await this.findOne(player2.login42)
-        : await this.findOne(player1.login42);
-
-    const newGame = Game.create({
-      player1_id: player1.id,
-      player2_id: player2.id,
-      winner: winner.id,
-      player1: player1,
-      player2: player2,
-    });
-
-    await newGame.save();
-
-    /* Always increase the winner's XP by 2 */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(winner)
-      .set({ xp: winner.xp + 2 })
-      .where({ id: winner.id })
-      .execute();
-
-    /* If the loser's xp is > 0, increases only by 1 */
-    this.usersRepository
-      .createQueryBuilder()
-      .update(loser)
-      .set({ xp: loser.xp + 1 })
-      .where('id = :id', { id: loser.id })
-      .andWhere('xp > 0', { xp: loser.xp })
-      .execute();
-  }
-
   async addFriend(dto: AddFriendDto, login42: string) {
     /* First we get the caller (person who is initiating the friend request) 
     and friend in our db */
@@ -278,18 +247,25 @@ export class UsersService {
     await addFriend.save();
   }
 
-  async getFriendsList(login42: string) {
+  async getFriendsList(caller: User) {
     /* Same logic as getUserHistory */
-    const user = await this.findOne(login42);
-
-    const friendsList = await this.friendRepository.find({
+    const rawFriendsList = await this.friendRepository.find({
       relations: {
         user: true,
       },
-      where: { user_id: user.id },
+      where: { user_id: caller.id },
     });
 
-    return friendsList;
+    const orderedFriendsList: UserInterface[] = await rawFriendsList.map(
+      (friend) => {
+        return {
+          id: friend.user.id,
+          pongUsername: this.getFrontUsername(friend.user),
+        };
+      },
+    );
+
+    return orderedFriendsList;
   }
 
   async setTwoFactorAuthenticationSecret(secret: string, login42: string) {
