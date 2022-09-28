@@ -27,9 +27,12 @@ import { User } from 'shared/interfaces/User';
 import * as bcrypt from 'bcrypt';
 import JoinChannel from 'shared/interfaces/JoinChannel';
 import ChannelData from 'shared/interfaces/ChannelData';
+import UserPrivileges from 'shared/interfaces/UserPrivileges';
 import Message from 'shared/interfaces/Message';
 import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
+import roomId from 'shared/interfaces/JoinChannel';
+import RoomId from 'shared/interfaces/JoinChannel';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -293,7 +296,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST)
   async joinRoom(
-    @MessageBody() { roomId }: JoinChannel,
+    @MessageBody() { roomId }: RoomId,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
@@ -349,7 +352,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /** GET ATTACHED USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
-  async getAttachedUsersInChannel(@MessageBody() roomId: number) {
+  async attachedUsersList(@MessageBody() roomId: number) {
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
 
     const attachedUsers = await this.chatService.getAttachedUsersInChannel(
@@ -471,5 +474,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server
       .in(data.channelName)
       .emit(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, demotedUser);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
+  async getUserPrivileges(
+    @MessageBody() data: RoomId,
+    @UserPayload() payload: any,
+  ) {
+    const room = await this.chatService.getRoomWithRelations(
+      { id: data.roomId },
+      { owner: true, admins: true, members: true },
+    );
+
+    if (!room) throw new BadRequestException('Channel does not exist');
+
+    const privilege = await this.chatService.getUserPrivileges(
+      room,
+      payload.userId,
+    );
+
+    this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
   }
 }
