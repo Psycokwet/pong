@@ -161,15 +161,12 @@ export class UsersService {
       const file = createReadStream(join(process.cwd(), `${picture_path}`));
       profilePicture = new StreamableFile(file);
     } catch (error) {}
-    console.log('Ah que cc bob 1 finished');
-    console.log('Ah que cc bob 2 finished');
     const profileElements = {
       pongUsername: user.pongUsername,
       userRank: await (await this.getUserRank(user)).userRank,
       userHistory: await this.getUserHistory(user),
       profilePicture: profilePicture,
     };
-    console.log('Ah que cc bob  finished');
     return profileElements;
   }
 
