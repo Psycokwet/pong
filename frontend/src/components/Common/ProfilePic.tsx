@@ -4,13 +4,13 @@ import { Api } from "../../api/api";
 const DEFAULT_AVATAR: string =
   "https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg";
 
-type Props = {
+type ProfilePicProps = {
   avatar: string;
   setAvatar: React.Dispatch<React.SetStateAction<string>>; // I guess we will need to add some props for size adaptation :)
 };
 
 const api = new Api();
-const ProfilePic: React.FC<Props> = ({ avatar, setAvatar }) => {
+const ProfilePic: React.FC<ProfilePicProps> = ({ avatar, setAvatar }) => {
   useEffect(() => {
     api
       .getPicture()
