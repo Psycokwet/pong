@@ -19,21 +19,19 @@ const Play = () => {
   const [canvasSize, setCanvasSize] = useState<Position>({x: 0, y: 0})
 
   useEffect(() => {
-    return () => {
-      const screenIsVertical =  window.innerHeight >  window.innerWidth;
-      const newCanvasSize: Position = { x: 0, y: 0 };
-      const referenceSize = screenIsVertical ?
-        window.innerWidth:
-        window.innerHeight - window.innerHeight / 3;
-      if (screenIsVertical) {
-        newCanvasSize.x = referenceSize;
-        newCanvasSize.y = referenceSize / 4 * 3
-        setCanvasSize(newCanvasSize)
-      } else {
-        newCanvasSize.y = referenceSize;
-        newCanvasSize.x = referenceSize / 3 * 4;
-        setCanvasSize(newCanvasSize)
-      }
+    const screenIsVertical =  window.innerHeight >  window.innerWidth;
+    const newCanvasSize: Position = { x: 0, y: 0 };
+    const referenceSize = screenIsVertical ?
+      window.innerWidth:
+      window.innerHeight - window.innerHeight / 3;
+    if (screenIsVertical) {
+      newCanvasSize.x = referenceSize;
+      newCanvasSize.y = referenceSize / 4 * 3
+      setCanvasSize(newCanvasSize)
+    } else {
+      newCanvasSize.y = referenceSize;
+      newCanvasSize.x = referenceSize / 3 * 4;
+      setCanvasSize(newCanvasSize)
     }
   }, []);
 
