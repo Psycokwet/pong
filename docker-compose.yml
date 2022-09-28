@@ -1,3 +1,4 @@
+#development
 version: '3.9'
 services:
   nginx:
@@ -22,8 +23,8 @@ services:
       - ./frontend/src:/usr/src/app/src:ro 
       - ./backend/shared:/usr/src/app/shared:ro 
     environment:
-      - VITE_CONTEXT=DEV
-      # - VITE_CONTEXT=MOCKUP
+      - VITE_CONTEXT="DEV"
+      # - VITE_CONTEXT="MOCKUP"
     restart: unless-stopped
 
   #  # Don't forget to uncomment the following conteneur if you want to have the mockup available :) 
