@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Menu, MenuItem, MenuButton, ControlledMenu, useMenuState } from '@szhsin/react-menu';
+import { useState, useEffect } from "react";
+import { MenuItem, ControlledMenu, useMenuState } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
 import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
@@ -11,7 +11,6 @@ import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 export type UserMenu = {
   challenge:boolean,
   watch:boolean,
-  ban:boolean,
   privileges:number,
   friend:boolean,
 }
@@ -26,7 +25,7 @@ const Friend = ({friend, input, socket, menu} :{
   const [menuProps, toggleMenu] = useMenuState();
   const [userOwnership, setOwnership] = useState<number>(Privileges.MEMBER);
 
-  const SendDm = () => {
+  const SendDirectMessage = () => {
     socket?.emit(ROUTES_BASE.CHAT.CREATE_DM, friend.id)
   }
   const Challenge = () => {
@@ -48,7 +47,7 @@ const Friend = ({friend, input, socket, menu} :{
     socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, SetupOwnership);
     return () => {
       socket?.off(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, SetupOwnership);
-      }});
+  }}, []);
   const handleClick = () => {
     console.log("Redirect to User Page");
     return (
@@ -57,7 +56,7 @@ const Friend = ({friend, input, socket, menu} :{
     )
   }
   return (
-    <Link
+    <div
       key={friend.pongUsername}
       onContextMenu={(e) => {
           e.preventDefault();
@@ -67,7 +66,6 @@ const Friend = ({friend, input, socket, menu} :{
       }}
       className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
       ${friend.pongUsername.startsWith(input) ? "block" : "hidden"}`}
-      to={`/profile/${friend.pongUsername}`}
     >
       {/* Avatar and Nickname */}
       <div
@@ -86,35 +84,38 @@ const Friend = ({friend, input, socket, menu} :{
         onClose={() => toggleMenu(false)}
       >
         <MenuItem>
-          <Link to="/chat" onClick={SendDm}>SendDM</Link>
-        </MenuItem>
-        <MenuItem className={ menu.challenge ? "" : "hidden" }>
-          <Link to="/chat" onClick={Challenge}>Challenge</Link>
-        </MenuItem>
-        <MenuItem className={ menu.watch ? "" : "hidden" }>
-          <Link to="/chat">Watch</Link>
-        </MenuItem>
-        <MenuItem className={ menu.friend ? "hidden" : "" }>
-          <Link to="/chat" onClick={AddFriend}>Watch</Link>
+          <Link to={`/profile/${friend.pongUsername}`}>SeeProfile</Link>
         </MenuItem>
         <MenuItem>
-          <Link to="/chat">Block</Link>
+          <Link to="/chat" onClick={SendDirectMessage}>Send a Direct Message</Link>
+        </MenuItem>
+        <MenuItem className={ menu.challenge ? "" : "hidden" }>
+          <Link to="/play" onClick={Challenge}>Challenge</Link>
+        </MenuItem>
+        <MenuItem className={ menu.watch ? "" : "hidden" }>
+          <Link to="/play">Watch</Link>
+        </MenuItem>
+        <MenuItem className={ menu.friend ? "hidden" : "" }>
+          <div onClick={AddFriend}>Add as Friend</div>
+        </MenuItem>
+        <MenuItem>
+          <div>Block</div>
         </MenuItem>
         <MenuItem className={ menu.privileges === Privileges.MEMBER ? "hidden" : "" }
           disabled={ userOwnership > menu.privileges }
         >
-          <Link to="/chat" onClick={Mute}>Mute</Link>
+          <div onClick={Mute}>Mute</div>
         </MenuItem>
         <MenuItem className={ menu.privileges === Privileges.MEMBER ? "hidden" : "" }
           disabled={ userOwnership > menu.privileges }
         >
-          <Link to="/chat" onClick={Ban}>Ban from Channel</Link>
+          <div onClick={Ban}>Ban from Channel</div>
         </MenuItem>
         <MenuItem className={ menu.privileges === Privileges.OWNER ? "" : "hidden" }>
-          <Link to="/chat" onClick={SetAdmin}>Give Admin Rights</Link>
+          <div onClick={SetAdmin}>Give Admin Rights</div>
         </MenuItem>
       </ControlledMenu>
-    </Link>
+    </div>
   )
 }
 

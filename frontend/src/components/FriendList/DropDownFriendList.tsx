@@ -5,34 +5,12 @@ import SubFriendList from "./SubFriendList";
 import { Socket } from "socket.io-client";
 import { UserInterface, Status } from "/shared/interfaces/UserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import { subList } from "../Common/Sublist"
 
 type DropDownFriendListProps = {
   userFriendList: UserInterface;
   socket: Socket|undefined;
 };
-
-export type UserStatus = {
-  status: Status;
-  color: string;
-  groupName: string;
-}
-const subList:UserStatus[] = [
-  {
-    status: Status.ONLINE,
-    color: "text-green-400",
-    groupName: "Online",
-  },
-  {
-    status: Status.PLAYING,
-    color: "text-yellow-400",
-    groupName: "Playing",
-  },
-  {
-    status: Status.OFFLINE,
-    color: "text-red-500",
-    groupName: "Offline",
-  },
-];
 
 const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
   socket,
@@ -70,7 +48,6 @@ const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
               menu={({
                 challenge:aSubList.status===Status.ONLINE,
                 watch:aSubList.status===Status.PLAYING,
-                ban:false,
                 privileges:Privileges.MEMBER,
                 friend:true,
               })}
