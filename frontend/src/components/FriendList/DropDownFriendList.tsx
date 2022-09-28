@@ -3,36 +3,32 @@ import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import SubFriendList from "./SubFriendList";
 import { Socket } from "socket.io-client";
-import { User } from "/shared/interfaces/User";
+import { UserInterface, Status } from "/shared/interfaces/UserInterface";
+import { UserMenu } from "./Friend"
 
 type DropDownFriendListProps = {
-  userFriendList: User;
+  userFriendList: UserInterface;
   socket: Socket|undefined;
 };
 
-export enum UserStatusEnum {
-  Online,
-  Playing,
-  Offline,
-}
 export type UserStatus = {
-  status: UserStatusEnum;
+  status: Status;
   color: string;
   groupName: string;
 }
 const subList:UserStatus[] = [
   {
-    status: UserStatusEnum.Online,
+    status: Status.ONLINE,
     color: "text-green-400",
     groupName: "Online",
   },
   {
-    status: UserStatusEnum.Playing,
+    status: Status.PLAYING,
     color: "text-yellow-400",
     groupName: "Playing",
   },
   {
-    status: UserStatusEnum.Offline,
+    status: Status.OFFLINE,
     color: "text-red-500",
     groupName: "Offline",
   },
@@ -70,6 +66,14 @@ const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
               input={inputValue}
               subList={aSubList}
               socket={socket}
+              roomId={0}
+              menu={({
+                challenge:aSubList.status===Status.ONLINE,
+                watch:aSubList.status===Status.PLAYING,
+                ban:false,
+                isOwner:false,
+                isAdmin:false,
+              })}
             />
           );
         })}
