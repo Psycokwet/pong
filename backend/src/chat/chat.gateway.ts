@@ -22,14 +22,18 @@ import { UsersService } from 'src/user/user.service';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import CreateChannel from '../../shared/interfaces/CreateChannel';
 import SearchChannel from '../../shared/interfaces/SearchChannel';
-import { User } from 'shared/interfaces/User';
+import { UserInterface } from 'shared/interfaces/User';
 
 import * as bcrypt from 'bcrypt';
 import JoinChannel from 'shared/interfaces/JoinChannel';
 import ChannelData from 'shared/interfaces/ChannelData';
+import UserPrivileges from 'shared/interfaces/UserPrivileges';
 import Message from 'shared/interfaces/Message';
 import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
+import roomId from 'shared/interfaces/JoinChannel';
+import RoomId from 'shared/interfaces/JoinChannel';
+import { User } from 'src/user/user.entity';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -293,7 +297,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST)
   async joinRoom(
-    @MessageBody() { roomId }: JoinChannel,
+    @MessageBody() { roomId }: RoomId,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
@@ -320,7 +324,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room.messages.map((message) => {
         const messageForFront: Message = {
           id: message.id,
-          author: this.userService.getFrontUsername(message.author),
+          author: message.author.pongUsername,
           time: message.createdAt,
           content: message.content,
         };
@@ -349,7 +353,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /** GET ATTACHED USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
-  async getAttachedUsersInChannel(@MessageBody() roomId: number) {
+  async attachedUsersList(@MessageBody() roomId: number) {
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
 
     const attachedUsers = await this.chatService.getAttachedUsersInChannel(
@@ -385,7 +389,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const messageForFront: Message = {
       id: newMessage.id,
-      author: this.userService.getFrontUsername(newMessage.author),
+      author: newMessage.author.pongUsername,
       time: newMessage.createdAt,
       content: newMessage.content,
     };
@@ -425,7 +429,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.chatService.setAdmin(room, newAdmin);
 
-    const promotedUser: User = {
+    const promotedUser: UserInterface = {
       id: newAdmin.id,
       pongUsername: newAdmin.pongUsername,
     };
@@ -463,7 +467,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.chatService.unsetAdmin(room, oldAdmin);
 
-    const demotedUser: User = {
+    const demotedUser: UserInterface = {
       id: oldAdmin.id,
       pongUsername: oldAdmin.pongUsername,
     };
@@ -471,5 +475,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server
       .in(data.channelName)
       .emit(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, demotedUser);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
+  async getUserPrivileges(
+    @MessageBody() data: RoomId,
+    @UserPayload() payload: any,
+  ) {
+    const room = await this.chatService.getRoomWithRelations(
+      { id: data.roomId },
+      { owner: true, admins: true, members: true },
+    );
+
+    if (!room) throw new BadRequestException('Channel does not exist');
+
+    const privilege = await this.chatService.getUserPrivileges(
+      room,
+      payload.userId,
+    );
+
+    this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
   }
 }

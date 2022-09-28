@@ -28,7 +28,10 @@ export class TwoFactorAuthStrategy extends PassportStrategy(
 
   async validate(request: Request, payload: TokenPayload) {
     const user: User = await this.userService.getById(payload.userId);
-    if (!user.is_2fa_activated || payload.is2FAAuthenticated) {
+    if (
+      !user.isTwoFactorAuthenticationActivated ||
+      payload.is2FAAuthenticated
+    ) {
       const refreshToken = request.cookies?.Refresh;
       return this.userService.getUserIfRefreshTokenMatches(
         refreshToken,

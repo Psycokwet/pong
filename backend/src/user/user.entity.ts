@@ -23,7 +23,7 @@ export class User extends BaseEntity {
   @Column({ length: 128, unique: true })
   login42: string;
 
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: false, unique: true })
   pongUsername: string;
 
   @Column({ length: 128, unique: true })
@@ -66,7 +66,7 @@ export class User extends BaseEntity {
   @Column({
     nullable: false,
   })
-  public is_2fa_activated: boolean;
+  public isTwoFactorAuthenticationActivated: boolean;
 
   @Column({
     nullable: true,
