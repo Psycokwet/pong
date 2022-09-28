@@ -38,14 +38,11 @@ export class UserController {
     @Request() req: RequestWithUser,
     @Param() params: GetUserProfileDto,
   ) {
-    console.log('Ah que cc bob');
     let user: User = null;
     if (!params.pongUsername)
       user = await this.usersService.findOne(req.user.login42);
     else
       user = await this.usersService.findOneByPongUsername(params.pongUsername);
-
-    console.log('Ah que cc bob almost finished');
     return await this.usersService.getUserProfile(user);
   }
 

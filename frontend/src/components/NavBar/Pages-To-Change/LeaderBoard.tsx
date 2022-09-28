@@ -51,7 +51,7 @@ const LeaderBoard = () => {
         console.log("get_user_profile", content);
       });
     });
-    api.get_user_profile().then((res: Response) => {
+    api.get_user_profile(undefined).then((res: Response) => {
       console.log("get_user_profile", res);
       res.json().then((content) => {
         console.log("get_user_profile", content);
