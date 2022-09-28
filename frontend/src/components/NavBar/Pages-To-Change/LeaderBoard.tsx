@@ -17,8 +17,8 @@ const LeaderBoard = () => {
         console.log("get_friend_list", content);
       });
     });
-    api.set_nickname("ponnnny").then((res: Response) => {
-      console.log("set_nickname", res);
+    api.set_pong_username("bla bla 2").then((res: Response) => {
+      console.log("set_nickname is ok", res);
       if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
         res.json().then((content) => {
           console.log("set_nickname", content);
@@ -31,13 +31,14 @@ const LeaderBoard = () => {
           console.log("get_login42", content);
         });
     });
-    api.get_nickname("scarboni").then((res: Response) => {
-      console.log("get_nickname", res);
+    api.get_pong_username().then((res: Response) => {
+      console.log("get_pong_username", res);
       res.json().then((content) => {
-        console.log("get_nickname", content);
+        console.log("get_pong_username is ok, result:", content);
       });
     });
   };
+
   const sendRequestHisRank = () => {
     api.get_user_rank().then((res: Response) => {
       console.log("get_user_rank", res);
