@@ -69,7 +69,7 @@ export class ChatService {
           };
         }),
       );
-      return attachedRoomList;
+    return attachedRoomList;
   }
 
   public async getAllDMRooms(userId: number) {
@@ -288,11 +288,8 @@ export class ChatService {
     return room.members;
   }
 
-  async getUserPrivileges(roomId: number, userId: number) {
-    const room = await this.getRoomWithRelations(
-      { id: roomId },
-      { owner: true, admins: true, members: true },
-    );
+  getUserPrivileges(room: Room, userId: number): { privilege: Privileges } {
+    if (room.isDM === true) return { privilege: Privileges.MEMBER };
 
     if (userId === room.owner.id) return { privilege: Privileges.OWNER };
 
