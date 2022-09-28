@@ -115,7 +115,17 @@ export class Api {
       body: JSON.stringify({ player1, player2, winner }),
     });
   }
-  get_user_profile() {
+  get_user_profile(pongUsername: string | undefined) {
+    if (pongUsername != undefined) {
+      return fetch(
+        `${PREFIX}${FULL_ROUTE.USER.GET_USER_PROFILE}?${new URLSearchParams(
+          new URLSearchParams({ pongUsername }).toString()
+        )}`,
+        {
+          method: "GET",
+        }
+      );
+    }
     return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_USER_PROFILE}`, {
       method: "GET",
     });

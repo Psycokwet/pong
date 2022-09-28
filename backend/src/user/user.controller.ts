@@ -9,6 +9,7 @@ import {
   StreamableFile,
   UseInterceptors,
   UploadedFile,
+  Param,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -22,6 +23,7 @@ import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { PlayGameDto } from './play-game.dto';
 import { User } from './user.entity';
 import { GetUserProfileDto } from './get-user-profile.dto';
+import RequestWithUser from 'src/auth/requestWithUser.interface';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
@@ -31,12 +33,20 @@ export class UserController {
 
   @Get(ROUTES_BASE.USER.GET_USER_PROFILE)
   @UseGuards(JwtAuthGuard)
-  async getUserProfile(@Body() dto: GetUserProfileDto) {
-    const profile = await this.usersService.findOneByPongUsername(
-      dto.pongUsername,
-    );
+  async getUserProfile(
+    // @Body() dto: GetUserProfileDto, Pas de body dans un get merci :)
+    @Request() req: RequestWithUser,
+    @Param() params: GetUserProfileDto,
+  ) {
+    console.log('Ah que cc bob');
+    let user: User = null;
+    if (!params.pongUsername)
+      user = await this.usersService.findOne(req.user.login42);
+    else
+      user = await this.usersService.findOneByPongUsername(params.pongUsername);
 
-    return await this.usersService.getUserProfile(profile);
+    console.log('Ah que cc bob almost finished');
+    return await this.usersService.getUserProfile(user);
   }
 
   @Get(ROUTES_BASE.USER.GET_USER_RANK)
