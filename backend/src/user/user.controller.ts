@@ -10,10 +10,10 @@ import {
   UseInterceptors,
   UploadedFile,
   Param,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { createReadStream } from 'fs';
 import { join } from 'path';
@@ -24,6 +24,7 @@ import { TwoFactorAuthGuard } from 'src/two-factor-auth/two-factor-auth.guard';
 import { User } from './user.entity';
 import { GetUserProfileDto } from './get-user-profile.dto';
 import RequestWithUser from 'src/auth/requestWithUser.interface';
+import { AddFriendDto } from './add-friend.dto';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
@@ -43,6 +44,10 @@ export class UserController {
       user = await this.usersService.findOne(req.user.login42);
     else
       user = await this.usersService.findOneByPongUsername(params.pongUsername);
+
+    if (!user) {
+      throw new BadRequestException({ error: 'User not found' });
+    }
     return await this.usersService.getUserProfile(user);
   }
 
@@ -64,7 +69,7 @@ export class UserController {
     const friend = await this.usersService.findOneByPongUsername(
       dto.friend_to_add,
     );
-    await this.usersService.addFriend(dto, req.user);
+    await this.usersService.addFriend(friend, req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)
@@ -72,20 +77,19 @@ export class UserController {
   async getFriendsList(@Request() req) {
     return await this.usersService.getFriendsList(req.user);
   }
-
   @Get(ROUTES_BASE.USER.GET_LOGIN42)
   @UseGuards(TwoFactorAuthGuard)
   async getLogin42(@Request() req) {
     return await this.usersService.getLogin42(req.user.login42);
   }
 
-  @Get(ROUTES_BASE.USER.GET_NICKNAME)
+  @Get(ROUTES_BASE.USER.GET_PONG_USERNAME)
   @UseGuards(TwoFactorAuthGuard)
   async getPongUsername(@Request() req) {
     return await this.usersService.getPongUsername(req.user.login42);
   }
 
-  @Post(ROUTES_BASE.USER.SET_NICKNAME)
+  @Post(ROUTES_BASE.USER.SET_PONG_USERNAME)
   @UseGuards(TwoFactorAuthGuard)
   async setPongUsername(
     @Body() newPongUsername: pongUsernameDto,
