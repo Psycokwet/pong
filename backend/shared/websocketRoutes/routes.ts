@@ -33,9 +33,6 @@ export const ROUTES_BASE = {
     RECEIVE_MESSAGE: 'receiveMessage',
     /** MESSAGE HISTORY */
     MESSAGE_HISTORY: 'messageHistory',
-    /** CHANNEL ATTACHED USER LIST */
-    UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
-    ATTACHED_USER_LIST_SENT: 'attachedUserListSent',
     /** ATTACH TO CHANNEL REQUEST */
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
     /** SET / UNSET ADMIN */

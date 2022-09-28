@@ -2,7 +2,7 @@ import React from "react";
 import { BsCircleFill } from "react-icons/bs";
 import { UserInterface } from "/shared/interfaces/UserInterface";
 import Friend, { UserMenu } from "./Friend"
-import { UserStatus } from "./DropDownFriendList"
+import { UserStatus } from "../Common/Sublist"
 import { Socket } from "socket.io-client";
 
 type SubFriendListProps = {
