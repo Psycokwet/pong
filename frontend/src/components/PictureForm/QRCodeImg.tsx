@@ -1,21 +1,19 @@
-import { useState } from "react";
-import { Api } from "../../api/api";
-const api = new Api();
+import React, { useState } from "react";
+type QRCodeImgProps = {
+  apiCall: () => Promise<Response>;
+};
 
-export const PictureGetter = () => {
+export const QRCodeImg: React.FC<QRCodeImgProps> = ({ apiCall }) => {
   const [userPicture, setUserPicture] = useState<string>("");
 
   const submitDownloadForm = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-
-    api
-      .getPicture()
-      .then((res) => res.blob())
-      .then((myBlob) => {
+    apiCall()
+      .then((res: Response) => res.blob())
+      .then((myBlob: Blob) => {
         setUserPicture(URL.createObjectURL(myBlob));
-        console.log("get_picture is Ok");
       })
-      .catch((err) => alert(`File Download Error ${err}`));
+      .catch((err: Error) => alert(`File Download Error ${err}`));
   };
 
   return (
@@ -24,7 +22,7 @@ export const PictureGetter = () => {
         onClick={submitDownloadForm}
         className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
       >
-        View Uploaded Photo:{" "}
+        get QrCode to activate 2 fa !
       </button>
       <img
         src={userPicture ? userPicture : ""}
