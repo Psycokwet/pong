@@ -74,7 +74,7 @@ function App() {
     if (connectedState == connectionStatusEnum.Unknown) {
       api.refreshToken().then((res: Response) => {
         if (res.status !== 200) {
-          console.log(res);
+          console.error(res);
           setConnectedState(connectionStatusEnum.Disconnected);
         } else {
           setConnectedState(connectionStatusEnum.Connected);
@@ -82,16 +82,16 @@ function App() {
       });
     }
     const interval = setInterval(() => {
-      setConnectedState(() => {
-        api.refreshToken().then((res) => {
+      api
+        .refreshToken()
+        .then(res => {
           if (res.status !== 200) {
-            console.log(res);
-            return connectionStatusEnum.Disconnected;
-          } else {
-            return connectionStatusEnum.Connected;
+            setConnectedState(() => {
+              console.error(res);
+              return connectionStatusEnum.Disconnected;
+            })
           }
         });
-      });
     }, 600_000);
 
     return () => {

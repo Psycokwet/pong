@@ -11,15 +11,7 @@ import { JwtRefreshStrategy } from './jwtRefresh.strategy';
   imports: [
     UsersModule,
     PassportModule,
-    JwtModule.registerAsync({
-      useFactory: async () => {
-        return {
-          secret: jwtConstants.JWT_ACCESS_TOKEN_SECRET,
-          signOptions: { expiresIn: '60s' },
-        };
-      },
-      inject: [],
-    }),
+    JwtModule,
   ],
   providers: [JwtAuthStrategy, JwtAuthService, JwtRefreshStrategy],
   exports: [JwtModule, JwtAuthService],
