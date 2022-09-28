@@ -69,13 +69,9 @@ export class UsersService {
   }
 
   async findOneByPongUsername(pongUsername: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({
+    return this.usersRepository.findOneBy({
       pongUsername: pongUsername,
     });
-
-    if (!user) throw new BadRequestException({ error: 'User not found' });
-
-    return user;
   }
 
   getFrontUsername(user: User) {
@@ -260,11 +256,6 @@ export class UsersService {
   }
 
   async addFriend(friend: User, caller: User) {
-    /* First we get the caller (person who is initiating the friend request) 
-    and friend in our db */
-    // const caller = await this.findOne(login42);
-    // const friend = await this.findOne(dto.friend_to_add);
-
     /* Checking if the caller is adding himself (I think this should never 
       happen on the front side) */
     if (caller.id === friend.id) {
