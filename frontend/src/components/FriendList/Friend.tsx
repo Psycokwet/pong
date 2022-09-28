@@ -12,8 +12,8 @@ export type UserMenu = {
   challenge:boolean,
   watch:boolean,
   ban:boolean,
-  isOwner:boolean,
-  isAdmin:boolean,
+  privileges:number,
+  friend:boolean,
 }
 
 const Friend = ({friend, input, socket, menu} :{
@@ -24,7 +24,7 @@ const Friend = ({friend, input, socket, menu} :{
 }) => {
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
-  const [isUserOwner, setOwnership] = useState<number>(Privileges.MEMBER);
+  const [userOwnership, setOwnership] = useState<number>(Privileges.MEMBER);
 
   const SendDm = () => {
     socket?.emit(ROUTES_BASE.CHAT.CREATE_DM, friend.id)
@@ -37,6 +37,12 @@ const Friend = ({friend, input, socket, menu} :{
   const Ban = () => {
   }
   const SetAdmin = () => {
+  }
+  const AddFriend = () => {
+    socket?.emit(ROUTES_BASE.USER.ADD_FRIEND_REQUEST, friend.pongUsername);
+  }
+  const SetupOwnership = (val:number) => {
+    setOwnership(val);
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, SetupOwnership);
@@ -88,16 +94,23 @@ const Friend = ({friend, input, socket, menu} :{
         <MenuItem className={ menu.watch ? "" : "hidden" }>
           <Link to="/chat">Watch</Link>
         </MenuItem>
+        <MenuItem className={ menu.friend ? "hidden" : "" }>
+          <Link to="/chat" onClick={AddFriend}>Watch</Link>
+        </MenuItem>
         <MenuItem>
           <Link to="/chat">Block</Link>
         </MenuItem>
-        <MenuItem className={ (menu.isAdmin || menu.isOwner) && isUserOwner ? "" : "hidden" }>
+        <MenuItem className={ menu.privileges === Privileges.MEMBER ? "hidden" : "" }
+          disabled={ userOwnership > menu.privileges }
+        >
           <Link to="/chat" onClick={Mute}>Mute</Link>
         </MenuItem>
-        <MenuItem className={ menu.isAdmin ? "" : "hidden" }>
+        <MenuItem className={ menu.privileges === Privileges.MEMBER ? "hidden" : "" }
+          disabled={ userOwnership > menu.privileges }
+        >
           <Link to="/chat" onClick={Ban}>Ban from Channel</Link>
         </MenuItem>
-        <MenuItem className={ menu.isOwner ? "" : "hidden" }>
+        <MenuItem className={ menu.privileges === Privileges.OWNER ? "" : "hidden" }>
           <Link to="/chat" onClick={SetAdmin}>Give Admin Rights</Link>
         </MenuItem>
       </ControlledMenu>

@@ -4,7 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import SubFriendList from "./SubFriendList";
 import { Socket } from "socket.io-client";
 import { UserInterface, Status } from "/shared/interfaces/UserInterface";
-import { UserMenu } from "./Friend"
+import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 type DropDownFriendListProps = {
   userFriendList: UserInterface;
@@ -71,8 +71,8 @@ const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
                 challenge:aSubList.status===Status.ONLINE,
                 watch:aSubList.status===Status.PLAYING,
                 ban:false,
-                isOwner:false,
-                isAdmin:false,
+                privileges:Privileges.MEMBER,
+                friend:true,
               })}
             />
           );
