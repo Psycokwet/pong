@@ -13,6 +13,7 @@ export const ROUTES_BASE = {
     GET_NICKNAME: 'get_pong_username',
     GET_USER_RANK: 'get_user_rank',
     GET_USER_HISTORY: 'get_user_history',
+    GET_USER_PROFILE: 'get_user_profile',
   },
   AUTH: {
     ENDPOINT: '/auth/42/',
