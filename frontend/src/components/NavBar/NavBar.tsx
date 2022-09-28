@@ -28,8 +28,8 @@ export const NavBarPageList = [
     pageIcon: <HiChartBar size="28" />,
   },
   {
-    url: "/community",
-    pageName: "community",
+    url: "/chat",
+    pageName: "chat",
     pageIcon: <FaComments size="28" />,
   },
   {

@@ -1,45 +1,31 @@
 import { useEffect, useRef, useState } from "react";
-import io, { Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import Position from "/shared/interfaces/Position";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-
-const ENDPOINT = "http://localhost:8080"; // please put in env file in the future
 
 const canvasWidth = 640
 const canvasHeight = 480
 const PLAYER_HEIGHT = 100;
 const PLAYER_WIDTH = 5;
 
-/**
- * 
- * documentation 
- * https://blog.devoreve.com/2018/06/06/creer-un-pong-en-javascript/
- * https://github.com/devoreve/pong/blob/master/js/main.js
- * https://medium.com/@pdx.lucasm/canvas-with-react-js-32e133c05258
- * https://dirask.com/posts/React-mouse-button-press-and-hold-example-pzrAap
- * 
- */
-
-function GameCanvas() {
+const GameCanvas = (
+  {
+    socket,
+    setGameRoom,
+    gameRoom,
+    upgradeStep,
+  }:
+  {
+    socket: Socket,
+    setGameRoom: any,
+    gameRoom: GameRoom,
+    upgradeStep: any,
+  }
+) => {
   const canvasRef = useRef(null);
   const [coords, setCoords] = useState<Position>({x: 0, y: 0});
   const [globalCoords, setGlobalCoords] = useState<Position>({x: 0, y: 0});
-  const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined)
-  const [spectableGames, setSpectableGames] = useState<GameRoom[]>([])
-
-  /** WEBSOCKET */
-  const [socket, setSocket] = useState<Socket>();
-
-  useEffect(() => {
-    const newSocket = io(ENDPOINT, {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-    setSocket(newSocket);
-  }, []);
-  /** END WEBSOCKET */
-
 
   /** MOUSE HANDLER */
   useEffect(() => {
@@ -102,10 +88,8 @@ function GameCanvas() {
   }
 
   const handleGameUpdate = (gameRoom: GameRoom) => {
-    if (gameRoom.started === true) {
-      const canvas = canvasRef.current
-      draw(canvas, gameRoom)
-    }
+    const canvas = canvasRef.current
+    draw(canvas, gameRoom)
     setGameRoom(gameRoom)
   };
   useEffect(() => {
@@ -113,94 +97,27 @@ function GameCanvas() {
     return () => {
       socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, handleGameUpdate);
     };
-  }, [handleGameUpdate]);
+  }, []);
   /** END GAME LOOP */
 
-  /** GAME CREATION */
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, handleGameUpdate);
-    return () => {
-      socket?.off(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, handleGameUpdate);
+  /** GAMEOVER */
+  const handleGameover = () => {
+    upgradeStep()
+  }
+    useEffect(() => {
+      socket?.on(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, handleGameover);
+      return () => {
+        socket?.off(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, handleGameover);
     };
-  }, [handleGameUpdate]);
-
-  const handleCreateGame = () => {
-    socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST);
-  }
-  /** END GAME CREATION */
-
-
-
-  
-  /** GAME JOIN */
-  const handleJoinGame = () => {
-    socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST);
-  }
-  /** END GAME JOIN */
-
-  const displayPlayername = () => {
-    const playerPongUsernames = [];
-    if (gameRoom.gameData.player1.pongUsername !== '')
-      playerPongUsernames.push(
-        <p key={gameRoom.gameData.player1.pongUsername}>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
-      )
-    if (gameRoom.gameData.player2.pongUsername !== '')
-      playerPongUsernames.push(
-        <p key={gameRoom.gameData.player2.pongUsername}>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
-      )
-    return playerPongUsernames;
-  }
-
-  /** SPECTATE */
-  const handleSpectate = (roomName: string) => {
-    socket?.emit(ROUTES_BASE.GAME.JOIN_SPECTATE_REQUEST, roomName);
-  }
-  /** END SPECTACTE */
-
-  useEffect(() => {
-    socket?.emit(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST)
-  }, [socket]);
-
-  /** UPDATE SPECTABLE GAMES */
-  const updateSpectableGames = (spectableGames: GameRoom[]) => {
-    setSpectableGames(spectableGames);
-  };
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
-    return () => {
-      socket?.off(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
-    };
-  }, [updateSpectableGames]);
-  /** END UPDATE SPECTABLE GAMES */
-
+  }, []);
+  /** END GAMEOVER */
 
   return (
     <div
-      style={{padding: '3rem', backgroundColor: 'lightgray'}}
+      className="p-12 bg-gray-400"
     >
-      <h2>Final Game</h2>
-      {
-        gameRoom ? 
-          displayPlayername()
-          :
-          <>
-            <button onClick={handleCreateGame}>Create game</button>
-            <div></div>
-            <button onClick={handleJoinGame}>Join game</button>
-          </>
-      }
-      <br />
-      <h2>SPECTATE CDAI TEST</h2>
-      {
-        gameRoom ?
-          <></>
-          :
-          spectableGames.map(tempGameRoom => 
-            <div key={tempGameRoom.roomName}>
-              <button onClick={() => handleSpectate(tempGameRoom.roomName)}>{tempGameRoom.roomName}</button>
-            </div>
-          )
-      }
+      <p>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
+      <p>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
       <br />
       <canvas
         onMouseMove={handleMouseMove}

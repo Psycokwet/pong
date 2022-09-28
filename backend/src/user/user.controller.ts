@@ -21,7 +21,6 @@ import { join } from 'path';
 import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
-import { PlayGameDto } from './play-game.dto';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
@@ -46,9 +45,10 @@ export class UserController {
 
     if (!userHistory) return {};
 
-    /*  Manipulating userHistory array so we get exactly what we want.
-        The sort ensures the latest games are returned first. */
-
+    /**
+     * Manipulating userHistory array so we get exactly what we want.
+     * The sort ensures the latest games are returned first.
+     */
     const nbGames = userHistory.games.length;
     const nbWins = userHistory.games.filter((game) => {
       return game.winner == userHistory.user.id;
@@ -75,28 +75,19 @@ export class UserController {
     };
   }
 
-  @Post(ROUTES_BASE.USER.PLAY_GAME)
-  @UseGuards(JwtAuthGuard)
-  async playGame(@Body() dto: PlayGameDto) {
-    await this.usersService.playGame(dto);
-  }
-
   @Post(ROUTES_BASE.USER.ADD_FRIEND)
   @UseGuards(JwtAuthGuard)
-  async addFriend(@Body() friend: AddFriendDto, @Request() req) {
-    await this.usersService.addFriend(friend, req.user.login42);
+  async addFriend(@Body() dto: AddFriendDto, @Request() req) {
+    const friend = await this.usersService.findOneByPongUsername(
+      dto.friend_to_add,
+    );
+    await this.usersService.addFriend(dto, req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)
   @UseGuards(JwtAuthGuard)
   async getFriendsList(@Request() req) {
-    const friendList = await this.usersService.getFriendsList(req.user.login42);
-
-    return friendList.map((friend) => {
-      return {
-        login42: this.usersService.getFrontUsername(friend.user),
-      };
-    });
+    return await this.usersService.getFriendsList(req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_LOGIN42)
