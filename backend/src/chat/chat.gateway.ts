@@ -1,28 +1,34 @@
 import {
   BadRequestException,
+  ForbiddenException,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { ChatService } from './chat.service';
 import { UsersService } from 'src/user/user.service';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
-import { User } from 'src/user/user.entity';
 import CreateChannel from '../../shared/interfaces/CreateChannel';
 import SearchChannel from '../../shared/interfaces/SearchChannel';
+import { User } from 'shared/interfaces/User';
 
 import * as bcrypt from 'bcrypt';
 import JoinChannel from 'shared/interfaces/JoinChannel';
 import ChannelData from 'shared/interfaces/ChannelData';
 import Message from 'shared/interfaces/Message';
+import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 
 async function crypt(password: string): Promise<string> {
@@ -40,7 +46,7 @@ async function passwordCompare(
   transport: ['websocket'],
   cors: '*/*',
 })
-export class ChatGateway {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,
@@ -49,7 +55,32 @@ export class ChatGateway {
 
   @WebSocketServer()
   server: Server;
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    try {
+      const user = await this.chatService.getUserFromSocket(client);
 
+      if (!user) return;
+      const isRegistered = ChatService.userWebsockets.find(
+        (element) => element.userId === user.id,
+      );
+
+      if (!isRegistered) {
+        const newWebsocket = { userId: user.id, socketId: client.id };
+        ChatService.userWebsockets = [
+          ...ChatService.userWebsockets,
+          newWebsocket,
+        ];
+      }
+    } catch (e) {
+      console.error(e.message);
+    }
+  }
+
+  handleDisconnect(@ConnectedSocket() client: Socket) {
+    ChatService.userWebsockets = ChatService.userWebsockets.filter(
+      (websocket) => websocket.socketId !== client.id,
+    );
+  }
   /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
@@ -61,8 +92,6 @@ export class ChatGateway {
     this.server.in(this.channelLobby).emit(
       ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
       await this.chatService.getAllPublicRooms(),
-      await this.chatService.getAllAttachedRooms(payload.userId),
-      await this.chatService.getAllDMRooms(payload.userId),
       /** Either we send all 3 objects in 1 call from JOIN_CHANNEL_LOBBY_REQUEST, or we
        * use the below 2 routes along with this one individually.
        * I don't know what Matthieu will need so I'm keeping it like this for now,
@@ -157,6 +186,7 @@ export class ChatGateway {
           channelName: newRoom.channelName,
         });
     }
+    this.joinAttachedChannelLobby(client, payload);
   }
 
   /* CREATE DM ROOM*/
@@ -174,12 +204,27 @@ export class ChatGateway {
 
     await client.join(newDMRoom.roomName);
 
+    const receiverSocketId = this.chatService.getUserIdWebsocket(friendId);
+
+    if (receiverSocketId) {
+      /** Retrieve receiver's socket with the socket ID
+       * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
+       */
+
+      const receiverSocket = this.server.sockets.sockets.get(
+        receiverSocketId.socketId,
+      );
+
+      await receiverSocket.join(newDMRoom.roomName);
+    }
+
     this.server
       .in(newDMRoom.roomName)
       .emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_CREATION, {
         channelId: newDMRoom.id,
         channelName: newDMRoom.channelName,
       });
+    this.joinDMChannelLobby(client, payload);
   }
 
   /* ATTACH USER TO CHANNEL */
@@ -215,7 +260,8 @@ export class ChatGateway {
         });
     }
     await this.chatService.attachMemberToChannel(payload.userId, room);
-    this.joinRoom({ roomId: room.id }, client);
+    await this.joinAttachedChannelLobby(client, payload);
+    await this.joinRoom({ roomId: room.id }, client, payload);
   }
 
   /** UNATTACH USER TO CHANNEL */
@@ -249,6 +295,7 @@ export class ChatGateway {
   async joinRoom(
     @MessageBody() { roomId }: JoinChannel,
     @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
   ) {
     const room = await this.chatService.getRoomWithRelations(
       { id: roomId },
@@ -282,30 +329,6 @@ export class ChatGateway {
     );
   }
 
-  /* GET USERS IN CHANNEL */
-  @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.GET_CONNECTED_USER_LIST_REQUEST)
-  async getUsersInChannel(
-    @MessageBody() roomId: number,
-    @UserPayload() payload: any,
-  ) {
-    const room = await this.chatService.getRoomWithRelations(
-      { id: roomId },
-      { members: true },
-    );
-    const caller = await this.userService.getById(payload.userId);
-
-    this.server.in(room.roomName).emit(
-      ROUTES_BASE.CHAT.CONNECTED_USER_LIST,
-      room.members.map((user: User) => {
-        return {
-          id: user.id,
-          pongUsername: this.userService.getFrontUsername(user),
-        };
-      }),
-    );
-  }
-
   /* DISCONNECT FROM CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST)
@@ -321,6 +344,21 @@ export class ChatGateway {
         channelId: room.id,
         channelName: room.channelName,
       });
+  }
+
+  /** GET ATTACHED USERS IN CHANNEL */
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
+  async getAttachedUsersInChannel(@MessageBody() roomId: number) {
+    const room = await this.chatService.getRoomWithRelations({ id: roomId });
+
+    const attachedUsers = await this.chatService.getAttachedUsersInChannel(
+      roomId,
+    );
+
+    this.server
+      .in(room.roomName)
+      .emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, attachedUsers);
   }
 
   /*MESSAGE LISTENER */
@@ -355,5 +393,83 @@ export class ChatGateway {
       this.server
         .in(room.roomName)
         .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageForFront);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.SET_ADMIN_REQUEST)
+  async setAdmin(
+    @MessageBody() data: ActionOnUser,
+    @UserPayload() payload: any,
+  ) {
+    if (data.userIdToUpdate === payload.userId)
+      throw new BadRequestException('You cannot update yourself');
+
+    const newAdmin = await this.userService.getById(data.userIdToUpdate);
+
+    if (!newAdmin)
+      throw new BadRequestException(
+        'The user you want to set as admin does not exist',
+      );
+
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      { owner: true, admins: true },
+    );
+
+    if (!room) throw new BadRequestException('Channel does not exist');
+
+    if (room.owner.id !== payload.userId)
+      throw new ForbiddenException(
+        'You do not have the rights to set an admin',
+      );
+
+    this.chatService.setAdmin(room, newAdmin);
+
+    const promotedUser: User = {
+      id: newAdmin.id,
+      pongUsername: newAdmin.pongUsername,
+    };
+    this.server
+      .in(room.roomName)
+      .emit(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, promotedUser);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.UNSET_ADMIN_REQUEST)
+  async unsetAdmin(
+    @MessageBody() data: ActionOnUser,
+    @UserPayload() payload: any,
+  ) {
+    if (data.userIdToUpdate === payload.userId)
+      throw new BadRequestException('You cannot update yourself');
+
+    const oldAdmin = await this.userService.getById(data.userIdToUpdate);
+
+    if (!oldAdmin)
+      throw new BadRequestException(
+        'The user you want to unset as admin does not exist',
+      );
+
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      { owner: true, admins: true },
+    );
+    if (!room) throw new BadRequestException('Channel does not exist');
+
+    if (room.owner.id !== payload.userId)
+      throw new ForbiddenException(
+        'You do not have the rights to unset an admin',
+      );
+
+    this.chatService.unsetAdmin(room, oldAdmin);
+
+    const demotedUser: User = {
+      id: oldAdmin.id,
+      pongUsername: oldAdmin.pongUsername,
+    };
+
+    this.server
+      .in(data.channelName)
+      .emit(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, demotedUser);
   }
 }

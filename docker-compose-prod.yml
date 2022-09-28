@@ -1,0 +1,53 @@
+#production
+version: '3.9'
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.production
+    restart: unless-stopped
+    volumes:
+      - ./nginx/reverse_proxy_prod.conf:/etc/nginx/conf.d/default.conf:ro
+    environment:
+      - VITE_CONTEXT=PRODUCTION
+    ports:
+      - "0.0.0.0:8080:8080"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+    restart: unless-stopped
+    env_file: ./backend/.env
+    depends_on:
+      - database
+
+  database:
+    image: bitnami/postgresql:14
+    restart: unless-stopped
+    environment:
+      - POSTGRESQL_USERNAME=dev
+      - POSTGRESQL_PASSWORD=local
+      - POSTGRESQL_DATABASE=db
+      - POSTGRESQL_POSTGRES_PASSWORD=localroot
+      - POSTGRESQL_MASTER_PORT=5432
+    volumes:
+      - db:/bitnami/postgresql
+
+  admin:
+    image: bitnami/phppgadmin
+    restart: unless-stopped
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_PORT_NUMBER=5432
+    volumes:
+      - db:/bitnami/postgresql
+    ports:
+      - 5431:8080
+    depends_on:
+      - database
+
+volumes:
+  db:
