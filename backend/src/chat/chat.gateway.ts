@@ -410,11 +410,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const newAdmin = await this.userService.getById(data.userIdToUpdate);
 
-    if (!newAdmin)
-      throw new BadRequestException(
-        'The user you want to set as admin does not exist',
-      );
-
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
       { owner: true, admins: true },
@@ -448,11 +443,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       throw new BadRequestException('You cannot update yourself');
 
     const oldAdmin = await this.userService.getById(data.userIdToUpdate);
-
-    if (!oldAdmin)
-      throw new BadRequestException(
-        'The user you want to unset as admin does not exist',
-      );
 
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
@@ -496,5 +486,47 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
+  }
+
+  /** BAN / KICK / MUTE */
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.BAN_USER_REQUEST)
+  async banUser(
+    @MessageBody() data: ActionOnUser,
+    @UserPayload() payload: any,
+  ) {
+    const userToBan = await this.userService.getById(data.userIdToUpdate);
+
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      { owner: true, admins: true, members: true },
+    );
+
+    if (!room) throw new BadRequestException('Channel does not exist');
+
+    if (
+      payload.userId !== room.owner.id ||
+      !room.admins.filter((admin) => payload.userId === admin.id).length
+    )
+      throw new ForbiddenException('You do not have the rights to ban a user');
+
+    if (userToBan.id === room.owner.id)
+      throw new ForbiddenException('An owner cannot be banned');
+
+    this.chatService.unattachMemberToChannel(userToBan.id, room);
+
+    const bannedSocketId = this.chatService.getUserIdWebsocket(userToBan.id);
+
+    if (bannedSocketId) {
+      /** Retrieve receiver's socket with the socket ID
+       * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
+       */
+
+      const bannedSocket = this.server.sockets.sockets.get(
+        bannedSocketId.socketId,
+      );
+      this.disconnectFromChannel(room.id, bannedSocket);
+    }
   }
 }
