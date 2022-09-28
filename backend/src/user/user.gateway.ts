@@ -1,4 +1,9 @@
-import { forwardRef, Inject, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -70,8 +75,6 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       status: Status.OFFLINE,
     };
     this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, disconnectingUser);
-
-    console.log(UserGateway.userWebsockets);
   }
 
   @UseGuards(JwtWsGuard)
@@ -84,6 +87,11 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const friend = await this.userService.findOneByPongUsername(
       friendToAdd.pongUsername,
     );
+
+    if (!friend) {
+      throw new BadRequestException({ error: 'User not found' });
+    }
+
     const caller = await this.userService.getById(payload.userId);
 
     await this.userService.addFriend(friend, caller);

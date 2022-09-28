@@ -44,7 +44,7 @@ async function passwordCompare(
   transport: ['websocket'],
   cors: '*/*',
 })
-export class ChatGateway /* implements OnGatewayConnection, OnGatewayDisconnect*/ {
+export class ChatGateway {
   private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,

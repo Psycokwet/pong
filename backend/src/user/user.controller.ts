@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { createReadStream } from 'fs';
 import { join } from 'path';
