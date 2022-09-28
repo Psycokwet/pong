@@ -1,44 +1,50 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import { UserInterface } from "/shared/interfaces/User";
+import { UserInterface } from "/shared/interfaces/UserInterface";
 import { Api } from '../../api/api';
-
 import { BiChevronDown } from "react-icons/bi";
 
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import DropDownFriendList from "./DropDownFriendList";
 
-/******************* Challenge / Watch Stream ************
- * To be changed later...
- *********************************************************/
 
-const inviteToChallenge = () => {
-  console.log("Wanna play?");
-};
 
-const watchStream = () => {
-  console.log("Streaming...");
-};
-
-const sendMessage = () => {
-  console.log("Send message: Hi there!!!");
-};
-
-/***************** Component **********************************/
 
 const FriendList = ({socket} : {socket:Socket | undefined}) => {
   const [active, setActive] = useState(false);
-  const [userFriendList, setUserFriendList] = useState<UserInterface[]>([
-    {id:0, pongUsername:"mescande", status:1},
-    {id:1, pongUsername:"cdai", status:2},
-    {id:2, pongUsername:"nader", status:0},
-    {id:3, pongUsername:"sophie", status:0},
-  ]);
+  const [userFriendList, setUserFriendList] = useState<UserInterface[]>([]);
   const api = new Api();
 
-/*  useEffect(() => {
- *    socket?.on()
- *    return ( socket?.off()
-  }, []);*/
+  const ResetFriendList = (list:UserInterface[]) => {
+    setUserFriendList(list);
+  }
+  useEffect(() => {
+    socket?.emit(ROUTES_BASE.USER.FRIEND_LIST_REQUEST);
+  }, []);
+  useEffect(() => {
+     socket?.on(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, ResetFriendList)
+     return () => {
+      socket?.off(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, ResetFriendList)}
+  }, []);
+  const AppendFriendList = (list:UserInterface) => {
+    setUserFriendList([...userFriendList, list]);
+  }
+  useEffect(() => {
+     socket?.on(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, AppendFriendList)
+     return () => {
+      socket?.off(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, AppendFriendList)}
+  }, []);
+
+  const UserStatusChange = (user:UserInterface) => {
+    const old:UserInterface = userFriendList.find(user);
+    if (old)
+      setUserFriendList([userFriendList.filter((value) => { value.pongUsername !== old.pongUsername }), old])
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, UserStatusChange);
+    return () => {
+      socket?.off(ROUTES_BASE.USER.CONNECTION_CHANGE, UserStatusChange);}
+  }, []);
 
   const showList = () => {
     setActive(!active);
