@@ -50,7 +50,7 @@ async function passwordCompare(
   transport: ['websocket'],
   cors: '*/*',
 })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway {
   private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,
@@ -59,32 +59,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer()
   server: Server;
-  async handleConnection(@ConnectedSocket() client: Socket) {
-    try {
-      const user = await this.chatService.getUserFromSocket(client);
 
-      if (!user) return;
-      const isRegistered = ChatService.userWebsockets.find(
-        (element) => element.userId === user.id,
-      );
-
-      if (!isRegistered) {
-        const newWebsocket = { userId: user.id, socketId: client.id };
-        ChatService.userWebsockets = [
-          ...ChatService.userWebsockets,
-          newWebsocket,
-        ];
-      }
-    } catch (e) {
-      console.error(e.message);
-    }
-  }
-
-  handleDisconnect(@ConnectedSocket() client: Socket) {
-    ChatService.userWebsockets = ChatService.userWebsockets.filter(
-      (websocket) => websocket.socketId !== client.id,
-    );
-  }
   /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
@@ -208,7 +183,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     await client.join(newDMRoom.roomName);
 
-    const receiverSocketId = this.chatService.getUserIdWebsocket(friendId);
+    const receiverSocketId = this.userService.getUserIdWebsocket(friendId);
 
     if (receiverSocketId) {
       /** Retrieve receiver's socket with the socket ID
