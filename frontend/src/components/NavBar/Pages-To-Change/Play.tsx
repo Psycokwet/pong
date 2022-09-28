@@ -8,7 +8,7 @@ import GameRoom from "/shared/interfaces/GameRoom";
 import Position from "/shared/interfaces/Position";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 
-import myConfig from '../../../myConfig';
+const ENDPOINT = "http://localhost:8080/";
 
 const Play = () => {
   const [step, setStep] = useState<number>(0);
@@ -38,7 +38,7 @@ const Play = () => {
   }, []);
 
   useEffect(() => {
-    const newSocket = io(myConfig.domain, {
+    const newSocket = io(ENDPOINT, {
       transports: ["websocket"],
       withCredentials: true,
     });
