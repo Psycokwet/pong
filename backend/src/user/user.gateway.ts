@@ -31,7 +31,6 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
   ) {}
-  public static userWebsockets: UsersWebsockets[] = [];
 
   @WebSocketServer()
   server: Server;
@@ -40,14 +39,14 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.userService.getUserFromSocket(client);
 
       if (!user) return;
-      const isRegistered = UserGateway.userWebsockets.find(
+      const isRegistered = UsersService.userWebsockets.find(
         (element) => element.userId === user.id,
       );
 
       if (!isRegistered) {
         const newWebsocket = { userId: user.id, socketId: client.id };
-        UserGateway.userWebsockets = [
-          ...UserGateway.userWebsockets,
+        UsersService.userWebsockets = [
+          ...UsersService.userWebsockets,
           newWebsocket,
         ];
         const newUserConnected: UserInterface = {
@@ -66,7 +65,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const user = await this.userService.getUserFromSocket(client);
 
-      UserGateway.userWebsockets = UserGateway.userWebsockets.filter(
+      UsersService.userWebsockets = UsersService.userWebsockets.filter(
         (websocket) => websocket.socketId !== client.id,
       );
 
