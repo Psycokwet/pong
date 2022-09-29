@@ -48,6 +48,7 @@ export class GameService {
   private PLAYER_WIDTH = 5;
   private MAX_SPEED = 10;
   private DEFAULT_RAYON = 5;
+  private ENDGAME_POINT = 10;
 
   createGame(user: User): GameRoom {
     const newGameRoom: GameRoom = {
@@ -221,9 +222,10 @@ export class GameService {
 
   isGameFinished(gameRoom: GameRoom): boolean {
     return (
-      gameRoom.gameData.player1.score >= 10 ||
-      gameRoom.gameData.player2.score >= 10
-    );
+      gameRoom.gameData.player1.score >= this.ENDGAME_POINT
+      ||
+      gameRoom.gameData.player2.score >= this.ENDGAME_POINT
+    )
   }
 
   public async handleGameOver(gameRoom: GameRoom): Promise<void> {
