@@ -9,7 +9,12 @@ import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
-import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  FindOptionsRelations,
+  FindOptionsUtils,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
@@ -18,7 +23,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
 import ActionOnUser from 'shared/interfaces/ActionOnUser';
-import { Muted } from './mute-list.entity';
+import { Muted } from './muted.entity';
 @Injectable()
 export class ChatService {
   constructor(
@@ -127,9 +132,9 @@ export class ChatService {
     });
   }
 
-  public async getMutedUser(userId: number, roomId: number) {
-    return this.mutedRepository.findOne({
-      where: { user_id: userId, room_id: roomId },
+  public async getMutedUser(sender: User, room: Room) {
+    return await this.mutedRepository.findOne({
+      where: { mutedUserId: sender.id },
     });
   }
 
@@ -235,10 +240,10 @@ export class ChatService {
     room.save();
   }
 
-  async addMutedUser(userToMute: User, room: Room, muteTime: number) {
+  async addMutedUser(mutedUser: User, room: Room, muteTime: number) {
     const addMuted = Muted.create({
-      room_id: room.id,
-      user_id: userToMute.id,
+      roomId: room.id,
+      mutedUserId: mutedUser.id,
       unmuteAt: Date.now() + muteTime,
     });
 
@@ -247,8 +252,8 @@ export class ChatService {
 
   async unmuteUser(userIdToUnmute: number, roomId: number) {
     return await Muted.delete({
-      user_id: userIdToUnmute,
-      room_id: roomId,
+      mutedUserId: userIdToUnmute,
+      roomId: roomId,
     });
   }
 

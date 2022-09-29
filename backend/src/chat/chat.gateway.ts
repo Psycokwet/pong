@@ -353,11 +353,9 @@ export class ChatGateway {
       { id: data.channelId },
       { messages: true },
     );
+    const sender = await this.userService.getById(payload.userId);
 
-    const isUserMuted = await this.chatService.getMutedUser(
-      payload.userId,
-      room.id,
-    );
+    const isUserMuted = await this.chatService.getMutedUser(sender, room);
 
     if (isUserMuted) {
       if (isUserMuted.unmuteAt > Date.now()) return;
