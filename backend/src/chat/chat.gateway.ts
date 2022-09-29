@@ -264,6 +264,11 @@ export class ChatGateway {
       });
     }
 
+    this.server
+      .in(client.id)
+      .emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION, {
+        channelName: room.channelName,
+      });
     await this.chatService.unattachMemberToChannel(payload.userId, room);
     this.disconnectFromChannel(room.id, client);
   }
