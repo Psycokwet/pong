@@ -25,7 +25,7 @@ const Play = ({
     const screenIsVertical =  window.innerHeight >  window.innerWidth;
     const newCanvasSize: Position = { x: 0, y: 0 };
     const referenceSize = screenIsVertical ?
-      window.innerWidth:
+      window.innerWidth - window.innerWidth / 25 :
       window.innerHeight - window.innerHeight / 3;
     if (screenIsVertical) {
       newCanvasSize.x = referenceSize;
@@ -93,11 +93,12 @@ const Play = ({
       socket={socket}
       setStep={setStep}
       gameRoom={gameRoom}
+      canvasSize={canvasSize}
     />,
   ];
 
   return (
-    <div className='bg-black text-white h-7/8 place-content-center'>
+    <div className='bg-black text-white lg:h-7/8 sm:h-6/8 place-content-center'>
       {gameSteps[step]}
     </div>
   )
