@@ -10,11 +10,14 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 
 const ENDPOINT = "http://localhost:8080/";
 
-const Play = () => {
+const Play = ({
+  socket,
+}:{
+  socket: Socket;
+}) => {
   const [step, setStep] = useState<number>(0);
 
   /** WEBSOCKET */
-  const [socket, setSocket] = useState<Socket>();
   const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined)
   const [canvasSize, setCanvasSize] = useState<Position>({x: 0, y: 0})
 
@@ -33,14 +36,6 @@ const Play = () => {
       newCanvasSize.x = referenceSize / 3 * 4;
       setCanvasSize(newCanvasSize)
     }
-  }, []);
-
-  useEffect(() => {
-    const newSocket = io(ENDPOINT, {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-    setSocket(newSocket);
   }, []);
 
   const handleGameConfirm = (gameRoom: GameRoom) => {
