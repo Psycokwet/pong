@@ -150,8 +150,6 @@ export class ChatGateway {
       password: hashedPassword,
     });
 
-    await client.join(newRoom.roomName);
-
     this.server.in(client.id).emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, {
       channelId: newRoom.id,
       channelName: newRoom.channelName,
@@ -166,7 +164,7 @@ export class ChatGateway {
         });
     }
     this.attachUserToChannel(
-      { channelName: newRoom.channelName, inputPassword: hashedPassword },
+      { channelName: newRoom.channelName, inputPassword: data.password },
       client,
       payload,
     );
