@@ -4,6 +4,9 @@ import { Api } from "../../api/api";
 import { PictureGetter } from "../PictureForm/PictureGetter";
 import NickNameGetter from "../PictureForm/NickNameGetter";
 import ProfilePic from "../Common/ProfilePic";
+import Switch from "react-switch";
+import { MenuItem, Menu, MenuButton, useMenuState, FocusableItem } from '@szhsin/react-menu';
+import '@szhsin/react-menu/dist/index.css';
 
 const MAX_CHAR = 15;
 
@@ -12,7 +15,10 @@ const SignInPage = () => {
   const [pongUsername, setPongUsername] = useState<string>("anonymous");
   const [selectedFile, setSelectedFile] = useState<File>();
   const [avatar, setAvatar] = useState("");
-  const [twoFactor, setTwoFactor] = useState("off");
+  const [checked, setChecked] = useState<boolean>(false);
+  const [red, setRed] = useState<boolean>(true);
+  const [qrCodeImg, setQrCodeImg] = useState<string>("");
+  const [code, setCode] = useState<string>("");
 
   useEffect(() => {
     api.get_pong_username().then((res: Response) => {
@@ -45,7 +51,7 @@ const SignInPage = () => {
     }
 
     // Todo: set 2Factor through api.
-    console.log(`twoFactor status is set to: ${twoFactor}`);
+    console.log(`twoFactor status is set to: ${checked}`);
   };
 
   const handlePreviewPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,46 +61,96 @@ const SignInPage = () => {
     setAvatar(fileURL);
     setSelectedFile(file);
   };
+  const submitDownloadForm = (apiCall: () => Promise<Response>) => {
+    apiCall()
+      .then((res: Response) => res.blob())
+      .then((myBlob: Blob) => {
+        setQrCodeImg(URL.createObjectURL(myBlob));
+      })
+      .catch((err: Error) => alert(`File Download Error ${err}`));
+  };
 
+  const handleChange = (nextChecked:boolean) => {
+    setChecked(nextChecked);
+    if (nextChecked) {
+      if (qrCodeImg === "")
+        submitDownloadForm(() => api.generate_2fa())
+      setRed(true);
+    }
+  };
   return (
-    <div>
+    <div className="flex flex-col items-center bg-gray-900 gap-4 h-7/8 text-white">
       <div className="bg-gray-900">
         <ProfilePic avatar={avatar} setAvatar={setAvatar}></ProfilePic>
       </div>
+        <div className="flex flex-col self-center items-center">
+          <h1>Change your avatar :</h1>
+          <input type="file" onChange={handlePreviewPhoto} />
+        </div>
 
-      <form
-        className="text-white bg-gray-900 h-screen flex flex-col"
-        onSubmit={handleSubmitForm}
-      >
-        <h1>Change your avatar</h1>
-        <input type="file" onChange={handlePreviewPhoto} />
+        <div className="flex flex-col self-center items-center">
+          <h1>Change your pongUsername</h1>
+          <input
+            type="text"
+            name="pongUsername"
+            value={pongUsername}
+            onChange={(e) => setPongUsername(e.target.value)}
+            placeholder={`name less than ${MAX_CHAR} letters`}
+            className="bg-gray-600 placeholder:text-gray-400 placeholder:px-4 outline_none rounded-xl w-60 border-4 border-gray-600"
+          />
+          {pongUsername.length > MAX_CHAR ? (
+            <label className="text-yellow-400">
+              * Nickname can't be over {MAX_CHAR} characters
+            </label>
+          ) : (
+            ""
+          )}
+        </div>
 
-        <h1>Change your pongUsername</h1>
-        <input
-          type="text"
-          name="pongUsername"
-          value={pongUsername}
-          onChange={(e) => setPongUsername(e.target.value)}
-          placeholder={`name less than ${MAX_CHAR} letters`}
-          className="text-gray-900 placeholder:text-gray-400 placeholder:px-4 outline_none rounded-xl w-60"
-        />
-        {pongUsername.length > MAX_CHAR ? (
-          <label className="text-yellow-400">
-            * Nickname can't be over {MAX_CHAR} characters
-          </label>
-        ) : (
-          ""
-        )}
-
-        <div className="flex flex-row">
-          <span>Activate Two-Factor Authentication</span>
-          <select
-            onChange={(e) => setTwoFactor(e.target.value)}
-            className="text-gray-800 mx-4"
-          >
-            <option value="on">On</option>
-            <option value="off">Off</option>
-          </select>
+        <div className="flex flex-row gap-2">
+          <span>Enable Two-Factor Authentication : </span>
+          <div className="example">
+            <label>
+            </label>
+            <Menu menuButton={
+              <MenuButton><Switch
+                onChange={()=>{}}
+                checked={checked}
+                className="react-switch"
+                onColor={(red ? "#bc391c" : "#0cb92a")}
+              /></MenuButton>
+              }
+              key={"top"}
+              position={"anchor"}
+              align={"end"}
+              direction={"top"}
+              arrow={true}
+              transition={{open:true, close:true}}
+              onMenuChange={(open) =>handleChange(open.open)}
+            >
+              <MenuItem
+                className="items-center"
+                disabled={true}>
+                <img
+                  className="self-center"
+                  src={qrCodeImg ? qrCodeImg : ""}
+                  alt="user picture"
+                  hidden={Boolean(qrCodeImg)}
+                />
+              </MenuItem>
+              <FocusableItem>
+                {({ ref }) => (
+                  <div className="flex flex-row gap-2">
+                    <input ref={ref} type="text" placeholder="Enter Code"
+                        value={code} onChange={e => setCode(e.target.value)} />
+                    {( if (status===enum.VALIDATE)
+                    <button className="border-4 border-gray-400 bg-gray-400 hover:border-gray-300 hover:bg-gray-300 transition rounded-md">Validate</button>
+                    )}
+                  </div>
+                )}
+              </FocusableItem>
+            </Menu>
+          </div>
         </div>
 
         <button
@@ -103,7 +159,6 @@ const SignInPage = () => {
         >
           Submit
         </button>
-      </form>
 
       {/* Testing Zone - to delete later - don't forget to scroll down */}
       {/* <div>
