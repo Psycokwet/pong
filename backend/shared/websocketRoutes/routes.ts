@@ -50,6 +50,8 @@ export const ROUTES_BASE = {
     /** USER PRIVILEGES */
     USER_PRIVILEGES_REQUEST: 'userPrivilegesRequest',
     USER_PRIVILEGES_CONFIRMATION: 'userPrivilegesConfirmation',
+    /** BAN USER REQUEST */
+    BAN_USER_REQUEST: 'banUserRequest',
   },
   GAME: {
     ENDPOINT: '/game/',
