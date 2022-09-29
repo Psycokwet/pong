@@ -225,7 +225,9 @@ export class UsersService {
       games: games
         .map((game) => {
           return {
-            time: game.createdAt.toString().slice(4, 24),
+            time: game.createdAt.toLocaleString('fr-FR', {
+              timeZone: 'Europe/Paris',
+            }),
             opponent:
               game.player1.id === user.id
                 ? game.player2.pongUsername
