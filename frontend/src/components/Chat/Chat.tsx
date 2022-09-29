@@ -7,7 +7,7 @@ import Messages from "./Messages/Messages";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
-import { subList } from "../Common/Sublist"
+import { statusList } from "../Common/StatusList"
 import UserListByStatus from "../FriendList/UserListByStatus";
 import { UserInterface, Status } from "/shared/interfaces/UserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
@@ -16,6 +16,10 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
   const [userAttachedList, setUserAttachedList] = useState<UserInterface[]>([]);
+
+  useEffect(() => {
+    socket?.emit(ROUTES_BASE.USER.SET_CONNECTED_CHANNEL, connectedChannel);
+  }, [connectedChannel])
 
   const addMessage = (newElem:Message) => {
     setMessages([...messages, newElem]);
@@ -71,18 +75,18 @@ function Chat ({socket}:{socket:Socket|undefined}) {
       <Messages messages={messages}/>
       <TextField socket={socket} chan={connectedChannel} />
       <div className="row-start-1 row-span-6 col-start-5 p-x-8">
-        {subList?.map((aSubList) => {
+        {statusList?.map((aStatusList) => {
           return (
             <UserListByStatus
-              key={aSubList.status}
+              key={aStatusList.status}
               userList={userAttachedList}
               inputFilter={""}
-              subList={aSubList}
+              statusList={aStatusList}
               socket={socket}
               roomId={connectedChannel?.roomId}
               menuSettings={({
-                challenge:aSubList.status===Status.ONLINE,
-                watch:aSubList.status===Status.PLAYING,
+                challenge:aStatusList.status===Status.ONLINE,
+                watch:aStatusList.status===Status.PLAYING,
                 privileges:Privileges.MEMBER,
                 friend:false,
               })}

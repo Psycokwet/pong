@@ -5,7 +5,7 @@ import UserListByStatus from "./UserListByStatus";
 import { Socket } from "socket.io-client";
 import { UserInterface, Status } from "/shared/interfaces/UserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
-import { subList } from "../Common/Sublist"
+import { statusList } from "../Common/StatusList"
 
 type DropDownFriendListProps = {
   userFriendList: UserInterface;
@@ -36,18 +36,18 @@ const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
 
       {/* Sub lists */}
       <div>
-        {subList?.map((aSubList) => {
+        {statusList?.map((aStatusList) => {
           return (
             <UserListByStatus
-              key={aSubList.status}
+              key={aStatusList.status}
               userList={userFriendList}
               inputFilter={inputFilter}
-              subList={aSubList}
+              statusList={aStatusList}
               socket={socket}
               roomId={0}
               menuSettings={({
-                challenge:aSubList.status===Status.ONLINE,
-                watch:aSubList.status===Status.PLAYING,
+                challenge:aStatusList.status===Status.ONLINE,
+                watch:aStatusList.status===Status.PLAYING,
                 privileges:Privileges.MEMBER,
                 friend:true,
               })}
