@@ -97,10 +97,9 @@ const Play = ({
   ];
 
   return (
-    <>
-      <h1 className='text-violet-600'>I'm Play page</h1>
+    <div className='bg-black text-white h-7/8 place-content-center'>
       {gameSteps[step]}
-    </>
+    </div>
   )
 }
 
