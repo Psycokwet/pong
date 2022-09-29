@@ -33,7 +33,6 @@ export class UserController {
   @Get(ROUTES_BASE.USER.GET_USER_PROFILE)
   @UseGuards(JwtAuthGuard)
   async getUserProfile(
-    // @Body() dto: GetUserProfileDto, Pas de body dans un get merci :)
     @Request() req: RequestWithUser,
     @Param() params: GetUserProfileDto,
   ) {
@@ -86,8 +85,13 @@ export class UserController {
   }
   @Get(ROUTES_BASE.USER.GET_PICTURE)
   @UseGuards(JwtAuthGuard)
-  async getPicture(@Request() req): Promise<StreamableFile> {
-    const picture_path = await this.usersService.getPicture(req.user);
+  async getPicture(
+    @Param() params: { pongUsername: string },
+  ): Promise<StreamableFile> {
+    const user = await this.usersService.findOneByPongUsername(
+      params.pongUsername,
+    );
+    const picture_path = await this.usersService.getPicture(user);
 
     // https://docs.nestjs.com/techniques/streaming-files
     const file = createReadStream(join(process.cwd(), `${picture_path}`));
