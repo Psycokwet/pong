@@ -1,0 +1,3 @@
+interface TwoFactorAuthCodeDto {
+  code: string;
+}
