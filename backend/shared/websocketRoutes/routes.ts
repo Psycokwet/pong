@@ -89,6 +89,12 @@ export const ROUTES_BASE = {
     GET_STATUS_CONFIRMATION: 'getStatusConfirmation',
     /** CONNECTION NOTIFICATION */
     CONNECTION_CHANGE: 'connectionChange',
+    /** BLOCK USER */
+    BLOCK_USER_REQUEST: 'blockUserRequest',
+    BLOCK_USER_CONFIRMATION: 'blockUserConfirmation',
+    /** BLOCKED USERS LIST */
+    BLOCKED_USERS_LIST_REQUEST: 'blockedUsersListRequest',
+    BLOCKED_USERS_LIST_CONFIRMATION: 'blockedUsersListConfirmation',
   },
 };
 const generate_full_routes = (routes_base) => {

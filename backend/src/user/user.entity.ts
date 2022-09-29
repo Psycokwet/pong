@@ -63,6 +63,9 @@ export class User extends BaseEntity {
   @OneToMany(() => Message, (message) => message.author)
   public messages: Message[];
 
+  @OneToMany(() => User, (user) => user.id)
+  public blockedList: User[];
+
   @Column({ nullable: true })
   public mutedAt: number;
 }
