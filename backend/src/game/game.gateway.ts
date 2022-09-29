@@ -126,9 +126,7 @@ export class GameGateway implements OnGatewayConnection {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST)
   async getSpectableGames(
-    // @MessageBody() roomName: any,
     @ConnectedSocket() client: Socket,
-    @UserPayload() payload: any,
   ) {
     this.server.in(client.id).emit(
       ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
@@ -146,7 +144,6 @@ export class GameGateway implements OnGatewayConnection {
     const gameRoom: GameRoom = this.gameService.findByRoomName(roomName);
 
     if (gameRoom === undefined) {
-      // error
       return;
     }
 
@@ -158,7 +155,6 @@ export class GameGateway implements OnGatewayConnection {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.RECONNECT_GAME)
   async reconnectGame(
-    // @MessageBody() roomName: string,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
