@@ -65,6 +65,8 @@ export class UsersService {
     private readonly authService: AuthService,
   ) {}
 
+  public static userWebsockets: UsersWebsockets[] = [];
+
   async findOne(login42: string): Promise<User> {
     const user = await this.usersRepository.findOneBy({
       login42: login42,
