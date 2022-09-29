@@ -65,4 +65,14 @@ export class User extends BaseEntity {
 
   @Column({ nullable: true })
   public mutedAt: number;
+
+  @Column({
+    nullable: false,
+  })
+  public isTwoFactorAuthenticationActivated: boolean;
+
+  @Column({
+    nullable: true,
+  })
+  public twoFactorAuthenticationSecret?: string;
 }
