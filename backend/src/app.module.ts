@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 import { User } from './user/user.entity';
 import { FortyTwoModule } from './auth/fortytwo.module';
 import { ConfigModule } from '@nestjs/config';
-import { Friend } from './friend_list/friend.entity';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 
@@ -13,9 +12,11 @@ import Message from './chat/message.entity';
 import { ChatModule } from './chat/chat.module';
 import { Game } from './game/game.entity';
 import LocalFile from './localFiles/localFile.entity';
+import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';
 import { GameModule } from './game/game.module';
 import Room from './chat/room.entity';
 import { UsersModule } from './user/user.module';
+import { Friend } from './friend_list/friend.entity';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { UsersModule } from './user/user.module';
       synchronize: true, // to disable in prod
       entities: [User, Game, LocalFile, Message, Room, Friend],
     }),
+    TwoFactorAuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
