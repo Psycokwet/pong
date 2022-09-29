@@ -140,10 +140,10 @@ export class GameService {
       game[playerToUpdate].y = 0;
     } else if (
       playerInput.mouseLocation >
-      playerInput.canvasLocation.height - this.PLAYER_HEIGHT / 2
+      playerInput.canvasLocation - this.PLAYER_HEIGHT / 2
     ) {
       game[playerToUpdate].y =
-        playerInput.canvasLocation.height - this.PLAYER_HEIGHT;
+        playerInput.canvasLocation - this.PLAYER_HEIGHT;
     } else {
       game[playerToUpdate].y =
         playerInput.mouseLocation - this.PLAYER_HEIGHT / 2;
