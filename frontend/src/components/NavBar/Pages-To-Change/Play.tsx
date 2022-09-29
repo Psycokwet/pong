@@ -38,6 +38,24 @@ const Play = ({
     }
   }, []);
 
+  /** RECONNECT GAME */
+  useEffect(() => {
+    socket?.emit(ROUTES_BASE.GAME.RECONNECT_GAME);
+  }, []);
+
+  const reconnectGame = (gameRoom: GameRoom) => {
+    setStep(2);
+    setGameRoom(gameRoom);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.GAME.UPDATE_GAME, reconnectGame);
+    return () => {
+      socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, reconnectGame);
+    };
+  }, [reconnectGame]);
+  /** END RECONNECT GAME */
+
+
   const handleGameConfirm = (gameRoom: GameRoom) => {
     setGameRoom(gameRoom)
   };
