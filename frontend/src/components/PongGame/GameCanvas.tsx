@@ -15,12 +15,14 @@ const GameCanvas = (
     setGameRoom,
     gameRoom,
     upgradeStep,
+    canvasSize,
   }:
   {
     socket: Socket,
     setGameRoom: any,
     gameRoom: GameRoom,
     upgradeStep: any,
+    canvasSize: Position,
   }
 ) => {
   const canvasRef = useRef(null);
@@ -53,11 +55,26 @@ const GameCanvas = (
     const mouseLocation = event.clientY - canvasLocation.y;
 
     socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
-      canvasLocation: canvasLocation,
-      mouseLocation: mouseLocation,
+      canvasLocation: canvasLocation.height / canvasSize.y * canvasHeight,
+      mouseLocation: mouseLocation / canvasSize.y * canvasHeight,
     });
   };
 
+  const onTouchMove = event => {
+    console.log(event)
+    const position: Position = {
+      x: event.touches[0].clientX - event.touches[0].target.offsetLeft,
+      y: event.touches[0].clientY - event.touches[0].target.offsetTop,
+    }
+    setCoords(position);
+
+    const canvasLocation = canvasRef.current.getBoundingClientRect();
+    const mouseLocation = event.touches[0].clientY - canvasLocation.y;
+    socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
+      canvasLocation: canvasLocation.height / canvasSize.y * canvasHeight,
+      mouseLocation: mouseLocation / canvasSize.y * canvasHeight,
+    });
+  }
   /** END MOUSE HANDLER */
 
 
@@ -66,24 +83,32 @@ const GameCanvas = (
     const context = canvas.getContext('2d')
     // Draw field
     context.fillStyle = 'black';
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillRect(0, 0, canvasSize.x, canvasSize.y);
     // Draw middle line
     context.strokeStyle = 'white';
     context.beginPath();
-    context.moveTo(canvas.width / 2, 0);
-    context.lineTo(canvas.width / 2, canvas.height);
+    context.moveTo(canvasSize.x / 2, 0);
+    context.lineTo(canvasSize.x / 2, canvasSize.y);
     context.stroke();
 
 
     // Draw players
     context.fillStyle = 'white';
-    context.fillRect(0, gameRoom.gameData.player1.y, PLAYER_WIDTH, PLAYER_HEIGHT);
-    context.fillRect(canvas.width - PLAYER_WIDTH, gameRoom.gameData.player2.y, PLAYER_WIDTH, PLAYER_HEIGHT);
+    const player1position = gameRoom.gameData.player1.y * canvasSize.y / canvasHeight;
+    context.fillRect(0, player1position, PLAYER_WIDTH, PLAYER_HEIGHT * canvasSize.y / canvasHeight);
+    const player2position = gameRoom.gameData.player2.y * canvasSize.y / canvasHeight;
+    context.fillRect(canvas.width - PLAYER_WIDTH, player2position, PLAYER_WIDTH, PLAYER_HEIGHT * canvasSize.y / canvasHeight);
 
+    const ballPosition: Position = {
+      x: gameRoom.gameData.ball.x,
+      y: gameRoom.gameData.ball.y,
+    }
+    ballPosition.x = gameRoom.gameData.ball.x / canvasWidth * canvasSize.x
+    ballPosition.y = gameRoom.gameData.ball.y / canvasHeight * canvasSize.y
     // Draw ball
     context.beginPath();
     context.fillStyle = 'white';
-    context.arc(gameRoom.gameData.ball.x, gameRoom.gameData.ball.y, gameRoom.gameData.ball.rayon, 0, Math.PI * 2, false);
+    context.arc(ballPosition.x, ballPosition.y, gameRoom.gameData.ball.rayon, 0, Math.PI * 2, false);
     context.fill();
   }
 
@@ -101,31 +126,32 @@ const GameCanvas = (
   /** END GAME LOOP */
 
   /** GAMEOVER */
-  const handleGameover = () => {
-    upgradeStep()
-  }
-    useEffect(() => {
-      socket?.on(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, handleGameover);
-      return () => {
-        socket?.off(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, handleGameover);
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, upgradeStep);
+    return () => {
+      socket?.off(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, upgradeStep);
     };
   }, []);
   /** END GAMEOVER */
 
   return (
     <div
-      className="p-12 bg-gray-400"
+      className="w-full bg-gray-400"
     >
       <p>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
       <p>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
       <br />
-      <canvas
-        onMouseMove={handleMouseMove}
-        ref={canvasRef}
-        id="canvas"
-        width={canvasWidth}
-        height={canvasHeight}
-      ></canvas>
+      <div className="flex justify-center">
+
+        <canvas
+          onTouchMove={onTouchMove}
+          onMouseMove={handleMouseMove}
+          ref={canvasRef}
+          id="canvas"
+          width={canvasSize.x}
+          height={canvasSize.y}
+        ></canvas>
+      </div>
       <h2>DEV INFORMATIONS</h2>
       <h2>Coords: X: {coords.x} -- Y: {coords.y}</h2>
       <hr />
