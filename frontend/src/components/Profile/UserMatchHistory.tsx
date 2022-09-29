@@ -10,7 +10,18 @@ type UserMatchHistoryProps = {
 };
 
 const UserMatchHistory: React.FC<UserMatchHistoryProps> = ({ userHistory }) => {
-  return <div> UserMatchHistory {userHistory[0].winner}</div>;
+  return(<>
+  {userHistory.map((oneGame, id) => { 
+    return(
+      <> 
+        <div>{id}</div>
+        <div>{oneGame.time}</div>
+        <div>{oneGame.opponent}</div>
+        <div>{oneGame.winner}</div>
+      </>
+    )
+  })}
+  </>)  
 };
 
 export default UserMatchHistory;

@@ -5,18 +5,19 @@ export const DEFAULT_AVATAR: string =
 
 type AvatarProps = {
   url: string;
+  size: string
 };
 
-const Avatar: React.FC<AvatarProps> = ({ url }) => {
+const Avatar: React.FC<AvatarProps> = ({ url, size }) => {
   return (
     <div className="bg-gray-900">
       {url ? (
-        <img src={url} className="w-40 rounded-full" />
+        <img src={url} className={`rounded-full ${size}`} />
       ) : (
         <img
           src={DEFAULT_AVATAR}
           alt="Preview selected photo"
-          className="w-40 rounded-full"
+          className={`rounded-full ${size}`} 
         />
       )}
     </div>

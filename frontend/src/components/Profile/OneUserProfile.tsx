@@ -3,30 +3,33 @@ import UserStats from "./UserStats";
 import UserMatchHistory from "./UserMatchHistory";
 
 import UserProfile from "shared/interfaces/UserProfile";
-import Avatar from "../Common/Avatar"
+import Avatar from "../Common/Avatar";
 
 type OneUserProfileProps = {
   userProfile: UserProfile;
+  avatarUrl: string;
 };
 
 const OneUserProfile: React.FC<OneUserProfileProps> = ({
   userProfile,
+  avatarUrl,
 }) => {
   return (
-    <div>
-      <div>{userProfile.pongUsername}</div>
+    <div className="flex">
       <div>
-        <Avatar url={userProfile.profilePicture} />
+        <div>{userProfile.pongUsername}</div>
+        <div>
+          <Avatar url={avatarUrl} size="w-40" />
+        </div>
+        <div>Level: {Math.floor(userProfile.userRank.level * 100) / 100}</div>
+        <div>Rank : {userProfile.userRank.userRank.rank}</div>
       </div>
 
-      <div>Level: {userProfile.userRank.level}</div>
-      <div>Rank : {userProfile.userRank.userRank.rank}</div>
-
-      <div className="row-start-2 row-span-3 col-start-6 col-span-3">
-        {/* <UserMatchHistory userHistory={userProfile.userHistory.games}/> */}
+      <div className="">
+        <UserMatchHistory userHistory={userProfile.userHistory.games} />
       </div>
 
-      <div className="col-start-2 col-span-3 row-span-3">
+      <div className="">
         <UserStats
           nbGames={userProfile.userHistory.nbGames}
           nbWins={userProfile.userHistory.nbWins}

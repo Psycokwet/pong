@@ -19,6 +19,7 @@ const Profile = () => {
     profilePicture: null,
   });
 
+  const [avatarUrl, setAvatarUrl] = useState("");
 
   const { pongUsername } = useParams();
 
@@ -27,19 +28,28 @@ const Profile = () => {
       console.log("get_user_profile", res);
       res.json().then((content) => {
         console.log(
-          `get_user_profile with pongUsername = ${pongUsername}`,
+          `get_user_profile is OK with pongUsername = ${pongUsername}`,
           content
         );
-        if (content.profilePicture)
-          content.profilePicture = URL.createObjectURL(content.profilePicture); // am I a potato?
         setUserProfile(content);
       });
+    });
+
+    api.getPicture().then((res) => {
+      if (res.status == 200)
+        res.blob().then((myBlob) => {
+          setAvatarUrl((current) => {
+            console.log(`get_picture is Ok with pongUsername = ${pongUsername}`);
+            if (current) URL.revokeObjectURL(current);
+            return URL.createObjectURL(myBlob);
+          });
+        });
     });
   }, [pongUsername]);
 
   return (
     <div className="bg-black text-white h-screen">
-      <OneUserProfile userProfile={userProfile} />
+      <OneUserProfile userProfile={userProfile} avatarUrl={avatarUrl} />
     </div>
   );
 };
