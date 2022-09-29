@@ -328,7 +328,13 @@ export class ChatService {
       throw new BadRequestException('Channel does not exist');
     }
 
-    return room.members;
+    const userInterfaceMembers = room.members.map((member) => ({
+      id: member.id,
+      pongUsername: member.pongUsername,
+      status: this.userService.getStatus(member),
+    }));
+
+    return userInterfaceMembers;
   }
 
   getUserPrivileges(room: Room, userId: number): { privilege: Privileges } {
