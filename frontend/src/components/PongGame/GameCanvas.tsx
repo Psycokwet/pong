@@ -61,7 +61,6 @@ const GameCanvas = (
   };
 
   const onTouchMove = event => {
-    console.log(event)
     const position: Position = {
       x: event.touches[0].clientX - event.touches[0].target.offsetLeft,
       y: event.touches[0].clientY - event.touches[0].target.offsetTop,
