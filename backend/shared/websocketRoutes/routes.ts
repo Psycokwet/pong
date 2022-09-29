@@ -1,3 +1,5 @@
+import { generate_full_routes } from '../utils';
+
 export const ROUTES_BASE = {
   CHAT: {
     ENDPOINT: '/chat/',
@@ -86,17 +88,5 @@ export const ROUTES_BASE = {
     /** CONNECTION NOTIFICATION */
     CONNECTION_CHANGE: 'connectionChange',
   },
-};
-const generate_full_routes = (routes_base) => {
-  let accumulator = {};
-  for (const key_base_route in routes_base) {
-    let { ENDPOINT, ...current_sub_routes } = routes_base[key_base_route];
-    accumulator[key_base_route] = { ENDPOINT };
-    for (const key_end_route in current_sub_routes) {
-      accumulator[key_base_route][key_end_route] =
-        ENDPOINT + current_sub_routes[key_end_route];
-    }
-  }
-  return accumulator;
 };
 export const FULL_ROUTE = generate_full_routes(ROUTES_BASE);
