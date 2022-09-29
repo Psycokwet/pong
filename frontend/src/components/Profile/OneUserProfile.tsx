@@ -7,18 +7,16 @@ import Avatar from "../Common/Avatar"
 
 type OneUserProfileProps = {
   userProfile: UserProfile;
-  urlPic: string;
 };
 
 const OneUserProfile: React.FC<OneUserProfileProps> = ({
   userProfile,
-  urlPic,
 }) => {
   return (
     <div>
       <div>{userProfile.pongUsername}</div>
       <div>
-        <Avatar url={urlPic} />
+        <Avatar url={userProfile.profilePicture} />
       </div>
 
       <div>Level: {userProfile.userRank.level}</div>

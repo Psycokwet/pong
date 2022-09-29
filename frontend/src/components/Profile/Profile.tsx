@@ -31,7 +31,7 @@ const Profile = () => {
           content
         );
         if (content.profilePicture)
-          content.profilePicture = URL.revokeObjectURL(content.profilePicture.blob); // am I a potato?
+          content.profilePicture = URL.createObjectURL(content.profilePicture); // am I a potato?
         setUserProfile(content);
       });
     });
@@ -39,7 +39,7 @@ const Profile = () => {
 
   return (
     <div className="bg-black text-white h-screen">
-      <OneUserProfile userProfile={userProfile} urlPic={userProfile.profilePicture} />
+      <OneUserProfile userProfile={userProfile} />
     </div>
   );
 };
