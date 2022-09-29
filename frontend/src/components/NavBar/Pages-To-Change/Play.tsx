@@ -78,9 +78,7 @@ const Play = ({
       canvasSize={canvasSize}
     />,
     <GameQueue
-      socket={socket}
-      upgradeStep={upgradeStep}
-      setGameRoom={setGameRoom}
+      canvasSize={canvasSize}
     />,
     <GameCanvas
       socket={socket}
