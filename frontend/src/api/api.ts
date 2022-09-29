@@ -36,7 +36,7 @@ export class Api {
   }
 
   ping() {
-    return fetch(`${PREFIX}${URL.PROTECTED}`, {
+    return fetch(`${PREFIX}${FULL_ROUTE.ROOT.PROTECTED}`, {
       method: "GET",
       mode: "no-cors",
       credentials: "include",
@@ -48,7 +48,7 @@ export class Api {
     });
   }
 
-  add_friend(login42: string, friend_to_add: string) {
+  addFriend(login42: string, friend_to_add: string) {
     let headers = new Headers();
     headers.set(HeadersFields.ContentType, "application/json");
     return fetch(`${PREFIX}${FULL_ROUTE.USER.ADD_FRIEND}`, {
@@ -58,7 +58,7 @@ export class Api {
     });
   }
 
-  get_friend_list(login42: string) {
+  getFriendList() {
     return fetch(
       `${PREFIX}${FULL_ROUTE.USER.GET_FRIEND_LIST}` +
         "?" +
@@ -113,6 +113,33 @@ export class Api {
       method: "POST",
       headers: headers,
       body: JSON.stringify({ player1, player2, winner }),
+    });
+  }
+  turn_on_2fa(code: string) {
+    let headers = new Headers();
+    headers.set(HeadersFields.ContentType, "application/json");
+    return fetch(`${PREFIX}${FULL_ROUTE.AUTH.TURN_ON_2FA}`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({ code }),
+    });
+  }
+  turn_off_2fa() {
+    return fetch(`${PREFIX}${FULL_ROUTE.AUTH.TURN_OFF_2FA}`, {
+      method: "PUT",
+    });
+  }
+  get_2fa() {
+    return fetch(`${PREFIX}${FULL_ROUTE.AUTH.GET_2FA}`, {
+      method: "GET",
+    });
+  }
+  generate_2fa() {
+    let headers = new Headers();
+    headers.set(HeadersFields.ContentType, "application/json");
+    return fetch(`${PREFIX}${FULL_ROUTE.AUTH.GENERATE_2FA}`, {
+      method: "POST",
+      headers: headers,
     });
   }
   get_user_profile(pongUsername: string | undefined) {
