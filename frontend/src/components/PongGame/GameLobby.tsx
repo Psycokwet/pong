@@ -2,15 +2,18 @@ import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import Position from "/shared/interfaces/Position";
 
 const GameLobby = (
   {
     socket,
     upgradeStep,
+    canvasSize,
   }:
   {
     socket: Socket;
     upgradeStep: () => void;
+    canvasSize: Position;
   }
 ) => {
   
@@ -18,14 +21,14 @@ const GameLobby = (
 
   /** GAME JOIN */
   const handleJoinGame = () => {
-    socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST);
+    socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST, canvasSize);
     upgradeStep();
   }
   /** END GAME JOIN */
 
   const handleCreateGame = () => {
-    socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST);
-    `upgradeStep`();
+    socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST, canvasSize);
+    upgradeStep();
   }
 
   /** SPECTATE */
