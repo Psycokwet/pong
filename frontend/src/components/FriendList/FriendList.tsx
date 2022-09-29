@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import { UserInterface } from "/shared/interfaces/UserInterface";
 import { BiChevronDown } from "react-icons/bi";
 
+import { UserInterface } from "/shared/interfaces/UserInterface";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+
 import DropDownFriendList from "./DropDownFriendList";
 
 
@@ -13,27 +14,27 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
   const [active, setActive] = useState(false);
   const [userFriendList, setUserFriendList] = useState<UserInterface[]>([]);
 
-  const ResetFriendList = (list:UserInterface[]) => {
+  const resetFriendList = (list:UserInterface[]) => {
     setUserFriendList(list);
   }
   useEffect(() => {
     socket?.emit(ROUTES_BASE.USER.FRIEND_LIST_REQUEST);
   }, []);
   useEffect(() => {
-     socket?.on(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, ResetFriendList)
+     socket?.on(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, resetFriendList)
      return () => {
-      socket?.off(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, ResetFriendList)}
+      socket?.off(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, resetFriendList)}
   }, []);
-  const AppendFriendList = (list:UserInterface) => {
-    setUserFriendList((current) => [...current, list]);
+  const appendFriendList = (newUser:UserInterface) => {
+    setUserFriendList((current) => [...current, newUser]);
   }
   useEffect(() => {
-     socket?.on(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, AppendFriendList)
+     socket?.on(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, appendFriendList)
      return () => {
-      socket?.off(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, AppendFriendList)}
+      socket?.off(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, appendFriendList)}
   }, []);
 
-  const UserStatusChange = (user:UserInterface) => {
+  const userStatusChange = (user:UserInterface) => {
     setUserFriendList((current) => {
       const old:UserInterface = current.find((val) => val === user);
       if (old) {
@@ -47,9 +48,9 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
     });
   }
   useEffect(() => {
-    socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, UserStatusChange);
+    socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, userStatusChange);
     return () => {
-      socket?.off(ROUTES_BASE.USER.CONNECTION_CHANGE, UserStatusChange);}
+      socket?.off(ROUTES_BASE.USER.CONNECTION_CHANGE, userStatusChange);}
   }, []);
 
 
