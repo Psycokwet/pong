@@ -15,14 +15,14 @@ const OneUserProfile: React.FC<OneUserProfileProps> = ({
   avatarUrl,
 }) => {
   return (
-    <div className="flex">
-      <div>
-        <div>{userProfile.pongUsername}</div>
-        <div>
-          <Avatar url={avatarUrl} size="w-40" />
+    <div className="flex justify-evenly">
+      <div className="flex items-center">
+        <Avatar url={avatarUrl} size="w-20" />
+        <div className="p-2">
+          <strong>{userProfile.pongUsername}</strong>
+          <div>Level: {Math.floor(userProfile.userRank.level * 100) / 100}</div>
+          <div>Rank : {userProfile.userRank.userRank.rank}</div>
         </div>
-        <div>Level: {Math.floor(userProfile.userRank.level * 100) / 100}</div>
-        <div>Rank : {userProfile.userRank.userRank.rank}</div>
       </div>
 
       <div className="">
