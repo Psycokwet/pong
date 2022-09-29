@@ -19,7 +19,6 @@ const Profile = () => {
     profilePicture: null,
   });
 
-  const [urlProfilePic, setUrlProfilePic] = useState("")
 
   const { pongUsername } = useParams();
 
@@ -31,8 +30,8 @@ const Profile = () => {
           `get_user_profile with pongUsername = ${pongUsername}`,
           content
         );
-        // if (content.profilePicture)
-        //   setUrlProfilePic(URL.revokeObjectURL(content.profilePicture.blob()));
+        if (content.profilePicture)
+          content.profilePicture = URL.revokeObjectURL(content.profilePicture.blob); // am I a potato?
         setUserProfile(content);
       });
     });
@@ -40,7 +39,7 @@ const Profile = () => {
 
   return (
     <div className="bg-black text-white h-screen">
-      <OneUserProfile userProfile={userProfile} urlPic={urlProfilePic}/>
+      <OneUserProfile userProfile={userProfile} urlPic={userProfile.profilePicture} />
     </div>
   );
 };

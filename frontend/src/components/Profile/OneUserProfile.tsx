@@ -3,6 +3,7 @@ import UserStats from "./UserStats";
 import UserMatchHistory from "./UserMatchHistory";
 
 import UserProfile from "shared/interfaces/UserProfile";
+import Avatar from "../Common/Avatar"
 
 type OneUserProfileProps = {
   userProfile: UserProfile;
@@ -17,7 +18,7 @@ const OneUserProfile: React.FC<OneUserProfileProps> = ({
     <div>
       <div>{userProfile.pongUsername}</div>
       <div>
-        <img src={urlPic} alt="Avatar" />
+        <Avatar url={urlPic} />
       </div>
 
       <div>Level: {userProfile.userRank.level}</div>

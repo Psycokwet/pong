@@ -25,7 +25,9 @@ const UserStats: React.FC<UserStatsProps> = ({ nbGames, nbWins }) => {
   });
 
   return (
-    <PieChart
+    nbGames !== 0 ? (
+
+      <PieChart
       data={data}
       lineWidth={40}
       startAngle={75}
@@ -49,7 +51,8 @@ const UserStats: React.FC<UserStatsProps> = ({ nbGames, nbWins }) => {
       onMouseOut={() => {
         setHovered(undefined);
       }}
-    />
+      />
+      ) : (<h1>This player has no game yet</h1>)
   );
 };
 
