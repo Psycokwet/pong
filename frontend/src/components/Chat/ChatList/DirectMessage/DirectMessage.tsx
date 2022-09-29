@@ -19,12 +19,12 @@ const DirectMessage: React.FC<Props> = ({socket, channel, message, connectedChan
   }
 
   let style:string = "max-w-full truncate text-lg font-semibold self-center py-4 px-10 hover:bg-slate-800 cursor-pointer";
-  if (connectedChannel !== undefined && connectedChannel.channelId === channel.channelId) {
-    if (lastMessage !== message)
+  if (connectedChannel !== undefined && connectedChannel.channelId === channel.channelId)
+    style=style + " bg-slate-600";
+  if (connectedChannel !== undefined &&
+        message.roomId === channel.channelId &&
+        lastMessage !== message)
       setLastMessage(message);
-    style=style + "bg-slate-600";
-  }
-
   return (
     <div className={style}
       onClick={handleClick}>
@@ -34,7 +34,7 @@ const DirectMessage: React.FC<Props> = ({socket, channel, message, connectedChan
           {channel.channelName}
         </div>
         <div className="max-w-full truncate text-sm">
-          {lastMessage}
+          {lastMessage?.content}
         </div>
       </div>
     </div>

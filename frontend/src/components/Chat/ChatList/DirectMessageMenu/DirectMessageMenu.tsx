@@ -25,34 +25,7 @@ function DirectMessageMenu ({ socket }:{
           setAddChannel(!addChannel);}
         }>
         <h1 className="grow">Direct Messages</h1>
-        {addChannel ?
-          <FaMinusCircle className="cursor-pointer" onClick={() => setAddChannel(false)}/>
-          :
-          <FaPlusCircle className="cursor-pointer" onClick={() => setAddChannel(true)}/>
-        }
       </div>
-      {addChannel ?
-          <div className="flex flex-col gap-1 text-base font-light">
-            <input
-              className="bg-slate-600"
-              type="text"
-              placeholder="User Name"
-              value={user}
-              onChange={(e) => {
-                setUser(e.target.value);
-              }}
-              onKeyDown={handleKeyDown}
-            ></input>
-            <button
-              className={`rounded-xl bg-gray-600 m-2 hover:bg-gray-800`}
-              onClick={handleClick}
-            >
-              Create
-            </button>
-          </div>
-        :
-      <></>
-      }
     </div>
   );
 }

@@ -59,6 +59,7 @@ export class ChatService {
           members: {
             id: user.id,
           },
+          isDM: false,
         },
       })
       .then((rooms) =>
@@ -75,27 +76,32 @@ export class ChatService {
   public async getAllDMRooms(userId: number) {
     const user = await this.userService.getById(userId);
 
-    return this.roomsRepository
+    const rooms: Room[] = await this.roomsRepository
       .find({
-        relations: {
-          members: true,
-        },
         where: {
           members: {
             id: user.id,
           },
           isDM: true,
         },
-      })
-      .then((rooms) =>
-        rooms.map((room) => {
-          return {
-            id: room.id,
-            targetName: room.members.find((target) => target.id !== user.id),
-          };
-        }),
-      );
+      });
+
+      const result = [];
+      for (let i = 0; i < rooms.length; i++) {
+        const room = await this.roomsRepository.findOne({
+          relations: {
+            members: true,
+          },
+          where: { id: rooms[i].id }
+        })
+        result[i] = {
+            channelId: room.id,
+            channelName: room.members.filter((user) => user.id !== userId)[0].pongUsername
+        }
+      }
+      return result;
   }
+
 
   public async getRoomById(id: number) {
     return this.roomsRepository.findOneBy({ id });
@@ -137,7 +143,7 @@ export class ChatService {
   }) {
     const user = await this.userService.getById(userId);
 
-    const newRoom = await Room.create({
+    const newRoom = Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: roomName,
       password: password,
@@ -167,7 +173,7 @@ export class ChatService {
      */
     await this.doesDMChannelExist(receiverId, senderId);
 
-    const newRoom = await Room.create({
+    const newRoom = Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: uuidv4(),
       isDM: true,
@@ -189,7 +195,7 @@ export class ChatService {
       },
     });
 
-    const DMExists = await senderDMs.filter((room) => {
+    const DMExists = senderDMs.filter((room) => {
       return (
         room.members.find((user) => user.id === receiverId) &&
         room.members.find((user) => user.id === senderId)
@@ -227,7 +233,7 @@ export class ChatService {
   }
 
   async saveMessage(content: string, author: User, channel: Room) {
-    const newMessage = await this.messagesRepository.create({
+    const newMessage = this.messagesRepository.create({
       content: content,
       author: author,
       room: channel,
