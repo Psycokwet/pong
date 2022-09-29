@@ -1,42 +1,40 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
-import GameCanvas from '/src/components/PongGame/GameCanvas'
-import GameLobby from '/src/components/PongGame/GameLobby';
-import GameOver from '/src/components/PongGame/GameOver';
-import GameQueue from '/src/components/PongGame/GameQueue';
+import GameCanvas from "/src/components/PongGame/GameCanvas";
+import GameLobby from "/src/components/PongGame/GameLobby";
+import GameOver from "/src/components/PongGame/GameOver";
+import GameQueue from "/src/components/PongGame/GameQueue";
 import GameRoom from "/shared/interfaces/GameRoom";
 import Position from "/shared/interfaces/Position";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-
-const ENDPOINT = "http://localhost:8080/";
 
 const Play = () => {
   const [step, setStep] = useState<number>(0);
 
   /** WEBSOCKET */
   const [socket, setSocket] = useState<Socket>();
-  const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined)
-  const [canvasSize, setCanvasSize] = useState<Position>({x: 0, y: 0})
+  const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined);
+  const [canvasSize, setCanvasSize] = useState<Position>({ x: 0, y: 0 });
 
   useEffect(() => {
-    const screenIsVertical =  window.innerHeight >  window.innerWidth;
+    const screenIsVertical = window.innerHeight > window.innerWidth;
     const newCanvasSize: Position = { x: 0, y: 0 };
-    const referenceSize = screenIsVertical ?
-      window.innerWidth:
-      window.innerHeight - window.innerHeight / 3;
+    const referenceSize = screenIsVertical
+      ? window.innerWidth
+      : window.innerHeight - window.innerHeight / 3;
     if (screenIsVertical) {
       newCanvasSize.x = referenceSize;
-      newCanvasSize.y = referenceSize / 4 * 3
-      setCanvasSize(newCanvasSize)
+      newCanvasSize.y = (referenceSize / 4) * 3;
+      setCanvasSize(newCanvasSize);
     } else {
       newCanvasSize.y = referenceSize;
-      newCanvasSize.x = referenceSize / 3 * 4;
-      setCanvasSize(newCanvasSize)
+      newCanvasSize.x = (referenceSize / 3) * 4;
+      setCanvasSize(newCanvasSize);
     }
   }, []);
 
   useEffect(() => {
-    const newSocket = io(ENDPOINT, {
+    const newSocket = io(import.meta.env.VITE_PONG_URL, {
       transports: ["websocket"],
       withCredentials: true,
     });
@@ -44,7 +42,7 @@ const Play = () => {
   }, []);
 
   const handleGameConfirm = (gameRoom: GameRoom) => {
-    setGameRoom(gameRoom)
+    setGameRoom(gameRoom);
   };
   /** GAME CREATION */
   useEffect(() => {
@@ -56,7 +54,7 @@ const Play = () => {
 
   const upgradeStep = () => {
     setStep(step + 1);
-  }
+  };
 
   const gameSteps = [
     <GameLobby
@@ -76,19 +74,15 @@ const Play = () => {
       gameRoom={gameRoom}
       canvasSize={canvasSize}
     />,
-    <GameOver
-      socket={socket}
-      setStep={setStep}
-      gameRoom={gameRoom}
-    />,
+    <GameOver socket={socket} setStep={setStep} gameRoom={gameRoom} />,
   ];
 
   return (
     <>
-      <h1 className='text-violet-600'>I'm Play page</h1>
+      <h1 className="text-violet-600">I'm Play page</h1>
       {gameSteps[step]}
     </>
-  )
-}
+  );
+};
 
-export default Play
+export default Play;
