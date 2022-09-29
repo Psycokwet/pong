@@ -21,6 +21,7 @@ import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { UsersService } from './user.service';
 import AddFriend from 'shared/interfaces/AddFriend';
 import { Status, UserInterface } from 'shared/interfaces/UserInterface';
+import UserId from 'shared/interfaces/UserId';
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -120,4 +121,23 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       .in(client.id)
       .emit(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, orderedFriendsList);
   }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.USER.BLOCK_USER_REQUEST)
+  async blockUser(
+    @MessageBody() data: UserId,
+    @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const userToBlock = await this.userService.getById(data.id);
+    const caller = await this.userService.getById(payload.userId);
+
+    await this.userService.addBlockedUser(userToBlock, caller);
+    this.server.in(client.id).emit(ROUTES_BASE.USER.BLOCK_USER_CONFIRMATION, {
+      pongUsername: userToBlock.pongUsername,
+    });
+  }
+
+  //BLOCKED_USER_LIST_REQUEST
+  //renvoie la liste
 }

@@ -383,4 +383,15 @@ export class UsersService {
     if (isConnected) return Status.ONLINE;
     else return Status.OFFLINE;
   }
+
+  async addBlockedUser(userToBlock: User, caller: User) {
+    if (
+      !caller.blockedList.filter(
+        (member: User) => member.login42 === userToBlock.login42,
+      ).length
+    )
+      caller.blockedList = [...caller.blockedList, userToBlock];
+
+    await caller.save();
+  }
 }
