@@ -132,12 +132,35 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userToBlock = await this.userService.getById(data.id);
     const caller = await this.userService.getById(payload.userId);
 
+    if (!userToBlock) {
+      throw new BadRequestException({ error: 'User not found' });
+    }
+
     await this.userService.addBlockedUser(userToBlock, caller);
+
     this.server.in(client.id).emit(ROUTES_BASE.USER.BLOCK_USER_CONFIRMATION, {
       pongUsername: userToBlock.pongUsername,
     });
+
+    this.server
+      .in(client.id)
+      .emit(
+        ROUTES_BASE.USER.BLOCKED_USERS_LIST_CONFIRMATION,
+        await this.userService.getBlockedUsersList(caller),
+      );
   }
 
-  //BLOCKED_USER_LIST_REQUEST
-  //renvoie la liste
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.USER.BLOCKED_USERS_LIST_REQUEST)
+  async blockedUsersList(
+    @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const caller = await this.userService.getById(payload.userId);
+    const blockedList = this.userService.getBlockedUsersList(caller);
+
+    this.server
+      .in(client.id)
+      .emit(ROUTES_BASE.USER.BLOCKED_USERS_LIST_CONFIRMATION, blockedList);
+  }
 }
