@@ -17,10 +17,6 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
   const [userAttachedList, setUserAttachedList] = useState<UserInterface[]>([]);
 
-  useEffect(() => {
-    socket?.emit(ROUTES_BASE.USER.SET_CONNECTED_CHANNEL, connectedChannel);
-  }, [connectedChannel])
-
   const addMessage = (newElem:Message) => {
     setMessages([...messages, newElem]);
   }
