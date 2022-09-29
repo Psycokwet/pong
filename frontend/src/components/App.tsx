@@ -112,7 +112,7 @@ function App() {
           setConnectedState(connectionStatusEnum.Disconnected)
         }
       />
-      <FriendList />
+      <FriendList socket={socket}/>
 
       <Routes>
         {webPageRoutes.map((onePage, i) => {

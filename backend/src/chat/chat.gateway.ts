@@ -22,7 +22,7 @@ import { UsersService } from 'src/user/user.service';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import CreateChannel from '../../shared/interfaces/CreateChannel';
 import SearchChannel from '../../shared/interfaces/SearchChannel';
-import { UserInterface } from 'shared/interfaces/User';
+import { UserInterface, Status } from 'shared/interfaces/UserInterface';
 
 import * as bcrypt from 'bcrypt';
 import JoinChannel from 'shared/interfaces/JoinChannel';
@@ -409,6 +409,7 @@ export class ChatGateway {
     const promotedUser: UserInterface = {
       id: newAdmin.id,
       pongUsername: newAdmin.pongUsername,
+      status: Status.ONLINE,
     };
     this.server
       .in(room.roomName)
@@ -442,6 +443,7 @@ export class ChatGateway {
     const demotedUser: UserInterface = {
       id: oldAdmin.id,
       pongUsername: oldAdmin.pongUsername,
+      status: Status.ONLINE,
     };
 
     this.server
