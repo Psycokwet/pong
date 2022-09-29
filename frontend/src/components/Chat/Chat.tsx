@@ -14,11 +14,14 @@ import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])
+  const [lastMessage, setLastMessage] = useState<Message[]>([])
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
   const [userAttachedList, setUserAttachedList] = useState<UserInterface[]>([]);
 
   const addMessage = (newElem:Message) => {
-    setMessages([...messages, newElem]);
+    if (newElem.roomId == connectedChannel.channelId)
+      setMessages((current) => [...current, newElem]);
+    setLastMessage(newElem);
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, addMessage);
@@ -52,13 +55,20 @@ function Chat ({socket}:{socket:Socket|undefined}) {
       socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, channelListener);
     };
   }, [channelListener]);
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_CREATION, channelListener);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_CREATION, channelListener);
+    };
+  }, [channelListener]);
 
   const ResetUserList = (list:UserInterface[]) => {
     setUserAttachedList(list);
   }
   useEffect(() => {
-    socket?.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
-  }, []);
+    if (connectedChannel)
+      socket?.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST, connectedChannel.roomId)
+  }, [connectedChannel]);
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, ResetUserList);
     return () => {
@@ -67,7 +77,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   }, [ResetUserList]);
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
-      <ChatList msg={messages[messages.length - 1]} socket={socket} connectedChannel={connectedChannel}/>
+      <ChatList msg={lastMessage} socket={socket} connectedChannel={connectedChannel}/>
       <Messages messages={messages}/>
       <TextField socket={socket} chan={connectedChannel} />
       <div className="row-start-1 row-span-6 col-start-5 p-x-8">

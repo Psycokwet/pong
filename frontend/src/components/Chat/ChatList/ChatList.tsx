@@ -48,9 +48,9 @@ function ChatList({ msg , socket , connectedChannel} : {
     <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end relative">
       <div>
         <ChannelMenu socket={socket}/>
-        {chanList.map((chan, i) => {
+        {chanList.map((chan) => {
           return (
-            <div key={i}>
+            <div key={chan.channelId}>
               <Channel
                 channel={chan}
                 socket={socket}
@@ -62,12 +62,12 @@ function ChatList({ msg , socket , connectedChannel} : {
       </div>
       <div>
         <DirectMessageMenu socket={socket}/>
-        {directMessageList.map((chan, i) => {
+        {directMessageList.map((directMessage) => {
           return (
-            <div key={i}>
+            <div key={directMessage.channelId}>
               <DirectMessage
                 socket={socket}
-                channel={chan}
+                channel={directMessage}
                 message={msg===undefined?"":msg}
                 connectedChannel={connectedChannel}
               />

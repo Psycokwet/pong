@@ -195,7 +195,7 @@ export class ChatGateway {
       const receiverSocket = this.server.sockets.sockets.get(
         receiverSocketId.socketId,
       );
-
+      
       await receiverSocket.join(newDMRoom.roomName);
     }
 
@@ -309,6 +309,7 @@ export class ChatGateway {
           author: message.author.pongUsername,
           time: message.createdAt,
           content: message.content,
+          roomId: room.id
         };
         return messageForFront;
       }),
@@ -374,6 +375,7 @@ export class ChatGateway {
       author: newMessage.author.pongUsername,
       time: newMessage.createdAt,
       content: newMessage.content,
+      roomId: room.id,
     };
     if (room)
       this.server
