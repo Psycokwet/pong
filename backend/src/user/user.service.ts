@@ -90,10 +90,8 @@ export class UsersService {
       pongUsername: uuidv4(),
       email: dto.email,
       xp: 0,
-      blockedList: [],
+      isTwoFactorAuthenticationActivated: false,
     });
-
-    //user.xp = 0;
 
     try {
       return await user.save();
@@ -303,6 +301,28 @@ export class UsersService {
     return orderedFriendsList;
   }
 
+  async setTwoFactorAuthenticationSecret(secret: string, login42: string) {
+    const user = await this.findOne(login42);
+
+    /* We use TypeORM's update function to update our entity */
+    await this.usersRepository.update(user.id, {
+      twoFactorAuthenticationSecret: secret,
+    });
+  }
+
+  async getTwoFactorAuthentication(login42: string) {
+    const user = await this.findOne(login42);
+
+    return user.isTwoFactorAuthenticationActivated;
+  }
+  async setTwoFactorAuthentication(login42: string, value: boolean) {
+    const user = await this.findOne(login42);
+
+    /* We use TypeORM's update function to update our entity */
+    await this.usersRepository.update(user.id, {
+      isTwoFactorAuthenticationActivated: value,
+    });
+  }
   async getPongUsername(login42: string) {
     const user = await this.findOne(login42);
     return { pongUsername: user.pongUsername };
