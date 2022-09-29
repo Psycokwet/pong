@@ -27,7 +27,7 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
       socket?.off(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, ResetFriendList)}
   }, []);
   const AppendFriendList = (list:UserInterface) => {
-    setUserFriendList([...userFriendList, list]);
+    setUserFriendList((current) => [current, list]);
   }
   useEffect(() => {
      socket?.on(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, AppendFriendList)
@@ -38,7 +38,7 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
   const UserStatusChange = (user:UserInterface) => {
     const old:UserInterface = userFriendList.find((val) => val === user);
     if (old) {
-      setUserFriendList([...userFriendList.filter((value) => { value.pongUsername !== old.pongUsername }), old])
+      setUserFriendList((current) => [...current.filter((value) => { value.pongUsername !== old.pongUsername }), old])
       console.log("in", old); }
     else
       console.log("out", old);

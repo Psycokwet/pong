@@ -5,7 +5,7 @@ export type UserStatus = {
   color: string;
   groupName: string;
 }
-export const subList:UserStatus[] = [
+export const statusList:UserStatus[] = [
   {
     status: Status.ONLINE,
     color: "text-green-400",
