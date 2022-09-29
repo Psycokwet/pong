@@ -165,7 +165,11 @@ export class ChatGateway {
           channelName: newRoom.channelName,
         });
     }
-    this.joinAttachedChannelLobby(client, payload);
+    this.attachUserToChannel(
+      { channelName: newRoom.channelName, inputPassword: hashedPassword },
+      client,
+      payload,
+    );
   }
 
   /* CREATE DM ROOM*/
