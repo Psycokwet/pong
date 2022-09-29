@@ -241,6 +241,18 @@ export class ChatService {
   }
 
   async addMutedUser(mutedUser: User, room: Room, muteTime: number) {
+    const attachedRoomList = await this.roomsRepository.find({
+      relations: {
+        members: true,
+      },
+      where: {
+        members: {
+          id: mutedUser.id,
+        },
+        isDM: true,
+      },
+    });
+
     const addMuted = Muted.create({
       roomId: room.id,
       mutedUserId: mutedUser.id,
