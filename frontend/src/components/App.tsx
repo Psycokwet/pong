@@ -118,7 +118,7 @@ function App() {
         <Route path="/" element={<Home />} />
 
         <Route path="profile" element={<Profile />}>
-          <Route path=":login42" element={<OneUserProfile />} />
+          <Route path=":pongUsername" element={<OneUserProfile />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

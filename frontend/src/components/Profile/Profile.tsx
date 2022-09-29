@@ -12,27 +12,28 @@ const api = new Api();
 
 const Profile = () => {
   const [user_pic, setUserPic] = useState("");
-  const { login42 } = useParams();
+  const [userProfile, setUserProfile] = useState(null)
+  const { pongUsername } = useParams();
 
-  // api.get_user_rank().then((res: Response) => {
-  //   console.log("get_user_rank is OK, here's the Response", res);
-  //   if ((res.status / 200 >= 1 && res.status / 200 <= 2))
-  //     res.json().then((content) => {
-  //       console.log("get_user_rank is OK, here's the content", content);
-  //       console.log(`level is: ${content.level}`)
-  //       console.log(`rank is: ${content.userRank.rank}`)
-  //     });
-  // });
+  useEffect(() => {
+    api.get_user_profile(pongUsername).then((res: Response) => {
+      console.log("get_user_profile", res);
+      res.json().then((content) => {
+        console.log(`get_user_profile with pongUsername = ${pongUsername}`, content);
+        setUserProfile(content);
+      });
+    });
+  }, [pongUsername]);
 
   return (
     <div className="bg-black text-white h-screen grid grid-cols-10 grid-rows-6 gap-8">
-      <ProfilePic avatar={user_pic} setAvatar={setUserPic}/>
+      <ProfilePic avatar={user_pic} setAvatar={setUserPic} />
       <div className="col-start-2 col-span-3 row-start-2">
-        <ProfileName nickname={login42} />
+        <ProfileName nickname={pongUsername} />
       </div>
 
       {/* This part will change according to each user. Need to look into how to pass data */}
-      <OneUserProfile nickname={login42} />
+      <OneUserProfile nickname={pongUsername} />
     </div>
   );
 };

@@ -51,18 +51,22 @@ const LeaderBoard = () => {
           console.log(`rank is: ${content.userRank.rank}`)
         });
     });
-    api.get_user_profile('pony').then((res: Response) => {
+
+
+    api.get_user_profile('bla bla 2').then((res: Response) => {
       console.log("get_user_profile", res);
       res.json().then((content) => {
-        console.log("get_user_profile", content);
+        console.log("get_user_profile with pongUsername", content);
       });
     });
     api.get_user_profile(undefined).then((res: Response) => {
       console.log("get_user_profile", res);
       res.json().then((content) => {
-        console.log("get_user_profile", content);
+        console.log("get_user_profile with undefined pongUsername", content);
       });
     });
+
+
     api.get_user_history().then((res: Response) => {
       console.log("get_user_history", res);
       res.json().then((content) => {

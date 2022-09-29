@@ -108,7 +108,7 @@ const SignInPage = () => {
       {/* Testing Zone - to delete later - don't forget to scroll down */}
       <div>
         <PictureGetter />
-        {/* <NickNameGetter /> */}
+        <NickNameGetter />
       </div>
     </div>
   );
