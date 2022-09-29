@@ -2,7 +2,6 @@ import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { KeyboardEvent, useState, useEffect } from 'react';
-import '@szhsin/react-menu/dist/index.css';
 
 
 const Channel = function ({channel, socket, connectedChannel}:{
