@@ -20,8 +20,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.local
     volumes: 
-      - "./frontend/src:/usr/src/app/src"
-      - "./backend/shared:/usr/src/app/shared"
+      - ./frontend/src:/usr/src/app/src:ro 
+      - ./backend/shared:/usr/src/app/shared:ro 
     environment:
       - VITE_CONTEXT="DEV"
       # - VITE_CONTEXT="MOCKUP"
@@ -44,9 +44,9 @@ services:
       context: ./backend
       dockerfile: Dockerfile.local
     volumes: 
-      - "./backend/src:/svr/app/src"
-      - "./backend/test:/svr/app/test"
-      - "./backend/shared:/svr/app/shared"
+      - ./backend/src:/svr/app/src:ro
+      - ./backend/test:/svr/app/test:ro
+      - ./backend/shared:/svr/app/shared:ro
     restart: unless-stopped
     env_file: ./backend/.env
     depends_on:

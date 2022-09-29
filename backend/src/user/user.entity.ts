@@ -62,4 +62,14 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Message, (message) => message.author)
   public messages: Message[];
+
+  @Column({
+    nullable: false,
+  })
+  public isTwoFactorAuthenticationActivated: boolean;
+
+  @Column({
+    nullable: true,
+  })
+  public twoFactorAuthenticationSecret?: string;
 }
