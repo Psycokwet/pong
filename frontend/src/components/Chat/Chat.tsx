@@ -48,6 +48,16 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     };
   }, [channelListener]);
 
+  const disconnect = () => {
+    setMessages([]);
+    setConnectedChannel(undefined);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
+    };
+  }, [disconnect]);
 
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
