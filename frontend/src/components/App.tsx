@@ -39,7 +39,7 @@ function App() {
   const webPageRoutes = [
     {
       url: "/play",
-      element: <Play />,
+      element: <Play socket={socket}/>,
     },
     {
       url: "/leaderboard",
@@ -61,12 +61,14 @@ function App() {
 
 
   useEffect (()=>{
-    const newSocket = io(ENDPOINT, {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-    setSocket(newSocket);
-    }, [setSocket]);
+    return () => {
+      const newSocket = io(ENDPOINT, {
+        transports: ["websocket"],
+        withCredentials: true,
+      });
+      setSocket(newSocket);
+    }
+  }, [setSocket]);
 
 
 
