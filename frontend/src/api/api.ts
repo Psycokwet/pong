@@ -48,7 +48,7 @@ export class Api {
     });
   }
 
-  add_friend(login42: string, friend_to_add: string) {
+  addFriend(login42: string, friend_to_add: string) {
     let headers = new Headers();
     headers.set(HeadersFields.ContentType, "application/json");
     return fetch(`${PREFIX}${FULL_ROUTE.USER.ADD_FRIEND}`, {
@@ -58,7 +58,7 @@ export class Api {
     });
   }
 
-  get_friend_list(login42: string) {
+  getFriendList() {
     return fetch(
       `${PREFIX}${FULL_ROUTE.USER.GET_FRIEND_LIST}` +
         "?" +

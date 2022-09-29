@@ -35,9 +35,6 @@ export const ROUTES_BASE = {
     RECEIVE_MESSAGE: 'receiveMessage',
     /** MESSAGE HISTORY */
     MESSAGE_HISTORY: 'messageHistory',
-    /** CHANNEL ATTACHED USER LIST */
-    UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
-    ATTACHED_USER_LIST_SENT: 'attachedUserListSent',
     /** ATTACH TO CHANNEL REQUEST */
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
     /** SET / UNSET ADMIN */
@@ -47,6 +44,7 @@ export const ROUTES_BASE = {
     UNSET_ADMIN_CONFIRMATION: 'unsetAdminConfirmation',
     /** UNATTACH TO CHANNEL REQUEST */
     UNATTACH_TO_CHANNEL_REQUEST: 'unattachToChannelRequest',
+    UNATTACH_TO_CHANNEL_CONFIRMATION: 'unattachToChannelConfirmation',
     /** USER PRIVILEGES */
     USER_PRIVILEGES_REQUEST: 'userPrivilegesRequest',
     USER_PRIVILEGES_CONFIRMATION: 'userPrivilegesConfirmation',
@@ -61,6 +59,9 @@ export const ROUTES_BASE = {
     JOIN_GAME_LOBBY_REQUEST: 'joinGameLobbyRequest',
     /** CREATE GAME */
     CREATE_GAME_REQUEST: 'createGameRequest',
+    /** CREATE CHALLENGE */
+    CREATE_CHALLENGE_REQUEST: 'createChallengeRequest',
+    NOTIF_CHALLENGE_CONFIRM: 'notifChallengeConfirm',
     // CONFIRM_GAME_CREATION: 'confirmGameCreation',
     /** JOIN GAME */
     JOIN_GAME_REQUEST: 'joinGameRequest',
