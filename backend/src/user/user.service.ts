@@ -374,7 +374,7 @@ export class UsersService {
   }
 
   getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
-    return UserGateway.userWebsockets.find(
+    return UsersService.userWebsockets.find(
       (receiver) => receiver.userId === receiverId,
     );
   }
