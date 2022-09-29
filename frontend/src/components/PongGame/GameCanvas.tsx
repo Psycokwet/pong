@@ -138,9 +138,10 @@ const GameCanvas = (
       className="w-full h-7/8"
     >
       <div>
-        <h1
-          className="lg:text-3xl text-center p-2"
-        >RANKED MATCH</h1>
+        <h1 className="text-3xl text-center p-2">RANKED MATCH</h1>
+      </div>
+      <div>
+        <h2 className="lg:text-3xl text-center p-2">First to 10 points win</h2>
       </div>
       <div
         className="grid sm:grid-cols-3 content-center"
