@@ -69,6 +69,8 @@ export const ROUTES_BASE = {
     GET_SPECTABLE_GAMES_REQUEST: 'getSpectableGamesRequest',
     UPDATE_SPECTABLE_GAMES: 'updateSpectableGames',
     JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
+    /** SET CANVAS SIZE */
+    SET_CANVAS_SIZE: 'setCanvasSize',
   },
   USER: {
     ERROR: 'error',
