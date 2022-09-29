@@ -5,9 +5,10 @@ import GameLobby from '/src/components/PongGame/GameLobby';
 import GameOver from '/src/components/PongGame/GameOver';
 import GameQueue from '/src/components/PongGame/GameQueue';
 import GameRoom from "/shared/interfaces/GameRoom";
+import Position from "/shared/interfaces/Position";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 
-const ENDPOINT = "http://localhost:8080/"
+const ENDPOINT = "http://localhost:8080/";
 
 const Play = () => {
   const [step, setStep] = useState<number>(0);
@@ -15,7 +16,24 @@ const Play = () => {
   /** WEBSOCKET */
   const [socket, setSocket] = useState<Socket>();
   const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined)
+  const [canvasSize, setCanvasSize] = useState<Position>({x: 0, y: 0})
 
+  useEffect(() => {
+    const screenIsVertical =  window.innerHeight >  window.innerWidth;
+    const newCanvasSize: Position = { x: 0, y: 0 };
+    const referenceSize = screenIsVertical ?
+      window.innerWidth:
+      window.innerHeight - window.innerHeight / 3;
+    if (screenIsVertical) {
+      newCanvasSize.x = referenceSize;
+      newCanvasSize.y = referenceSize / 4 * 3
+      setCanvasSize(newCanvasSize)
+    } else {
+      newCanvasSize.y = referenceSize;
+      newCanvasSize.x = referenceSize / 3 * 4;
+      setCanvasSize(newCanvasSize)
+    }
+  }, []);
 
   useEffect(() => {
     const newSocket = io(ENDPOINT, {
@@ -44,6 +62,7 @@ const Play = () => {
     <GameLobby
       socket={socket}
       upgradeStep={upgradeStep}
+      canvasSize={canvasSize}
     />,
     <GameQueue
       socket={socket}
@@ -55,6 +74,7 @@ const Play = () => {
       setGameRoom={setGameRoom}
       upgradeStep={upgradeStep}
       gameRoom={gameRoom}
+      canvasSize={canvasSize}
     />,
     <GameOver
       socket={socket}
