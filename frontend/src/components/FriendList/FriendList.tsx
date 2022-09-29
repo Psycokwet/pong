@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import { UserInterface } from "/shared/interfaces/UserInterface";
-import { Api } from '../../api/api';
 import { BiChevronDown } from "react-icons/bi";
 
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
@@ -13,7 +12,6 @@ import DropDownFriendList from "./DropDownFriendList";
 const FriendList = ({socket} : {socket:Socket | undefined}) => {
   const [active, setActive] = useState(false);
   const [userFriendList, setUserFriendList] = useState<UserInterface[]>([]);
-  const api = new Api();
 
   const ResetFriendList = (list:UserInterface[]) => {
     setUserFriendList(list);
@@ -27,7 +25,7 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
       socket?.off(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, ResetFriendList)}
   }, []);
   const AppendFriendList = (list:UserInterface) => {
-    setUserFriendList((current) => [current, list]);
+    setUserFriendList((current) => [...current, list]);
   }
   useEffect(() => {
      socket?.on(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, AppendFriendList)
@@ -36,12 +34,17 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
   }, []);
 
   const UserStatusChange = (user:UserInterface) => {
-    const old:UserInterface = userFriendList.find((val) => val === user);
-    if (old) {
-      setUserFriendList((current) => [...current.filter((value) => { value.pongUsername !== old.pongUsername }), old])
-      console.log("in", old); }
-    else
-      console.log("out", old);
+    setUserFriendList((current) => {
+      const old:UserInterface = current.find((val) => val === user);
+      if (old) {
+        console.log("in", old);
+        return [...current.filter((value) => { value.pongUsername !== old.pongUsername }), old]
+      }
+      else{
+        console.log("out", old);
+        return current;
+      }
+    });
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, UserStatusChange);
