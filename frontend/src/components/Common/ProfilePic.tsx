@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Api } from "../../api/api";
 
-const DEFAULT_AVATAR: string =
+export const DEFAULT_AVATAR: string =
   "https://thumbs.dreamstime.com/b/default-avatar-profile-vector-user-profile-default-avatar-profile-vector-user-profile-profile-179376714.jpg";
 
 type ProfilePicProps = {

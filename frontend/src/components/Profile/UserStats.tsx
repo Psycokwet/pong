@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PieChart } from "react-minimal-pie-chart";
 
-function Stats () {
+const UserStats = () => {
 	let wins=7
 	let looses=10
 	let abandons=10
@@ -50,4 +50,4 @@ function Stats () {
 	)
 }
 
-export default Stats
+export default UserStats
