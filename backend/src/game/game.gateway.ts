@@ -2,6 +2,7 @@ import { UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -23,7 +24,7 @@ import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
   transport: ['websocket'],
   cors: '*/*',
 })
-export class GameGateway {
+export class GameGateway implements OnGatewayDisconnect {
 
   constructor(
     private userService: UsersService,
@@ -33,6 +34,30 @@ export class GameGateway {
 
   @WebSocketServer()
   server: Server;
+
+  async handleDisconnect(@ConnectedSocket() client: Socket) {
+    console.log(client.id)
+
+    
+
+    // try {
+    //   const user = await this.userService.getUserFromSocket(client);
+
+    //   UserGateway.userWebsockets = UserGateway.userWebsockets.filter(
+    //     (websocket) => websocket.socketId !== client.id,
+    //   );
+
+    //   const disconnectingUser: UserInterface = {
+    //     id: user.id,
+    //     pongUsername: user.pongUsername,
+    //     status: Status.OFFLINE,
+    //   };
+    //   this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, disconnectingUser);
+    // } catch (e) {
+    //   console.error(e.message);
+    //   return;
+    // }
+  }
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.SEND_INPUT)

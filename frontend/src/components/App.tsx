@@ -83,8 +83,8 @@ function App() {
         }
       });
     }
-    const interval = setInterval(() => {
-      api
+    const interval = setInterval(async () => {
+      await api
         .refreshToken()
         .then(res => {
           setConnectedState(current => {
@@ -98,6 +98,8 @@ function App() {
             return result;
           })
         });
+      socket?.disconnect();
+      socket?.connect();
     }, 600_000);
 
     return () => {
