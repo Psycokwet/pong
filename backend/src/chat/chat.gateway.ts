@@ -358,14 +358,10 @@ export class ChatGateway {
       payload.userId,
       room.id,
     );
-    console.log('isUserMuted', isUserMuted);
-    console.log('now', Date.now());
-    //console.log('unmuteAt', isUserMuted.unmuteAt);
+
     if (isUserMuted) {
-      if (isUserMuted.unmuteAt > Date.now()) {
-        console.log('dsa');
-        return;
-      } else this.chatService.unmuteUser(payload.userId, room.id);
+      if (isUserMuted.unmuteAt > Date.now()) return;
+      else this.chatService.unmuteUser(payload.userId, room.id);
     }
 
     const author = await this.userService.getUserByIdWithMessages(
