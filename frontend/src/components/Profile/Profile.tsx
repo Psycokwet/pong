@@ -19,6 +19,8 @@ const Profile = () => {
     profilePicture: null,
   });
 
+  const [urlProfilePic, setUrlProfilePic] = useState("")
+
   const { pongUsername } = useParams();
 
   useEffect(() => {
@@ -29,6 +31,8 @@ const Profile = () => {
           `get_user_profile with pongUsername = ${pongUsername}`,
           content
         );
+        // if (content.profilePicture)
+        //   setUrlProfilePic(URL.revokeObjectURL(content.profilePicture.blob()));
         setUserProfile(content);
       });
     });
@@ -36,7 +40,7 @@ const Profile = () => {
 
   return (
     <div className="bg-black text-white h-screen">
-      <OneUserProfile userProfile={userProfile}/>
+      <OneUserProfile userProfile={userProfile} urlPic={urlProfilePic}/>
     </div>
   );
 };

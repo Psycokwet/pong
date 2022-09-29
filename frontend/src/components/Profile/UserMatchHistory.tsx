@@ -2,19 +2,15 @@ import React from "react";
 
 type UserMatchHistoryProps = {
   userHistory: {
-    nbGames: number;
-    nbWins: number;
-    games: string[];
-  };
+    time: string;
+    opponent: string;
+    winner: string;
+    id: Number;
+  }[];
 };
 
 const UserMatchHistory: React.FC<UserMatchHistoryProps> = ({ userHistory }) => {
-  return (
-  <div>
-    UserMatchHistory {userHistory.nbGames}
-    UserMatchHistory {userHistory.nbWins}
-    UserMatchHistory {userHistory.games[0]}
-    </div>);
+  return <div> UserMatchHistory {userHistory[0].winner}</div>;
 };
 
 export default UserMatchHistory;
