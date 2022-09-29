@@ -9,7 +9,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { UsersModule } from 'src/user/user.module';
 import { User } from 'src/user/user.entity';
 import { AuthService } from 'src/auth/auth.service';
-import { Muted } from './mute-list.entity';
+import { Muted } from './muted.entity';
 
 @Module({
   imports: [
