@@ -8,7 +8,6 @@ import LeaveChannelButton from "./LeaveChannelButton";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
 import CreateDm from "./CreateDm";
-const ENDPOINT = "http://localhost:8080";
 import { ROUTES_BASE } from "../../../shared/websocketRoutes/routes";
 import ChannelData from "../../../shared/interfaces/ChannelData";
 import Message from "../../../shared/interfaces/Message";
@@ -52,7 +51,7 @@ function WebSocketCdaiTest() {
     });
   };
   useEffect(() => {
-    const newSocket = io(ENDPOINT, {
+    const newSocket = io(import.meta.env.VITE_PONG_URL, {
       transports: ["websocket"],
       withCredentials: true,
     });
