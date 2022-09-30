@@ -1,3 +1,5 @@
+import { generate_full_routes } from '../utils';
+
 export const ROUTES_BASE = {
   CHAT: {
     ENDPOINT: '/chat/',
@@ -33,9 +35,6 @@ export const ROUTES_BASE = {
     RECEIVE_MESSAGE: 'receiveMessage',
     /** MESSAGE HISTORY */
     MESSAGE_HISTORY: 'messageHistory',
-    /** CHANNEL ATTACHED USER LIST */
-    UPDATE_CHANNEL_ATTACHED_USER_LIST: 'updateChannelAttachedUserList',
-    ATTACHED_USER_LIST_SENT: 'attachedUserListSent',
     /** ATTACH TO CHANNEL REQUEST */
     ATTACH_TO_CHANNEL_REQUEST: 'attachToChannelRequest',
     /** SET / UNSET ADMIN */
@@ -45,9 +44,17 @@ export const ROUTES_BASE = {
     UNSET_ADMIN_CONFIRMATION: 'unsetAdminConfirmation',
     /** UNATTACH TO CHANNEL REQUEST */
     UNATTACH_TO_CHANNEL_REQUEST: 'unattachToChannelRequest',
+    UNATTACH_TO_CHANNEL_CONFIRMATION: 'unattachToChannelConfirmation',
     /** USER PRIVILEGES */
     USER_PRIVILEGES_REQUEST: 'userPrivilegesRequest',
     USER_PRIVILEGES_CONFIRMATION: 'userPrivilegesConfirmation',
+    /** BAN USER REQUEST */
+    BAN_USER_REQUEST: 'banUserRequest',
+    /** MUTE USER REQUEST */
+    MUTE_USER_REQUEST: 'muteUserRequest',
+    /** CHANGE PASSWORD */
+    CHANGE_PASSWORD_REQUEST: 'changePasswordRequest',
+    CHANGE_PASSWORD_CONFIRMATION: 'changePasswordConfirmation',
   },
   GAME: {
     ENDPOINT: '/game/',
@@ -55,6 +62,9 @@ export const ROUTES_BASE = {
     JOIN_GAME_LOBBY_REQUEST: 'joinGameLobbyRequest',
     /** CREATE GAME */
     CREATE_GAME_REQUEST: 'createGameRequest',
+    /** CREATE CHALLENGE */
+    CREATE_CHALLENGE_REQUEST: 'createChallengeRequest',
+    NOTIF_CHALLENGE_CONFIRM: 'notifChallengeConfirm',
     // CONFIRM_GAME_CREATION: 'confirmGameCreation',
     /** JOIN GAME */
     JOIN_GAME_REQUEST: 'joinGameRequest',
@@ -85,18 +95,13 @@ export const ROUTES_BASE = {
     GET_STATUS_CONFIRMATION: 'getStatusConfirmation',
     /** CONNECTION NOTIFICATION */
     CONNECTION_CHANGE: 'connectionChange',
+    /** BLOCK USER */
+    BLOCK_USER_REQUEST: 'blockUserRequest',
+    BLOCK_USER_CONFIRMATION: 'blockUserConfirmation',
+    /** BLOCKED USERS LIST */
+    BLOCKED_USERS_LIST_REQUEST: 'blockedUsersListRequest',
+    BLOCKED_USERS_LIST_CONFIRMATION: 'blockedUsersListConfirmation',
   },
-};
-const generate_full_routes = (routes_base) => {
-  let accumulator = {};
-  for (const key_base_route in routes_base) {
-    let { ENDPOINT, ...current_sub_routes } = routes_base[key_base_route];
-    accumulator[key_base_route] = { ENDPOINT };
-    for (const key_end_route in current_sub_routes) {
-      accumulator[key_base_route][key_end_route] =
-        ENDPOINT + current_sub_routes[key_end_route];
-    }
-  }
-  return accumulator;
+  ERROR: 'error',
 };
 export const FULL_ROUTE = generate_full_routes(ROUTES_BASE);

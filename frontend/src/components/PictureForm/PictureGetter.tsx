@@ -1,20 +1,19 @@
 import { useState } from "react";
 import { Api } from "../../api/api";
+const api = new Api();
 
 export const PictureGetter = () => {
   const [userPicture, setUserPicture] = useState<string>("");
 
-  const api = new Api();
-
-  const submitDownloadForm = (e: React. MouseEvent<HTMLElement>) => {
+  const submitDownloadForm = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     api
-      .getPicture()
+      .getPicture(null)
       .then((res) => res.blob())
       .then((myBlob) => {
-        setUserPicture(URL.createObjectURL(myBlob))
-        console.log("get_picture is Ok")
+        setUserPicture(URL.createObjectURL(myBlob));
+        console.log("get_picture is Ok");
       })
       .catch((err) => alert(`File Download Error ${err}`));
   };
