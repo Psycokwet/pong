@@ -337,4 +337,10 @@ export class ChatService {
 
     return { privilege: Privileges.MEMBER };
   }
+
+  async changePassword(room: Room, newPassword: string) {
+    room.password = newPassword;
+
+    await room.save();
+  }
 }
