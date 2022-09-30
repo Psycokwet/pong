@@ -11,13 +11,14 @@ import {
   UploadedFile,
   Param,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { createReadStream } from 'fs';
 import { join } from 'path';
-import { Express } from 'express';
+import { Express, query } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { User } from './user.entity';
@@ -32,16 +33,12 @@ export class UserController {
 
   @Get(ROUTES_BASE.USER.GET_USER_PROFILE)
   @UseGuards(JwtAuthGuard)
-  async getUserProfile(
-    @Request() req: RequestWithUser,
-    @Param() params: GetUserProfileDto,
-  ) {
+  async getUserProfile(@Request() req: RequestWithUser, @Query() query) {
     let user: User = null;
-    if (!params.pongUsername)
+    if (!req.query.pongUsername)
       user = await this.usersService.findOne(req.user.login42);
     else
-      user = await this.usersService.findOneByPongUsername(params.pongUsername);
-
+      user = await this.usersService.findOneByPongUsername(query.pongUsername);
     if (!user) {
       throw new BadRequestException({ error: 'User not found' });
     }
