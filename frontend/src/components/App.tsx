@@ -19,6 +19,7 @@ import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
 import Settings from "./NavBar/Pages-To-Change/Settings";
 import Profile from "./Profile/Profile";
 import OneUserProfile from "./Profile/OneUserProfile";
+import False42Login from "./LoginPage/False42Login";
 
 enum connectionStatusEnum {
   Unknown,
@@ -130,7 +131,10 @@ function App() {
       </Routes>
     </div>
   ) : (
-    <LoginPage />
+    <Routes>
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/false42login" element={<False42Login />} />
+    </Routes>
   );
 }
 
