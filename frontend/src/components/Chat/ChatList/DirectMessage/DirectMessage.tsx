@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import UserPicture from "../../../User Picture/UserPicture";
+import UserPicture from "../../../UserPicture/UserPicture";
 import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";

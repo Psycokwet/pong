@@ -1,14 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 import io, { Socket } from "socket.io-client";
-import GameCanvas from '/src/components/PongGame/GameCanvas'
-import GameLobby from '/src/components/PongGame/GameLobby';
-import GameOver from '/src/components/PongGame/GameOver';
-import GameQueue from '/src/components/PongGame/GameQueue';
+import GameCanvas from "/src/components/PongGame/GameCanvas";
+import GameLobby from "/src/components/PongGame/GameLobby";
+import GameOver from "/src/components/PongGame/GameOver";
+import GameQueue from "/src/components/PongGame/GameQueue";
 import GameRoom from "/shared/interfaces/GameRoom";
 import Position from "/shared/interfaces/Position";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-
-const ENDPOINT = "http://localhost:8080/";
 
 const Play = ({
   socket,
@@ -22,19 +20,19 @@ const Play = ({
   const [canvasSize, setCanvasSize] = useState<Position>({x: 0, y: 0})
 
   useEffect(() => {
-    const screenIsVertical =  window.innerHeight >  window.innerWidth;
+    const screenIsVertical = window.innerHeight > window.innerWidth;
     const newCanvasSize: Position = { x: 0, y: 0 };
     const referenceSize = screenIsVertical ?
       window.innerWidth - window.innerWidth / 25 :
       window.innerHeight - window.innerHeight / 3;
     if (screenIsVertical) {
       newCanvasSize.x = referenceSize;
-      newCanvasSize.y = referenceSize / 4 * 3
-      setCanvasSize(newCanvasSize)
+      newCanvasSize.y = (referenceSize / 4) * 3;
+      setCanvasSize(newCanvasSize);
     } else {
       newCanvasSize.y = referenceSize;
-      newCanvasSize.x = referenceSize / 3 * 4;
-      setCanvasSize(newCanvasSize)
+      newCanvasSize.x = (referenceSize / 3) * 4;
+      setCanvasSize(newCanvasSize);
     }
   }, []);
 
@@ -57,7 +55,7 @@ const Play = ({
 
 
   const handleGameConfirm = (gameRoom: GameRoom) => {
-    setGameRoom(gameRoom)
+    setGameRoom(gameRoom);
   };
   /** GAME CREATION */
   useEffect(() => {
@@ -69,7 +67,7 @@ const Play = ({
 
   const upgradeStep = () => {
     setStep(step + 1);
-  }
+  };
 
   const gameSteps = [
     <GameLobby
@@ -102,4 +100,4 @@ const Play = ({
   )
 }
 
-export default Play
+export default Play;

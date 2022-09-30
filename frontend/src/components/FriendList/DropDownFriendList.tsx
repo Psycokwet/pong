@@ -1,60 +1,56 @@
 import React from "react";
 import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import { userStatusEnum } from "./FriendList";
-import SubFriendList from "./SubFriendList";
+import UserListByStatus from "./UserListByStatus";
+import { Socket } from "socket.io-client";
+import { UserInterface, Status } from "/shared/interfaces/UserInterface";
+import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import { statusList } from "../Common/StatusList"
 
 type DropDownFriendListProps = {
-  subListInfo: {
-    status: userStatusEnum;
-    color: string;
-    group_name: string;
-    invite?: React.MouseEventHandler<HTMLButtonElement>;
-    button_name?: string;
-  }[];
-  profile_data: {
-    login: string;
-    nickname: string;
-    status: userStatusEnum;
-    image_url: string;
-  }[];
+  userFriendList: UserInterface;
+  socket: Socket|undefined;
 };
 
 const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
-  subListInfo,
-  profile_data,
+  socket,
+  userFriendList,
 }) => {
-  const [inputValue, setInputValue] = useState("");
+  const [inputFilter, setInputFilter] = useState("");
 
   return (
-    <div>
+    <div className="rounded-b-md overflow-none">
       {/* Searching area */}
-      <div className="flex items-center p-1 bg-white">
+      <div className="flex items-center p-1 bg-gray-600">
         <span>
-          <FaSearch size={20} className="text-gray-500" />
+          <FaSearch size={20} className="text-white-100" />
         </span>
         <input
           type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          value={inputFilter}
+          onChange={(e) => setInputFilter(e.target.value)}
           placeholder="Search a name"
-          className="text-gray-700 placeholder:text-gray-500 p-2 outline-none rounded-xl"
+          className="text-white-900 placeholder:text-gray-400 p-2 outline-none rounded-xl bg-gray-600"
         />
       </div>
 
       {/* Sub lists */}
       <div>
-        {subListInfo?.map((aSubList) => {
+        {statusList?.map((aStatusList) => {
           return (
-            <SubFriendList
-              key={aSubList.status}
-              friend_list={profile_data}
-              input={inputValue}
-              group_status={aSubList.status}
-              color={aSubList.color}
-              group_name={aSubList.group_name}
-              handle_click={aSubList.invite}
-              group_button_name={aSubList.button_name}
+            <UserListByStatus
+              key={aStatusList.status}
+              userList={userFriendList}
+              inputFilter={inputFilter}
+              statusList={aStatusList}
+              socket={socket}
+              roomId={0}
+              menuSettings={({
+                challenge:aStatusList.status===Status.ONLINE,
+                watch:aStatusList.status===Status.PLAYING,
+                privileges:Privileges.MEMBER,
+                friend:true,
+              })}
             />
           );
         })}
