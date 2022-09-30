@@ -1,3 +1,5 @@
+import { generate_full_routes } from '../utils';
+
 export const ROUTES_BASE = {
   USER: {
     ENDPOINT: '/user/',
@@ -18,6 +20,11 @@ export const ROUTES_BASE = {
     LOGOUT: 'logout',
     REFRESH: 'refresh',
     REDIRECT: 'redirect',
+    TURN_ON_2FA: 'turn_on_2fa',
+    TURN_OFF_2FA: 'turn_off_2fa',
+    GET_2FA: 'get_2fa',
+    GENERATE_2FA: 'generate_2fa',
+    CHECK_2FA: 'check_2fa',
   },
   ROOT: {
     ENDPOINT: '/',
@@ -25,17 +32,5 @@ export const ROUTES_BASE = {
     REFRESH: 'refresh',
     REDIRECT: 'redirect',
   },
-};
-const generate_full_routes = (routes_base) => {
-  let accumulator = {};
-  for (const key_base_route in routes_base) {
-    let { ENDPOINT, ...current_sub_routes } = routes_base[key_base_route];
-    accumulator[key_base_route] = { ENDPOINT };
-    for (const key_end_route in current_sub_routes) {
-      accumulator[key_base_route][key_end_route] =
-        ENDPOINT + current_sub_routes[key_end_route];
-    }
-  }
-  return accumulator;
 };
 export const FULL_ROUTE = generate_full_routes(ROUTES_BASE);

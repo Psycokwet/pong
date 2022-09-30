@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import io, { Socket } from "socket.io-client";
 
-const ENDPOINT = "http://localhost:8080";
 import { Api } from "../api/api";
 
 // Components
@@ -29,7 +28,6 @@ enum connectionStatusEnum {
 
 const api = new Api();
 
-
 function App() {
   const [connectedState, setConnectedState] = useState(
     connectionStatusEnum.Unknown
@@ -47,7 +45,7 @@ function App() {
     },
     {
       url: "/chat",
-      element: <Chat socket={socket}/>,
+      element: <Chat socket={socket} />,
     },
     {
       url: "/settings",
@@ -59,18 +57,13 @@ function App() {
     },
   ];
 
-
-  useEffect (()=>{
-    return () => {
-      const newSocket = io(ENDPOINT, {
-        transports: ["websocket"],
-        withCredentials: true,
-      });
-      setSocket(newSocket);
-    }
+  useEffect(() => {
+    const newSocket = io(import.meta.env.VITE_PONG_URL, {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
+    setSocket(newSocket);
   }, [setSocket]);
-
-
 
   useEffect(() => {
     if (connectedState == connectionStatusEnum.Unknown) {
@@ -84,20 +77,24 @@ function App() {
       });
     }
     const interval = setInterval(async () => {
-      await api
-        .refreshToken()
-        .then(res => {
-          setConnectedState(current => {
-            let result = current;
-            if (res.status !== 200 && current!== connectionStatusEnum.Disconnected) {
-              console.error(res);
-              result = connectionStatusEnum.Disconnected
-            } else if (res.status === 200 && current!== connectionStatusEnum.Connected) {
-              result = connectionStatusEnum.Connected
-            }
-            return result;
-          })
+      await api.refreshToken().then((res) => {
+        setConnectedState((current) => {
+          let result = current;
+          if (
+            res.status !== 200 &&
+            current !== connectionStatusEnum.Disconnected
+          ) {
+            console.error(res);
+            result = connectionStatusEnum.Disconnected;
+          } else if (
+            res.status === 200 &&
+            current !== connectionStatusEnum.Connected
+          ) {
+            result = connectionStatusEnum.Connected;
+          }
+          return result;
         });
+      });
       socket?.disconnect();
       socket?.connect();
     }, 600_000);
@@ -116,7 +113,7 @@ function App() {
           setConnectedState(connectionStatusEnum.Disconnected)
         }
       />
-      <FriendList />
+      <FriendList socket={socket} />
 
       <Routes>
         {webPageRoutes.map((onePage, i) => {
