@@ -2,14 +2,17 @@ import { useState } from "react";
 import { Api } from "../../api/api";
 const api = new Api();
 
-export const PictureGetter = () => {
+type PictureGetterProps = {
+  pongUsername: string;
+}
+export const PictureGetter: React.FC<PictureGetterProps> = ({pongUsername}) => {
   const [userPicture, setUserPicture] = useState<string>("");
 
   const submitDownloadForm = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     api
-      .getPicture(null)
+      .getPicture(pongUsername)
       .then((res) => res.blob())
       .then((myBlob) => {
         setUserPicture(URL.createObjectURL(myBlob));
