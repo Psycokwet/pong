@@ -103,11 +103,24 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    this.server
-      .in(client.id)
+    client
       .emit(
         ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS,
         await this.chatService.getAllDMRooms(payload.userId),
+      );
+  }
+
+  @UseGuards(JwtWsGuard)
+  async forceJoinDMChannelLobby(
+    @ConnectedSocket() client: Socket,
+    userId: number,
+  ) {
+    const DMList = await this.chatService.getAllDMRooms(userId);
+    console.log("forced :", client.id, userId, DMList)
+    client
+      .emit(
+        ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS,
+        DMList
       );
   }
 
@@ -197,10 +210,10 @@ export class ChatGateway {
       );
       
       await receiverSocket.join(newDMRoom.roomName);
+      this.forceJoinDMChannelLobby(receiverSocket, friendId);
     }
 
-    this.server
-      .in(newDMRoom.roomName)
+    client
       .emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_CREATION, {
         channelId: newDMRoom.id,
         channelName: newDMRoom.channelName,

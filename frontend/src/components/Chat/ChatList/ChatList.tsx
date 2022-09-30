@@ -33,7 +33,7 @@ function ChatList({ msg , socket , connectedChannel} : {
     };
   }, [resetChanList]);
 
-  const resetDirectMessageList = (chans:ChannelData[]) => {
+  const resetDirectMessageList = (chans:any) => {
     setDirectMessageList(chans);
   }
   useEffect(() => {
@@ -41,7 +41,7 @@ function ChatList({ msg , socket , connectedChannel} : {
     return () => {
       socket?.off(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, resetDirectMessageList);
     };
-  }, [resetDirectMessageList]);
+  }, []);
 
 
   return (

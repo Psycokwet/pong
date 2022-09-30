@@ -8,16 +8,6 @@ function DirectMessageMenu ({ socket }:{
 }){
   const [addChannel, setAddChannel] = useState<boolean>(false)
   const [user, setUser] = useState<string>("")
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.code == 'Enter')
-      handleClick();
-  }
-  const handleClick = () => {
-    if (user.trim() !== "") {
-      socket?.emit(ROUTES_BASE.CHAT.CREATE_DM, user);
-    }
-    setUser("")
-  }
   return (
     <div className="flex flex-col sticky top-0 px-4 py-3 font-semibold text-xl text-slate-200 bg-slate-700/90 backdrop-blur-sm ring-1 ring-black/10">
       <div className={("flex flex-row"+ (addChannel ? ' cursor-pointer':''))}
