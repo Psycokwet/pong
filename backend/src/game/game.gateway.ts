@@ -44,6 +44,7 @@ export class GameGateway implements OnGatewayConnection {
 
       if (!gameRoom) return;
       client.join(gameRoom.roomName);
+      this.updateUserStatus(user, Status.PLAYING);
     } catch (e) {
       console.error(e.message);
     }
