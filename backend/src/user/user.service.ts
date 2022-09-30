@@ -31,6 +31,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import UserProfile from 'shared/interfaces/UserProfile';
+import { Blocked } from 'src/blocked/blocked.entity';
 
 // This should be a real class/interface representing a user entity
 export type UserLocal = { userId: number; login42: string; password: string };
@@ -60,6 +61,9 @@ export class UsersService {
 
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
+    @InjectRepository(Blocked)
+    private blockedRepository: Repository<Blocked>,
+
     private localFilesService: LocalFilesService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
@@ -86,9 +90,8 @@ export class UsersService {
       pongUsername: uuidv4(),
       email: dto.email,
       xp: 0,
+      isTwoFactorAuthenticationActivated: false,
     });
-
-    //user.xp = 0;
 
     try {
       return await user.save();
@@ -155,17 +158,10 @@ export class UsersService {
   }
 
   async getUserProfile(user: User) {
-    let profilePicture: StreamableFile | null = null;
-    try {
-      const picture_path = await this.getPicture(user);
-      const file = createReadStream(join(process.cwd(), `${picture_path}`));
-      profilePicture = new StreamableFile(file);
-    } catch (error) {}
     const profileElements: UserProfile = {
       pongUsername: user.pongUsername,
       userRank: await await this.getUserRank(user),
       userHistory: await this.getUserHistory(user),
-      profilePicture: profilePicture,
     };
     return profileElements;
   }
@@ -298,6 +294,28 @@ export class UsersService {
     return orderedFriendsList;
   }
 
+  async setTwoFactorAuthenticationSecret(secret: string, login42: string) {
+    const user = await this.findOne(login42);
+
+    /* We use TypeORM's update function to update our entity */
+    await this.usersRepository.update(user.id, {
+      twoFactorAuthenticationSecret: secret,
+    });
+  }
+
+  async getTwoFactorAuthentication(login42: string) {
+    const user = await this.findOne(login42);
+
+    return user.isTwoFactorAuthenticationActivated;
+  }
+  async setTwoFactorAuthentication(login42: string, value: boolean) {
+    const user = await this.findOne(login42);
+
+    /* We use TypeORM's update function to update our entity */
+    await this.usersRepository.update(user.id, {
+      isTwoFactorAuthenticationActivated: value,
+    });
+  }
   async getPongUsername(login42: string) {
     const user = await this.findOne(login42);
     return { pongUsername: user.pongUsername };
@@ -382,5 +400,64 @@ export class UsersService {
 
     if (isConnected) return Status.ONLINE;
     else return Status.OFFLINE;
+  }
+
+  async addBlockedUser(userToBlock: User, caller: User) {
+    /* Checking if the caller is blocking himself (I think this should never 
+      happen on the front side) */
+    if (caller.id === userToBlock.id) {
+      throw new BadRequestException({
+        error: 'You cannot block yourself',
+      });
+    }
+
+    /* Then we check if the person the caller wants to block is already
+      in our blocked list and throw a 400 if they are */
+    const doubleBlockCheck = await this.blockedRepository.findOne({
+      relations: {
+        blockedUser: true,
+      },
+      where: { blockedId: userToBlock.id, userId: caller.id },
+    });
+
+    if (doubleBlockCheck) {
+      throw new BadRequestException({
+        error: 'User is already blocked',
+      });
+    }
+
+    /* Finally the profile we want to block is registered in our Blocked db */
+    const addBlockedUser = Blocked.create({
+      blockedId: userToBlock.id,
+      userId: caller.id,
+      blockedUser: userToBlock,
+    });
+
+    await addBlockedUser.save();
+  }
+
+  async getBlockedUsersList(caller: User): Promise<
+    | {
+        id: number;
+        pongUsername: string;
+      }[]
+    | undefined
+  > {
+    const rawBlockedList: Blocked[] = await this.blockedRepository.find({
+      relations: {
+        blockedUser: true,
+      },
+      where: { userId: caller.id },
+    });
+
+    const orderedBlockedList: { id: number; pongUsername: string }[] =
+      rawBlockedList.map((blocked: Blocked) => {
+        return {
+          id: blocked.blockedUser.id,
+          pongUsername: blocked.blockedUser.pongUsername,
+        };
+      });
+
+    return orderedBlockedList;
   }
 }
