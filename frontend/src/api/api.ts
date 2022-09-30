@@ -27,8 +27,16 @@ export class Api {
       body: data,
     });
   }
-
-  getPicture() {
+  getPicture(pongUsername: string | null) {
+    if (pongUsername)
+      return fetch(
+        `${PREFIX}${FULL_ROUTE.USER.GET_PICTURE}` +
+          "\\?" +
+          new URLSearchParams({ pongUsername }),
+        {
+          method: "GET",
+        }
+      );
     return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_PICTURE}`, {
       method: "GET",
     });
