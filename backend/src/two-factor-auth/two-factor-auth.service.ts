@@ -44,14 +44,17 @@ export class TwoFactorAuthService {
 
     return await this.getCookiesWith2FAValue(user, value);
   }
-  public async getCookiesWith2FAValue(user: User, is2FAAuthenticated: boolean) {
+  public async getCookiesWith2FAValue(
+    user: User,
+    isTwoFactorAuthenticated: boolean,
+  ) {
     const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
       user.id,
-      is2FAAuthenticated,
+      isTwoFactorAuthenticated,
     );
     const refreshToken = this.authService.getJwtRefreshToken(
       user.id,
-      is2FAAuthenticated,
+      isTwoFactorAuthenticated,
     );
     const refreshTokenCookie =
       this.authService.getCookieWithJwtRefreshToken(refreshToken);

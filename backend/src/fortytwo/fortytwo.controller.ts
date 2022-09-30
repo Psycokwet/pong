@@ -18,6 +18,7 @@ import JwtRefreshGuard from 'src/auth/jwtRefresh.guard';
 import { FortytwoService } from './fortytwo.service';
 import { User } from 'src/user/user.entity';
 import { TwoFactorAuthService } from 'src/two-factor-auth/two-factor-auth.service';
+import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
 
 @Injectable()
 @Controller(ROUTES_BASE.AUTH.ENDPOINT)
@@ -72,7 +73,6 @@ export class FortyTwoController {
       request.user.id,
       false,
     );
-
     request.res.setHeader('Set-Cookie', accessTokenCookie);
     return request.user;
   }

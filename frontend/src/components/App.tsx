@@ -20,20 +20,15 @@ import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
 import Settings from "./NavBar/Pages-To-Change/Settings";
 import Profile from "./Profile/Profile";
 import OneUserProfile from "./Profile/OneUserProfile";
-
-enum connectionStatusEnum {
-  Unknown,
-  Connected,
-  Disconnected,
-}
+import { CurrentUser } from "../../shared/interfaces/CurrentUser";
+import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
 
 const api = new Api();
 
-
 function App() {
-  const [connectedState, setConnectedState] = useState(
-    connectionStatusEnum.Unknown
-  );
+  const [currentUser, setCurrentUser] = useState<CurrentUser>({
+    status: ConnectionStatus.Unknown,
+  } as CurrentUser);
   const [socket, setSocket] = useState<Socket>();
 
   const webPageRoutes = [
@@ -47,7 +42,7 @@ function App() {
     },
     {
       url: "/chat",
-      element: <Chat socket={socket}/>,
+      element: <Chat socket={socket} />,
     },
     {
       url: "/settings",
@@ -59,60 +54,55 @@ function App() {
     },
   ];
 
-
-  useEffect (()=>{
+  useEffect(() => {
     const newSocket = io(ENDPOINT, {
       transports: ["websocket"],
       withCredentials: true,
     });
     setSocket(newSocket);
-    }, [setSocket]);
-
-
+  }, [setSocket]);
 
   useEffect(() => {
-    if (connectedState == connectionStatusEnum.Unknown) {
+    if (currentUser.status == ConnectionStatus.Unknown) {
       api.refreshToken().then((res: Response) => {
-        if (res.status !== 200) {
-          console.error(res);
-          setConnectedState(connectionStatusEnum.Disconnected);
-        } else {
-          setConnectedState(connectionStatusEnum.Connected);
-        }
+        res.json().then((newCurrentUser: CurrentUser) => {
+          console.log(newCurrentUser);
+          setCurrentUser((current: CurrentUser) => {
+            if (current.status !== newCurrentUser.status) return newCurrentUser;
+            return current;
+          });
+        });
       });
     }
     const interval = setInterval(() => {
-      api
-        .refreshToken()
-        .then(res => {
-          setConnectedState(current => {
-            let result = current;
-            if (res.status !== 200 && current!== connectionStatusEnum.Disconnected) {
-              console.error(res);
-              result = connectionStatusEnum.Disconnected
-            } else if (res.status === 200 && current!== connectionStatusEnum.Connected) {
-              result = connectionStatusEnum.Connected
-            }
-            return result;
-          })
+      api.refreshToken().then((res: Response) => {
+        res.json().then((newCurrentUser: CurrentUser) => {
+          console.log(newCurrentUser);
+          setCurrentUser((current: CurrentUser) => {
+            if (current.status !== newCurrentUser.status) return newCurrentUser;
+            return current;
+          });
         });
+      });
     }, 600_000);
 
     return () => {
       clearInterval(interval);
     };
-  }, [connectedState]);
+  }, [currentUser.status]);
 
-  return connectedState == connectionStatusEnum.Unknown ? (
+  return currentUser.status == ConnectionStatus.Unknown ? (
     <Loading></Loading>
-  ) : connectedState == connectionStatusEnum.Connected ? (
+  ) : currentUser.status == ConnectionStatus.Connected ? (
     <div className="h-screen">
       <NavBar
         setDisconnected={() =>
-          setConnectedState(connectionStatusEnum.Disconnected)
+          setCurrentUser((current) => {
+            return { ...current, status: ConnectionStatus.Disconnected };
+          })
         }
       />
-      <FriendList socket={socket}/>
+      <FriendList socket={socket} />
 
       <Routes>
         {webPageRoutes.map((onePage, i) => {
