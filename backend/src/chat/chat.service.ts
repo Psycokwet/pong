@@ -13,6 +13,7 @@ import {
   FindOptionsRelations,
   FindOptionsUtils,
   FindOptionsWhere,
+  RelationQueryBuilder,
   Repository,
 } from 'typeorm';
 import { User } from 'src/user/user.entity';
@@ -134,7 +135,7 @@ export class ChatService {
 
   public async getMutedUser(sender: User, room: Room) {
     return await this.mutedRepository.findOne({
-      where: { mutedUserId: sender.id },
+      where: { mutedUserId: sender.id, roomId: room.id },
     });
   }
 
@@ -241,18 +242,6 @@ export class ChatService {
   }
 
   async addMutedUser(mutedUser: User, room: Room, muteTime: number) {
-    const attachedRoomList = await this.roomsRepository.find({
-      relations: {
-        members: true,
-      },
-      where: {
-        members: {
-          id: mutedUser.id,
-        },
-        isDM: true,
-      },
-    });
-
     const addMuted = Muted.create({
       roomId: room.id,
       mutedUserId: mutedUser.id,
@@ -347,5 +336,11 @@ export class ChatService {
     }
 
     return { privilege: Privileges.MEMBER };
+  }
+
+  async changePassword(room: Room, newPassword: string) {
+    room.password = newPassword;
+
+    await room.save();
   }
 }

@@ -67,9 +67,6 @@ export class User extends BaseEntity {
   @OneToMany(() => Blocked, (blocked) => blocked.blockedUser)
   public blockedList!: Blocked[];
 
-  @Column({ nullable: true })
-  public mutedAt: number;
-
   @Column({
     nullable: false,
   })

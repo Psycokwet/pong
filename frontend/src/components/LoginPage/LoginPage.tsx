@@ -1,8 +1,9 @@
 import React from "react";
+import { FULL_ROUTE } from "../../../shared/httpsRoutes/routes";
+import { PREFIX } from "../../api/api";
 const LoginPage = () => {
-
   const redirectOauth = () => {
-    window.location.replace("http://localhost:8080/api/auth/42")
+    window.location.replace(PREFIX + FULL_ROUTE.AUTH.ENDPOINT);
   };
   /***************************************************************/
 
@@ -14,7 +15,9 @@ const LoginPage = () => {
           <button
             className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
             onClick={redirectOauth}
-          >Login with 42</button>
+          >
+            Login with 42
+          </button>
         </div>
       </div>
     </div>

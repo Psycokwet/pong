@@ -52,6 +52,9 @@ export const ROUTES_BASE = {
     BAN_USER_REQUEST: 'banUserRequest',
     /** MUTE USER REQUEST */
     MUTE_USER_REQUEST: 'muteUserRequest',
+    /** CHANGE PASSWORD */
+    CHANGE_PASSWORD_REQUEST: 'changePasswordRequest',
+    CHANGE_PASSWORD_CONFIRMATION: 'changePasswordConfirmation',
   },
   GAME: {
     ENDPOINT: '/game/',
@@ -99,5 +102,6 @@ export const ROUTES_BASE = {
     BLOCKED_USERS_LIST_REQUEST: 'blockedUsersListRequest',
     BLOCKED_USERS_LIST_CONFIRMATION: 'blockedUsersListConfirmation',
   },
+  ERROR: 'error',
 };
 export const FULL_ROUTE = generate_full_routes(ROUTES_BASE);

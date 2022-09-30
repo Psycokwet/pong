@@ -12,6 +12,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
@@ -132,8 +133,8 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userToBlock = await this.userService.getById(data.id);
     const caller = await this.userService.getById(payload.userId);
 
-    if (!userToBlock) {
-      throw new BadRequestException({ error: 'User not found' });
+    if (!userToBlock || !caller) {
+      throw new WsException({ error: 'User not found' });
     }
 
     await this.userService.addBlockedUser(userToBlock, caller);
