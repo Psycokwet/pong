@@ -81,6 +81,8 @@ export const ROUTES_BASE = {
     JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
     /** SET CANVAS SIZE */
     SET_CANVAS_SIZE: 'setCanvasSize',
+  /** RECONNECT GAME */
+    RECONNECT_GAME: 'reconnectGame',
   },
   USER: {
     ERROR: 'error',
