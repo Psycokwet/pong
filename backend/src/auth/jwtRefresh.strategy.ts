@@ -5,6 +5,8 @@ import { jwtConstants } from './constants';
 import { TokenPayload } from './auth.service';
 import { UsersService } from '../user/user.service';
 import { Request } from 'express';
+import { User } from 'src/user/user.entity';
+import { CurrentUser } from 'shared/interfaces/CurrentUser';
 
 //is it still in use ?
 export type JwtPayload = { sub: number; login42: string };
@@ -29,9 +31,15 @@ export class JwtRefreshStrategy extends PassportStrategy(
 
   async validate(request: Request, payload: TokenPayload) {
     const refreshToken = request.cookies?.Refresh;
-    return this.userService.getUserIfRefreshTokenMatches(
+    const user: User = await this.userService.getUserIfRefreshTokenMatches(
       refreshToken,
       payload.userId,
     );
+    if (!user) return;
+    let result: CurrentUser = {
+      ...user,
+      status: this.userService.getStatusFromUser(user, payload),
+    } as CurrentUser;
+    return result;
   }
 }

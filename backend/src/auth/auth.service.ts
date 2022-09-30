@@ -5,7 +5,7 @@ import { User } from '../user/user.entity';
 import { jwtConstants } from './constants';
 export interface TokenPayload {
   userId: number;
-  is2FAAuthenticated: boolean;
+  isTwoFactorAuthenticated: boolean;
 }
 @Injectable()
 export class AuthService {
@@ -32,9 +32,9 @@ export class AuthService {
 
   public getCookieWithJwtAccessToken(
     userId: number,
-    is2FAAuthenticated: boolean,
+    isTwoFactorAuthenticated: boolean,
   ) {
-    const payload: TokenPayload = { userId, is2FAAuthenticated };
+    const payload: TokenPayload = { userId, isTwoFactorAuthenticated };
     const token = this.jwtService.sign(payload, {
       secret: jwtConstants.JWT_ACCESS_TOKEN_SECRET,
       expiresIn: jwtConstants.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
@@ -42,8 +42,8 @@ export class AuthService {
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.JWT_ACCESS_TOKEN_EXPIRATION_TIME}`;
   }
 
-  public getJwtRefreshToken(userId: number, is2FAAuthenticated: boolean) {
-    const payload: TokenPayload = { userId, is2FAAuthenticated };
+  public getJwtRefreshToken(userId: number, isTwoFactorAuthenticated: boolean) {
+    const payload: TokenPayload = { userId, isTwoFactorAuthenticated };
     return this.jwtService.sign(payload, {
       secret: jwtConstants.JWT_REFRESH_TOKEN_SECRET,
       expiresIn: jwtConstants.JWT_REFRESH_TOKEN_EXPIRATION_TIME,

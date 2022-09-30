@@ -20,7 +20,7 @@ import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import { Socket } from 'socket.io';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService, TokenPayload } from 'src/auth/auth.service';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { UserGateway } from './user.gateway';
@@ -31,6 +31,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import UserProfile from 'shared/interfaces/UserProfile';
+import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -61,6 +62,18 @@ export class UsersService {
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
   ) {}
+
+  getStatusFromUser(user: User, payload: TokenPayload): ConnectionStatus {
+    let result: ConnectionStatus = ConnectionStatus.Unknown;
+    if (user.isTwoFactorAuthenticationActivated === false)
+      return ConnectionStatus.Connected;
+    if (user.isTwoFactorAuthenticationActivated === true)
+      if (payload.isTwoFactorAuthenticated) return ConnectionStatus.Connected;
+      else return ConnectionStatus.TwoFactorAuthenticationRequested;
+
+    //need to add signin
+    return result;
+  }
 
   async findOne(login42: string): Promise<User> {
     const user = await this.usersRepository.findOneBy({
