@@ -34,6 +34,7 @@ import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 import roomId from 'shared/interfaces/JoinChannel';
 import RoomId from 'shared/interfaces/JoinChannel';
 import { User } from 'src/user/user.entity';
+import MuteUser from 'shared/interfaces/MuteUser';
 import { SocketReadyState } from 'net';
 
 async function crypt(password: string): Promise<string> {
@@ -360,6 +361,16 @@ export class ChatGateway {
       { id: data.channelId },
       { messages: true },
     );
+    const sender = await this.userService.getById(payload.userId);
+    if (!sender) throw new WsException('User does not exist');
+
+    const isUserMuted = await this.chatService.getMutedUser(sender, room);
+
+    if (isUserMuted) {
+      if (isUserMuted.unmuteAt > Date.now()) return;
+      else this.chatService.unmuteUser(payload.userId, room.id);
+    }
+
     const author = await this.userService.getUserByIdWithMessages(
       payload.userId,
     );
@@ -376,6 +387,7 @@ export class ChatGateway {
       time: newMessage.createdAt,
       content: newMessage.content,
     };
+
     if (room)
       this.server
         .in(room.roomName)
@@ -500,6 +512,14 @@ export class ChatGateway {
     if (userToBan.id === room.owner.id)
       throw new ForbiddenException('An owner cannot be banned');
 
+    /** The person who wants to ban is not an owner (so he's an admin) and wants to ban
+     *  another user */
+    if (
+      payload.userId !== room.owner.id &&
+      room.admins.filter((admin) => admin.id === userToBan.id).length !== 0
+    )
+      throw new WsException('Another admin cannot be banned');
+
     this.chatService.unattachMemberToChannel(userToBan.id, room);
 
     const bannedSocketId = this.chatService.getUserIdWebsocket(userToBan.id);
@@ -510,6 +530,40 @@ export class ChatGateway {
       );
       this.disconnectFromChannel(room.id, bannedSocket);
     }
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.MUTE_USER_REQUEST)
+  async muteUser(@MessageBody() data: MuteUser, @UserPayload() payload: any) {
+    const userToMute = await this.userService.getById(data.userIdToMute);
+
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      { owner: true, admins: true, members: true },
+    );
+
+    if (!room) throw new WsException('Channel does not exist');
+
+    /** The person who wants to mute another user is not the owner or an admin */
+    if (
+      payload.userId !== room.owner.id &&
+      room.admins.filter((admin) => payload.userId === admin.id).length === 0
+    )
+      throw new WsException('You do not have the rights to mute a user');
+
+    /** The userToMute is the owner of the room */
+    if (userToMute.id === room.owner.id)
+      throw new WsException('An owner cannot be muted');
+
+    /** The person who wants to mute is not an owner (so he's an admin) and wants to
+     * mute another user */
+    if (
+      payload.userId !== room.owner.id &&
+      room.admins.filter((admin) => admin.id === userToMute.id).length !== 0
+    )
+      throw new WsException('Another admin cannot be muted');
+
+    await this.chatService.addMutedUser(userToMute, room, data.muteTime);
   }
 
   /** CHANGE PASSWORD */
