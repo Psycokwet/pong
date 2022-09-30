@@ -50,6 +50,9 @@ export const ROUTES_BASE = {
     USER_PRIVILEGES_CONFIRMATION: 'userPrivilegesConfirmation',
     /** BAN USER REQUEST */
     BAN_USER_REQUEST: 'banUserRequest',
+    /** CHANGE PASSWORD */
+    CHANGE_PASSWORD_REQUEST: 'changePasswordRequest',
+    CHANGE_PASSWORD_CONFIRMATION: 'changePasswordConfirmation',
   },
   GAME: {
     ENDPOINT: '/game/',
@@ -91,5 +94,6 @@ export const ROUTES_BASE = {
     /** CONNECTION NOTIFICATION */
     CONNECTION_CHANGE: 'connectionChange',
   },
+  ERROR: 'error',
 };
 export const FULL_ROUTE = generate_full_routes(ROUTES_BASE);

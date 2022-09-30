@@ -34,6 +34,7 @@ import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 import roomId from 'shared/interfaces/JoinChannel';
 import RoomId from 'shared/interfaces/JoinChannel';
 import { User } from 'src/user/user.entity';
+import { SocketReadyState } from 'net';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -381,6 +382,7 @@ export class ChatGateway {
         .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageForFront);
   }
 
+  /** SET / UNSET ADMIN */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.SET_ADMIN_REQUEST)
   async setAdmin(
@@ -508,5 +510,38 @@ export class ChatGateway {
       );
       this.disconnectFromChannel(room.id, bannedSocket);
     }
+  }
+
+  /** CHANGE PASSWORD */
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.CHAT.CHANGE_PASSWORD_REQUEST)
+  async changePassword(
+    @MessageBody() data: { channelName: string; inputPassword: string },
+    @ConnectedSocket() client: Socket,
+    @UserPayload() payload: any,
+  ) {
+    const caller = await this.userService.getById(payload.userId);
+    const room = await this.chatService.getRoomWithRelations(
+      { channelName: data.channelName },
+      { owner: true },
+    );
+
+    if (room.owner.id !== caller.id) {
+      this.server.in(client.id).emit(ROUTES_BASE.ERROR, {
+        message: 'You are not the owner of the channel',
+      });
+      return;
+    }
+
+    let hashedPassword = '';
+
+    if (data.inputPassword !== '')
+      hashedPassword = await crypt(data.inputPassword);
+
+    await this.chatService.changePassword(room, hashedPassword);
+
+    this.server
+      .in(client.id)
+      .emit(ROUTES_BASE.CHAT.CHANGE_PASSWORD_CONFIRMATION);
   }
 }

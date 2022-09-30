@@ -154,17 +154,10 @@ export class UsersService {
   }
 
   async getUserProfile(user: User) {
-    let profilePicture: StreamableFile | null = null;
-    try {
-      const picture_path = await this.getPicture(user);
-      const file = createReadStream(join(process.cwd(), `${picture_path}`));
-      profilePicture = new StreamableFile(file);
-    } catch (error) {}
     const profileElements: UserProfile = {
       pongUsername: user.pongUsername,
       userRank: await await this.getUserRank(user),
       userHistory: await this.getUserHistory(user),
-      profilePicture: profilePicture,
     };
     return profileElements;
   }
