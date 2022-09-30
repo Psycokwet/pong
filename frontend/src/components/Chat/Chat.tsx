@@ -31,6 +31,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   }, [addMessage]);
   const resetMessages = (msgs:Message[]) => {
     setMessages(msgs);
+    setLastMessage(msgs.at(-1));
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.MESSAGE_HISTORY, resetMessages);

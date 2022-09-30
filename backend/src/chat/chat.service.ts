@@ -35,7 +35,10 @@ export class ChatService {
   public async getAllPublicRooms(): Promise<ChannelData[]> {
     return this.roomsRepository
       .find({
-        where: { isChannelPrivate: false },
+        where: {
+          isChannelPrivate: false,
+          isDM: false,
+        },
       })
       .then((rooms) =>
         rooms.map((room) => {
