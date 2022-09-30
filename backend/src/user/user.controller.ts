@@ -18,11 +18,10 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { createReadStream } from 'fs';
 import { join } from 'path';
-import { Express, query } from 'express';
+import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { User } from './user.entity';
-import { GetUserProfileDto } from './get-user-profile.dto';
 import RequestWithUser from 'src/auth/requestWithUser.interface';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
@@ -33,9 +32,12 @@ export class UserController {
 
   @Get(ROUTES_BASE.USER.GET_USER_PROFILE)
   @UseGuards(JwtAuthGuard)
-  async getUserProfile(@Request() req: RequestWithUser, @Query() query) {
+  async getUserProfile(
+    @Request() req: RequestWithUser,
+    @Query() query: { pongUsername: string },
+  ) {
     let user: User = null;
-    if (!req.query.pongUsername)
+    if (!query.pongUsername)
       user = await this.usersService.findOne(req.user.login42);
     else
       user = await this.usersService.findOneByPongUsername(query.pongUsername);
@@ -83,11 +85,14 @@ export class UserController {
   @Get(ROUTES_BASE.USER.GET_PICTURE)
   @UseGuards(JwtAuthGuard)
   async getPicture(
-    @Param() params: { pongUsername: string },
+    @Request() req: RequestWithUser,
+    @Query() query: { pongUsername: string },
   ): Promise<StreamableFile> {
-    const user = await this.usersService.findOneByPongUsername(
-      params.pongUsername,
-    );
+    let user: User = null;
+    if (!query.pongUsername)
+      user = await this.usersService.findOne(req.user.login42);
+    else
+      user = await this.usersService.findOneByPongUsername(query.pongUsername);
     const picture_path = await this.usersService.getPicture(user);
 
     // https://docs.nestjs.com/techniques/streaming-files
