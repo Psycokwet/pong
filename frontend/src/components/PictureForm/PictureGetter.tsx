@@ -9,7 +9,7 @@ export const PictureGetter = () => {
     e.preventDefault();
 
     api
-      .getPicture()
+      .getPicture(null)
       .then((res) => res.blob())
       .then((myBlob) => {
         setUserPicture(URL.createObjectURL(myBlob));
