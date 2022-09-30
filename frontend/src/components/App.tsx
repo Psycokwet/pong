@@ -37,7 +37,7 @@ function App() {
   const webPageRoutes = [
     {
       url: "/play",
-      element: <Play />,
+      element: <Play socket={socket}/>,
     },
     {
       url: "/leaderboard",
@@ -76,8 +76,8 @@ function App() {
         }
       });
     }
-    const interval = setInterval(() => {
-      api.refreshToken().then((res) => {
+    const interval = setInterval(async () => {
+      await api.refreshToken().then((res) => {
         setConnectedState((current) => {
           let result = current;
           if (
@@ -95,6 +95,8 @@ function App() {
           return result;
         });
       });
+      socket?.disconnect();
+      socket?.connect();
     }, 600_000);
 
     return () => {
