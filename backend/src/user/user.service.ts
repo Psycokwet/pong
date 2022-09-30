@@ -158,17 +158,10 @@ export class UsersService {
   }
 
   async getUserProfile(user: User) {
-    let profilePicture: StreamableFile | null = null;
-    try {
-      const picture_path = await this.getPicture(user);
-      const file = createReadStream(join(process.cwd(), `${picture_path}`));
-      profilePicture = new StreamableFile(file);
-    } catch (error) {}
     const profileElements: UserProfile = {
       pongUsername: user.pongUsername,
       userRank: await await this.getUserRank(user),
       userHistory: await this.getUserHistory(user),
-      profilePicture: profilePicture,
     };
     return profileElements;
   }
@@ -443,20 +436,27 @@ export class UsersService {
     await addBlockedUser.save();
   }
 
-  async getBlockedUsersList(caller: User) {
-    const rawBlockedList = await this.blockedRepository.find({
+  async getBlockedUsersList(caller: User): Promise<
+    | {
+        id: number;
+        pongUsername: string;
+      }[]
+    | undefined
+  > {
+    const rawBlockedList: Blocked[] = await this.blockedRepository.find({
       relations: {
         blockedUser: true,
       },
       where: { userId: caller.id },
     });
 
-    const orderedBlockedList = rawBlockedList.map((blocked: Blocked) => {
-      return {
-        id: blocked.blockedUser.id,
-        pongUsername: blocked.blockedUser.pongUsername,
-      };
-    });
+    const orderedBlockedList: { id: number; pongUsername: string }[] =
+      rawBlockedList.map((blocked: Blocked) => {
+        return {
+          id: blocked.blockedUser.id,
+          pongUsername: blocked.blockedUser.pongUsername,
+        };
+      });
 
     return orderedBlockedList;
   }
