@@ -8,8 +8,6 @@ import GameRoom from "/shared/interfaces/GameRoom";
 import Position from "/shared/interfaces/Position";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 
-const ENDPOINT = "http://localhost:8080/";
-
 const Play = ({
   socket,
 }:{
