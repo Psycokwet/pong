@@ -14,6 +14,7 @@ import { Exclude } from 'class-transformer';
 import LocalFile from 'src/localFiles/localFile.entity';
 import Room from 'src/chat/room.entity';
 import Message from 'src/chat/message.entity';
+import { Blocked } from 'src/blocked/blocked.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -62,4 +63,17 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Message, (message) => message.author)
   public messages: Message[];
+
+  @OneToMany(() => Blocked, (blocked) => blocked.blockedUser)
+  public blockedList!: Blocked[];
+
+  @Column({
+    nullable: false,
+  })
+  public isTwoFactorAuthenticationActivated: boolean;
+
+  @Column({
+    nullable: true,
+  })
+  public twoFactorAuthenticationSecret?: string;
 }

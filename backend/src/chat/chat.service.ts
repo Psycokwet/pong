@@ -9,7 +9,13 @@ import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
-import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
+import {
+  FindOptionsRelations,
+  FindOptionsUtils,
+  FindOptionsWhere,
+  RelationQueryBuilder,
+  Repository,
+} from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
@@ -18,6 +24,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
 import ActionOnUser from 'shared/interfaces/ActionOnUser';
+import { Muted } from './muted.entity';
 @Injectable()
 export class ChatService {
   constructor(
@@ -28,6 +35,8 @@ export class ChatService {
     private roomsRepository: Repository<Room>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Muted)
+    private mutedRepository: Repository<Muted>,
     private userService: UsersService,
   ) {}
   public static userWebsockets: UsersWebsockets[] = [];
@@ -121,6 +130,12 @@ export class ChatService {
       relations: {
         members: true,
       },
+    });
+  }
+
+  public async getMutedUser(sender: User, room: Room) {
+    return await this.mutedRepository.findOne({
+      where: { mutedUserId: sender.id, roomId: room.id },
     });
   }
 
@@ -226,6 +241,23 @@ export class ChatService {
     room.save();
   }
 
+  async addMutedUser(mutedUser: User, room: Room, muteTime: number) {
+    const addMuted = Muted.create({
+      roomId: room.id,
+      mutedUserId: mutedUser.id,
+      unmuteAt: Date.now() + muteTime,
+    });
+
+    await addMuted.save();
+  }
+
+  async unmuteUser(userIdToUnmute: number, roomId: number) {
+    return await Muted.delete({
+      mutedUserId: userIdToUnmute,
+      roomId: roomId,
+    });
+  }
+
   async saveMessage(content: string, author: User, channel: Room) {
     const newMessage = await this.messagesRepository.create({
       content: content,
@@ -285,7 +317,13 @@ export class ChatService {
       throw new BadRequestException('Channel does not exist');
     }
 
-    return room.members;
+    const userInterfaceMembers = room.members.map((member) => ({
+      id: member.id,
+      pongUsername: member.pongUsername,
+      status: this.userService.getStatus(member),
+    }));
+
+    return userInterfaceMembers;
   }
 
   getUserPrivileges(room: Room, userId: number): { privilege: Privileges } {
@@ -298,5 +336,11 @@ export class ChatService {
     }
 
     return { privilege: Privileges.MEMBER };
+  }
+
+  async changePassword(room: Room, newPassword: string) {
+    room.password = newPassword;
+
+    await room.save();
   }
 }

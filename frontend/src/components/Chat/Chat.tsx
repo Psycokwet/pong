@@ -1,17 +1,22 @@
 import { useState, useEffect } from "react";
 import { Socket } from "socket.io-client";
-import UserPicture from "../User Picture/UserPicture";
+import UserPicture from "../UserPicture/UserPicture";
 import ChatList from "./ChatList/ChatList";
 import TextField from "./TextField/TextField";
 import Messages from "./Messages/Messages";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
-import { User } from "/shared/interfaces/User";
+import { statusList } from "../Common/StatusList"
+import UserListByStatus from "../FriendList/UserListByStatus";
+import { UserInterface, Status } from "/shared/interfaces/UserInterface";
+import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
+  const [userAttachedList, setUserAttachedList] = useState<UserInterface[]>([]);
+
   const addMessage = (newElem:Message) => {
     setMessages([...messages, newElem]);
   }
@@ -48,13 +53,42 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     };
   }, [channelListener]);
 
-
+  const ResetUserList = (list:UserInterface[]) => {
+    setUserAttachedList(list);
+  }
+  useEffect(() => {
+    socket?.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
+  }, []);
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, ResetUserList);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, ResetUserList);
+    };
+  }, [ResetUserList]);
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
       <ChatList msg={messages[messages.length - 1]} socket={socket} connectedChannel={connectedChannel}/>
       <Messages messages={messages}/>
       <TextField socket={socket} chan={connectedChannel} />
-      <div className="row-start-1 row-span-6 col-start-5">
+      <div className="row-start-1 row-span-6 col-start-5 p-x-8">
+        {statusList?.map((aStatusList) => {
+          return (
+            <UserListByStatus
+              key={aStatusList.status}
+              userList={userAttachedList}
+              inputFilter={""}
+              statusList={aStatusList}
+              socket={socket}
+              roomId={connectedChannel?.roomId}
+              menuSettings={({
+                challenge:aStatusList.status===Status.ONLINE,
+                watch:aStatusList.status===Status.PLAYING,
+                privileges:Privileges.MEMBER,
+                friend:false,
+              })}
+            />
+          );
+        })}
         <UserPicture />
       </div>
     </div>
