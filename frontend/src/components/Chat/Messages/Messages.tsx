@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import UserPicture from "../../User Picture/UserPicture";
+import UserPicture from "../../UserPicture/UserPicture";
 import { Message } from "/shared/interfaces/Message";
-import { User } from "/shared/interfaces/User";
+import { UserInterface } from "/shared/interfaces/UserInterface";
 
 const Messages = ({messages}: {messages:Message[]}) => {
   const containerRef = useRef();
