@@ -2,13 +2,12 @@ import { FULL_ROUTE } from "../../shared/httpsRoutes/routes";
 
 export const PREFIX =
   import.meta.env.VITE_CONTEXT == "MOCKUP"
-    ? "http://localhost:8080/api_mockup"
-    : "http://localhost:8080/api";
+    ? import.meta.env.VITE_PONG_URL_BACK_MOCKUP
+    : import.meta.env.VITE_PONG_URL_BACK;
 export enum HeadersFields {
   ContentType = "Content-Type",
   Authorization = "Authorization",
 }
-
 export class Api {
   hello() {
     return fetch(`${PREFIX}${FULL_ROUTE.ROOT.ENDPOINT}`, {
@@ -21,15 +20,23 @@ export class Api {
       method: "GET",
     });
   }
-  
+
   setPicture(data: FormData) {
     return fetch(`${PREFIX}${FULL_ROUTE.USER.SET_PICTURE}`, {
       method: "POST",
       body: data,
     });
   }
-
-  getPicture() {
+  getPicture(pongUsername: string | null) {
+    if (pongUsername)
+      return fetch(
+        `${PREFIX}${FULL_ROUTE.USER.GET_PICTURE}` +
+          "\\?" +
+          new URLSearchParams({ pongUsername }),
+        {
+          method: "GET",
+        }
+      );
     return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_PICTURE}`, {
       method: "GET",
     });
@@ -78,13 +85,10 @@ export class Api {
   }
 
   get_pong_username() {
-    return fetch(
-      `${PREFIX}${FULL_ROUTE.USER.GET_PONG_USERNAME}` ,
-      {
-        method: "GET",
-        // headers: this._headers,
-      }
-    );
+    return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_PONG_USERNAME}`, {
+      method: "GET",
+      // headers: this._headers,
+    });
   }
   set_pong_username(newPongUsername: string) {
     let headers = new Headers();
@@ -95,7 +99,7 @@ export class Api {
       body: JSON.stringify({ newPongUsername }),
     });
   }
-  
+
   get_user_rank() {
     return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_USER_RANK}`, {
       method: "GET",
