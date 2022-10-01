@@ -146,9 +146,8 @@ function App() {
       return <TwoStepSignupMockup></TwoStepSignupMockup>;
     case ConnectionStatus.TwoFactorAuthenticationRequested:
       return <TwoStepSigningMockup></TwoStepSigningMockup>;
-
     default:
-      return <></>;
+      return <>This should never happen.</>;
   }
 }
 
