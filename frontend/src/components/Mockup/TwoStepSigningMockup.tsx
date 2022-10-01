@@ -4,7 +4,7 @@ import { Api } from "../../api/api";
 const api = new Api();
 
 type Props = {
-  updateCurrentUser: () => {};
+  updateCurrentUser: () => void;
 };
 const TwoStepSigningMockup: React.FC<Props> = ({ updateCurrentUser }) => {
   const [code2fa, setCode2fa] = useState<string>("");

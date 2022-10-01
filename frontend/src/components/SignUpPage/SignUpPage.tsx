@@ -7,8 +7,11 @@ import ProfilePic from "../Common/ProfilePic";
 
 const MAX_CHAR = 15;
 
+export type SignUpProps = {
+  updateCurrentUser: () => void;
+};
 const api = new Api();
-const SignInPage = () => {
+const SignUpPage: React.FC<SignUpProps> = ({ updateCurrentUser }) => {
   const [pongUsername, setPongUsername] = useState<string>("anonymous");
   const [selectedFile, setSelectedFile] = useState<File>();
   const [avatar, setAvatar] = useState("");
@@ -21,31 +24,34 @@ const SignInPage = () => {
       });
     });
   }, []);
-
-  const handleSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     if (event === undefined) return; //not sure it may happen
     event.preventDefault();
+    let should_update = false;
 
     const fileData = new FormData();
     if (selectedFile) {
       fileData.append("file", selectedFile);
-      api.setPicture(fileData).then((res: Response) => {
+      await api.setPicture(fileData).then((res: Response) => {
         if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
           console.log("set picture is NOT Ok");
         else console.log(`Set picture is ok, status is: ${res.status}`);
       });
+      should_update = true;
     }
 
     if (pongUsername.length <= MAX_CHAR) {
-      api.set_pong_username(pongUsername).then((res: Response) => {
+      await api.set_pong_username(pongUsername).then((res: Response) => {
         if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
           console.log("set pongUsername is NOT Ok");
         else console.log(`Set pongUsername is ok, status is: ${res.status}`);
       });
+      should_update = true;
     }
 
     // Todo: set 2Factor through api.
     console.log(`twoFactor status is set to: ${twoFactor}`);
+    if (should_update && updateCurrentUser) updateCurrentUser();
   };
 
   const handlePreviewPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,4 +120,4 @@ const SignInPage = () => {
   );
 };
 
-export default SignInPage;
+export default SignUpPage;

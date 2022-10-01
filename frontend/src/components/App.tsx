@@ -24,6 +24,7 @@ import { CurrentUser } from "../../shared/interfaces/CurrentUser";
 import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
 import TwoStepSignupMockup from "./Mockup/TwoStepSignupMockup";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
+import SignUpPage from "./SignUpPage/SignUpPage";
 
 const api = new Api();
 
@@ -31,39 +32,6 @@ function App() {
   const [currentUser, setCurrentUser] = useState<CurrentUser>({
     status: ConnectionStatus.Unknown,
   } as CurrentUser);
-  const [socket, setSocket] = useState<Socket>();
-
-  const webPageRoutes = [
-    {
-      url: "/play",
-      element: <Play socket={socket} />,
-    },
-    {
-      url: "/leaderboard",
-      element: <LeaderBoard />,
-    },
-    {
-      url: "/chat",
-      element: <Chat socket={socket} />,
-    },
-    {
-      url: "/settings",
-      element: <Settings />,
-    },
-    {
-      url: "/practice",
-      element: <PracticeJwt />,
-    },
-  ];
-
-  useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_PONG_URL, {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-    setSocket(newSocket);
-  }, [setSocket]);
-
   const updateCurrentUser = () => {
     api.refreshToken().then((res: Response) => {
       if (res.status != 200) {
@@ -86,6 +54,39 @@ function App() {
       }
     });
   };
+
+  const [socket, setSocket] = useState<Socket>();
+
+  const webPageRoutes = [
+    {
+      url: "/play",
+      element: <Play socket={socket} />,
+    },
+    {
+      url: "/leaderboard",
+      element: <LeaderBoard />,
+    },
+    {
+      url: "/chat",
+      element: <Chat socket={socket} />,
+    },
+    {
+      url: "/settings",
+      element: <SignUpPage updateCurrentUser={updateCurrentUser} />,
+    },
+    {
+      url: "/practice",
+      element: <PracticeJwt />,
+    },
+  ];
+
+  useEffect(() => {
+    const newSocket = io(import.meta.env.VITE_PONG_URL, {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
+    setSocket(newSocket);
+  }, [setSocket]);
 
   useEffect(() => {
     if (currentUser.status == ConnectionStatus.Unknown) {
@@ -141,7 +142,7 @@ function App() {
         </Routes>
       );
     case ConnectionStatus.SignupRequested:
-      return <TwoStepSignupMockup></TwoStepSignupMockup>;
+      return <SignUpPage updateCurrentUser={updateCurrentUser}></SignUpPage>;
     case ConnectionStatus.TwoFactorAuthenticationRequested:
       return (
         <TwoStepSigningMockup
