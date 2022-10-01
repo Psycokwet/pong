@@ -20,7 +20,6 @@ const SignUpPage: React.FC<SignUpProps> = ({
   const [twoFactor, setTwoFactor] = useState("off");
 
   useEffect(() => {
-    console.log(pongUsername);
     setLocalPongUsername(pongUsername);
   }, [pongUsername]);
 
