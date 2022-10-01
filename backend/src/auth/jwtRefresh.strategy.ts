@@ -7,7 +7,6 @@ import { UsersService } from '../user/user.service';
 import { Request } from 'express';
 import { User } from 'src/user/user.entity';
 import { CurrentUser } from 'shared/interfaces/CurrentUser';
-import { currentUserToFrontInterface } from 'shared/interfaces/CurrentUserFrontInterface';
 
 //is it still in use ?
 export type JwtPayload = { sub: number; login42: string };
@@ -41,6 +40,6 @@ export class JwtRefreshStrategy extends PassportStrategy(
       ...user,
       status: this.userService.getStatusFromUser(user, payload),
     } as CurrentUser;
-    return currentUserToFrontInterface(result);
+    return result;
   }
 }

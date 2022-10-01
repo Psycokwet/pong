@@ -21,7 +21,10 @@ import { User } from 'src/user/user.entity';
 import { TwoFactorAuthService } from 'src/two-factor-auth/two-factor-auth.service';
 import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
 import { UserInterface } from 'shared/interfaces/UserInterface';
-import { CurrentUserFrontInterface } from 'shared/interfaces/CurrentUserFrontInterface';
+import {
+  CurrentUserFrontInterface,
+  currentUserToFrontInterface,
+} from 'shared/interfaces/CurrentUserFrontInterface';
 
 @Injectable()
 @Controller(ROUTES_BASE.AUTH.ENDPOINT)
@@ -107,6 +110,6 @@ export class FortyTwoController {
       false,
     );
     request.res.setHeader('Set-Cookie', accessTokenCookie);
-    return { ...request.user } as CurrentUserFrontInterface;
+    return currentUserToFrontInterface(request.user);
   }
 }
