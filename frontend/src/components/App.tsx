@@ -134,6 +134,7 @@ function App() {
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/false42login" element={<False42Login />} />
+      <Route path="*" element={<LoginPage />} />
     </Routes>
   );
 }
