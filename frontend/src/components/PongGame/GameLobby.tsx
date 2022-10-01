@@ -54,21 +54,33 @@ const GameLobby = (
   }, [updateSpectableGames]);
   /** END UPDATE SPECTABLE GAMES */
 
-  return <div>
-    <h2>PLAY</h2>
-    <button onClick={handleCreateGame}>Create game</button>
-    <div></div>
-    <button onClick={handleJoinGame}>Join game</button>
-    <br />
+  return <div className="h-7/8 w-full grid content-around">
+    <div className="flex justify-around">
+      <button
+        className="h-1/8 bg-sky-500 hover:bg-sky-700 lg:text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50 max-h-20"
+        onClick={handleCreateGame}
+      >Create game</button>
+      <button
+        className="h-1/8 bg-sky-500 hover:bg-sky-700 lg:text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50 max-h-20"
+        onClick={handleJoinGame}
+      >Join game</button>
+    </div>
 
-    <h2>SPECTATE</h2>
-    {
-      spectableGames.map(tempGameRoom => 
-        <div key={tempGameRoom.roomName}>
-          <button onClick={() => handleSpectate(tempGameRoom.roomName)}>{tempGameRoom.roomName}</button>
-        </div>
-      )
-    }
+    <div className="grid justify-around">
+      <h2 className="text-center">SPECTATE</h2>
+      <div>
+        {
+          spectableGames.map(tempGameRoom => 
+            <div key={tempGameRoom.roomName}>
+              <button 
+                className="bg-sky-500 hover:bg-sky-700 rounded-3xl shadow-md shadow-blue-500/50"
+                onClick={() => handleSpectate(tempGameRoom.roomName)}
+              >{tempGameRoom.gameData.player1.pongUsername} VS {tempGameRoom.gameData.player1.pongUsername}</button>
+            </div>
+          )
+        }
+      </div>
+    </div>
   </div>
 } 
 

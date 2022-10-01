@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import io, { Socket } from "socket.io-client";
 
-const ENDPOINT = "http://localhost:8080";
 import { Api } from "../api/api";
 
 // Components
@@ -20,6 +19,7 @@ import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
 import Settings from "./NavBar/Pages-To-Change/Settings";
 import Profile from "./Profile/Profile";
 import OneUserProfile from "./Profile/OneUserProfile";
+import False42Login from "./LoginPage/False42Login";
 import { CurrentUser } from "../../shared/interfaces/CurrentUser";
 import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
 
@@ -34,7 +34,7 @@ function App() {
   const webPageRoutes = [
     {
       url: "/play",
-      element: <Play />,
+      element: <Play socket={socket}/>,
     },
     {
       url: "/leaderboard",
@@ -55,7 +55,7 @@ function App() {
   ];
 
   useEffect(() => {
-    const newSocket = io(ENDPOINT, {
+    const newSocket = io(import.meta.env.VITE_PONG_URL, {
       transports: ["websocket"],
       withCredentials: true,
     });
@@ -84,6 +84,8 @@ function App() {
           });
         });
       });
+      socket?.disconnect();
+      socket?.connect();
     }, 600_000);
 
     return () => {
@@ -119,7 +121,10 @@ function App() {
       </Routes>
     </div>
   ) : (
-    <LoginPage />
+    <Routes>
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/false42login" element={<False42Login />} />
+    </Routes>
   );
 }
 

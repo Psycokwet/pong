@@ -97,10 +97,20 @@ export class GameService {
   }
 
   findUserRoom(userId: number): GameRoom | undefined {
-    const index = GameService.gameRoomList.findIndex(
+    let index = GameService.gameRoomList.findIndex(
       (gameRoom) =>
         gameRoom.gameData.player1.userId === userId ||
-        gameRoom.gameData.player2.userId === userId,
+        gameRoom.gameData.player2.userId === userId ||
+        gameRoom.spectatorsId.includes(userId)
+    );
+    return GameService.gameRoomList[index]; // can be -1, so undefined
+  }
+
+  findPlayerRoom(userId: number): GameRoom | undefined {
+    let index = GameService.gameRoomList.findIndex(
+      (gameRoom) =>
+        gameRoom.gameData.player1.userId === userId ||
+        gameRoom.gameData.player2.userId === userId
     );
     return GameService.gameRoomList[index]; // can be -1, so undefined
   }
@@ -119,7 +129,7 @@ export class GameService {
   }
 
   updatePlayerPosition(playerInput: PlayerInput, userId: number): void {
-    const gameRoom = this.findUserRoom(userId);
+    const gameRoom = this.findPlayerRoom(userId);
     if (gameRoom === undefined) return;
 
     const game = gameRoom.gameData;
@@ -130,10 +140,10 @@ export class GameService {
       game[playerToUpdate].y = 0;
     } else if (
       playerInput.mouseLocation >
-      playerInput.canvasLocation.height - this.PLAYER_HEIGHT / 2
+      playerInput.canvasLocation - this.PLAYER_HEIGHT / 2
     ) {
       game[playerToUpdate].y =
-        playerInput.canvasLocation.height - this.PLAYER_HEIGHT;
+        playerInput.canvasLocation - this.PLAYER_HEIGHT;
     } else {
       game[playerToUpdate].y =
         playerInput.mouseLocation - this.PLAYER_HEIGHT / 2;

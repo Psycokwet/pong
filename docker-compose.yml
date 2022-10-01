@@ -25,6 +25,9 @@ services:
     environment:
       - VITE_CONTEXT="DEV"
       # - VITE_CONTEXT="MOCKUP"
+      - VITE_PONG_URL=${PONG_URL}
+      - VITE_PONG_URL_BACK=${PONG_URL_BACK}
+      - VITE_PONG_URL_BACK_MOCKUP=${PONG_URL_BACK_MOCKUP}
     restart: unless-stopped
 
   #  # Don't forget to uncomment the following conteneur if you want to have the mockup available :) 
