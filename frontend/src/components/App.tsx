@@ -22,6 +22,7 @@ import OneUserProfile from "./Profile/OneUserProfile";
 import False42Login from "./LoginPage/False42Login";
 import { CurrentUser } from "../../shared/interfaces/CurrentUser";
 import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
+import TwoStepSignupMockup from "./Mockup/TwoStepSignupMockup";
 
 const api = new Api();
 
@@ -100,39 +101,54 @@ function App() {
     };
   }, [currentUser.status]);
 
-  return currentUser.status == ConnectionStatus.Unknown ? (
-    <Loading></Loading>
-  ) : currentUser.status == ConnectionStatus.Connected ? (
-    <div className="h-screen">
-      <NavBar
-        setDisconnected={() =>
-          setCurrentUser((current) => {
-            return { ...current, status: ConnectionStatus.Disconnected };
-          })
-        }
-      />
-      <FriendList socket={socket} />
+  switch (currentUser.status) {
+    case ConnectionStatus.Unknown:
+      return <Loading></Loading>;
+    case ConnectionStatus.Connected:
+      return (
+        <div className="h-screen">
+          <NavBar
+            setDisconnected={() =>
+              setCurrentUser((current) => {
+                return { ...current, status: ConnectionStatus.Disconnected };
+              })
+            }
+          />
+          <FriendList socket={socket} />
 
-      <Routes>
-        {webPageRoutes.map((onePage, i) => {
-          return <Route key={i} path={onePage.url} element={onePage.element} />;
-        })}
+          <Routes>
+            {webPageRoutes.map((onePage, i) => {
+              return (
+                <Route key={i} path={onePage.url} element={onePage.element} />
+              );
+            })}
 
-        <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home />} />
 
-        <Route path="profile" element={<Profile />}>
-          <Route path=":user_login" element={<OneUserProfile />} />
-        </Route>
+            <Route path="profile" element={<Profile />}>
+              <Route path=":user_login" element={<OneUserProfile />} />
+            </Route>
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </div>
-  ) : (
-    <Routes>
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/false42login" element={<False42Login />} />
-    </Routes>
-  );
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+      );
+    case ConnectionStatus.Disconnected:
+    case ConnectionStatus.NetworkUnavailable:
+      return (
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/false42login" element={<False42Login />} />
+        </Routes>
+      );
+    case ConnectionStatus.SignupRequested:
+      return <TwoStepSignupMockup></TwoStepSignupMockup>;
+    case ConnectionStatus.TwoFactorAuthenticationRequested:
+      return <TwoStepSigninMockup></TwoStepSigninMockup>;
+
+    default:
+      return <></>;
+  }
 }
 
 export default App;
