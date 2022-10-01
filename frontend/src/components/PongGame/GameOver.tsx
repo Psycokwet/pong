@@ -2,18 +2,19 @@ import { Socket } from "socket.io-client";
 import GameRoom from "/shared/interfaces/GameRoom";
 import Position from "/shared/interfaces/Position";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { GameStep } from "/src/components/PongGame/GameStep.enum";
 
 const GameOver = ({
     socket,
     gameRoom,
     setStep,
-    canvasSize,
+    clientCanvasSize,
   }:
   {
     socket: Socket,
     gameRoom: GameRoom,
     setStep: any,
-    canvasSize: Position,
+    clientCanvasSize: Position,
   }
 ) => {
   const getWinner = () => {
@@ -24,10 +25,10 @@ const GameOver = ({
   }
   const joinNewGame = () => {
     socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST);
-    setStep(1);
+    setStep(GameStep.QUEUE);
   }
   const redirectToLobby = () => {
-    setStep(0);
+    setStep(GameStep.LOBBY);
   }
   return <div>
     <div className="w-full h-7/8">
@@ -40,8 +41,10 @@ const GameOver = ({
         </div>
         <div className="flex self-center">
           <div
-            // i add twice border because of tailwind border
-            style={{width: canvasSize.x + 16, height: canvasSize.y + 8}}
+            // i add twice border because of tailwind border 
+            // border-x-8 makes 16px horizontal border
+            // border-y-4 makes 8px vertical border
+            style={{width: clientCanvasSize.x + 16, height: clientCanvasSize.y + 8}}
             className="border-x-8 border-y-4 border-white rounded-lg flex flex-col place-content-around"
           >
               <h3 className="place-self-center sm:text-6xl text-3xl text-center">{getWinner()} WINS</h3>
