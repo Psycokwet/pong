@@ -2,57 +2,68 @@ import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import Position from "/shared/interfaces/Position";
+import { GameStep } from "/src/components/PongGame/GameStep.enum";
 
 const GameLobby = (
   {
     socket,
-    upgradeStep,
-    canvasSize,
+    setStep,
+    setGameRoom,
   }:
   {
-    socket: Socket;
-    upgradeStep: () => void;
-    canvasSize: Position;
+    socket: Socket,
+    setStep: any,
+    setGameRoom: any,
   }
 ) => {
-  
-  const [spectableGames, setSpectableGames] = useState<GameRoom[]>([])
+  const [spectableGameList, setSpectableGameList] = useState<GameRoom[]>([])
 
   /** GAME JOIN */
   const handleJoinGame = () => {
-    socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST, canvasSize);
-    upgradeStep();
+    socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST);
+    setStep(GameStep.QUEUE);
   }
   /** END GAME JOIN */
 
   const handleCreateGame = () => {
-    socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST, canvasSize);
-    upgradeStep();
+    socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST);
+    setStep(GameStep.QUEUE);
   }
 
   /** SPECTATE */
   const handleSpectate = (roomName: string) => {
     socket?.emit(ROUTES_BASE.GAME.JOIN_SPECTATE_REQUEST, roomName);
-    upgradeStep()
+    setStep(GameStep.QUEUE)
   }
   /** END SPECTACTE */
-
+  
+  /** UPDATE SPECTABLE GAMES */
   useEffect(() => {
     socket?.emit(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST)
-  }, [socket]);
-
-  /** UPDATE SPECTABLE GAMES */
-  const updateSpectableGames = (spectableGames: GameRoom[]) => {
-    setSpectableGames(spectableGames);
-  };
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
+    socket?.on(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, (spectableGameList: GameRoom[]) => {
+      setSpectableGameList(spectableGameList);
+    });
     return () => {
-      socket?.off(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
+      socket?.off(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, (spectableGameList: GameRoom[]) => {
+        setSpectableGameList(spectableGameList);
+      });
     };
-  }, [updateSpectableGames]);
+  }, []);
   /** END UPDATE SPECTABLE GAMES */
+
+  const updateStep = (gameRoom: GameRoom) => {
+    if (gameRoom.started === true)
+      setStep(GameStep.PLAYING);
+    else
+      setStep(GameStep.QUEUE);
+    setGameRoom(gameRoom);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.GAME.UPDATE_GAME, updateStep);
+    return () => {
+      socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, updateStep);
+    };
+  }, []);
 
   return <div className="h-7/8 w-full grid content-around">
     <div className="flex justify-around">
@@ -70,12 +81,12 @@ const GameLobby = (
       <h2 className="text-center">SPECTATE</h2>
       <div>
         {
-          spectableGames.map(tempGameRoom => 
-            <div key={tempGameRoom.roomName}>
+          spectableGameList.map(gameRoom => 
+            <div key={gameRoom.roomName}>
               <button 
                 className="bg-sky-500 hover:bg-sky-700 rounded-3xl shadow-md shadow-blue-500/50"
-                onClick={() => handleSpectate(tempGameRoom.roomName)}
-              >{tempGameRoom.gameData.player1.pongUsername} VS {tempGameRoom.gameData.player1.pongUsername}</button>
+                onClick={() => handleSpectate(gameRoom.roomName)}
+              >{gameRoom.gameData.player1.pongUsername} VS {gameRoom.gameData.player1.pongUsername}</button>
             </div>
           )
         }

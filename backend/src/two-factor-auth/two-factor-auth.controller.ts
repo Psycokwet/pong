@@ -13,6 +13,8 @@ import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import JwtRefreshGuard from 'src/auth/jwtRefresh.guard';
 import RequestWithUser from 'src/auth/requestWithUser.interface';
+import { FortytwoService } from 'src/fortytwo/fortytwo.service';
+import { User } from 'src/user/user.entity';
 import { UsersService } from 'src/user/user.service';
 import { TwoFactorAuthService } from './two-factor-auth.service';
 
@@ -25,20 +27,37 @@ export class TwoFactorAuthController {
 
   @UseGuards(JwtRefreshGuard)
   @Post(ROUTES_BASE.AUTH.TURN_ON_2FA) // to use after generate, with the code
-  async turn_on_2FA(@Req() req, @Body() { code }: TwoFactorAuthCodeDto) {
-    const isValid = await this.twoFactorAuthService.is2FACodeValid(
-      code,
-      req.user,
-    );
+  async turn_on_2FA(
+    @Req() { user }: RequestWithUser,
+    @Res({ passthrough: true }) response,
+    @Body() { code }: TwoFactorAuthCodeDto,
+  ) {
+    const isValid = await this.twoFactorAuthService.is2FACodeValid(code, user);
     if (!isValid) {
       throw new UnauthorizedException('Wrong authentication code');
     }
-    await this.userService.setTwoFactorAuthentication(req.user.login42, true);
+
+    response.setHeader(
+      'Set-Cookie',
+      await this.twoFactorAuthService.setTwoFactorAuthentication(
+        user.login42,
+        true,
+      ),
+    );
   }
   @Put(ROUTES_BASE.AUTH.TURN_OFF_2FA)
   @UseGuards(JwtRefreshGuard)
-  turn_off_2FA(@Req() req) {
-    this.userService.setTwoFactorAuthentication(req.user.login42, false);
+  async turn_off_2FA(
+    @Req() { user }: RequestWithUser,
+    @Res({ passthrough: true }) response,
+  ) {
+    response.setHeader(
+      'Set-Cookie',
+      await this.twoFactorAuthService.setTwoFactorAuthentication(
+        user.login42,
+        false,
+      ),
+    );
   }
   @Get(ROUTES_BASE.AUTH.GET_2FA)
   @UseGuards(JwtRefreshGuard)
@@ -54,7 +73,13 @@ export class TwoFactorAuthController {
     @Res() response: Response,
     @Req() request: RequestWithUser,
   ) {
-    this.userService.setTwoFactorAuthentication(request.user.login42, false); //We change the secret, previous 2fa ain't valid anymore
+    request.res.setHeader(
+      'Set-Cookie',
+      await this.twoFactorAuthService.setTwoFactorAuthentication(
+        request.user.login42,
+        false,
+      ),
+    );
     const { otpauthUrl } =
       await this.twoFactorAuthService.generateTwoFactorAuthenticationSecret(
         request.user,

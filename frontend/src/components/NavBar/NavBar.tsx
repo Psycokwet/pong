@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { CurrentUser } from "../../../../backend/shared/interfaces/CurrentUser";
 
 // Components
 import APage from "./APage";
@@ -11,7 +12,6 @@ import { HiChartBar } from "react-icons/hi";
 import { RiPingPongFill } from "react-icons/ri";
 import { IoMdSettings } from "react-icons/io";
 import { DisconnectionButton } from "../ConnectionButton/DisconnectionButton";
-
 
 type NavBarProps = {
   setDisconnected: CallableFunction;

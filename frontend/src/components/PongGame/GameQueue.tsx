@@ -1,10 +1,36 @@
 import Position from "/shared/interfaces/Position";
+import { useEffect } from "react";
+import { Socket } from "socket.io-client";
+import GameRoom from "/shared/interfaces/GameRoom";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { GameStep } from "/src/components/PongGame/GameStep.enum";
+
 const GameQueue = ({
-  canvasSize,
+  clientCanvasSize,
+  socket,
+  setStep,
+  setGameRoom,
 }:
 {
-  canvasSize: Position,
+  clientCanvasSize: Position,
+  socket: Socket,
+  setStep: any,
+  setGameRoom: any,
 }) => {
+
+  const updateStep = (gameRoom: GameRoom) => {
+    if (gameRoom.started === true)
+      setStep(GameStep.PLAYING);
+    else
+      setStep(GameStep.QUEUE);
+    setGameRoom(gameRoom);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.GAME.UPDATE_GAME, updateStep);
+    return () => {
+      socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, updateStep);
+    };
+  }, []);
 
   return <div>
   <div className="w-full h-7/8">
@@ -15,8 +41,10 @@ const GameQueue = ({
     <div className="grid sm:grid-cols-5 content-center sm:flex sm:justify-around">
       <div className="flex self-center">
         <div
-          // i add twice border because of tailwind border
-          style={{width: canvasSize.x + 16, height: canvasSize.y + 8}}
+          // i add twice border because of tailwind border 
+          // border-x-8 makes 16px horizontal border
+          // border-y-4 makes 8px vertical border
+          style={{width: clientCanvasSize.x + 16, height: clientCanvasSize.y + 8}}
           className="border-x-8 border-y-4 border-white rounded-lg flex flex-col place-content-around"
         >
           <img
