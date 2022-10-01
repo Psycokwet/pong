@@ -9,7 +9,6 @@ import { Game } from './game.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { virtualGameData } from 'shared/other/virtualGameData';
-import { WsException } from '@nestjs/websockets';
 @Injectable()
 export class GameService {
   constructor(
@@ -42,6 +41,10 @@ export class GameService {
 
   private MAX_SPEED = 10;
   private ENDGAME_POINT = 10;
+  private centerPlayerPaddle = virtualGameData.playerHeight / 2;
+  private halfCanvasHeight = virtualGameData.canvasHeight / 2;
+  private halfCanvasWidth = virtualGameData.canvasWidth / 2;
+  private speedMultiplicator = 1.2;
 
   createGame(user: User): GameRoom {
     const newGameRoom: GameRoom = {
@@ -74,15 +77,13 @@ export class GameService {
   }
 
   gameStart(gameData: GameData): GameData {
-    gameData.player1.y = virtualGameData.canvasHeight / 2 - virtualGameData.playerHeight / 2;
-    gameData.player2.y = virtualGameData.canvasHeight / 2 - virtualGameData.playerHeight / 2;
-    gameData.ball.x = virtualGameData.canvasWidth / 2;
-    gameData.ball.y = virtualGameData.canvasHeight / 2;
+    gameData.player1.y = this.halfCanvasHeight - this.centerPlayerPaddle;
+    gameData.player2.y = this.halfCanvasHeight - this.centerPlayerPaddle;
+    gameData.ball.x = this.halfCanvasWidth;
+    gameData.ball.y = this.halfCanvasHeight;
     gameData.ball.rayon = virtualGameData.ballRayon;
-    gameData.ball.speed.x =
-      (0.5 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
-    gameData.ball.speed.y =
-      (0.5 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
+    gameData.ball.speed.x = this.getRandomBallVector();
+    gameData.ball.speed.y = this.getRandomBallVector();
 
     return gameData;
   }
@@ -127,17 +128,17 @@ export class GameService {
     const playerToUpdate =
       userId === game.player1.userId ? 'player1' : 'player2';
 
-    if (playerInput.mouseLocation < virtualGameData.playerHeight / 2) {
+    if (playerInput.mouseLocation < this.centerPlayerPaddle) {
       game[playerToUpdate].y = 0;
     } else if (
       playerInput.mouseLocation >
-      playerInput.canvasLocation - virtualGameData.playerHeight / 2
+      playerInput.canvasLocation - this.centerPlayerPaddle
     ) {
       game[playerToUpdate].y =
         playerInput.canvasLocation - virtualGameData.playerHeight;
     } else {
       game[playerToUpdate].y =
-        playerInput.mouseLocation - virtualGameData.playerHeight / 2;
+        playerInput.mouseLocation - this.centerPlayerPaddle;
     }
   }
 
@@ -150,9 +151,16 @@ export class GameService {
    * https://dirask.com/posts/React-mouse-button-press-and-hold-example-pzrAap
    *
    */
-  private changeDirection(game, playerPosition) {
-    const impact = game.ball.y - playerPosition - virtualGameData.playerHeight / 2;
-    const ratio = 100 / (virtualGameData.playerHeight / 2);
+  private getRandomBallVector() {
+    const minimumSpeed: number = 2;
+    const direction: number = Math.random() > 0.5 ? 1 : -1;
+    const speedMinimumCoefficiant = 0.5;
+    return (speedMinimumCoefficiant + Math.random()) * (direction * minimumSpeed)
+  }
+
+  private changeDirection(game: GameData, playerPosition: number) {
+    const impact = game.ball.y - playerPosition - this.centerPlayerPaddle;
+    const ratio = 100 / this.centerPlayerPaddle;
 
     // Get a value between 0 and 10
     game.ball.speed.y = Math.round((impact * ratio) / 10);
@@ -165,12 +173,10 @@ export class GameService {
       newGame.ball.y < player1.y ||
       newGame.ball.y > player1.y + virtualGameData.playerHeight
     ) {
-      newGame.ball.x = virtualGameData.canvasWidth / 2;
-      newGame.ball.y = virtualGameData.canvasHeight / 2;
-      newGame.ball.speed.x =
-        (0.5 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
-      newGame.ball.speed.y =
-        (0.5 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
+      newGame.ball.x = this.halfCanvasWidth;
+      newGame.ball.y = this.halfCanvasHeight;
+      newGame.ball.speed.x = this.getRandomBallVector();
+      newGame.ball.speed.y = this.getRandomBallVector();
       // Update score
       if (player1 == newGame.player1) {
         newGame.player2.score++;
@@ -179,12 +185,12 @@ export class GameService {
       }
     } else {
       // Change direction
-      newGame.ball.speed.x *= -1;
+      newGame.ball.speed.x = -newGame.ball.speed.x;
       newGame = this.changeDirection(newGame, player1.y);
 
       // Increase speed if it has not reached max speed
       if (Math.abs(newGame.ball.speed.x) < this.MAX_SPEED) {
-        newGame.ball.speed.x *= 1.2;
+        newGame.ball.speed.x *= this.speedMultiplicator;
       }
     }
     return newGame;
@@ -197,7 +203,7 @@ export class GameService {
 
     let newGame = GameService.gameRoomList[index].gameData;
     if (newGame.ball.y > virtualGameData.canvasHeight || newGame.ball.y < 0) {
-      newGame.ball.speed.y *= -1;
+      newGame.ball.speed.y = -newGame.ball.speed.y;
     }
 
     if (newGame.ball.x > virtualGameData.canvasWidth - virtualGameData.playerWidth) {
