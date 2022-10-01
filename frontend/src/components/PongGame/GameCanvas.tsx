@@ -107,7 +107,7 @@ const GameCanvas = (
     // Draw ball
     context.beginPath();
     context.fillStyle = 'white';
-    context.arc(ballPosition.x, ballPosition.y, gameRoom.gameData.ball.rayon, 0, Math.PI * 2, false);
+    context.arc(ballPosition.x, ballPosition.y, gameRoom.gameData.ball.rayon / canvasHeight * canvasSize.y , 0, Math.PI * 2, false);
     context.fill();
   }
 
