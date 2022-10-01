@@ -68,7 +68,6 @@ export const ROUTES_BASE = {
     // CONFIRM_GAME_CREATION: 'confirmGameCreation',
     /** JOIN GAME */
     JOIN_GAME_REQUEST: 'joinGameRequest',
-    CONFIRM_GAME_JOINED: 'confirmGameJoined',
     /** SEND INPUT */
     SEND_INPUT: 'sendInput',
     /** GAME LOOP */
@@ -81,8 +80,8 @@ export const ROUTES_BASE = {
     JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
     /** SET CANVAS SIZE */
     SET_CANVAS_SIZE: 'setCanvasSize',
-  /** RECONNECT GAME */
-    RECONNECT_GAME: 'reconnectGame',
+    /** RECONNECT GAME */
+    RECONNECT_GAME_REQUEST: 'reconnectGameRequest',
   },
   USER: {
     ERROR: 'error',
