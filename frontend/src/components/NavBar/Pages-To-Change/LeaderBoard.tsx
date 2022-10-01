@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Api } from "../../../api/api";
 import { QRCodeImg } from "../../PictureForm/QRCodeImg";
 
+
 const api = new Api();
 const LeaderBoard = () => {
   const [code2fa, setCode2fa] = useState<string>("");

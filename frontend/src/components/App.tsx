@@ -20,32 +20,17 @@ import Settings from "./NavBar/Pages-To-Change/Settings";
 import Profile from "./Profile/Profile";
 import OneUserProfile from "./Profile/OneUserProfile";
 import False42Login from "./LoginPage/False42Login";
-
-enum connectionStatusEnum {
-  Unknown,
-  Connected,
-  Disconnected,
-}
+import { CurrentUser } from "../../shared/interfaces/CurrentUser";
+import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
 
 const api = new Api();
 
 function App() {
-  const [currentUser, setCurrentUser] = useState("");
+  const [currentUser, setCurrentUser] = useState<CurrentUser>({
+    status: ConnectionStatus.Unknown,
+  } as CurrentUser);
 
-  api.get_pong_username().then((res: Response) => {
-    if (res.status == 200) {
-      res.json().then((content) => {
-        console.log("get_pong_username is ok, result is: ", content);
-        setCurrentUser(content.pongUsername);
-      });
-    } else console.log(res.status);
-  });
-  
-  const [connectedState, setConnectedState] = useState(
-    connectionStatusEnum.Unknown
-  );
   const [socket, setSocket] = useState<Socket>();
-
 
   const webPageRoutes = [
     {
@@ -79,53 +64,54 @@ function App() {
   }, [setSocket]);
 
   useEffect(() => {
-    if (connectedState == connectionStatusEnum.Unknown) {
+    const updateCurrentUser = () => {
       api.refreshToken().then((res: Response) => {
-        if (res.status !== 200) {
-          console.error(res);
-          setConnectedState(connectionStatusEnum.Disconnected);
+        if (res.status != 200) {
+          setCurrentUser((current: CurrentUser) => {
+            if (current.status !== ConnectionStatus.NetworkUnavailable)
+              return {
+                ...current,
+                status: ConnectionStatus.NetworkUnavailable,
+              };
+            return current;
+          });
         } else {
-          setConnectedState(connectionStatusEnum.Connected);
+          res.json().then((newCurrentUser: CurrentUser) => {
+            console.log(newCurrentUser);
+            setCurrentUser((current: CurrentUser) => {
+              if (current.status !== newCurrentUser.status)
+                return newCurrentUser;
+              return current;
+            });
+          });
         }
       });
+    };
+
+    if (currentUser.status == ConnectionStatus.Unknown) {
+      updateCurrentUser();
     }
-    const interval = setInterval(async () => {
-      await api.refreshToken().then((res) => {
-        setConnectedState((current) => {
-          let result = current;
-          if (
-            res.status !== 200 &&
-            current !== connectionStatusEnum.Disconnected
-          ) {
-            console.error(res);
-            result = connectionStatusEnum.Disconnected;
-          } else if (
-            res.status === 200 &&
-            current !== connectionStatusEnum.Connected
-          ) {
-            result = connectionStatusEnum.Connected;
-          }
-          return result;
-        });
-      });
+    const interval = setInterval(() => {
+      updateCurrentUser();
       socket?.disconnect();
       socket?.connect();
     }, 600_000);
-
     return () => {
       clearInterval(interval);
     };
-  }, [connectedState]);
+  }, [currentUser.status]);
 
-  return connectedState == connectionStatusEnum.Unknown ? (
+  return currentUser.status == ConnectionStatus.Unknown ? (
     <Loading></Loading>
-  ) : connectedState == connectionStatusEnum.Connected ? (
+  ) : currentUser.status == ConnectionStatus.Connected ? (
     <div className="h-screen">
       <NavBar
         setDisconnected={() =>
-          setConnectedState(connectionStatusEnum.Disconnected)
+          setCurrentUser((current) => {
+            return { ...current, status: ConnectionStatus.Disconnected };
+          })
         }
-        currentUser={currentUser}
+        currentUser={currentUser.pongUsername}
       />
       <FriendList socket={socket} />
 
@@ -147,6 +133,7 @@ function App() {
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/false42login" element={<False42Login />} />
+      <Route path="*" element={<LoginPage />} />
     </Routes>
   );
 }

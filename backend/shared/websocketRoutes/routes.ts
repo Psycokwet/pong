@@ -65,24 +65,20 @@ export const ROUTES_BASE = {
     /** CREATE CHALLENGE */
     CREATE_CHALLENGE_REQUEST: 'createChallengeRequest',
     NOTIF_CHALLENGE_CONFIRM: 'notifChallengeConfirm',
-    // CONFIRM_GAME_CREATION: 'confirmGameCreation',
     /** JOIN GAME */
     JOIN_GAME_REQUEST: 'joinGameRequest',
-    CONFIRM_GAME_JOINED: 'confirmGameJoined',
     /** SEND INPUT */
     SEND_INPUT: 'sendInput',
     /** GAME LOOP */
     UPDATE_GAME: 'updateGame',
     /** GAMEOVER CONFIRM */
     GAMEOVER_CONFIRM: 'gameoverConfirm',
-    /** GET SPECTABLE GAME */
+    /** SPECTABLE GAME */
     GET_SPECTABLE_GAMES_REQUEST: 'getSpectableGamesRequest',
     UPDATE_SPECTABLE_GAMES: 'updateSpectableGames',
     JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
-    /** SET CANVAS SIZE */
-    SET_CANVAS_SIZE: 'setCanvasSize',
-  /** RECONNECT GAME */
-    RECONNECT_GAME: 'reconnectGame',
+    /** RECONNECT GAME */
+    RECONNECT_GAME_REQUEST: 'reconnectGameRequest',
   },
   USER: {
     ERROR: 'error',

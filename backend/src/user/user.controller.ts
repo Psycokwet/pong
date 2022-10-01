@@ -21,8 +21,10 @@ import { join } from 'path';
 import { Express } from 'express';
 import LocalFilesInterceptor from 'src/localFiles/localFiles.interceptor';
 import { ROUTES_BASE } from 'shared/httpsRoutes/routes';
+import { TwoFactorAuthGuard } from 'src/two-factor-auth/two-factor-auth.guard';
 import { User } from './user.entity';
 import RequestWithUser from 'src/auth/requestWithUser.interface';
+import { AddFriendDto } from './add-friend.dto';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
@@ -48,31 +50,31 @@ export class UserController {
   }
 
   @Get(ROUTES_BASE.USER.GET_USER_RANK)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getUserRank(@Request() req) {
     return await this.usersService.getUserRank(req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_USER_HISTORY)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getUserHistory(@Request() req) {
     return await this.usersService.getUserHistory(req.user);
   }
 
   @Get(ROUTES_BASE.USER.GET_LOGIN42)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getLogin42(@Request() req) {
     return await this.usersService.getLogin42(req.user.login42);
   }
 
   @Get(ROUTES_BASE.USER.GET_PONG_USERNAME)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getPongUsername(@Request() req) {
     return await this.usersService.getPongUsername(req.user.login42);
   }
 
   @Post(ROUTES_BASE.USER.SET_PONG_USERNAME)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async setPongUsername(
     @Body() newPongUsername: pongUsernameDto,
     @Request() req,
@@ -83,7 +85,7 @@ export class UserController {
     );
   }
   @Get(ROUTES_BASE.USER.GET_PICTURE)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getPicture(
     @Request() req: RequestWithUser,
     @Query() query: { pongUsername: string },
@@ -101,7 +103,7 @@ export class UserController {
   }
 
   @Post(ROUTES_BASE.USER.SET_PICTURE)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   @UseInterceptors(
     LocalFilesInterceptor({
       fieldName: 'file',
