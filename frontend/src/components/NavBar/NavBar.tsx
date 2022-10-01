@@ -15,11 +15,11 @@ import { DisconnectionButton } from "../ConnectionButton/DisconnectionButton";
 
 type NavBarProps = {
   setDisconnected: CallableFunction;
-  currentUser: string;
+  setPongUsername: CallableFunction;
 };
 
 /***************** Component NavBar ******************************************/
-const NavBar: React.FC<NavBarProps> = ({ setDisconnected, currentUser }) => {
+const NavBar: React.FC<NavBarProps> = ({ setDisconnected, setPongUsername }) => {
   /***************** List of Pages ******************************************/
   const NavBarPageList = [
     {
@@ -38,8 +38,8 @@ const NavBar: React.FC<NavBarProps> = ({ setDisconnected, currentUser }) => {
       pageIcon: <FaComments size="28" />,
     },
     {
-      url: `/profile/${currentUser}`, // to change with real user
-      pageName: `profile ${currentUser}`, // to change with real user
+      url: `/profile/${currentPongUsername}`, // to change with real user
+      pageName: `profile ${currentPongUsername}`, // to change with real user
       pageIcon: <FaUser size="26" />,
     },
     {

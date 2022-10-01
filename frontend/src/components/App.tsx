@@ -111,7 +111,11 @@ function App() {
             return { ...current, status: ConnectionStatus.Disconnected };
           })
         }
-        currentUser={currentUser.pongUsername}
+        setPongUsername={(newPongUsername) =>
+          setCurrentUser((current) => {
+            return { ...current, pongUsername: newPongUsername };
+          })
+        }
       />
       <FriendList socket={socket} />
 
