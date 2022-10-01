@@ -20,8 +20,9 @@ const SignUpPage: React.FC<SignUpProps> = ({
   const [twoFactor, setTwoFactor] = useState("off");
 
   useEffect(() => {
+    console.log(pongUsername);
     setLocalPongUsername(pongUsername);
-  }, []);
+  }, [pongUsername]);
 
   const handleSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     if (event === undefined) return; //not sure it may happen
