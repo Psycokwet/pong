@@ -25,6 +25,7 @@ import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
 import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import { Muted } from './muted.entity';
+import { filter } from 'rxjs';
 @Injectable()
 export class ChatService {
   constructor(
@@ -233,13 +234,11 @@ export class ChatService {
   }
 
   async unattachMemberToChannel(userId: number, room: Room) {
-    const leavingUser = await this.userService.getById(userId);
-
     room.members = room.members.filter(
-      (member: User) => member.login42 !== leavingUser.login42,
+      (member: User) => member.id !== userId,
     );
 
-    room.save();
+    await room.save();
   }
 
   async addMutedUser(mutedUser: User, room: Room, muteTime: number) {
@@ -308,7 +307,7 @@ export class ChatService {
     await room.save();
   }
 
-  async getAttachedUsersInChannel(roomId: number) {
+  async getAttachedUsersInChannel(roomId: number, selfId: number) {
     const room = await this.getRoomWithRelations(
       { id: roomId },
       { members: true },

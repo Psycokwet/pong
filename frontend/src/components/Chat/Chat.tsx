@@ -15,9 +15,10 @@ import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
-  const [userAttachedList, setUserAttachedList] = useState<UserInterface[]>([]);
+  const [attachedUserList, setAttachedUserList] = useState<UserInterface[]>([]);
 
   const addMessage = (newElem:Message) => {
+    console.log(newElem)
     setMessages([...messages, newElem]);
   }
   useEffect(() => {
@@ -25,7 +26,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     return () => {
       socket?.off(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, addMessage);
     };
-  }, [addMessage]);
+  }, []);
   const resetMessages = (msgs:Message[]) => {
     setMessages(msgs);
   }
@@ -63,21 +64,50 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     return () => {
       socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
     };
-  }, [disconnect]);
+  }, []);
 
-
-  const ResetUserList = (list:UserInterface[]) => {
-    setUserAttachedList(list);
-  }
   useEffect(() => {
     socket?.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
   }, []);
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, ResetUserList);
+    socket?.on(
+      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, 
+      (userList: UserInterface[]) => setAttachedUserList(userList)
+    );
+
+
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, ResetUserList);
+      socket?.off(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        (userList: UserInterface[]) => setAttachedUserList(userList)
+      );
     };
-  }, [ResetUserList]);
+  }, []);
+
+  /** UNATTACH FROM CHANNEL */
+  useEffect(() => {
+    socket?.on(
+      ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
+      (unattachedUserId: number) => {
+        setAttachedUserList((current) => {
+          console.log(current, unattachedUserId)
+          return current.filter((user) => user.id !== unattachedUserId);
+        });
+      }
+    );
+    return () => {
+      socket?.off(
+        ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
+        (unattachedUserId: number) => {
+          setAttachedUserList((current) => {
+            return current.filter((user) => user.id !== unattachedUserId);
+          });
+        }
+      );
+    };
+  }, []);
+  /** END UNATTACH FROM CHANNEL */
+
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
       <ChatList msg={messages[messages.length - 1]} socket={socket} connectedChannel={connectedChannel}/>
@@ -88,7 +118,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
           return (
             <UserListByStatus
               key={aStatusList.status}
-              userList={userAttachedList}
+              userList={attachedUserList}
               inputFilter={""}
               statusList={aStatusList}
               socket={socket}
