@@ -27,33 +27,31 @@ const SignUpPage: React.FC<SignUpProps> = ({
     if (event === undefined) return; //not sure it may happen
     event.preventDefault();
     let should_update = false;
+    console.log(`should_update status is set to: ${should_update}`);
 
     const fileData = new FormData();
     if (selectedFile) {
       fileData.append("file", selectedFile);
       await api.setPicture(fileData).then((res: Response) => {
-        if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
-          console.log("set picture is NOT Ok");
-        else {
+        if (res.status >= 200 && res.status < 300) {
           console.log(`Set picture is ok, status is: ${res.status}`);
           should_update = true;
-        }
+        } else console.log("set picture is NOT Ok");
       });
     }
 
     if (localPongUsername.length <= MAX_CHAR) {
       await api.set_pong_username(localPongUsername).then((res: Response) => {
-        if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
-          console.log("set pongUsername is NOT Ok");
-        else {
+        if (res.status >= 200 && res.status < 300) {
           console.log(`Set pongUsername is ok, status is: ${res.status}`);
           should_update = true;
-        }
+        } else console.log("set pongUsername is NOT Ok");
       });
     }
 
     // Todo: set 2Factor through api.
     console.log(`twoFactor status is set to: ${twoFactor}`);
+    console.log(`should_update status is set to: ${should_update}`);
     if (should_update && updateCurrentUser) updateCurrentUser();
   };
 
