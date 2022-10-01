@@ -19,6 +19,7 @@ import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
 import Settings from "./NavBar/Pages-To-Change/Settings";
 import Profile from "./Profile/Profile";
 import OneUserProfile from "./Profile/OneUserProfile";
+import False42Login from "./LoginPage/False42Login";
 
 enum connectionStatusEnum {
   Unknown,
@@ -37,7 +38,7 @@ function App() {
   const webPageRoutes = [
     {
       url: "/play",
-      element: <Play />,
+      element: <Play socket={socket}/>,
     },
     {
       url: "/leaderboard",
@@ -76,8 +77,8 @@ function App() {
         }
       });
     }
-    const interval = setInterval(() => {
-      api.refreshToken().then((res) => {
+    const interval = setInterval(async () => {
+      await api.refreshToken().then((res) => {
         setConnectedState((current) => {
           let result = current;
           if (
@@ -95,6 +96,8 @@ function App() {
           return result;
         });
       });
+      socket?.disconnect();
+      socket?.connect();
     }, 600_000);
 
     return () => {
@@ -128,7 +131,10 @@ function App() {
       </Routes>
     </div>
   ) : (
-    <LoginPage />
+    <Routes>
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/false42login" element={<False42Login />} />
+    </Routes>
   );
 }
 

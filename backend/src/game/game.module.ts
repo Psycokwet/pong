@@ -17,7 +17,6 @@ import { ChatModule } from 'src/chat/chat.module';
     AuthModule,
     JwtModule,
     UsersModule,
-    ChatModule,
   ],
   providers: [GameGateway, GameService],
   exports: [GameGateway, GameService],

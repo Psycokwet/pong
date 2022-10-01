@@ -8,13 +8,16 @@ import GameRoom from "/shared/interfaces/GameRoom";
 import Position from "/shared/interfaces/Position";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 
-const Play = () => {
+const Play = ({
+  socket,
+}:{
+  socket: Socket;
+}) => {
   const [step, setStep] = useState<number>(0);
 
   /** WEBSOCKET */
-  const [socket, setSocket] = useState<Socket>();
-  const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined);
-  const [canvasSize, setCanvasSize] = useState<Position>({ x: 0, y: 0 });
+  const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined)
+  const [canvasSize, setCanvasSize] = useState<Position>({x: 0, y: 0})
 
   useEffect(() => {
     const screenIsVertical = window.innerHeight > window.innerWidth;
@@ -33,13 +36,23 @@ const Play = () => {
     }
   }, []);
 
+  /** RECONNECT GAME */
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_PONG_URL, {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-    setSocket(newSocket);
+    socket?.emit(ROUTES_BASE.GAME.RECONNECT_GAME);
   }, []);
+
+  const reconnectGame = (gameRoom: GameRoom) => {
+    setStep(2);
+    setGameRoom(gameRoom);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.GAME.UPDATE_GAME, reconnectGame);
+    return () => {
+      socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, reconnectGame);
+    };
+  }, [reconnectGame]);
+  /** END RECONNECT GAME */
+
 
   const handleGameConfirm = (gameRoom: GameRoom) => {
     setGameRoom(gameRoom);

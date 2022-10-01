@@ -69,6 +69,8 @@ export class UsersService {
     private readonly authService: AuthService,
   ) {}
 
+  public static userWebsockets: UsersWebsockets[] = [];
+
   async findOne(login42: string): Promise<User> {
     const user = await this.usersRepository.findOneBy({
       login42: login42,
@@ -390,7 +392,7 @@ export class UsersService {
   }
 
   getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
-    return UserGateway.userWebsockets.find(
+    return UsersService.userWebsockets.find(
       (receiver) => receiver.userId === receiverId,
     );
   }
