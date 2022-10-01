@@ -64,31 +64,30 @@ function App() {
     setSocket(newSocket);
   }, [setSocket]);
 
-  useEffect(() => {
-    const updateCurrentUser = () => {
-      api.refreshToken().then((res: Response) => {
-        if (res.status != 200) {
+  const updateCurrentUser = () => {
+    api.refreshToken().then((res: Response) => {
+      if (res.status != 200) {
+        setCurrentUser((current: CurrentUser) => {
+          if (current.status !== ConnectionStatus.NetworkUnavailable)
+            return {
+              ...current,
+              status: ConnectionStatus.NetworkUnavailable,
+            };
+          return current;
+        });
+      } else {
+        res.json().then((newCurrentUser: CurrentUser) => {
+          console.log(newCurrentUser);
           setCurrentUser((current: CurrentUser) => {
-            if (current.status !== ConnectionStatus.NetworkUnavailable)
-              return {
-                ...current,
-                status: ConnectionStatus.NetworkUnavailable,
-              };
+            if (current.status !== newCurrentUser.status) return newCurrentUser;
             return current;
           });
-        } else {
-          res.json().then((newCurrentUser: CurrentUser) => {
-            console.log(newCurrentUser);
-            setCurrentUser((current: CurrentUser) => {
-              if (current.status !== newCurrentUser.status)
-                return newCurrentUser;
-              return current;
-            });
-          });
-        }
-      });
-    };
+        });
+      }
+    });
+  };
 
+  useEffect(() => {
     if (currentUser.status == ConnectionStatus.Unknown) {
       updateCurrentUser();
     }
@@ -144,7 +143,11 @@ function App() {
     case ConnectionStatus.SignupRequested:
       return <TwoStepSignupMockup></TwoStepSignupMockup>;
     case ConnectionStatus.TwoFactorAuthenticationRequested:
-      return <TwoStepSigningMockup></TwoStepSigningMockup>;
+      return (
+        <TwoStepSigningMockup
+          updateCurrentUser={updateCurrentUser}
+        ></TwoStepSigningMockup>
+      );
     default:
       return <>This should never happen.</>;
   }
