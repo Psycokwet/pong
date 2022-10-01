@@ -22,9 +22,9 @@ const Play = ({
   useEffect(() => {
     const screenIsVertical = window.innerHeight > window.innerWidth;
     const newCanvasSize: Position = { x: 0, y: 0 };
-    const referenceSize = screenIsVertical
-      ? window.innerWidth
-      : window.innerHeight - window.innerHeight / 3;
+    const referenceSize = screenIsVertical ?
+      window.innerWidth - window.innerWidth / 25 :
+      window.innerHeight - window.innerHeight / 3;
     if (screenIsVertical) {
       newCanvasSize.x = referenceSize;
       newCanvasSize.y = (referenceSize / 4) * 3;
@@ -76,9 +76,7 @@ const Play = ({
       canvasSize={canvasSize}
     />,
     <GameQueue
-      socket={socket}
-      upgradeStep={upgradeStep}
-      setGameRoom={setGameRoom}
+      canvasSize={canvasSize}
     />,
     <GameCanvas
       socket={socket}
@@ -87,15 +85,19 @@ const Play = ({
       gameRoom={gameRoom}
       canvasSize={canvasSize}
     />,
-    <GameOver socket={socket} setStep={setStep} gameRoom={gameRoom} />,
+    <GameOver
+      socket={socket}
+      setStep={setStep}
+      gameRoom={gameRoom}
+      canvasSize={canvasSize}
+    />,
   ];
 
   return (
-    <>
-      <h1 className="text-violet-600">I'm Play page</h1>
+    <div className='bg-black text-white lg:h-7/8 sm:h-6/8 place-content-center'>
       {gameSteps[step]}
-    </>
-  );
-};
+    </div>
+  )
+}
 
 export default Play;
