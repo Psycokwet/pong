@@ -1,7 +1,7 @@
 export enum ConnectionStatus {
   Unknown,
   Connected,
-  SigninRequested,
+  SignupRequested,
   TwoFactorAuthenticationRequested,
   Disconnected,
   NetworkUnavailable,
