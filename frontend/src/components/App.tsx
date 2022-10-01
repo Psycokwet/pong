@@ -16,7 +16,6 @@ import Play from "./NavBar/Pages-To-Change/Play";
 import Home from "./NavBar/Pages-To-Change/Home";
 import Chat from "./Chat/Chat";
 import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
-import Settings from "./NavBar/Pages-To-Change/Settings";
 import Profile from "./Profile/Profile";
 import OneUserProfile from "./Profile/OneUserProfile";
 import False42Login from "./LoginPage/False42Login";
@@ -72,7 +71,12 @@ function App() {
     },
     {
       url: "/settings",
-      element: <SignUpPage updateCurrentUser={updateCurrentUser} />,
+      element: (
+        <SignUpPage
+          updateCurrentUser={updateCurrentUser}
+          pongUsername={currentUser.pongUsername}
+        />
+      ),
     },
     {
       url: "/practice",
@@ -142,7 +146,12 @@ function App() {
         </Routes>
       );
     case ConnectionStatus.SignupRequested:
-      return <SignUpPage updateCurrentUser={updateCurrentUser}></SignUpPage>;
+      return (
+        <SignUpPage
+          updateCurrentUser={updateCurrentUser}
+          pongUsername={currentUser.pongUsername}
+        ></SignUpPage>
+      );
     case ConnectionStatus.TwoFactorAuthenticationRequested:
       return (
         <TwoStepSigningMockup
