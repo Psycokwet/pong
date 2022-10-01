@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Game } from './game.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { virtualGameData } from 'shared/other/virtualGameData';
 @Injectable()
 export class GameService {
   constructor(
@@ -42,12 +43,7 @@ export class GameService {
   private static gameRoomList: GameRoom[] = [];
   public static gameIntervalList: number[] = [];
 
-  private CANVAS_WIDTH = 640;
-  private CANVAS_HEIGHT = 480;
-  private PLAYER_HEIGHT = 100;
-  private PLAYER_WIDTH = 5;
   private MAX_SPEED = 10;
-  private DEFAULT_RAYON = 5;
   private ENDGAME_POINT = 10;
 
   createGame(user: User): GameRoom {
@@ -83,11 +79,11 @@ export class GameService {
   }
 
   gameStart(gameData: GameData): GameData {
-    gameData.player1.y = this.CANVAS_HEIGHT / 2 - this.PLAYER_HEIGHT / 2;
-    gameData.player2.y = this.CANVAS_HEIGHT / 2 - this.PLAYER_HEIGHT / 2;
-    gameData.ball.x = this.CANVAS_WIDTH / 2;
-    gameData.ball.y = this.CANVAS_HEIGHT / 2;
-    gameData.ball.rayon = this.DEFAULT_RAYON;
+    gameData.player1.y = virtualGameData.canvasHeight / 2 - virtualGameData.playerHeight / 2;
+    gameData.player2.y = virtualGameData.canvasHeight / 2 - virtualGameData.playerHeight / 2;
+    gameData.ball.x = virtualGameData.canvasWidth / 2;
+    gameData.ball.y = virtualGameData.canvasHeight / 2;
+    gameData.ball.rayon = virtualGameData.ballRayon;
     gameData.ball.speed.x =
       (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
     gameData.ball.speed.y =
@@ -132,24 +128,22 @@ export class GameService {
     const gameRoom = this.findPlayerRoom(userId);
     if (gameRoom === undefined) return;
 
-    const game = gameRoom.gameData;
+    const game: GameData = gameRoom.gameData;
     const playerToUpdate =
       userId === game.player1.userId ? 'player1' : 'player2';
 
-    if (playerInput.mouseLocation < this.PLAYER_HEIGHT / 2) {
+    if (playerInput.mouseLocation < virtualGameData.playerHeight / 2) {
       game[playerToUpdate].y = 0;
     } else if (
       playerInput.mouseLocation >
-      playerInput.canvasLocation - this.PLAYER_HEIGHT / 2
+      playerInput.canvasLocation - virtualGameData.playerHeight / 2
     ) {
       game[playerToUpdate].y =
-        playerInput.canvasLocation - this.PLAYER_HEIGHT;
+        playerInput.canvasLocation - virtualGameData.playerHeight;
     } else {
       game[playerToUpdate].y =
-        playerInput.mouseLocation - this.PLAYER_HEIGHT / 2;
+        playerInput.mouseLocation - virtualGameData.playerHeight / 2;
     }
-
-    GameService.gameRoomList[this.findIndex(gameRoom)] = gameRoom;
   }
 
   /** GAME LOOP */
@@ -162,8 +156,8 @@ export class GameService {
    *
    */
   private changeDirection(game, playerPosition) {
-    const impact = game.ball.y - playerPosition - this.PLAYER_HEIGHT / 2;
-    const ratio = 100 / (this.PLAYER_HEIGHT / 2);
+    const impact = game.ball.y - playerPosition - virtualGameData.playerHeight / 2;
+    const ratio = 100 / (virtualGameData.playerHeight / 2);
 
     // Get a value between 0 and 10
     game.ball.speed.y = Math.round((impact * ratio) / 10);
@@ -174,10 +168,10 @@ export class GameService {
     // The player does not hit the ball
     if (
       newGame.ball.y < player1.y ||
-      newGame.ball.y > player1.y + this.PLAYER_HEIGHT
+      newGame.ball.y > player1.y + virtualGameData.playerHeight
     ) {
-      newGame.ball.x = this.CANVAS_WIDTH / 2;
-      newGame.ball.y = this.CANVAS_HEIGHT / 2;
+      newGame.ball.x = virtualGameData.canvasWidth / 2;
+      newGame.ball.y = virtualGameData.canvasHeight / 2;
       newGame.ball.speed.x =
         (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
       newGame.ball.speed.y =
@@ -207,13 +201,13 @@ export class GameService {
     );
 
     let newGame = GameService.gameRoomList[index].gameData;
-    if (newGame.ball.y > this.CANVAS_HEIGHT || newGame.ball.y < 0) {
+    if (newGame.ball.y > virtualGameData.canvasHeight || newGame.ball.y < 0) {
       newGame.ball.speed.y *= -1;
     }
 
-    if (newGame.ball.x > this.CANVAS_WIDTH - this.PLAYER_WIDTH) {
+    if (newGame.ball.x > virtualGameData.canvasWidth - virtualGameData.playerWidth) {
       newGame = this.collide(newGame.player2, newGame);
-    } else if (newGame.ball.x < this.PLAYER_WIDTH) {
+    } else if (newGame.ball.x < virtualGameData.playerWidth) {
       newGame = this.collide(newGame.player1, newGame);
     }
     newGame.ball.x += newGame.ball.speed.x;

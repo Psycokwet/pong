@@ -69,7 +69,7 @@ export class GameGateway implements OnGatewayConnection {
 
     client.join(gameRoom.roomName);
 
-    this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, gameRoom);
+    this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
   }
 
   @UseGuards(JwtWsGuard)
@@ -84,7 +84,7 @@ export class GameGateway implements OnGatewayConnection {
 
     client.join(gameRoom.roomName);
 
-    this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, gameRoom);
+    this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
 
     if (gameRoom.started === true) {
       this.server.emit(
@@ -119,6 +119,10 @@ export class GameGateway implements OnGatewayConnection {
               .map(clientId => clientId ? this.server.sockets.sockets.get(clientId.socketId) : undefined)
               .map(clientSocket => clientSocket ? clientSocket.leave(gameRoom.roomName) : undefined);
           }
+          this.server.emit(
+            ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
+            this.gameService.getSpectableGames(),
+          );
         }, 10);
     }
   }
@@ -153,9 +157,8 @@ export class GameGateway implements OnGatewayConnection {
   }
 
   @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.GAME.RECONNECT_GAME)
+  @SubscribeMessage(ROUTES_BASE.GAME.RECONNECT_GAME_REQUEST)
   async reconnectGame(
-    @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
     const gameRoom: GameRoom = this.gameService.findUserRoom(payload.userId);
