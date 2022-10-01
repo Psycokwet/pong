@@ -11,13 +11,12 @@ import {
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { GameService } from './game.service';
-
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import { UsersService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
 import GameRoom from 'shared/interfaces/game/GameRoom';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
-
+import { Status, UserInterface } from 'shared/interfaces/UserInterface';
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -45,6 +44,7 @@ export class GameGateway implements OnGatewayConnection {
 
       if (!gameRoom) return;
       client.join(gameRoom.roomName);
+      this.updateUserStatus(user, Status.PLAYING);
     } catch (e) {
       console.error(e.message);
     }
@@ -94,6 +94,9 @@ export class GameGateway implements OnGatewayConnection {
     this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
 
     if (gameRoom.started === true) {
+      const opponent = await this.userService.getById(gameRoom.gameData.player1.userId);
+      this.updateUserStatus(user, Status.PLAYING);
+      this.updateUserStatus(opponent, Status.PLAYING);
       this.server.emit(
         ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
         this.gameService.getSpectableGames(),
@@ -111,6 +114,8 @@ export class GameGateway implements OnGatewayConnection {
             } catch (e) {
               throw new WsException(e);
             }
+            this.updateUserStatus(user, Status.ONLINE);
+            this.updateUserStatus(opponent, Status.ONLINE);
             this.gameService.removeGameFromGameRoomList(newGameRoom);
             this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, newGameRoom);
 
@@ -173,5 +178,25 @@ export class GameGateway implements OnGatewayConnection {
     }
 
     this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
+  }
+
+  private async updateUserStatus(user: User, status: Status) {
+    try {
+      if (!user) return;
+      const isRegistered = UsersService.userWebsockets.find(
+        (element) => element.userId === user.id,
+      );
+
+      if (isRegistered) {
+        const userPlaying: UserInterface = {
+          id: user.id,
+          pongUsername: user.pongUsername,
+          status,
+        };
+        this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, userPlaying);
+      }
+    } catch (e) {
+      console.error(e.message);
+    }
   }
 }

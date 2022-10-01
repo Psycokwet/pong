@@ -48,7 +48,7 @@ const GameQueue = ({
           <img
           style={{ width: 'auto' }}
             className="place-self-center sm:h-full h-3/5"
-            src={'/public/aniek-janssen-loading-icon-export.gif'}
+            src={'/aniek-janssen-loading-icon-export.gif'}
           />
           <h1 className="sm:text-3xl text-center p-8"><b>Looking for an opponent</b></h1>
         </div>
