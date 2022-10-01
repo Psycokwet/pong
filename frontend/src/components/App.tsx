@@ -125,11 +125,9 @@ function App() {
             })}
 
             <Route path="/" element={<Home />} />
-
             <Route path="profile" element={<Profile />}>
               <Route path=":user_login" element={<OneUserProfile />} />
             </Route>
-
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
@@ -140,6 +138,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/false42login" element={<False42Login />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       );
     case ConnectionStatus.SignupRequested:
