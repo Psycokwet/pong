@@ -55,28 +55,6 @@ export class Api {
     });
   }
 
-  addFriend(login42: string, friend_to_add: string) {
-    let headers = new Headers();
-    headers.set(HeadersFields.ContentType, "application/json");
-    return fetch(`${PREFIX}${FULL_ROUTE.USER.ADD_FRIEND}`, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify({ login42, friend_to_add }),
-    });
-  }
-
-  getFriendList() {
-    return fetch(
-      `${PREFIX}${FULL_ROUTE.USER.GET_FRIEND_LIST}` +
-        "?" +
-        new URLSearchParams({ login42 }),
-      {
-        method: "GET",
-        // headers: this._headers,
-      }
-    );
-  }
-
   get_login42() {
     return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_LOGIN42}`, {
       method: "GET",
