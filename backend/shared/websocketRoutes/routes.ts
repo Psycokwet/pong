@@ -65,6 +65,9 @@ export const ROUTES_BASE = {
     /** CREATE CHALLENGE */
     CREATE_CHALLENGE_REQUEST: 'createChallengeRequest',
     NOTIF_CHALLENGE_CONFIRM: 'notifChallengeConfirm',
+    CHALLENGE_LIST_REQUEST: 'challengeListRequest',
+    CHALLENGE_LIST_CONFIRM: 'challengeListConfirm',
+    CHALLENGE_ACCEPT_REQUEST: 'challengeAcceptRequest',
     /** JOIN GAME */
     JOIN_GAME_REQUEST: 'joinGameRequest',
     /** SEND INPUT */
