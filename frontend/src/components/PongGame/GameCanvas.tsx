@@ -74,7 +74,6 @@ const GameCanvas = (
       // Draw players
       context.fillStyle = 'white';
       const playersPaddleHeight = virtualGameData.playerHeight * clientCanvasSize.y / virtualGameData.canvasHeight;
-      const playersPaddleWidth = virtualGameData.playerWidth * clientCanvasSize.y / virtualGameData.canvasWidth;
 
       const player1PaddlePosition = gameRoom.gameData.player1.y * clientCanvasSize.y / virtualGameData.canvasHeight;
       context.fillRect(0, player1PaddlePosition, virtualGameData.playerWidth, playersPaddleHeight);
