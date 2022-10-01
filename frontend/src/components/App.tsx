@@ -23,6 +23,7 @@ import False42Login from "./LoginPage/False42Login";
 import { CurrentUser } from "../../shared/interfaces/CurrentUser";
 import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
 import TwoStepSignupMockup from "./Mockup/TwoStepSignupMockup";
+import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 
 const api = new Api();
 
@@ -144,7 +145,7 @@ function App() {
     case ConnectionStatus.SignupRequested:
       return <TwoStepSignupMockup></TwoStepSignupMockup>;
     case ConnectionStatus.TwoFactorAuthenticationRequested:
-      return <TwoStepSigninMockup></TwoStepSigninMockup>;
+      return <TwoStepSigningMockup></TwoStepSigningMockup>;
 
     default:
       return <></>;
