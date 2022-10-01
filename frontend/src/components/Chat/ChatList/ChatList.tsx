@@ -8,10 +8,11 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
 
-function ChatList({ msg , socket , connectedChannel} : {
+function ChatList({ msg , socket , connectedChannel, handleLeaveChannel} : {
     msg: Message,
     socket:Socket | undefined,
     connectedChannel: ChannelData | undefined,
+    handleLeaveChannel: any;
 }){
   const [channelList, setChannelList] = useState<ChannelData[]>([]);
   const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
@@ -55,6 +56,10 @@ function ChatList({ msg , socket , connectedChannel} : {
           channelList.map((channel) => 
             <div key={channel.channelname}>
               <Channel
+                handleLeaveChannel={() => {
+                  handleLeaveChannel();
+                  setChannelList(current => current.filter(channel => channel.id !== connectedChannel.id))
+                }}
                 channel={channel}
                 socket={socket}
                 connectedChannel={connectedChannel}

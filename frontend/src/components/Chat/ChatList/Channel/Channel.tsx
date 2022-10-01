@@ -5,10 +5,11 @@ import { KeyboardEvent, useState, useEffect } from 'react';
 import { ChangeChannelData } from "/shared/interfaces/ChangeChannelData";
 import { Privileges } from '/shared/interfaces/UserPrivilegesEnum';
 
-const Channel = function ({channel, socket, connectedChannel}:{
+const Channel = function ({channel, socket, connectedChannel, handleLeaveChannel}:{
   channel:ChannelData,
   socket:Socket|undefined,
   connectedChannel:ChannelData|undefined,
+  handleLeaveChannel: any,
 }){
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [newChanPassword, setNewChanPassword] = useState<string>('');
@@ -37,11 +38,11 @@ const Channel = function ({channel, socket, connectedChannel}:{
     setIsVisible(false);
   }
 
-  const handleLeaveChannel = () => {
-    socket?.emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST, {
-      channelName: channel.channelName
-    });
-  }
+  // const handleLeaveChannel = () => {
+  //   socket?.emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST, {
+  //     channelName: channel.channelName
+  //   });
+  // }
 
   return (
     <div
@@ -69,7 +70,7 @@ const Channel = function ({channel, socket, connectedChannel}:{
         {
           isVisible ?
           <button
-          onClick={handleLeaveChannel}
+            onClick={handleLeaveChannel}
           >Leave channel</button> : <></>
         }
     </div>
