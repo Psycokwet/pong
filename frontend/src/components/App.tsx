@@ -19,22 +19,25 @@ import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
 import Profile from "./Profile/Profile";
 import OneUserProfile from "./Profile/OneUserProfile";
 import False42Login from "./LoginPage/False42Login";
-import { CurrentUser } from "../../shared/interfaces/CurrentUser";
+import {
+  createCurrentUserFrontInterface,
+  CurrentUserFrontInterface,
+} from "../../shared/interfaces/CurrentUserFrontInterface";
 import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
-import TwoStepSignupMockup from "./Mockup/TwoStepSignupMockup";
+import { isSameSimpleObj } from "../../shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 import SignUpPage from "./SignUpPage/SignUpPage";
 
 const api = new Api();
 
 function App() {
-  const [currentUser, setCurrentUser] = useState<CurrentUser>({
-    status: ConnectionStatus.Unknown,
-  } as CurrentUser);
+  const [currentUser, setCurrentUser] = useState<CurrentUserFrontInterface>(
+    createCurrentUserFrontInterface()
+  );
   const updateCurrentUser = () => {
     api.refreshToken().then((res: Response) => {
       if (res.status != 200) {
-        setCurrentUser((current: CurrentUser) => {
+        setCurrentUser((current: CurrentUserFrontInterface) => {
           if (current.status !== ConnectionStatus.NetworkUnavailable)
             return {
               ...current,
@@ -43,10 +46,11 @@ function App() {
           return current;
         });
       } else {
-        res.json().then((newCurrentUser: CurrentUser) => {
+        res.json().then((newCurrentUser: CurrentUserFrontInterface) => {
           console.log(newCurrentUser);
-          setCurrentUser((current: CurrentUser) => {
-            if (current.status !== newCurrentUser.status) return newCurrentUser;
+          setCurrentUser((current: CurrentUserFrontInterface) => {
+            if (!isSameSimpleObj(current, newCurrentUser))
+              return newCurrentUser;
             return current;
           });
         });
@@ -55,8 +59,7 @@ function App() {
   };
 
   const [socket, setSocket] = useState<Socket>();
-
-  const webPageRoutes = [
+  const init_webPageRoutes = () => [
     {
       url: "/play",
       element: <Play socket={socket} />,
@@ -84,6 +87,8 @@ function App() {
     },
   ];
 
+  const [webPageRoutes, setWebPagesRoutes] = useState(init_webPageRoutes());
+
   useEffect(() => {
     const newSocket = io(import.meta.env.VITE_PONG_URL, {
       transports: ["websocket"],
@@ -91,6 +96,10 @@ function App() {
     });
     setSocket(newSocket);
   }, [setSocket]);
+
+  useEffect(() => {
+    setWebPagesRoutes(init_webPageRoutes());
+  }, [socket, currentUser]);
 
   useEffect(() => {
     if (currentUser.status == ConnectionStatus.Unknown) {
