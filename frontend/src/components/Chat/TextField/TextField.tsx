@@ -4,12 +4,6 @@ import { IoSend } from "react-icons/io5"
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 
-type userType = {
-  login: string;
-  nickname: string;
-//  status: userStatusEnum;
-  link_to_profile: string;
-}
 
 function TextField ({socket , chan}:{
     socket:Socket|undefined,
