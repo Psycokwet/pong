@@ -28,7 +28,8 @@ const GameCanvas = (
     if (canvasLocation) {
       const mouseLocation = event.clientY - canvasLocation.y;
       
-      // because of the border, i needed a offset
+      // because of the border from tailwind "border-y-4", i needed a offset
+      // border-top + border-botom = 8
       const offset = 8 / clientCanvasSize.y * virtualGameData.canvasHeight; 
       socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
         canvasLocation: canvasLocation.height / clientCanvasSize.y * virtualGameData.canvasHeight - offset,
@@ -42,6 +43,8 @@ const GameCanvas = (
     if (canvasLocation) {
       const mouseLocation = event.touches[0].clientY - canvasLocation.y;
 
+      // because of the border from tailwind "border-y-4", i needed a offset
+      // border-top + border-botom = 8
       const offset = 8 / clientCanvasSize.y * virtualGameData.canvasHeight;
       socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
         canvasLocation: canvasLocation.height / clientCanvasSize.y * virtualGameData.canvasHeight - offset,
@@ -54,6 +57,7 @@ const GameCanvas = (
 
   /** GAME LOOP */
   const draw = (canvas: HTMLCanvasElement, gameRoom: GameRoom) => {
+    const halfCanvasWidth = clientCanvasSize.x / 2;
     const context = canvas.getContext('2d')
     if (context) {
       // Draw field
@@ -62,28 +66,30 @@ const GameCanvas = (
       // Draw middle line
       context.strokeStyle = 'white';
       context.beginPath();
-      context.moveTo(clientCanvasSize.x / 2, 0);
-      context.lineTo(clientCanvasSize.x / 2, clientCanvasSize.y);
+      context.moveTo(halfCanvasWidth, 0);
+      context.lineTo(halfCanvasWidth, clientCanvasSize.y);
       context.stroke();
 
 
       // Draw players
       context.fillStyle = 'white';
-      const player1position = gameRoom.gameData.player1.y * clientCanvasSize.y / virtualGameData.canvasHeight;
-      context.fillRect(0, player1position, virtualGameData.playerWidth, virtualGameData.playerHeight * clientCanvasSize.y / virtualGameData.canvasHeight);
-      const player2position = gameRoom.gameData.player2.y * clientCanvasSize.y / virtualGameData.canvasHeight;
-      context.fillRect(canvas.width - virtualGameData.playerWidth, player2position, virtualGameData.playerWidth, virtualGameData.playerHeight * clientCanvasSize.y / virtualGameData.canvasHeight);
+      const playersPaddleHeight = virtualGameData.playerHeight * clientCanvasSize.y / virtualGameData.canvasHeight;
+      const playersPaddleWidth = virtualGameData.playerWidth * clientCanvasSize.y / virtualGameData.canvasWidth;
+
+      const player1PaddlePosition = gameRoom.gameData.player1.y * clientCanvasSize.y / virtualGameData.canvasHeight;
+      context.fillRect(0, player1PaddlePosition, virtualGameData.playerWidth, playersPaddleHeight);
+      const player2PaddlePosition = gameRoom.gameData.player2.y * clientCanvasSize.y / virtualGameData.canvasHeight;
+      context.fillRect(canvas.width - virtualGameData.playerWidth, player2PaddlePosition, virtualGameData.playerWidth, playersPaddleHeight);
 
       const ballPosition: Position = {
-        x: gameRoom.gameData.ball.x,
-        y: gameRoom.gameData.ball.y,
+        x: gameRoom.gameData.ball.x / virtualGameData.canvasWidth * clientCanvasSize.x,
+        y: gameRoom.gameData.ball.y / virtualGameData.canvasHeight * clientCanvasSize.y,
       }
-      ballPosition.x = gameRoom.gameData.ball.x / virtualGameData.canvasWidth * clientCanvasSize.x
-      ballPosition.y = gameRoom.gameData.ball.y / virtualGameData.canvasHeight * clientCanvasSize.y
       // Draw ball
       context.beginPath();
       context.fillStyle = 'white';
-      context.arc(ballPosition.x, ballPosition.y, gameRoom.gameData.ball.rayon / virtualGameData.canvasHeight * clientCanvasSize.y , 0, Math.PI * 2, false);
+      const clientBallRayon = gameRoom.gameData.ball.rayon / virtualGameData.canvasHeight * clientCanvasSize.y;
+      context.arc(ballPosition.x, ballPosition.y, clientBallRayon , 0, Math.PI * 2, false);
       context.fill();
     }
   }

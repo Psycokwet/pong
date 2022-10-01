@@ -24,15 +24,18 @@ const Play = ({
     const isScreenVertical = window.innerHeight > window.innerWidth;
     const newClientCanvasSize: Position = { x: 0, y: 0 };
     const referenceSize = isScreenVertical ?
-      window.innerWidth - window.innerWidth / 25 :
+      // if the screen is vertical, i remove 1/25 window.width because of the border otherwise we don't see the border
+      window.innerWidth - window.innerWidth / 25:
+      // if the screen is horizontal, i remove 1/3 widow.height to have the game in center but not too big
       window.innerHeight - window.innerHeight / 3;
-    if (isScreenVertical) {
-      newClientCanvasSize.x = referenceSize;
-      newClientCanvasSize.y = (referenceSize / 4) * 3;
-    } else {
-      newClientCanvasSize.y = referenceSize;
-      newClientCanvasSize.x = (referenceSize / 3) * 4;
-    }
+
+    // in this condition, i try to keep the gameBox with a ratio of 4/3
+    newClientCanvasSize.x = isScreenVertical ?
+      referenceSize:
+      referenceSize / 3 * 4;
+    newClientCanvasSize.y = isScreenVertical ?
+      referenceSize / 4 * 3:
+      referenceSize;
     setClientCanvasSize(newClientCanvasSize);
   }, []);
 
