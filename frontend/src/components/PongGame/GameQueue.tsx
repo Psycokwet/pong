@@ -41,7 +41,9 @@ const GameQueue = ({
     <div className="grid sm:grid-cols-5 content-center sm:flex sm:justify-around">
       <div className="flex self-center">
         <div
-          // i add twice border because of tailwind border
+          // i add twice border because of tailwind border 
+          // border-x-8 makes 16px horizontal border
+          // border-y-4 makes 8px vertical border
           style={{width: clientCanvasSize.x + 16, height: clientCanvasSize.y + 8}}
           className="border-x-8 border-y-4 border-white rounded-lg flex flex-col place-content-around"
         >
