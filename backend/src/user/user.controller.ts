@@ -61,20 +61,6 @@ export class UserController {
     return await this.usersService.getUserHistory(req.user);
   }
 
-  @Post(ROUTES_BASE.USER.ADD_FRIEND)
-  @UseGuards(JwtAuthGuard)
-  async addFriend(@Body() dto: AddFriendDto, @Request() req) {
-    const friend = await this.usersService.findOneByPongUsername(
-      dto.friend_to_add,
-    );
-    await this.usersService.addFriend(friend, req.user);
-  }
-
-  @Get(ROUTES_BASE.USER.GET_FRIEND_LIST)
-  @UseGuards(TwoFactorAuthGuard)
-  async getFriendsList(@Request() req) {
-    return await this.usersService.getFriendsList(req.user);
-  }
   @Get(ROUTES_BASE.USER.GET_LOGIN42)
   @UseGuards(TwoFactorAuthGuard)
   async getLogin42(@Request() req) {
