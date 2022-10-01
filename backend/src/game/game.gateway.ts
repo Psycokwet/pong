@@ -93,9 +93,13 @@ export class GameGateway implements OnGatewayConnection {
 
     this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
 
+    this.gameloop(gameRoom, user);    
+  }
+
+  private async gameloop(gameRoom: GameRoom, player2: User) {
     if (gameRoom.started === true) {
       const opponent = await this.userService.getById(gameRoom.gameData.player1.userId);
-      this.updateUserStatus(user, Status.PLAYING);
+      this.updateUserStatus(player2, Status.PLAYING);
       this.updateUserStatus(opponent, Status.PLAYING);
       this.server.emit(
         ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
@@ -114,7 +118,7 @@ export class GameGateway implements OnGatewayConnection {
             } catch (e) {
               throw new WsException(e);
             }
-            this.updateUserStatus(user, Status.ONLINE);
+            this.updateUserStatus(player2, Status.ONLINE);
             this.updateUserStatus(opponent, Status.ONLINE);
             this.gameService.removeGameFromGameRoomList(newGameRoom);
             this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, newGameRoom);
@@ -199,4 +203,61 @@ export class GameGateway implements OnGatewayConnection {
       console.error(e.message);
     }
   }
+
+  /** CHALLENGE */
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.GAME.CREATE_CHALLENGE_REQUEST)
+  async challenge(
+    @MessageBody() opponentId: number,
+    @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+      if (payload.userId === opponentId) return ;
+    const opponent = await this.userService.getById(opponentId);
+    const user = await this.userService.getById(payload.opponentId);
+    const newChallengeRoom: GameRoom = this.gameService.createChallenge(user, opponent);
+
+    if (!user || !opponent) {
+      throw new WsException('Player not found');
+    }
+
+    client.join(newChallengeRoom.roomName);
+    client.emit(ROUTES_BASE.GAME.UPDATE_GAME, newChallengeRoom);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.GAME.CHALLENGE_LIST_REQUEST)
+  async challengeList(
+    @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const challengeRooms: GameRoom[] = this.gameService.findUserChallengeRoom(payload.userId);
+
+    if (!challengeRooms) {
+      return;
+    }
+
+    client.emit(ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM, challengeRooms);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.GAME.CHALLENGE_ACCEPT_REQUEST)
+  async challengeAccept(
+    @MessageBody() roomName: string,
+    @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const challenge: GameRoom = this.gameService.findByRoomName(roomName);
+    const player2: User = await this.userService.getById(payload.userId);
+
+    if (!challenge || !player2) {
+      throw new WsException('Challenge or Player2 not found');
+    }
+    
+    challenge.started = true;
+    this.gameService.gameStart(challenge.gameData);
+    client.join(challenge.roomName)
+    this.gameloop(challenge, player2); 
+  }
+  /** END CHALLENGE */
 }

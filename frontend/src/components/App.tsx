@@ -48,10 +48,6 @@ function App() {
       url: "/settings",
       element: <Settings />,
     },
-    {
-      url: "/practice",
-      element: <PracticeJwt />,
-    },
   ];
 
   useEffect(() => {
