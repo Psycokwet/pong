@@ -30,15 +30,27 @@ enum connectionStatusEnum {
 const api = new Api();
 
 function App() {
+  const [currentUser, setCurrentUser] = useState("");
+
+  api.get_pong_username().then((res: Response) => {
+    if (res.status == 200) {
+      res.json().then((content) => {
+        console.log("get_pong_username is ok, result is: ", content);
+        setCurrentUser(content.pongUsername);
+      });
+    } else console.log(res.status);
+  });
+  
   const [connectedState, setConnectedState] = useState(
     connectionStatusEnum.Unknown
   );
   const [socket, setSocket] = useState<Socket>();
 
+
   const webPageRoutes = [
     {
       url: "/play",
-      element: <Play socket={socket}/>,
+      element: <Play socket={socket} />,
     },
     {
       url: "/leaderboard",
@@ -113,6 +125,7 @@ function App() {
         setDisconnected={() =>
           setConnectedState(connectionStatusEnum.Disconnected)
         }
+        currentUser={currentUser}
       />
       <FriendList socket={socket} />
 
@@ -124,7 +137,7 @@ function App() {
         <Route path="/" element={<Home />} />
 
         <Route path="profile" element={<Profile />}>
-          <Route path=":user_login" element={<OneUserProfile />} />
+          <Route path=":pongUsername" element={<OneUserProfile />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />

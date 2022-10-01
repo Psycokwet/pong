@@ -6,8 +6,8 @@ import UserProfile from "shared/interfaces/UserProfile";
 import Avatar from "../Common/Avatar";
 
 type OneUserProfileProps = {
-  userProfile: UserProfile;
-  avatarUrl: string;
+  userProfile?: UserProfile;
+  avatarUrl?: string;
 };
 
 const OneUserProfile: React.FC<OneUserProfileProps> = ({
