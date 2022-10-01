@@ -9,6 +9,7 @@ import { Game } from './game.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { virtualGameData } from 'shared/other/virtualGameData';
+import { WsException } from '@nestjs/websockets';
 @Injectable()
 export class GameService {
   constructor(
@@ -34,14 +35,10 @@ export class GameService {
       x: 0,
       y: 0,
       rayon: 0,
-      speed: {
-        x: 0,
-        y: 0,
-      },
+      speed: { x: 0, y: 0 },
     },
   };
   private static gameRoomList: GameRoom[] = [];
-  public static gameIntervalList: number[] = [];
 
   private MAX_SPEED = 10;
   private ENDGAME_POINT = 10;
@@ -62,11 +59,9 @@ export class GameService {
   }
 
   matchMaking(user: User): GameRoom {
-    const gamesToLaunch: GameRoom[] = GameService.gameRoomList.filter(
+    const gameToLaunch: GameRoom = GameService.gameRoomList.find(
       (gameRoom) => !gameRoom.started,
     );
-
-    const gameToLaunch = gamesToLaunch.length ? gamesToLaunch[0] : undefined;
 
     if (!gameToLaunch) return this.createGame(user);
 
@@ -85,9 +80,9 @@ export class GameService {
     gameData.ball.y = virtualGameData.canvasHeight / 2;
     gameData.ball.rayon = virtualGameData.ballRayon;
     gameData.ball.speed.x =
-      (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
+      (0.5 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
     gameData.ball.speed.y =
-      (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
+      (0.5 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
 
     return gameData;
   }
@@ -173,9 +168,9 @@ export class GameService {
       newGame.ball.x = virtualGameData.canvasWidth / 2;
       newGame.ball.y = virtualGameData.canvasHeight / 2;
       newGame.ball.speed.x =
-        (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
+        (0.5 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
       newGame.ball.speed.y =
-        (1 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
+        (0.5 + Math.random()) * (Math.random() > 0.5 ? 2 : -2);
       // Update score
       if (player1 == newGame.player1) {
         newGame.player2.score++;
@@ -212,7 +207,6 @@ export class GameService {
     }
     newGame.ball.x += newGame.ball.speed.x;
     newGame.ball.y += newGame.ball.speed.y;
-    GameService.gameRoomList[index].gameData.ball = newGame.ball;
 
     return GameService.gameRoomList[index];
   }
@@ -239,6 +233,10 @@ export class GameService {
     const player2 = await this.userService.getById(
       gameRoom.gameData.player2.userId,
     );
+
+    if (!player1 || !player2) {
+      throw 'User doesn\'t exists';
+    }
     const isPlayer1Won =
       gameRoom.gameData.player1.score > gameRoom.gameData.player2.score;
 

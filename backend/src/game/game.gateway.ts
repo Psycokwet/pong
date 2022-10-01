@@ -3,10 +3,10 @@ import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
-  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
@@ -17,7 +17,6 @@ import { UsersService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
 import GameRoom from 'shared/interfaces/game/GameRoom';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
-import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 
 
 @WebSocketGateway({
@@ -31,14 +30,16 @@ export class GameGateway implements OnGatewayConnection {
     private gameService: GameService,
   ) {}
 
+
   @WebSocketServer()
   server: Server;
 
   async handleConnection(@ConnectedSocket() client: Socket) {
     try {
       const user = await this.userService.getUserFromSocket(client);
-
-      if (!user) return;
+      if (!user) {
+        throw new WsException('User doesn\'t exists');
+      }
 
       const gameRoom: GameRoom = this.gameService.findUserRoom(user.id);
 
@@ -65,6 +66,9 @@ export class GameGateway implements OnGatewayConnection {
     @UserPayload() payload: any,
   ) {
     const user: User = await this.userService.getById(payload.userId);
+    if (!user) {
+      throw new WsException('User doesn\'t exists');
+    }
     const gameRoom: GameRoom = this.gameService.createGame(user);
 
     client.join(gameRoom.roomName);
@@ -80,6 +84,9 @@ export class GameGateway implements OnGatewayConnection {
   ) {
 
     const user: User = await this.userService.getById(payload.userId);
+    if (!user) {
+      throw new WsException('User doesn\'t exists');
+    }
     const gameRoom: GameRoom = this.gameService.matchMaking(user);
 
     client.join(gameRoom.roomName);
@@ -91,39 +98,37 @@ export class GameGateway implements OnGatewayConnection {
         ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
         this.gameService.getSpectableGames(),
       );
-      GameService.gameIntervalList[gameRoom.roomName] = setInterval(
+      const interval = setInterval(
         () => {
           const newGameRoom = this.gameService.gameLoop(gameRoom.roomName);
 
           this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, newGameRoom);
           if (this.gameService.isGameFinished(newGameRoom))
           {
-            clearInterval(GameService.gameIntervalList[newGameRoom.roomName]);
-            this.gameService.handleGameOver(newGameRoom);
+            clearInterval(interval);
+            try {
+              this.gameService.handleGameOver(newGameRoom);
+            } catch (e) {
+              throw new WsException(e);
+            }
             this.gameService.removeGameFromGameRoomList(newGameRoom);
             this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, newGameRoom);
-            client.leave(gameRoom.roomName);
 
-            const opponentId = gameRoom.gameData.player1.userId === user.id ?
-              gameRoom.gameData.player2.userId:
-              gameRoom.gameData.player1.userId;
-            const receiverSocketId: UsersWebsockets = this.userService.getUserIdWebsocket(opponentId);
-            if (receiverSocketId) {
-              const receiverSocket = this.server.sockets.sockets.get(
-                receiverSocketId.socketId,
+            // get all idSocket from a room
+            this.server.sockets.adapter.rooms
+              .get(gameRoom.roomName)
+              .forEach(
+                // make all socket leave the room
+                idSocket => this.server.sockets.sockets
+                  .get(idSocket)
+                  .leave(gameRoom.roomName)
               );
-              if (receiverSocket) receiverSocket.leave(gameRoom.roomName);
-            }
-            gameRoom.spectatorsId
-              .map(spectatorId => this.userService.getUserIdWebsocket(spectatorId))
-              .map(clientId => clientId ? this.server.sockets.sockets.get(clientId.socketId) : undefined)
-              .map(clientSocket => clientSocket ? clientSocket.leave(gameRoom.roomName) : undefined);
+            this.server.emit(
+              ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
+              this.gameService.getSpectableGames(),
+            );
           }
-          this.server.emit(
-            ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
-            this.gameService.getSpectableGames(),
-          );
-        }, 10);
+        }, 5);
     }
   }
 

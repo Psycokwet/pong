@@ -28,8 +28,10 @@ const GameCanvas = (
     if (canvasLocation) {
       const mouseLocation = event.clientY - canvasLocation.y;
       
+      // because of the border, i needed a offset
+      const offset = 8 / clientCanvasSize.y * virtualGameData.canvasHeight; 
       socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
-        canvasLocation: canvasLocation.height / clientCanvasSize.y * virtualGameData.canvasHeight,
+        canvasLocation: canvasLocation.height / clientCanvasSize.y * virtualGameData.canvasHeight - offset,
         mouseLocation: mouseLocation / clientCanvasSize.y * virtualGameData.canvasHeight,
       });
     }
@@ -39,8 +41,10 @@ const GameCanvas = (
     const canvasLocation = canvasRef?.current?.getBoundingClientRect();
     if (canvasLocation) {
       const mouseLocation = event.touches[0].clientY - canvasLocation.y;
+
+      const offset = 8 / clientCanvasSize.y * virtualGameData.canvasHeight;
       socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
-        canvasLocation: canvasLocation.height / clientCanvasSize.y * virtualGameData.canvasHeight,
+        canvasLocation: canvasLocation.height / clientCanvasSize.y * virtualGameData.canvasHeight - offset,
         mouseLocation: mouseLocation / clientCanvasSize.y * virtualGameData.canvasHeight,
       });
     }
