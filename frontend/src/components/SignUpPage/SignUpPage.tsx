@@ -51,7 +51,6 @@ const SignUpPage: React.FC<SignUpProps> = ({
 
     // Todo: set 2Factor through api.
     console.log(`twoFactor status is set to: ${twoFactor}`);
-    console.log(`should_update status is set to: ${should_update}`);
     if (should_update && updateCurrentUser) updateCurrentUser();
   };
 
