@@ -5,6 +5,7 @@ import { User } from '../user/user.entity';
 import { jwtConstants } from './constants';
 export interface TokenPayload {
   userId: number;
+  isTwoFactorAuthenticated: boolean;
 }
 @Injectable()
 export class AuthService {
@@ -29,8 +30,11 @@ export class AuthService {
     return { userId: user.id, login42: login42 };
   }
 
-  public getCookieWithJwtAccessToken(userId: number) {
-    const payload: TokenPayload = { userId };
+  public getCookieWithJwtAccessToken(
+    userId: number,
+    isTwoFactorAuthenticated: boolean,
+  ) {
+    const payload: TokenPayload = { userId, isTwoFactorAuthenticated };
     const token = this.jwtService.sign(payload, {
       secret: jwtConstants.JWT_ACCESS_TOKEN_SECRET,
       expiresIn: jwtConstants.JWT_ACCESS_TOKEN_EXPIRATION_TIME,
@@ -38,8 +42,8 @@ export class AuthService {
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${jwtConstants.JWT_ACCESS_TOKEN_EXPIRATION_TIME}`;
   }
 
-  public getJwtRefreshToken(userId: number) {
-    const payload: TokenPayload = { userId };
+  public getJwtRefreshToken(userId: number, isTwoFactorAuthenticated: boolean) {
+    const payload: TokenPayload = { userId, isTwoFactorAuthenticated };
     return this.jwtService.sign(payload, {
       secret: jwtConstants.JWT_REFRESH_TOKEN_SECRET,
       expiresIn: jwtConstants.JWT_REFRESH_TOKEN_EXPIRATION_TIME,

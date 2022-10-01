@@ -24,7 +24,7 @@ export const PictureGetter = () => {
         onClick={submitDownloadForm}
         className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
       >
-        View Uploaded Photo:{" "}
+        View Uploaded Photo:
       </button>
       <img
         src={userPicture ? userPicture : ""}
