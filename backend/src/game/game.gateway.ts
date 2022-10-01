@@ -217,6 +217,9 @@ export class GameGateway implements OnGatewayConnection {
     const user = await this.userService.getById(payload.opponentId);
     const newChallengeRoom: GameRoom = this.gameService.createChallenge(user, opponent);
 
+    if (!user || !opponent) {
+      throw new WsException('Player not found');
+    }
 
     client.join(newChallengeRoom.roomName);
     client.emit(ROUTES_BASE.GAME.UPDATE_GAME, newChallengeRoom);
