@@ -71,13 +71,14 @@ export class UsersService {
 
   getStatusFromUser(user: User, payload: TokenPayload): ConnectionStatus {
     let result: ConnectionStatus = ConnectionStatus.Unknown;
+    if (user.isUserFullySignedUp === false)
+      return ConnectionStatus.SignupRequested;
     if (user.isTwoFactorAuthenticationActivated === false)
       return ConnectionStatus.Connected;
     if (user.isTwoFactorAuthenticationActivated === true)
       if (payload.isTwoFactorAuthenticated) return ConnectionStatus.Connected;
       else return ConnectionStatus.TwoFactorAuthenticationRequested;
 
-    //need to add signin
     return result;
   }
 
@@ -103,6 +104,7 @@ export class UsersService {
       email: dto.email,
       xp: 0,
       isTwoFactorAuthenticationActivated: false,
+      isUserFullySignedUp: false,
     });
 
     try {
@@ -326,6 +328,7 @@ export class UsersService {
   async setTwoFactorAuthentication(user: User, value: boolean) {
     await this.usersRepository.update(user.id, {
       isTwoFactorAuthenticationActivated: value,
+      isUserFullySignedUp: true,
     });
   }
 
@@ -346,6 +349,7 @@ export class UsersService {
     try {
       await this.usersRepository.update(user.id, {
         pongUsername: dto.newPongUsername,
+        isUserFullySignedUp: true,
       });
     } catch (e) {
       throw new BadRequestException({ error: 'Nickname already taken' });
@@ -380,6 +384,7 @@ export class UsersService {
     const picture = await this.localFilesService.saveLocalFileData(fileData);
     await this.usersRepository.update(user.id, {
       pictureId: picture.id,
+      isUserFullySignedUp: true,
     });
   }
 
