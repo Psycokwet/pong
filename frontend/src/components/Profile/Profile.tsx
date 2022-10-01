@@ -16,12 +16,11 @@ const Profile = () => {
       nbWins: NaN,
       games: [],
     },
-    profilePicture: null,
   });
 
   const [avatarUrl, setAvatarUrl] = useState("");
 
-  const { pongUsername } = useParams();
+  const { pongUsername } = useParams(); // get this from url: /practice/pongUsername
 
   useEffect(() => {
     api.get_user_profile(pongUsername).then((res: Response) => {
@@ -35,7 +34,7 @@ const Profile = () => {
       });
     });
 
-    api.getPicture().then((res) => {
+    api.getPicture(pongUsername).then((res) => {
       if (res.status == 200)
         res.blob().then((myBlob) => {
           setAvatarUrl((current) => {
