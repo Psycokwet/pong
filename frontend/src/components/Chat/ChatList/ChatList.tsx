@@ -23,15 +23,18 @@ function ChatList({ msg , socket , connectedChannel} : {
     socket?.emit(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_LOBBY_REQUEST);
   }, []);
 
-  const resetChannelList = (chans:ChannelData[]) => {
-    setChannelList(chans);
-  }
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChannelList);
+    socket?.on(
+      ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
+      (chans:ChannelData[]) => setChannelList(chans),
+    );
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChannelList);
+      socket?.off(
+        ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
+        (chans:ChannelData[]) => setChannelList(chans)
+      );
     };
-  }, [resetChannelList]);
+  }, []);
 
   const resetDirectMessageList = (chans:ChannelData[]) => {
     setDirectMessageList(chans);
@@ -49,30 +52,31 @@ function ChatList({ msg , socket , connectedChannel} : {
       <div>
         <ChannelMenu socket={socket}/>
         {
-          channelList.map((channel, i) => 
-            <Channel
-              key={channel.channelname}
-              channel={channel}
-              socket={socket}
-              connectedChannel={connectedChannel}
-            />
+          channelList.map((channel) => 
+            <div key={channel.channelname}>
+              <Channel
+                channel={channel}
+                socket={socket}
+                connectedChannel={connectedChannel}
+              />
+            </div>
           )
         }
       </div>
       <div>
         <DirectMessageMenu socket={socket}/>
-        {directMessageList.map((chan, i) => {
-          return (
-            <div key={i}>
+        {
+          directMessageList.map((channel) => 
+            <div key={channel.channelname}>
               <DirectMessage
                 socket={socket}
-                channel={chan}
+                channel={channel}
                 message={msg===undefined?"":msg}
                 connectedChannel={connectedChannel}
               />
             </div>
-          );
-        })}
+        )
+        }
       </div>
     </div>
   );
