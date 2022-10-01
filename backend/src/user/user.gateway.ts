@@ -12,6 +12,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
@@ -21,6 +22,7 @@ import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { UsersService } from './user.service';
 import AddFriend from 'shared/interfaces/AddFriend';
 import { Status, UserInterface } from 'shared/interfaces/UserInterface';
+import UserId from 'shared/interfaces/UserId';
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -31,7 +33,6 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
   ) {}
-  public static userWebsockets: UsersWebsockets[] = [];
 
   @WebSocketServer()
   server: Server;
@@ -40,14 +41,14 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.userService.getUserFromSocket(client);
 
       if (!user) return;
-      const isRegistered = UserGateway.userWebsockets.find(
+      const isRegistered = UsersService.userWebsockets.find(
         (element) => element.userId === user.id,
       );
 
       if (!isRegistered) {
         const newWebsocket = { userId: user.id, socketId: client.id };
-        UserGateway.userWebsockets = [
-          ...UserGateway.userWebsockets,
+        UsersService.userWebsockets = [
+          ...UsersService.userWebsockets,
           newWebsocket,
         ];
         const newUserConnected: UserInterface = {
@@ -66,7 +67,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const user = await this.userService.getUserFromSocket(client);
 
-      UserGateway.userWebsockets = UserGateway.userWebsockets.filter(
+      UsersService.userWebsockets = UsersService.userWebsockets.filter(
         (websocket) => websocket.socketId !== client.id,
       );
 
@@ -119,5 +120,47 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server
       .in(client.id)
       .emit(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, orderedFriendsList);
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.USER.BLOCK_USER_REQUEST)
+  async blockUser(
+    @MessageBody() data: UserId,
+    @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const userToBlock = await this.userService.getById(data.id);
+    const caller = await this.userService.getById(payload.userId);
+
+    if (!userToBlock || !caller) {
+      throw new WsException({ error: 'User not found' });
+    }
+
+    await this.userService.addBlockedUser(userToBlock, caller);
+
+    this.server.in(client.id).emit(ROUTES_BASE.USER.BLOCK_USER_CONFIRMATION, {
+      pongUsername: userToBlock.pongUsername,
+    });
+
+    this.server
+      .in(client.id)
+      .emit(
+        ROUTES_BASE.USER.BLOCKED_USERS_LIST_CONFIRMATION,
+        await this.userService.getBlockedUsersList(caller),
+      );
+  }
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.USER.BLOCKED_USERS_LIST_REQUEST)
+  async blockedUsersList(
+    @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    const caller = await this.userService.getById(payload.userId);
+    const blockedList = this.userService.getBlockedUsersList(caller);
+
+    this.server
+      .in(client.id)
+      .emit(ROUTES_BASE.USER.BLOCKED_USERS_LIST_CONFIRMATION, blockedList);
   }
 }

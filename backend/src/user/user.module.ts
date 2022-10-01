@@ -11,10 +11,11 @@ import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import LocalFile from 'src/localFiles/localFile.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserGateway } from './user.gateway';
+import { Blocked } from 'src/blocked/blocked.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Friend, Game, LocalFile]),
+    TypeOrmModule.forFeature([User, Friend, Game, LocalFile, Blocked]),
     JwtModule,
     LocalFilesModule,
     forwardRef(() => AuthModule),

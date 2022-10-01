@@ -6,6 +6,7 @@ import {
   UseGuards,
   Injectable,
   Redirect,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from 'src/user/user.service';
 
@@ -56,6 +57,37 @@ export class FortyTwoController {
       'Set-Cookie',
       await this.twoFactorAuthService.getCookiesWith2FAValue(user, false),
     );
+  }
+
+  @Get(ROUTES_BASE.AUTH.FALSE_42_LOGIN)
+  @Redirect('/', 302)
+  async cdaiTestLogin(
+    @Req() req: any,
+    @Query() { login42, email }: { login42: string; email: string }
+  ) {
+    let userFromDb;
+    try {
+      userFromDb = await this.usersService.signin({
+        login42,
+      });
+    } catch (e) {
+      //will have to manage signup more ... Slowly, like, in multiple steps, to fit requirements
+      userFromDb = await this.usersService.signup({
+        login42,
+        email,
+      });
+    }
+
+    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+      userFromDb.id,
+    );
+    const refreshToken = this.authService.getJwtRefreshToken(userFromDb.id);
+    const refreshTokenCookie =
+      this.authService.getCookieWithJwtRefreshToken(refreshToken);
+
+    await this.usersService.setCurrentRefreshToken(refreshToken, userFromDb.id);
+
+    req.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
   }
 
   @Get(ROUTES_BASE.AUTH.LOGOUT)

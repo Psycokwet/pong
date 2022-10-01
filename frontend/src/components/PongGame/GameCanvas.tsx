@@ -61,7 +61,6 @@ const GameCanvas = (
   };
 
   const onTouchMove = event => {
-    console.log(event)
     const position: Position = {
       x: event.touches[0].clientX - event.touches[0].target.offsetLeft,
       y: event.touches[0].clientY - event.touches[0].target.offsetTop,
@@ -108,7 +107,7 @@ const GameCanvas = (
     // Draw ball
     context.beginPath();
     context.fillStyle = 'white';
-    context.arc(ballPosition.x, ballPosition.y, gameRoom.gameData.ball.rayon, 0, Math.PI * 2, false);
+    context.arc(ballPosition.x, ballPosition.y, gameRoom.gameData.ball.rayon / canvasHeight * canvasSize.y , 0, Math.PI * 2, false);
     context.fill();
   }
 
@@ -136,26 +135,66 @@ const GameCanvas = (
 
   return (
     <div
-      className="w-full bg-gray-400"
+      className="w-full h-7/8"
     >
-      <p>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
-      <p>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
-      <br />
-      <div className="flex justify-center">
-
-        <canvas
-          onTouchMove={onTouchMove}
-          onMouseMove={handleMouseMove}
-          ref={canvasRef}
-          id="canvas"
-          width={canvasSize.x}
-          height={canvasSize.y}
-        ></canvas>
+      <div>
+        <h1 className="text-3xl text-center p-2">RANKED MATCH</h1>
       </div>
-      <h2>DEV INFORMATIONS</h2>
-      <h2>Coords: X: {coords.x} -- Y: {coords.y}</h2>
-      <hr />
-      <h2>Global coords: X: {globalCoords.x} -- Y: {globalCoords.y}</h2>
+      <div>
+        <h2 className="lg:text-3xl text-center p-2">First to 10 points win</h2>
+      </div>
+      <div
+        className="grid sm:grid-cols-5 content-center sm:flex sm:justify-around"
+      >
+        <div className="self-center text-center hidden sm:block">
+          <p>
+            {gameRoom.gameData.player1.pongUsername}
+          </p>
+          <p className="text-6xl p-4">
+            {gameRoom.gameData.player1.score}
+          </p>
+        </div>
+        <div className="flex self-center">
+          <canvas
+            className="border-x-8 border-y-4 border-white rounded-lg"
+            onTouchMove={onTouchMove}
+            onMouseMove={handleMouseMove}
+            ref={canvasRef}
+            id="canvas"
+            width={canvasSize.x}
+            height={canvasSize.y}
+            ></canvas>
+        </div>
+
+        <div className="sm:hidden block grid grid-cols-2 content-between w-full">
+          <div>
+            <p className="text-center">
+              {gameRoom.gameData.player1.pongUsername}
+            </p>
+            <p className="text-6xl p-4 text-center">
+              <b>{gameRoom.gameData.player1.score}</b>
+            </p>
+          </div>
+
+          <div>
+            <p className="text-center">
+              {gameRoom.gameData.player2.pongUsername}
+            </p>
+            <p className="text-6xl p-4 text-center">
+              <b>{gameRoom.gameData.player2.score}</b>
+            </p>
+          </div>
+        </div>
+
+        <div className="self-center text-center hidden sm:block">
+          <p>
+            {gameRoom.gameData.player2.pongUsername}
+          </p>
+          <p className="text-6xl p-4">
+            {gameRoom.gameData.player2.score}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

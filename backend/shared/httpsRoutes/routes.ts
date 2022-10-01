@@ -25,6 +25,7 @@ export const ROUTES_BASE = {
     GET_2FA: 'get_2fa',
     GENERATE_2FA: 'generate_2fa',
     CHECK_2FA: 'check_2fa',
+    FALSE_42_LOGIN: 'false42Login',
   },
   ROOT: {
     ENDPOINT: '/',

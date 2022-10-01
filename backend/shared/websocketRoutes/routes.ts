@@ -50,6 +50,11 @@ export const ROUTES_BASE = {
     USER_PRIVILEGES_CONFIRMATION: 'userPrivilegesConfirmation',
     /** BAN USER REQUEST */
     BAN_USER_REQUEST: 'banUserRequest',
+    /** MUTE USER REQUEST */
+    MUTE_USER_REQUEST: 'muteUserRequest',
+    /** CHANGE PASSWORD */
+    CHANGE_PASSWORD_REQUEST: 'changePasswordRequest',
+    CHANGE_PASSWORD_CONFIRMATION: 'changePasswordConfirmation',
   },
   GAME: {
     ENDPOINT: '/game/',
@@ -76,6 +81,8 @@ export const ROUTES_BASE = {
     JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
     /** SET CANVAS SIZE */
     SET_CANVAS_SIZE: 'setCanvasSize',
+  /** RECONNECT GAME */
+    RECONNECT_GAME: 'reconnectGame',
   },
   USER: {
     ERROR: 'error',
@@ -90,6 +97,13 @@ export const ROUTES_BASE = {
     GET_STATUS_CONFIRMATION: 'getStatusConfirmation',
     /** CONNECTION NOTIFICATION */
     CONNECTION_CHANGE: 'connectionChange',
+    /** BLOCK USER */
+    BLOCK_USER_REQUEST: 'blockUserRequest',
+    BLOCK_USER_CONFIRMATION: 'blockUserConfirmation',
+    /** BLOCKED USERS LIST */
+    BLOCKED_USERS_LIST_REQUEST: 'blockedUsersListRequest',
+    BLOCKED_USERS_LIST_CONFIRMATION: 'blockedUsersListConfirmation',
   },
+  ERROR: 'error',
 };
 export const FULL_ROUTE = generate_full_routes(ROUTES_BASE);
