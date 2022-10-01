@@ -4,4 +4,5 @@ export enum ConnectionStatus {
   SigninRequested,
   TwoFactorAuthenticationRequested,
   Disconnected,
+  NetworkUnavailable,
 }

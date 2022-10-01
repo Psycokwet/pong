@@ -34,7 +34,7 @@ function App() {
   const webPageRoutes = [
     {
       url: "/play",
-      element: <Play socket={socket}/>,
+      element: <Play socket={socket} />,
     },
     {
       url: "/leaderboard",
@@ -63,31 +63,38 @@ function App() {
   }, [setSocket]);
 
   useEffect(() => {
-    if (currentUser.status == ConnectionStatus.Unknown) {
+    const updateCurrentUser = () => {
       api.refreshToken().then((res: Response) => {
-        res.json().then((newCurrentUser: CurrentUser) => {
-          console.log(newCurrentUser);
+        if (res.status != 200) {
           setCurrentUser((current: CurrentUser) => {
-            if (current.status !== newCurrentUser.status) return newCurrentUser;
+            if (current.status !== ConnectionStatus.NetworkUnavailable)
+              return {
+                ...current,
+                status: ConnectionStatus.NetworkUnavailable,
+              };
             return current;
           });
-        });
+        } else {
+          res.json().then((newCurrentUser: CurrentUser) => {
+            console.log(newCurrentUser);
+            setCurrentUser((current: CurrentUser) => {
+              if (current.status !== newCurrentUser.status)
+                return newCurrentUser;
+              return current;
+            });
+          });
+        }
       });
+    };
+
+    if (currentUser.status == ConnectionStatus.Unknown) {
+      updateCurrentUser();
     }
     const interval = setInterval(() => {
-      api.refreshToken().then((res: Response) => {
-        res.json().then((newCurrentUser: CurrentUser) => {
-          console.log(newCurrentUser);
-          setCurrentUser((current: CurrentUser) => {
-            if (current.status !== newCurrentUser.status) return newCurrentUser;
-            return current;
-          });
-        });
-      });
+      updateCurrentUser();
       socket?.disconnect();
       socket?.connect();
     }, 600_000);
-
     return () => {
       clearInterval(interval);
     };
