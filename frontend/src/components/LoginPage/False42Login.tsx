@@ -19,11 +19,11 @@ const False42Login = () => {
       <form action={import.meta.env.VITE_PONG_URL_BACK + FULL_ROUTE.AUTH.FALSE_42_LOGIN} method="get">
         <label htmlFor="login42">false login42</label>
         <br />
-        <input type="text" name="login42" onChange={handleLogin42Change} value={cdaiLogin}/>
+        <input className="text-black" type="text" name="login42" onChange={handleLogin42Change} value={cdaiLogin}/>
         <br />
         <label htmlFor="email">false email</label>
         <br />
-        <input type="text" name="email" onChange={handleEmailChange} value={email}/>
+        <input className="text-black" type="text" name="email" onChange={handleEmailChange} value={email}/>
         <br />
         <input 
             className="bg-sky-500 hover:bg-sky-700 text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50" type="submit" value="false login button" />
