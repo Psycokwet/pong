@@ -1,8 +1,6 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
 import { Api } from "../../api/api";
-import { PictureGetter } from "../PictureForm/PictureGetter";
-import NickNameGetter from "../PictureForm/NickNameGetter";
 import ProfilePic from "../Common/ProfilePic";
 
 const MAX_CHAR = 15;
@@ -20,6 +18,10 @@ const SignUpPage: React.FC<SignUpProps> = ({
   const [localPongUsername, setLocalPongUsername] = useState(pongUsername);
   const [avatar, setAvatar] = useState("");
   const [twoFactor, setTwoFactor] = useState("off");
+
+  useEffect(() => {
+    setLocalPongUsername(pongUsername);
+  }, []);
 
   const handleSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     if (event === undefined) return; //not sure it may happen
