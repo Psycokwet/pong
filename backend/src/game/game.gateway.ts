@@ -18,7 +18,7 @@ import { User } from 'src/user/user.entity';
 import GameRoom from 'shared/interfaces/game/GameRoom';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
-
+import { Status, UserInterface } from 'shared/interfaces/UserInterface';
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -44,6 +44,7 @@ export class GameGateway implements OnGatewayConnection {
 
       if (!gameRoom) return;
       client.join(gameRoom.roomName);
+      this.updateUserStatus(user, Status.PLAYING);
     } catch (e) {
       console.error(e.message);
     }
@@ -87,6 +88,9 @@ export class GameGateway implements OnGatewayConnection {
     this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.CONFIRM_GAME_JOINED, gameRoom);
 
     if (gameRoom.started === true) {
+      const opponent = await this.userService.getById(gameRoom.gameData.player1.userId);
+      this.updateUserStatus(user, Status.PLAYING);
+      this.updateUserStatus(opponent, Status.PLAYING);
       this.server.emit(
         ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
         this.gameService.getSpectableGames(),
@@ -99,6 +103,8 @@ export class GameGateway implements OnGatewayConnection {
           if (this.gameService.isGameFinished(newGameRoom))
           {
             clearInterval(GameService.gameIntervalList[newGameRoom.roomName]);
+            this.updateUserStatus(user, Status.ONLINE);
+            this.updateUserStatus(opponent, Status.ONLINE);
             this.gameService.handleGameOver(newGameRoom);
             this.gameService.removeGameFromGameRoomList(newGameRoom);
             this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, newGameRoom);
@@ -155,7 +161,6 @@ export class GameGateway implements OnGatewayConnection {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.RECONNECT_GAME)
   async reconnectGame(
-    @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
     const gameRoom: GameRoom = this.gameService.findUserRoom(payload.userId);
@@ -165,5 +170,25 @@ export class GameGateway implements OnGatewayConnection {
     }
 
     this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
+  }
+
+  private async updateUserStatus(user: User, status: Status) {
+    try {
+      if (!user) return;
+      const isRegistered = UsersService.userWebsockets.find(
+        (element) => element.userId === user.id,
+      );
+
+      if (isRegistered) {
+        const userPlaying: UserInterface = {
+          id: user.id,
+          pongUsername: user.pongUsername,
+          status,
+        };
+        this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, userPlaying);
+      }
+    } catch (e) {
+      console.error(e.message);
+    }
   }
 }
