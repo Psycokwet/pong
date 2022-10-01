@@ -9,21 +9,18 @@ const MAX_CHAR = 15;
 
 export type SignUpProps = {
   updateCurrentUser: () => void;
+  pongUsername: string;
 };
 const api = new Api();
-const SignUpPage: React.FC<SignUpProps> = ({ updateCurrentUser }) => {
-  const [pongUsername, setPongUsername] = useState<string>("anonymous");
+const SignUpPage: React.FC<SignUpProps> = ({
+  updateCurrentUser,
+  pongUsername,
+}) => {
   const [selectedFile, setSelectedFile] = useState<File>();
+  const [localPongUsername, setLocalPongUsername] = useState(pongUsername);
   const [avatar, setAvatar] = useState("");
   const [twoFactor, setTwoFactor] = useState("off");
 
-  useEffect(() => {
-    api.get_pong_username().then((res: Response) => {
-      res.json().then((content) => {
-        setPongUsername(content.pongUsername);
-      });
-    });
-  }, []);
   const handleSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     if (event === undefined) return; //not sure it may happen
     event.preventDefault();
@@ -35,18 +32,22 @@ const SignUpPage: React.FC<SignUpProps> = ({ updateCurrentUser }) => {
       await api.setPicture(fileData).then((res: Response) => {
         if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
           console.log("set picture is NOT Ok");
-        else console.log(`Set picture is ok, status is: ${res.status}`);
+        else {
+          console.log(`Set picture is ok, status is: ${res.status}`);
+          should_update = true;
+        }
       });
-      should_update = true;
     }
 
-    if (pongUsername.length <= MAX_CHAR) {
-      await api.set_pong_username(pongUsername).then((res: Response) => {
+    if (localPongUsername.length <= MAX_CHAR) {
+      await api.set_pong_username(localPongUsername).then((res: Response) => {
         if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
           console.log("set pongUsername is NOT Ok");
-        else console.log(`Set pongUsername is ok, status is: ${res.status}`);
+        else {
+          console.log(`Set pongUsername is ok, status is: ${res.status}`);
+          should_update = true;
+        }
       });
-      should_update = true;
     }
 
     // Todo: set 2Factor through api.
@@ -79,12 +80,12 @@ const SignUpPage: React.FC<SignUpProps> = ({ updateCurrentUser }) => {
         <input
           type="text"
           name="pongUsername"
-          value={pongUsername}
-          onChange={(e) => setPongUsername(e.target.value)}
+          value={localPongUsername}
+          onChange={(e) => setLocalPongUsername(e.target.value)}
           placeholder={`name less than ${MAX_CHAR} letters`}
           className="text-gray-900 placeholder:text-gray-400 placeholder:px-4 outline_none rounded-xl w-60"
         />
-        {pongUsername.length > MAX_CHAR ? (
+        {localPongUsername.length > MAX_CHAR ? (
           <label className="text-yellow-400">
             * Nickname can't be over {MAX_CHAR} characters
           </label>

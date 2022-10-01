@@ -7,7 +7,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -16,20 +15,15 @@ import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
-import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import { Socket } from 'socket.io';
 import { AuthService, TokenPayload } from 'src/auth/auth.service';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
-import { UserGateway } from './user.gateway';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import { Status, UserInterface } from 'shared/interfaces/UserInterface';
-import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { createReadStream } from 'fs';
-import { join } from 'path';
 import UserProfile from 'shared/interfaces/UserProfile';
 import { Blocked } from 'src/blocked/blocked.entity';
 import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
@@ -344,7 +338,6 @@ export class UsersService {
 
   async setPongUsername(dto: pongUsernameDto, login42: string) {
     const user = await this.findOne(login42);
-
     /* We use TypeORM's update function to update our entity */
     try {
       await this.usersRepository.update(user.id, {
