@@ -72,14 +72,20 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   useEffect(() => {
     socket?.on(
       ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, 
-      (userList: UserInterface[]) => setAttachedUserList(userList)
+      (userList: UserInterface[]) => {
+        console.log(userList) 
+        setAttachedUserList(userList);
+      }
     );
 
 
     return () => {
       socket?.off(
         ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        (userList: UserInterface[]) => setAttachedUserList(userList)
+        (userList: UserInterface[]) => {
+          console.log(userList) 
+          setAttachedUserList(userList);
+        }
       );
     };
   }, []);
@@ -100,6 +106,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
         ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
         (unattachedUserId: number) => {
           setAttachedUserList((current) => {
+            
             return current.filter((user) => user.id !== unattachedUserId);
           });
         }
@@ -108,9 +115,18 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   }, []);
   /** END UNATTACH FROM CHANNEL */
 
+  const handleLeaveChannel = () => {
+    socket?.emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST, {
+      channelName: connectedChannel.channelName
+    });
+    setConnectedChannel(undefined);
+    setMessages([]);
+    setAttachedUserList([]);
+  }
+
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
-      <ChatList msg={messages[messages.length - 1]} socket={socket} connectedChannel={connectedChannel}/>
+      <ChatList handleLeaveChannel={handleLeaveChannel} msg={messages[messages.length - 1]} socket={socket} connectedChannel={connectedChannel}/>
       <Messages messages={messages}/>
       <TextField socket={socket} chan={connectedChannel} />
       <div className="row-start-1 row-span-6 col-start-5 p-x-8">

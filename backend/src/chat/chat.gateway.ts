@@ -205,6 +205,7 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
+    console.log(data)
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
       {
@@ -253,12 +254,8 @@ export class ChatGateway {
       });
 
     await this.chatService.unattachMemberToChannel(payload.userId, room);
-    client.emit(
-      ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
-      await this.chatService.getAllAttachedRooms(payload.userId),
-    );
     console.log('unattached', room.id, payload.userId)
-    await this.disconnectFromChannel(room.id, client);
+    client.leave(room.roomName);
     this.server.in(room.roomName).emit(
       ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
       payload.userId,
@@ -284,7 +281,7 @@ export class ChatGateway {
       },
     );
 
-    client.join(room.roomName);
+    await client.join(room.roomName);
 
     const channelData: ChannelData = {
       channelId: room.id,
