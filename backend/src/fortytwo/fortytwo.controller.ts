@@ -63,7 +63,7 @@ export class FortyTwoController {
   @Redirect('/', 302)
   async cdaiTestLogin(
     @Req() req: any,
-    @Query() { login42, email }: { login42: string; email: string }
+    @Query() { login42, email }: { login42: string; email: string },
   ) {
     let userFromDb;
     try {
@@ -80,8 +80,12 @@ export class FortyTwoController {
 
     const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
       userFromDb.id,
+      false,
     );
-    const refreshToken = this.authService.getJwtRefreshToken(userFromDb.id);
+    const refreshToken = this.authService.getJwtRefreshToken(
+      userFromDb.id,
+      false,
+    );
     const refreshTokenCookie =
       this.authService.getCookieWithJwtRefreshToken(refreshToken);
 
