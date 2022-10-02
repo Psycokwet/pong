@@ -4,10 +4,16 @@ import { Api } from "../../api/api";
 import { PictureGetter } from "../PictureForm/PictureGetter";
 import NickNameGetter from "../PictureForm/NickNameGetter";
 import ProfilePic from "../Common/ProfilePic";
+import Button2fa from "./Button2fa";
 import Switch from "react-switch";
 import { MenuItem, Menu, MenuButton, useMenuState, FocusableItem } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
 
+const enum twoFactorSteps {
+  BUTTON,
+  LOADING,
+  DONE,
+}
 const MAX_CHAR = 15;
 
 const api = new Api();
@@ -16,9 +22,9 @@ const SignInPage = () => {
   const [selectedFile, setSelectedFile] = useState<File>();
   const [avatar, setAvatar] = useState("");
   const [checked, setChecked] = useState<boolean>(false);
-  const [red, setRed] = useState<boolean>(true);
   const [qrCodeImg, setQrCodeImg] = useState<string>("");
   const [code, setCode] = useState<string>("");
+  const [status, setStatus] = useState<number>(twoFactorSteps.BUTTON);
 
   useEffect(() => {
     api.get_pong_username().then((res: Response) => {
@@ -75,7 +81,6 @@ const SignInPage = () => {
     if (nextChecked) {
       if (qrCodeImg === "")
         submitDownloadForm(() => api.generate_2fa())
-      setRed(true);
     }
   };
   return (
@@ -115,9 +120,9 @@ const SignInPage = () => {
             <Menu menuButton={
               <MenuButton><Switch
                 onChange={()=>{}}
-                checked={checked}
+                checked={checked || status===twoFactorSteps.DONE}
                 className="react-switch"
-                onColor={(red ? "#bc391c" : "#0cb92a")}
+                onColor={(status!==twoFactorSteps.DONE ? "#bc391c" : "#0cb92a")}
               /></MenuButton>
               }
               key={"top"}
@@ -143,9 +148,7 @@ const SignInPage = () => {
                   <div className="flex flex-row gap-2">
                     <input ref={ref} type="text" placeholder="Enter Code"
                         value={code} onChange={e => setCode(e.target.value)} />
-                    {( if (status===enum.VALIDATE)
-                    <button className="border-4 border-gray-400 bg-gray-400 hover:border-gray-300 hover:bg-gray-300 transition rounded-md">Validate</button>
-                    )}
+                    <Button2fa status={status} setStatus={setStatus}/>
                   </div>
                 )}
               </FocusableItem>
