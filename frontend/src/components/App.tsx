@@ -136,7 +136,7 @@ function App() {
 
             <Route path="/" element={<Home />} />
             <Route path="profile" element={<Profile />}>
-              <Route path=":user_login" element={<OneUserProfile />} />
+              <Route path=":pongUsername" element={<OneUserProfile />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
