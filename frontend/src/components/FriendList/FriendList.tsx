@@ -26,7 +26,6 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
       socket?.off(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, resetFriendList)}
   }, []);
   const appendFriendList = (newUser:UserInterface) => {
-    console.log('newUser:', newUser)
     setUserFriendList((current) => [...current, newUser]);
   }
   useEffect(() => {
