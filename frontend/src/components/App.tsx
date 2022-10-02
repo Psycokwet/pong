@@ -16,25 +16,50 @@ import Play from "./NavBar/Pages-To-Change/Play";
 import Home from "./NavBar/Pages-To-Change/Home";
 import Chat from "./Chat/Chat";
 import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
-import Settings from "./NavBar/Pages-To-Change/Settings";
 import Profile from "./Profile/Profile";
 import OneUserProfile from "./Profile/OneUserProfile";
 import False42Login from "./LoginPage/False42Login";
-import { CurrentUser } from "../../shared/interfaces/CurrentUser";
+import {
+  createCurrentUserFrontInterface,
+  CurrentUserFrontInterface,
+} from "../../shared/interfaces/CurrentUserFrontInterface";
 import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
-import TwoStepSignupMockup from "./Mockup/TwoStepSignupMockup";
+import { isSameSimpleObj } from "../../shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
+import SignUpPage from "./SignUpPage/SignUpPage";
 
 const api = new Api();
 
 function App() {
-  const [currentUser, setCurrentUser] = useState<CurrentUser>({
-    status: ConnectionStatus.Unknown,
-  } as CurrentUser);
+  const [currentUser, setCurrentUser] = useState<CurrentUserFrontInterface>(
+    createCurrentUserFrontInterface()
+  );
+  const updateCurrentUser = () => {
+    api.refreshToken().then((res: Response) => {
+      if (res.status != 200) {
+        setCurrentUser((current: CurrentUserFrontInterface) => {
+          if (current.status !== ConnectionStatus.NetworkUnavailable)
+            return {
+              ...current,
+              status: ConnectionStatus.NetworkUnavailable,
+            };
+          return current;
+        });
+      } else {
+        res.json().then((newCurrentUser: CurrentUserFrontInterface) => {
+          console.log(newCurrentUser);
+          setCurrentUser((current: CurrentUserFrontInterface) => {
+            if (!isSameSimpleObj(current, newCurrentUser))
+              return newCurrentUser;
+            return current;
+          });
+        });
+      }
+    });
+  };
 
   const [socket, setSocket] = useState<Socket>();
-
-  const webPageRoutes = [
+  const init_webPageRoutes = () => [
     {
       url: "/play",
       element: <Play socket={socket} />,
@@ -49,9 +74,16 @@ function App() {
     },
     {
       url: "/settings",
-      element: <Settings />,
+      element: (
+        <SignUpPage
+          updateCurrentUser={updateCurrentUser}
+          pongUsername={currentUser.pongUsername}
+        />
+      ),
     },
   ];
+
+  const [webPageRoutes, setWebPagesRoutes] = useState(init_webPageRoutes());
 
   useEffect(() => {
     const newSocket = io(import.meta.env.VITE_PONG_URL, {
@@ -61,28 +93,9 @@ function App() {
     setSocket(newSocket);
   }, [setSocket]);
 
-  const updateCurrentUser = () => {
-    api.refreshToken().then((res: Response) => {
-      if (res.status != 200) {
-        setCurrentUser((current: CurrentUser) => {
-          if (current.status !== ConnectionStatus.NetworkUnavailable)
-            return {
-              ...current,
-              status: ConnectionStatus.NetworkUnavailable,
-            };
-          return current;
-        });
-      } else {
-        res.json().then((newCurrentUser: CurrentUser) => {
-          console.log(newCurrentUser);
-          setCurrentUser((current: CurrentUser) => {
-            if (current.status !== newCurrentUser.status) return newCurrentUser;
-            return current;
-          });
-        });
-      }
-    });
-  };
+  useEffect(() => {
+    setWebPagesRoutes(init_webPageRoutes());
+  }, [socket, currentUser]);
 
   useEffect(() => {
     if (currentUser.status == ConnectionStatus.Unknown) {
@@ -146,7 +159,12 @@ function App() {
         </Routes>
       );
     case ConnectionStatus.SignupRequested:
-      return <TwoStepSignupMockup></TwoStepSignupMockup>;
+      return (
+        <SignUpPage
+          updateCurrentUser={updateCurrentUser}
+          pongUsername={currentUser.pongUsername}
+        ></SignUpPage>
+      );
     case ConnectionStatus.TwoFactorAuthenticationRequested:
       return (
         <TwoStepSigningMockup
