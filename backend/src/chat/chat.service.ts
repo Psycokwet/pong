@@ -51,6 +51,7 @@ export class ChatService {
           return {
             channelId: room.id,
             channelName: room.channelName,
+            currentUserPrivileges: Privileges.MEMBER,
           };
         }),
       );
@@ -326,16 +327,16 @@ export class ChatService {
     return userInterfaceMembers;
   }
 
-  getUserPrivileges(room: Room, userId: number): { privilege: Privileges } {
-    if (room.isDM === true) return { privilege: Privileges.MEMBER };
+  getUserPrivileges(room: Room, userId: number): Privileges {
+    if (room.isDM === true) return Privileges.MEMBER;
 
-    if (userId === room.owner.id) return { privilege: Privileges.OWNER };
+    if (userId === room.owner.id) return Privileges.OWNER;
 
-    if (room.admins.filter((admin) => admin.id === userId).length) {
-      return { privilege: Privileges.ADMIN };
+    if (room.admins.find(admin => admin.id === userId)) {
+      return Privileges.ADMIN;
     }
 
-    return { privilege: Privileges.MEMBER };
+    return Privileges.MEMBER;
   }
 
   async changePassword(room: Room, newPassword: string) {
