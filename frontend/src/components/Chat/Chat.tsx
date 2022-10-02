@@ -63,6 +63,19 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     };
   }, [channelListener]);
 
+
+  const disconnect = () => {
+    setMessages([]);
+    setConnectedChannel(undefined);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
+    };
+  }, [disconnect]);
+
+
   const ResetUserList = (list:UserInterface[]) => {
     setUserAttachedList(list);
   }
