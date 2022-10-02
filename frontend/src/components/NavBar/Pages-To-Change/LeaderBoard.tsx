@@ -1,24 +1,11 @@
 import { useState } from "react";
-import { Api } from "../../../api/api";
 import { QRCodeImg } from "../../PictureForm/QRCodeImg";
+import { Api } from "../../../api/api";
 
 const api = new Api();
 const LeaderBoard = () => {
   const [code2fa, setCode2fa] = useState<string>("");
   const sendRequest = () => {
-    api.add_friend("scarboni", "bob").then((res: Response) => {
-      console.log("add_friend", res);
-      if (res.status != 200)
-        res.json().then((content) => {
-          console.log("add_friend", content);
-        });
-    });
-    api.get_friend_list("scarboni").then((res: Response) => {
-      console.log("get_friend_list", res);
-      res.json().then((content) => {
-        console.log("get_friend_list", content);
-      });
-    });
     api.set_pong_username("bla bla 2").then((res: Response) => {
       console.log("set_nickname is ok", res);
       if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
@@ -46,6 +33,12 @@ const LeaderBoard = () => {
       console.log("get_user_rank", res);
       res.json().then((content) => {
         console.log("get_user_rank", content);
+      });
+    });
+    api.get_user_profile("ponydfdfg").then((res: Response) => {
+      console.log("get_user_profile", res);
+      res.json().then((content) => {
+        console.log("get_user_profile", content);
       });
     });
     api.get_user_profile("pony").then((res: Response) => {

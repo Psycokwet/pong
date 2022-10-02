@@ -13,5 +13,4 @@ export default interface UserProfile {
       id: number;
     }[];
   };
-  profilePicture: StreamableFile | null;
 }
