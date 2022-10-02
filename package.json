@@ -4,6 +4,6 @@
     "purge": "docker system prune -fa && docker volume prune",
     "full_build": "npm run prebuild && npm run build",
     "build": "bash ./build_prod.sh",
-    "prebuild": "bash ./pre_build_prod.sh"
+    "pre_build": "bash ./pre_build_prod.sh"
   }
 }
