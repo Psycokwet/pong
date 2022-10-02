@@ -260,4 +260,13 @@ export class GameGateway implements OnGatewayConnection {
     this.gameloop(challenge, player2); 
   }
   /** END CHALLENGE */
+
+  @UseGuards(JwtWsGuard)
+  @SubscribeMessage(ROUTES_BASE.GAME.CANCEL_MATCH_MAKING_REQUEST)
+  async cancelMatchMaking(
+    @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    this.gameService.cancelMatchMaking(payload.userId);
+  }
 }
