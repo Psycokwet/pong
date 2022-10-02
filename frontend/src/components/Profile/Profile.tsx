@@ -17,34 +17,36 @@ const Profile = () => {
       games: [],
     },
   });
-
   const [avatarUrl, setAvatarUrl] = useState("");
 
   const { pongUsername } = useParams(); // get this from url: /practice/pongUsername
+  const [localPongUsername, setLocalPongUsername] = useState(pongUsername);
+  useEffect(() => {
+    setLocalPongUsername(pongUsername);
+  }, [pongUsername]);
 
   useEffect(() => {
-    api.get_user_profile(pongUsername).then((res: Response) => {
-      console.log("get_user_profile", res);
+    api.get_user_profile(localPongUsername).then((res: Response) => {
       res.json().then((content) => {
         console.log(
-          `get_user_profile is OK with pongUsername = ${pongUsername}`,
+          `get_user_profile is OK with localPongUsername = ${localPongUsername}`,
           content
         );
         setUserProfile(content);
       });
     });
 
-    api.getPicture(pongUsername).then((res) => {
+    api.getPicture(localPongUsername).then((res) => {
       if (res.status == 200)
         res.blob().then((myBlob) => {
           setAvatarUrl((current) => {
-            console.log(`get_picture is Ok with pongUsername = ${pongUsername}`);
+            console.log(`get_picture is Ok with localPongUsername = ${localPongUsername}`);
             if (current) URL.revokeObjectURL(current);
             return URL.createObjectURL(myBlob);
           });
         });
     });
-  }, [pongUsername]);
+  }, [localPongUsername]);
 
   return (
     <div className="bg-black text-white h-screen">

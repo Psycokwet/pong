@@ -24,6 +24,7 @@ const NavBar: React.FC<NavBarProps> = ({
   pongUsername,
 }) => {
   const [localPongUsername, setLocalPongUsername] = useState(pongUsername);
+  
   useEffect(() => {
     setLocalPongUsername(pongUsername);
   }, [pongUsername]);
