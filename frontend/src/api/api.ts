@@ -97,6 +97,15 @@ export class Api {
       body: JSON.stringify({ player1, player2, winner }),
     });
   }
+  check_2fa(code: string) {
+    let headers = new Headers();
+    headers.set(HeadersFields.ContentType, "application/json");
+    return fetch(`${PREFIX}${FULL_ROUTE.AUTH.CHECK_2FA}`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({ code }),
+    });
+  }
   turn_on_2fa(code: string) {
     let headers = new Headers();
     headers.set(HeadersFields.ContentType, "application/json");
