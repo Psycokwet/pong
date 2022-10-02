@@ -562,8 +562,8 @@ export class ChatGateway {
   async changePassword(
     @MessageBody() {
       channelName,
-      newPassword,
-    }: ChangeChannelData,
+      inputPassword,
+    }: SearchChannel,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
@@ -584,8 +584,8 @@ export class ChatGateway {
       });
 
     let hashedPassword = '';
-    if (newPassword === '') return;
-      hashedPassword = await crypt(newPassword);
+    if (inputPassword !== '')
+      hashedPassword = await crypt(inputPassword);
 
     await this.chatService.changePassword(room, hashedPassword);
 

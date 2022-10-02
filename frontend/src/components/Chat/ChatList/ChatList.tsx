@@ -53,8 +53,8 @@ function ChatList({ msg , socket , connectedChannel, handleLeaveChannel} : {
       <div>
         <ChannelMenu socket={socket}/>
         {
-          channelList.map((channel) => 
-            <div key={channel.channelname}>
+          channelList.map((channel, i) =>
+            <div key={i}>
               <Channel
                 handleLeaveChannel={() => {
                   handleLeaveChannel();
