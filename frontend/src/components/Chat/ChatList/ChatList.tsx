@@ -49,13 +49,15 @@ function ChatList({ msg , socket , connectedChannel} : {
       <div>
         <ChannelMenu socket={socket}/>
         {
-          channelList.map((channel, i) => 
-            <Channel
-              key={channel.channelname}
-              channel={channel}
-              socket={socket}
-              connectedChannel={connectedChannel}
-            />
+          channelList.map((channel, i) =>
+            <div key={i}>
+              <Channel
+                key={channel.channelname}
+                channel={channel}
+                socket={socket}
+                connectedChannel={connectedChannel}
+              />
+            </div>
           )
         }
       </div>
