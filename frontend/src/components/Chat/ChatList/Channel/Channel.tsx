@@ -18,8 +18,11 @@ const Channel = function ({channel, socket, connectedChannel}:{
       setIsVisible(false);
   }, [connectedChannel]);
   const handleClick = () => {
-    if (connectedChannel?.channelId !== channel.channelId)
+    if (connectedChannel?.channelId !== channel.channelId) {
+      if (connectedChannel)
+        socket?.emit(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST, connectedChannel.channelId);
       socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST, {roomId: channel.channelId});
+    }
     else setIsVisible(val => !val);
   }
   const handleKeyDownPassword = (e: KeyboardEvent) => {
