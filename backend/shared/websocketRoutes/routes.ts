@@ -82,6 +82,8 @@ export const ROUTES_BASE = {
     JOIN_SPECTATE_REQUEST: 'joinSpectateRequest',
     /** RECONNECT GAME */
     RECONNECT_GAME_REQUEST: 'reconnectGameRequest',
+    /** CANCEL MATCH MAKING */
+    CANCEL_MATCH_MAKING_REQUEST: 'cancelMatchMakingRequest',
   },
   USER: {
     ERROR: 'error',

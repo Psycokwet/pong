@@ -1,5 +1,12 @@
 {
-  "dependencies": {
-    "react-router-dom": "^6.4.0"
+  "scripts": {
+    "pre_dev": "bash ./prepare_dev.sh",
+    "dev": "docker-compose up",
+    "prod": "docker-compose up --build",
+    "purge": "docker system prune -fa && docker volume prune",
+    "full_build": "npm run prebuild && npm run build",
+    "build": "bash ./build_prod.sh",
+    "pre_build": "bash ./pre_build_prod.sh",
+    "clear_build":"rm -rf ./dist_project"
   }
 }
