@@ -4,10 +4,12 @@ import { useParams } from "react-router-dom";
 
 import UserProfile from "shared/interfaces/UserProfile";
 import OneUserProfile from "./OneUserProfile";
+import NotFound from "../NavBar/Pages-To-Change/NotFound";
 
 const api = new Api();
 
 const Profile = () => {
+  const [userNotFound, setUserNotFound] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile>({
     pongUsername: "anonymous",
     userRank: { level: 0, userRank: 0 },
@@ -21,20 +23,16 @@ const Profile = () => {
 
   const { pongUsername } = useParams(); // get this from url: /practice/pongUsername
 
-  const [localPongUsername, setLocalPongUsername] = useState(pongUsername);
   useEffect(() => {
-    setLocalPongUsername(pongUsername);
-  }, [pongUsername]);
-
-  useEffect(() => {
-    api.get_user_profile(localPongUsername).then((res: Response) => {
+    api.get_user_profile(pongUsername).then((res: Response) => {
       if (res.status == 200)
         res.json().then((content) => {
           setUserProfile(content);
         });
+      else setUserNotFound(true);
     });
 
-    api.getPicture(localPongUsername).then((res) => {
+    api.getPicture(pongUsername).then((res) => {
       if (res.status == 200)
         res.blob().then((myBlob) => {
           setAvatarUrl((current) => {
@@ -43,11 +41,15 @@ const Profile = () => {
           });
         });
     });
-  }, [localPongUsername]);
+  }, [pongUsername]);
 
   return (
     <div className="bg-black text-white h-screen">
-      <OneUserProfile userProfile={userProfile} avatarUrl={avatarUrl} />
+      {userNotFound ? (
+        <NotFound />
+      ) : (
+        <OneUserProfile userProfile={userProfile} avatarUrl={avatarUrl} />
+      )}
     </div>
   );
 };
