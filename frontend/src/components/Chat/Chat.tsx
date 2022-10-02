@@ -18,7 +18,6 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   const [attachedUserList, setAttachedUserList] = useState<UserInterface[]>([]);
 
   const addMessage = (newElem:Message) => {
-    console.log(newElem)
     setMessages([...messages, newElem]);
   }
   useEffect(() => {
@@ -72,20 +71,13 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   useEffect(() => {
     socket?.on(
       ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, 
-      (userList: UserInterface[]) => {
-        console.log(userList) 
-        setAttachedUserList(userList);
-      }
+      (userList: UserInterface[]) => setAttachedUserList(userList)
     );
-
 
     return () => {
       socket?.off(
         ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        (userList: UserInterface[]) => {
-          console.log(userList) 
-          setAttachedUserList(userList);
-        }
+        (userList: UserInterface[]) => setAttachedUserList(userList)
       );
     };
   }, []);
@@ -94,22 +86,16 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   useEffect(() => {
     socket?.on(
       ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
-      (unattachedUserId: number) => {
-        setAttachedUserList((current) => {
-          console.log(current, unattachedUserId)
-          return current.filter((user) => user.id !== unattachedUserId);
-        });
-      }
+      (unattachedUserId: number) => setAttachedUserList(
+        (current) => current.filter((user) => user.id !== unattachedUserId)
+      )
     );
     return () => {
       socket?.off(
         ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
-        (unattachedUserId: number) => {
-          setAttachedUserList((current) => {
-            
-            return current.filter((user) => user.id !== unattachedUserId);
-          });
-        }
+        (unattachedUserId: number) => setAttachedUserList(
+          (current) => current.filter((user) => user.id !== unattachedUserId)
+        )
       );
     };
   }, []);

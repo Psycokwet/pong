@@ -205,7 +205,6 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    console.log(data)
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
       {
@@ -254,7 +253,6 @@ export class ChatGateway {
       });
 
     await this.chatService.unattachMemberToChannel(payload.userId, room);
-    console.log('unattached', room.id, payload.userId)
     client.leave(room.roomName);
     this.server.in(room.roomName).emit(
       ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
