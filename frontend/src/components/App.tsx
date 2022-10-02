@@ -86,12 +86,14 @@ function App() {
   const [webPageRoutes, setWebPagesRoutes] = useState(init_webPageRoutes());
 
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_PONG_URL, {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-    setSocket(newSocket);
-  }, [setSocket]);
+    return () => {
+      const newSocket = io(import.meta.env.VITE_PONG_URL, {
+        transports: ["websocket"],
+        withCredentials: true,
+      });
+      setSocket(newSocket);
+    }
+  }, []);
 
   useEffect(() => {
     setWebPagesRoutes(init_webPageRoutes());
