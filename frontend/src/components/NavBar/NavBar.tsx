@@ -19,16 +19,7 @@ type NavBarProps = {
 };
 
 /***************** Component NavBar ******************************************/
-const NavBar: React.FC<NavBarProps> = ({
-  setDisconnected,
-  pongUsername,
-}) => {
-  const [localPongUsername, setLocalPongUsername] = useState(pongUsername);
-  
-  useEffect(() => {
-    setLocalPongUsername(pongUsername);
-  }, [pongUsername]);
-
+const NavBar: React.FC<NavBarProps> = ({ setDisconnected, pongUsername }) => {
   /***************** List of Pages ******************************************/
   const NavBarPageList = [
     {
@@ -47,8 +38,8 @@ const NavBar: React.FC<NavBarProps> = ({
       pageIcon: <FaComments size="28" />,
     },
     {
-      url: `/profile/${localPongUsername}`,
-      pageName: `profile ${localPongUsername}`,
+      url: `/profile/${pongUsername}`,
+      pageName: `profile ${pongUsername}`,
       pageIcon: <FaUser size="26" />,
     },
     {
