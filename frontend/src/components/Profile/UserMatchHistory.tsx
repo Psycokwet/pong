@@ -25,7 +25,7 @@ const UserMatchHistory: React.FC<UserMatchHistoryProps> = ({ userHistory }) => {
         {userHistory.map((oneGame, id) => {
           while (id <= MAX_SHOWN_GAME)
             return (
-              <tr>
+              <tr key={id}>
                 <td>{oneGame.time}</td>
                 <td>{oneGame.opponent}</td>
                 <td>{oneGame.winner}</td>
