@@ -1,13 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { Socket } from "socket.io-client";
 import Position from "/shared/interfaces/Position";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-
-const canvasWidth = 640
-const canvasHeight = 480
-const PLAYER_HEIGHT = 100;
-const PLAYER_WIDTH = 5;
+import { virtualGameData } from "/shared/other/virtualGameData";
 
 const GameCanvas = (
   {
@@ -15,106 +11,91 @@ const GameCanvas = (
     setGameRoom,
     gameRoom,
     upgradeStep,
-    canvasSize,
+    clientCanvasSize,
   }:
   {
     socket: Socket,
     setGameRoom: any,
     gameRoom: GameRoom,
     upgradeStep: any,
-    canvasSize: Position,
+    clientCanvasSize: Position,
   }
 ) => {
-  const canvasRef = useRef(null);
-  const [coords, setCoords] = useState<Position>({x: 0, y: 0});
-  const [globalCoords, setGlobalCoords] = useState<Position>({x: 0, y: 0});
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  /** MOUSE HANDLER */
-  useEffect(() => {
-    // 👇️ get global mouse coordinates
-    const handleWindowMouseMove = event => {
-      setGlobalCoords({
-        x: event.screenX,
-        y: event.screenY,
+  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvasLocation = canvasRef?.current?.getBoundingClientRect();
+    if (canvasLocation) {
+      const mouseLocation = event.clientY - canvasLocation.y;
+      
+      // because of the border from tailwind "border-y-4", i needed a offset
+      // border-top + border-botom = 8
+      const offset = 8 / clientCanvasSize.y * virtualGameData.canvasHeight; 
+      socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
+        canvasLocation: canvasLocation.height / clientCanvasSize.y * virtualGameData.canvasHeight - offset,
+        mouseLocation: mouseLocation / clientCanvasSize.y * virtualGameData.canvasHeight,
       });
-    };
-    window.addEventListener('mousemove', handleWindowMouseMove);
-
-    return () => {
-      window.removeEventListener('mousemove', handleWindowMouseMove);
-    };
-  }, []);
-
-  const handleMouseMove = event => {
-    const position: Position = {
-      x: event.clientX - event.target.offsetLeft,
-      y: event.clientY - event.target.offsetTop,
     }
-    setCoords(position);
-    const canvasLocation = canvasRef.current.getBoundingClientRect();
-    const mouseLocation = event.clientY - canvasLocation.y;
-
-    socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
-      canvasLocation: canvasLocation.height / canvasSize.y * canvasHeight,
-      mouseLocation: mouseLocation / canvasSize.y * canvasHeight,
-    });
   };
 
-  const onTouchMove = event => {
-    console.log(event)
-    const position: Position = {
-      x: event.touches[0].clientX - event.touches[0].target.offsetLeft,
-      y: event.touches[0].clientY - event.touches[0].target.offsetTop,
-    }
-    setCoords(position);
+  const onTouchMove = (event: React.TouchEvent<HTMLCanvasElement>) => {
+    const canvasLocation = canvasRef?.current?.getBoundingClientRect();
+    if (canvasLocation) {
+      const mouseLocation = event.touches[0].clientY - canvasLocation.y;
 
-    const canvasLocation = canvasRef.current.getBoundingClientRect();
-    const mouseLocation = event.touches[0].clientY - canvasLocation.y;
-    socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
-      canvasLocation: canvasLocation.height / canvasSize.y * canvasHeight,
-      mouseLocation: mouseLocation / canvasSize.y * canvasHeight,
-    });
+      // because of the border from tailwind "border-y-4", i needed a offset
+      // border-top + border-botom = 8
+      const offset = 8 / clientCanvasSize.y * virtualGameData.canvasHeight;
+      socket?.emit(ROUTES_BASE.GAME.SEND_INPUT, {
+        canvasLocation: canvasLocation.height / clientCanvasSize.y * virtualGameData.canvasHeight - offset,
+        mouseLocation: mouseLocation / clientCanvasSize.y * virtualGameData.canvasHeight,
+      });
+    }
   }
   /** END MOUSE HANDLER */
 
 
   /** GAME LOOP */
-  const draw = (canvas, gameRoom: GameRoom) => {
+  const draw = (canvas: HTMLCanvasElement, gameRoom: GameRoom) => {
+    const halfCanvasWidth = clientCanvasSize.x / 2;
     const context = canvas.getContext('2d')
-    // Draw field
-    context.fillStyle = 'black';
-    context.fillRect(0, 0, canvasSize.x, canvasSize.y);
-    // Draw middle line
-    context.strokeStyle = 'white';
-    context.beginPath();
-    context.moveTo(canvasSize.x / 2, 0);
-    context.lineTo(canvasSize.x / 2, canvasSize.y);
-    context.stroke();
+    if (context) {
+      // Draw field
+      context.fillStyle = 'black';
+      context.fillRect(0, 0, clientCanvasSize.x, clientCanvasSize.y);
+      // Draw middle line
+      context.strokeStyle = 'white';
+      context.beginPath();
+      context.moveTo(halfCanvasWidth, 0);
+      context.lineTo(halfCanvasWidth, clientCanvasSize.y);
+      context.stroke();
 
 
-    // Draw players
-    context.fillStyle = 'white';
-    const player1position = gameRoom.gameData.player1.y * canvasSize.y / canvasHeight;
-    context.fillRect(0, player1position, PLAYER_WIDTH, PLAYER_HEIGHT * canvasSize.y / canvasHeight);
-    const player2position = gameRoom.gameData.player2.y * canvasSize.y / canvasHeight;
-    context.fillRect(canvas.width - PLAYER_WIDTH, player2position, PLAYER_WIDTH, PLAYER_HEIGHT * canvasSize.y / canvasHeight);
+      // Draw players
+      context.fillStyle = 'white';
+      const playersPaddleHeight = virtualGameData.playerHeight * clientCanvasSize.y / virtualGameData.canvasHeight;
 
-    const ballPosition: Position = {
-      x: gameRoom.gameData.ball.x,
-      y: gameRoom.gameData.ball.y,
+      const player1PaddlePosition = gameRoom.gameData.player1.y * clientCanvasSize.y / virtualGameData.canvasHeight;
+      context.fillRect(0, player1PaddlePosition, virtualGameData.playerWidth, playersPaddleHeight);
+      const player2PaddlePosition = gameRoom.gameData.player2.y * clientCanvasSize.y / virtualGameData.canvasHeight;
+      context.fillRect(canvas.width - virtualGameData.playerWidth, player2PaddlePosition, virtualGameData.playerWidth, playersPaddleHeight);
+
+      const ballPosition: Position = {
+        x: gameRoom.gameData.ball.x / virtualGameData.canvasWidth * clientCanvasSize.x,
+        y: gameRoom.gameData.ball.y / virtualGameData.canvasHeight * clientCanvasSize.y,
+      }
+      // Draw ball
+      context.beginPath();
+      context.fillStyle = 'white';
+      const clientBallRayon = gameRoom.gameData.ball.rayon / virtualGameData.canvasHeight * clientCanvasSize.y;
+      context.arc(ballPosition.x, ballPosition.y, clientBallRayon , 0, Math.PI * 2, false);
+      context.fill();
     }
-    ballPosition.x = gameRoom.gameData.ball.x / canvasWidth * canvasSize.x
-    ballPosition.y = gameRoom.gameData.ball.y / canvasHeight * canvasSize.y
-    // Draw ball
-    context.beginPath();
-    context.fillStyle = 'white';
-    context.arc(ballPosition.x, ballPosition.y, gameRoom.gameData.ball.rayon, 0, Math.PI * 2, false);
-    context.fill();
   }
 
   const handleGameUpdate = (gameRoom: GameRoom) => {
-    const canvas = canvasRef.current
-    draw(canvas, gameRoom)
+    const canvas: HTMLCanvasElement | null = canvasRef.current;
+    if (canvas) draw(canvas, gameRoom);
     setGameRoom(gameRoom)
   };
   useEffect(() => {
@@ -136,26 +117,52 @@ const GameCanvas = (
 
   return (
     <div
-      className="w-full bg-gray-400"
+      className="w-full h-7/8"
     >
-      <p>{gameRoom.gameData.player1.pongUsername} : {gameRoom.gameData.player1.score}</p>
-      <p>{gameRoom.gameData.player2.pongUsername} : {gameRoom.gameData.player2.score}</p>
-      <br />
-      <div className="flex justify-center">
+      <div><h1 className="text-3xl text-center p-2">RANKED MATCH</h1></div>
+      <div><h2 className="lg:text-3xl text-center p-2">First to 10 points win</h2> </div>
+      <div
+        className="grid sm:grid-cols-5 content-center sm:flex sm:justify-around"
+      >
+        <div className="self-center text-center hidden sm:block">
+          <p>{gameRoom.gameData.player1.pongUsername}</p>
+          <p className="text-6xl p-4">{gameRoom.gameData.player1.score}</p>
+        </div>
+        <div className="flex self-center">
+          <canvas
+            className="border-x-8 border-y-4 border-white rounded-lg"
+            onTouchMove={onTouchMove}
+            onMouseMove={handleMouseMove}
+            ref={canvasRef}
+            id="canvas"
+            width={clientCanvasSize.x}
+            height={clientCanvasSize.y}
+            ></canvas>
+        </div>
 
-        <canvas
-          onTouchMove={onTouchMove}
-          onMouseMove={handleMouseMove}
-          ref={canvasRef}
-          id="canvas"
-          width={canvasSize.x}
-          height={canvasSize.y}
-        ></canvas>
+        <div className="sm:hidden block grid grid-cols-2 content-between w-full">
+          <div>
+            <p className="text-center">{gameRoom.gameData.player1.pongUsername} </p>
+            <p className="text-6xl p-4 text-center">
+              <b>{gameRoom.gameData.player1.score}</b>
+            </p>
+          </div>
+
+          <div>
+            <p className="text-center">{gameRoom.gameData.player2.pongUsername}</p>
+            <p className="text-6xl p-4 text-center">
+              <b>{gameRoom.gameData.player2.score}</b>
+            </p>
+          </div>
+        </div>
+
+        <div className="self-center text-center hidden sm:block">
+          <p>{gameRoom.gameData.player2.pongUsername}</p>
+          <p className="text-6xl p-4">
+            {gameRoom.gameData.player2.score}
+          </p>
+        </div>
       </div>
-      <h2>DEV INFORMATIONS</h2>
-      <h2>Coords: X: {coords.x} -- Y: {coords.y}</h2>
-      <hr />
-      <h2>Global coords: X: {globalCoords.x} -- Y: {globalCoords.y}</h2>
     </div>
   );
 }
