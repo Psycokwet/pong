@@ -26,7 +26,7 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
       socket?.off(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, resetFriendList)}
   }, []);
   const appendFriendList = (newUser:UserInterface) => {
-    setUserFriendList((current) => [...current, newUser]);
+    setUserFriendList((current: UserInterface[]) => [...current, newUser]);
   }
   useEffect(() => {
      socket?.on(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, appendFriendList)
@@ -35,10 +35,14 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
   }, []);
 
   const userStatusChange = (newUserData: UserInterface) => {
-    setUserFriendList((current) => [
-      ...current.filter((userData) => userData.id !== newUserData.id),
-      newUserData
-    ]);
+    const alreadyExistUser:UserInterface = userFriendList.find(
+      (user: UserInterface) => user.id === newUserData.id
+    );
+    if (alreadyExistUser)
+      setUserFriendList((current: UserInterface[]) => [
+        ...current.filter((user: UserInterface) => user.id !== alreadyExistUser.id),
+        newUserData
+      ])
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, userStatusChange);
