@@ -13,7 +13,7 @@ function ChatList({ msg , socket , connectedChannel} : {
     socket:Socket | undefined,
     connectedChannel: ChannelData | undefined,
 }){
-  const [chanList, setChanList] = useState<ChannelData[]>([]);
+  const [channelList, setChannelList] = useState<ChannelData[]>([]);
   const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
 
   useEffect(()=> {
@@ -23,15 +23,15 @@ function ChatList({ msg , socket , connectedChannel} : {
     socket?.emit(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_LOBBY_REQUEST);
   }, []);
 
-  const resetChanList = (chans:ChannelData[]) => {
-    setChanList(chans);
+  const resetChannelList = (chans:ChannelData[]) => {
+    setChannelList(chans);
   }
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChanList);
+    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChannelList);
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChanList);
+      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChannelList);
     };
-  }, [resetChanList]);
+  }, [resetChannelList]);
 
   const resetDirectMessageList = (chans:ChannelData[]) => {
     setDirectMessageList(chans);
@@ -48,17 +48,18 @@ function ChatList({ msg , socket , connectedChannel} : {
     <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end relative">
       <div>
         <ChannelMenu socket={socket}/>
-        {chanList.map((chan, i) => {
-          return (
+        {
+          channelList.map((channel, i) =>
             <div key={i}>
               <Channel
-                channel={chan}
+                key={channel.channelname}
+                channel={channel}
                 socket={socket}
                 connectedChannel={connectedChannel}
               />
             </div>
-          );
-        })}
+          )
+        }
       </div>
       <div>
         <DirectMessageMenu socket={socket}/>
