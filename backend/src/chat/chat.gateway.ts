@@ -31,6 +31,8 @@ import MuteUser from 'shared/interfaces/MuteUser';
 import { ChangeChannelData } from 'shared/interfaces/ChangeChannelData';
 import { User } from 'src/user/user.entity';
 import { Status } from 'shared/interfaces/UserStatus';
+import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
+import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -81,9 +83,9 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     client.emit(
-        ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
-        await this.chatService.getAllAttachedRooms(payload.userId),
-      );
+      ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
+      await this.chatService.getAllAttachedRooms(payload.userId),
+    );
   }
 
   /** JOIN DM CHANNELS LOBBY -- SHOWS ONLY THE DMs THE CURRENT USER HAS */
@@ -243,7 +245,7 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomWithRelations(
+    let room = await this.chatService.getRoomWithRelations(
       { channelName },
       { admins: true, members: true, owner: true },
     );
@@ -253,13 +255,26 @@ export class ChatGateway {
         message: 'You must specify which channel you want to leave',
       });
 
-    await this.chatService.unattachMemberToChannel(payload.userId, room);
+    room = await this.chatService.unattachMemberToChannel(payload.userId, room);
     client.leave(room.roomName);
     this.server.in(room.roomName).emit(
       ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
       payload.userId,
     );
     this.attachedUsersList(room.id);
+
+    const ownerWebsocket: UsersWebsockets = UsersService.userWebsockets.find((user) => user.userId === room.owner.id)
+    if (ownerWebsocket
+      &&
+      this.server.sockets.adapter.rooms
+        .get(room.roomName)
+        .has(ownerWebsocket.socketId)
+    ) { // if owner is connected and is joined to this room
+      this.server.sockets.sockets.get(ownerWebsocket.socketId).emit(
+        ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION,
+        { privilege: Privileges.OWNER },
+      )
+    }
   }
 
   /* JOIN ROOM */
@@ -309,6 +324,13 @@ export class ChatGateway {
         ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
         await this.chatService.getAttachedUsersInChannel(roomId),
       );
+
+    if (room.owner.id === payload.userId) {
+      client.emit(
+        ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION,
+        { privilege: Privileges.OWNER },
+      )
+    }
   }
 
   /* DISCONNECT FROM CHANNEL */
@@ -459,7 +481,7 @@ export class ChatGateway {
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
-  async getUserPrivileges(
+  async getUserPrivileges( // unused ?
     @MessageBody() data: RoomId,
     @UserPayload() payload: any,
   ) {

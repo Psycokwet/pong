@@ -7,12 +7,14 @@ import DirectMessageMenu from "./DirectMessageMenu/DirectMessageMenu";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
+import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
-function ChatList({ msg , socket , connectedChannel, handleLeaveChannel} : {
+function ChatList({ msg , socket , connectedChannel, handleLeaveChannel, userPrivilege} : {
     msg: Message,
     socket:Socket | undefined,
     connectedChannel: ChannelData | undefined,
     handleLeaveChannel: any;
+    userPrivilege: Privileges;
 }){
   const [channelList, setChannelList] = useState<ChannelData[]>([]);
   const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
@@ -56,6 +58,7 @@ function ChatList({ msg , socket , connectedChannel, handleLeaveChannel} : {
           channelList.map((channel) => 
             <div key={channel.channelname}>
               <Channel
+                userPrivilege={userPrivilege}
                 handleLeaveChannel={() => {
                   handleLeaveChannel();
                   setChannelList(current => current.filter(channel => channel.channelId !== connectedChannel.channelId))

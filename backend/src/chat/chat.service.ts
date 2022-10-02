@@ -248,7 +248,7 @@ export class ChatService {
         room.owner = newOwner;
     }
 
-    await room.save();
+    return await room.save();
   }
 
   async addMutedUser(mutedUser: User, room: Room, muteTime: number) {

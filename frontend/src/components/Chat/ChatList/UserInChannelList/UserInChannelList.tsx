@@ -20,25 +20,15 @@ import SetAdmin from "/src/components/UserInList/MenuComponents/SetAdmin";
 import { FaCrown } from "react-icons/fa";
 import { AiFillTool } from "react-icons/ai";
 
-const ChannelUserMenu = ({user, inputFilter, socket, menuSettings} :{
+const ChannelUserMenu = ({user, inputFilter, socket, menuSettings, userPrivilege} :{
   user: ChannelUserInterface,
   inputFilter: string,
   socket: Socket|undefined
   menuSettings: MenuSettingsType,
+  userPrivilege: Privileges;
 }) => {
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
-  const [userOwnership, setOwnership] = useState<number>(Privileges.MEMBER);
-
-  const setupOwnership = (val:number) => {
-    setOwnership(val);
-  }
-  console.log(userOwnership, user)
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupOwnership);
-    return () => {
-      socket?.off(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupOwnership);
-  }}, []);
 
   const icons = [
     <></>,
@@ -52,10 +42,10 @@ const ChannelUserMenu = ({user, inputFilter, socket, menuSettings} :{
     <div
       key={user.id}
       onContextMenu={(e) => {
-          e.preventDefault();
-          setAnchorPoint({ x: e.clientX, y: e.clientY });
-          toggleMenu(true);
-          socket?.emit(ROUTES_BASE.USER);
+        e.preventDefault();
+        setAnchorPoint({ x: e.clientX, y: e.clientY });
+        toggleMenu(true);
+        socket?.emit(ROUTES_BASE.USER);
       }}
       className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
       ${user.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
@@ -83,8 +73,8 @@ const ChannelUserMenu = ({user, inputFilter, socket, menuSettings} :{
         <Watch menuSettings={menuSettings}/>
         <AddFriend menuSettings={menuSettings} socket={socket} user={user}/>
         <Block />
-        <Mute menuSettings={menuSettings} userOwnership={userOwnership} />
-        <Ban menuSettings={menuSettings} userOwnership={userOwnership} />
+        <Mute menuSettings={menuSettings} userPrivilege={userPrivilege} />
+        <Ban menuSettings={menuSettings} userPrivilege={userPrivilege} />
         <SetAdmin menuSettings={menuSettings}/>
       </ControlledMenu>
     </div>
