@@ -8,12 +8,17 @@ import { Message } from "/shared/interfaces/Message";
 type Props = {
   socket: Socket|undefined;
   channel: ChannelData;
-  message: Message
+  // message: Message
   connectedChannel: ChannelData|undefined
 };
 
-const DirectMessage: React.FC<Props> = ({socket, channel, message, connectedChannel}) => {
-  const [lastMessage, setLastMessage] = useState<Message>();
+const DirectMessage: React.FC<Props> = ({
+  socket, 
+  channel, 
+  // message, 
+  connectedChannel
+}) => {
+  // const [lastMessage, setLastMessage] = useState<Message>();
   const handleClick = () => {
     socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST, {roomId: channel.channelId});
   }
@@ -22,8 +27,8 @@ const DirectMessage: React.FC<Props> = ({socket, channel, message, connectedChan
   if (connectedChannel !== undefined && connectedChannel.channelId === channel.channelId)
     style=style + " bg-slate-600";
 
-  if (message.roomId === channel.channelId && lastMessage !== message)
-    setLastMessage(message);
+  // if (message.roomId === channel.channelId && lastMessage !== message)
+  //   setLastMessage(message);
 
   return (
     <div className={style}
@@ -33,9 +38,9 @@ const DirectMessage: React.FC<Props> = ({socket, channel, message, connectedChan
         <h4 className="text-lg font-semibold truncate">
           {channel.channelName}
         </h4>
-        <p className="text-sm font-normal truncate text-gray-300 max-w-full">
+        {/* <p className="text-sm font-normal truncate text-gray-300 max-w-full">
           {lastMessage?.content}
-        </p>
+        </p> */}
       </div>
     </div>
   )

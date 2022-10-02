@@ -8,8 +8,11 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
 
-function ChatList({ lastMessage , socket , connectedChannel} : {
-    lastMessage: Message,
+function ChatList({
+  // lastMessage ,
+  socket ,
+  connectedChannel} : {
+    // lastMessage: Message,
     socket:Socket | undefined,
     connectedChannel: ChannelData | undefined,
 }){
@@ -64,7 +67,7 @@ function ChatList({ lastMessage , socket , connectedChannel} : {
               <DirectMessage
                 socket={socket}
                 channel={directMessage}
-                message={lastMessage === undefined ? "" : lastMessage}
+                // message={lastMessage === undefined ? "" : lastMessage}
                 connectedChannel={connectedChannel}
               />
             </div>
