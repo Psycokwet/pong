@@ -36,18 +36,10 @@ const FriendList = ({socket} : {socket:Socket | undefined}) => {
   }, []);
 
   const userStatusChange = (newUserData: UserInterface) => {
-    console.log(newUserData)
-    setUserFriendList((current) => {
-      const oldFriendData: UserInterface = current.find((userData) => userData.id === newUserData.id);
-      if (oldFriendData) {
-        console.log("in", oldFriendData);
-        return [...current.filter((userData) => { userData.id !== oldFriendData.id }), newUserData]
-      }
-      else{
-        console.log("out", oldFriendData);
-        return current;
-      }
-    });
+    setUserFriendList((current) => [
+      ...current.filter((userData) => userData.id !== newUserData.id),
+      newUserData
+    ]);
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, userStatusChange);
