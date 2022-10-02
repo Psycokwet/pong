@@ -2,6 +2,7 @@ import { useState } from "react";
 import { QRCodeImg } from "../../PictureForm/QRCodeImg";
 import { Api } from "../../../api/api";
 
+
 const api = new Api();
 const LeaderBoard = () => {
   const [code2fa, setCode2fa] = useState<string>("");
@@ -57,12 +58,6 @@ const LeaderBoard = () => {
       console.log("get_user_history", res);
       res.json().then((content) => {
         console.log("get_user_history", content);
-      });
-    });
-    api.add_played_game("scarboni", "bob", "scarboni").then((res: Response) => {
-      console.log("add_played_game", res);
-      res.json().then((content) => {
-        console.log("add_played_game", content);
       });
     });
   };
