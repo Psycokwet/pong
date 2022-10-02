@@ -28,7 +28,6 @@ import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 import RoomId from 'shared/interfaces/JoinChannel';
 import MuteUser from 'shared/interfaces/MuteUser';
-import { ChangeChannelData } from 'shared/interfaces/ChangeChannelData';
 import { User } from 'src/user/user.entity';
 
 async function crypt(password: string): Promise<string> {
@@ -59,17 +58,17 @@ export class ChatGateway {
   /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.JOIN_CHANNEL_LOBBY_REQUEST)
-  async joinChannelLobby(
-    @ConnectedSocket() client: Socket,
-  ) {
+  async joinChannelLobby(@ConnectedSocket() client: Socket) {
     client.join(this.channelLobby);
-    this.server.in(this.channelLobby).emit(
-      ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
-      await this.chatService.getAllPublicRooms(),
-    );
+    this.server
+      .in(this.channelLobby)
+      .emit(
+        ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
+        await this.chatService.getAllPublicRooms(),
+      );
   }
 
-  /** 
+  /**
    * JOIN ATTACHED CHANNELS LOBBY
    * SHOWS ONLY THE CHANNELS THE USER IS ATTACHED TO
    */
@@ -80,9 +79,9 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     client.emit(
-        ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
-        await this.chatService.getAllAttachedRooms(payload.userId),
-      );
+      ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
+      await this.chatService.getAllAttachedRooms(payload.userId),
+    );
   }
 
   /** JOIN DM CHANNELS LOBBY -- SHOWS ONLY THE DMs THE CURRENT USER HAS */
@@ -254,10 +253,9 @@ export class ChatGateway {
 
     await this.chatService.unattachMemberToChannel(payload.userId, room);
     client.leave(room.roomName);
-    this.server.in(room.roomName).emit(
-      ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
-      payload.userId,
-    );
+    this.server
+      .in(room.roomName)
+      .emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION, payload.userId);
   }
 
   /* JOIN ROOM */
@@ -268,7 +266,6 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const user: User = await this.userService.getById(payload.userId);
     const room = await this.chatService.getRoomWithRelations(
       { id: roomId },
       {
@@ -284,10 +281,12 @@ export class ChatGateway {
     const channelData: ChannelData = {
       channelId: room.id,
       channelName: room.channelName,
-      currentUserPrivileges: this.chatService.getUserPrivileges(room, payload.userId),
+      currentUserPrivileges: this.chatService.getUserPrivileges(
+        room,
+        payload.userId,
+      ),
     };
-    client
-      .emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, channelData);
+    client.emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, channelData);
 
     client.emit(
       ROUTES_BASE.CHAT.MESSAGE_HISTORY,
@@ -306,10 +305,7 @@ export class ChatGateway {
       .in(room.roomName)
       .emit(
         ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        await this.chatService.getAttachedUsersInChannel(
-          roomId,
-          payload.userId,
-        ),
+        await this.chatService.getAttachedUsersInChannel(roomId),
       );
   }
 
@@ -322,28 +318,24 @@ export class ChatGateway {
   ) {
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
     await client.leave(room.roomName);
-    client
-      .emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, {
-        channelId: room.id,
-        channelName: room.channelName,
-      });
+    client.emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, {
+      channelId: room.id,
+      channelName: room.channelName,
+    });
   }
 
   /** GET ATTACHED USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
-  async attachedUsersList(
-    @MessageBody() roomId: number,
-    @UserPayload() payload: any,
-  ) {
+  async attachedUsersList(@MessageBody() roomId: number) {
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
 
     this.server
       .in(room.roomName)
-      .emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, await this.chatService.getAttachedUsersInChannel(
-        roomId,
-        payload.userId,
-      ));
+      .emit(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        await this.chatService.getAttachedUsersInChannel(roomId),
+      );
   }
 
   /*MESSAGE LISTENER */
@@ -480,7 +472,9 @@ export class ChatGateway {
       payload.userId,
     );
 
-    this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, { privilege: privilege });
+    this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
+      privilege: privilege,
+    });
   }
 
   /** BAN / KICK / MUTE */
@@ -567,10 +561,7 @@ export class ChatGateway {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.CHANGE_PASSWORD_REQUEST)
   async changePassword(
-    @MessageBody() {
-      channelName,
-      newPassword,
-    }: ChangeChannelData,
+    @MessageBody() { channelName, inputPassword }: SearchChannel,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
@@ -585,14 +576,13 @@ export class ChatGateway {
         message: 'Room or User not found',
       });
 
-    if (room.owner.id !== caller.id) 
+    if (room.owner.id !== caller.id)
       return this.server.in(client.id).emit(ROUTES_BASE.ERROR, {
         message: 'You are not the owner of the channel',
       });
 
     let hashedPassword = '';
-    if (newPassword === '') return;
-      hashedPassword = await crypt(newPassword);
+    if (inputPassword !== '') hashedPassword = await crypt(inputPassword);
 
     await this.chatService.changePassword(room, hashedPassword);
 
