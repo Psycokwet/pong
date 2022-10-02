@@ -1,5 +1,6 @@
 #/bin/bash
 
+bash ./pre_build_prod.sh
 rm -rf dist_project
 mkdir dist_project -p
 FOLDERS=( frontend backend nginx )
