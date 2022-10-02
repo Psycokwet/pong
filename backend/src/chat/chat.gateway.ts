@@ -64,16 +64,16 @@ export class ChatGateway implements OnGatewayConnection {
   server: Server;
 
   async handleConnection(@ConnectedSocket() client: Socket) {
-    try {
-      const user = await this.userService.getUserFromSocket(client);
-      const userDM: Room[] = await this.chatService.getAllDMRoomsRaw(user);
+    // try { // this code is for DM notifications
+    //   const user = await this.userService.getUserFromSocket(client);
+    //   const userDM: Room[] = await this.chatService.getAllDMRoomsRaw(user);
 
-      userDM.forEach((room) => {
-        client.join(room.roomName);
-      })
-    } catch (e) {
-      console.error(e.message);
-    }
+    //   userDM.forEach((room) => {
+    //     client.join(room.roomName);
+    //   })
+    // } catch (e) {
+    //   console.error(e.message);
+    // }
   }
 
   /* JOIN CHANNEL LOBBY */

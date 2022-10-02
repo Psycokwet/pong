@@ -14,14 +14,14 @@ import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])
-  const [lastMessage, setLastMessage] = useState<Message>(undefined)
+  // const [lastMessage, setLastMessage] = useState<Message>(undefined)
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
   const [userAttachedList, setUserAttachedList] = useState<UserInterface[]>([]);
 
   const addMessage = (newElem:Message) => {
     if (connectedChannel && newElem.roomId === connectedChannel.channelId)
       setMessages((current) => [...current, newElem]);
-    setLastMessage(newElem);
+    // setLastMessage(newElem);
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, addMessage);
@@ -31,7 +31,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   }, [addMessage]);
   const resetMessages = (msgs:Message[]) => {
     setMessages(msgs);
-    setLastMessage(msgs.at(-1));
+    // setLastMessage(msgs.at(-1));
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.MESSAGE_HISTORY, resetMessages);
@@ -91,9 +91,16 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   }, [ResetUserList]);
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
-      <ChatList lastMessage={lastMessage} socket={socket} connectedChannel={connectedChannel}/>
+      <ChatList
+        // lastMessage={lastMessage}
+        socket={socket}
+        connectedChannel={connectedChannel}
+      />
       <Messages messages={messages}/>
-      <TextField socket={socket} chan={connectedChannel} />
+      <TextField
+        socket={socket}
+        chan={connectedChannel}
+      />
       <div className="row-start-1 row-span-6 col-start-5 p-x-8">
         {statusList?.map((aStatusList) => {
           return (
