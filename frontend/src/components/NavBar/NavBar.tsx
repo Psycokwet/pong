@@ -47,11 +47,6 @@ const NavBar: React.FC<NavBarProps> = ({ setDisconnected, pongUsername }) => {
       pageName: "settings",
       pageIcon: <IoMdSettings size="26" />,
     },
-    {
-      url: "/practice",
-      pageName: "practice",
-      pageIcon: <IoMdSettings size="26" />,
-    },
   ];
 
   return (

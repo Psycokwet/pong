@@ -7,9 +7,6 @@ import {
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -25,17 +22,12 @@ import SearchChannel from '../../shared/interfaces/SearchChannel';
 import { UserInterface, Status } from 'shared/interfaces/UserInterface';
 
 import * as bcrypt from 'bcrypt';
-import JoinChannel from 'shared/interfaces/JoinChannel';
 import ChannelData from 'shared/interfaces/ChannelData';
-import UserPrivileges from 'shared/interfaces/UserPrivileges';
 import Message from 'shared/interfaces/Message';
 import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
-import roomId from 'shared/interfaces/JoinChannel';
 import RoomId from 'shared/interfaces/JoinChannel';
-import { User } from 'src/user/user.entity';
 import MuteUser from 'shared/interfaces/MuteUser';
-import { SocketReadyState } from 'net';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -290,6 +282,8 @@ export class ChatGateway {
       {
         members: true,
         messages: { author: true },
+        admins: true,
+        owner: true,
       },
     );
 
@@ -298,6 +292,7 @@ export class ChatGateway {
     const channelData: ChannelData = {
       channelId: room.id,
       channelName: room.channelName,
+      currentUserPrivileges: this.chatService.getUserPrivileges(room, payload.userId),
     };
     this.server
       .in(client.id)
@@ -483,7 +478,7 @@ export class ChatGateway {
       payload.userId,
     );
 
-    this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
+    this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, { privilege: privilege });
   }
 
   /** BAN / KICK / MUTE */
@@ -570,27 +565,32 @@ export class ChatGateway {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.CHANGE_PASSWORD_REQUEST)
   async changePassword(
-    @MessageBody() data: { channelName: string; inputPassword: string },
+    @MessageBody() {
+      channelName,
+      inputPassword,
+    }: SearchChannel,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
     const caller = await this.userService.getById(payload.userId);
     const room = await this.chatService.getRoomWithRelations(
-      { channelName: data.channelName },
+      { channelName: channelName },
       { owner: true },
     );
 
-    if (room.owner.id !== caller.id) {
-      this.server.in(client.id).emit(ROUTES_BASE.ERROR, {
+    if (!caller || !room)
+      return this.server.in(client.id).emit(ROUTES_BASE.ERROR, {
+        message: 'Room or User not found',
+      });
+
+    if (room.owner.id !== caller.id) 
+      return this.server.in(client.id).emit(ROUTES_BASE.ERROR, {
         message: 'You are not the owner of the channel',
       });
-      return;
-    }
 
     let hashedPassword = '';
-
-    if (data.inputPassword !== '')
-      hashedPassword = await crypt(data.inputPassword);
+    if (inputPassword !== '')
+      hashedPassword = await crypt(inputPassword);
 
     await this.chatService.changePassword(room, hashedPassword);
 
