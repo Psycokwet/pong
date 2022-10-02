@@ -16,7 +16,7 @@ function ChatList({
     socket:Socket | undefined,
     connectedChannel: ChannelData | undefined,
 }){
-  const [chanList, setChanList] = useState<ChannelData[]>([]);
+  const [channelList, setChannelList] = useState<ChannelData[]>([]);
   const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
 
   useEffect(()=> {
@@ -26,12 +26,15 @@ function ChatList({
     socket?.emit(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_LOBBY_REQUEST);
   }, []);
 
+  const resetChannelList = (chans:ChannelData[]) => {
+    setChannelList(chans);
+  }
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, (channels: ChannelData[]) => setChanList(channels));
+    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChannelList);
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, (channels: ChannelData[]) => setChanList(channels));
+      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChannelList);
     };
-  }, []);
+  }, [resetChannelList]);
 
   const resetDirectMessageList = (directMessageChannels: ChannelData[]) => {
     setDirectMessageList(directMessageChannels);
@@ -47,17 +50,18 @@ function ChatList({
     <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end relative">
       <div>
         <ChannelMenu socket={socket}/>
-        {chanList.map((chan) => {
-          return (
-            <div key={chan.channelId}>
+        {
+          channelList.map((channel, i) =>
+            <div key={i}>
               <Channel
-                channel={chan}
+                key={channel.channelname}
+                channel={channel}
                 socket={socket}
                 connectedChannel={connectedChannel}
               />
             </div>
-          );
-        })}
+          )
+        }
       </div>
       <div>
         <DirectMessageMenu socket={socket}/>
