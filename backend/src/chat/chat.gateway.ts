@@ -30,7 +30,6 @@ import RoomId from 'shared/interfaces/JoinChannel';
 import MuteUser from 'shared/interfaces/MuteUser';
 
 async function crypt(password: string): Promise<string> {
-  console.log(password)
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
 }
 
