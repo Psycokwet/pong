@@ -81,10 +81,6 @@ function App() {
         />
       ),
     },
-    {
-      url: "/practice",
-      element: <PracticeJwt />,
-    },
   ];
 
   const [webPageRoutes, setWebPagesRoutes] = useState(init_webPageRoutes());

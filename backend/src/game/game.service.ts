@@ -46,13 +46,21 @@ export class GameService {
   private halfCanvasWidth = virtualGameData.canvasWidth / 2;
   private speedMultiplicator = 1.2;
 
-  createGame(user: User): GameRoom {
+  createEmptyGame(): GameRoom {
     const newGameRoom: GameRoom = {
-      roomName: `game:${user.login42}:${uuidv4()}`,
+      roomName: "",
       started: false,
+      isChallenge: false,
       gameData: structuredClone(GameService.defaultGameData), // deep clone
       spectatorsId: [],
     };
+
+    return newGameRoom;
+  }
+
+  createGame(user: User): GameRoom {
+    const newGameRoom: GameRoom = this.createEmptyGame();
+    newGameRoom.roomName = `game:${user.login42}:${uuidv4()}`;
     newGameRoom.gameData.player1.userId = user.id;
     newGameRoom.gameData.player1.pongUsername = user.pongUsername;
 
@@ -63,7 +71,7 @@ export class GameService {
 
   matchMaking(user: User): GameRoom {
     const gameToLaunch: GameRoom = GameService.gameRoomList.find(
-      (gameRoom) => !gameRoom.started,
+      (gameRoom) => !gameRoom.started && !gameRoom.isChallenge,
     );
 
     if (!gameToLaunch) return this.createGame(user);
@@ -270,6 +278,32 @@ export class GameService {
   public removeGameFromGameRoomList(gameRoomToRemove: GameRoom): void {
     GameService.gameRoomList = GameService.gameRoomList.filter(
       (gameRoom) => gameRoom.roomName !== gameRoomToRemove.roomName,
+    );
+  }
+
+  public createChallenge(user: User, opponent: User) {
+    const newChallengeRoom: GameRoom = this.createEmptyGame();
+
+    newChallengeRoom.roomName = `challenge:${user.login42}:${uuidv4()}`;
+    newChallengeRoom.isChallenge = true;
+    newChallengeRoom.gameData.player1.userId = user.id;
+    newChallengeRoom.gameData.player1.pongUsername = user.pongUsername;
+    newChallengeRoom.gameData.player2.userId = opponent.id;
+    newChallengeRoom.gameData.player2.pongUsername = opponent.pongUsername;
+
+    GameService.gameRoomList = [...GameService.gameRoomList, newChallengeRoom];
+
+    return newChallengeRoom;
+  }
+
+  public findUserChallengeRoom(userId): GameRoom[] {
+    return GameService.gameRoomList.filter(
+      (gameRoom) => 
+        !gameRoom.started
+        &&
+        gameRoom.isChallenge
+        &&
+        gameRoom.gameData.player2.userId === userId,
     );
   }
 }
