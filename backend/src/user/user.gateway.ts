@@ -42,23 +42,19 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.userService.getUserFromSocket(client);
 
       if (!user) return;
-      const isRegistered = UsersService.userWebsockets.find(
-        (element) => element.userId === user.id,
-      );
 
-      if (!isRegistered) {
-        const newWebsocket = { userId: user.id, socketId: client.id };
-        UsersService.userWebsockets = [
-          ...UsersService.userWebsockets,
-          newWebsocket,
-        ];
-        const newUserConnected: UserInterface = {
-          id: user.id,
-          pongUsername: user.pongUsername,
-          status: Status.ONLINE,
-        };
-        this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, newUserConnected);
-      }
+      const newWebsocket = { userId: user.id, socketId: client.id };
+      UsersService.userWebsockets = [
+        ...UsersService.userWebsockets,
+        newWebsocket,
+      ];
+      const newUserConnected: UserInterface = {
+        id: user.id,
+        pongUsername: user.pongUsername,
+        status: Status.ONLINE,
+      };
+      this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, newUserConnected);
+      
     } catch (e) {
       console.error(e.message);
     }
@@ -136,6 +132,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const orderedFriendsList = await this.userService.getFriendsList(caller);
 
+    console.log(orderedFriendsList)
     orderedFriendsList.map((user: UserInterface) => {
       if (user.status === Status.ONLINE && this.gameService.findPlayerRoom(user.id)) {
         user.status = Status.PLAYING;
@@ -143,9 +140,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return user;
     })
 
-    this.server
-      .in(client.id)
-      .emit(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, orderedFriendsList);
+    client.emit(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, orderedFriendsList);
   }
 
   @UseGuards(JwtWsGuard)
