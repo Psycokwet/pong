@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "pre_dev": "bash ./prepare_dev.sh",
     "dev": "docker-compose up",
     "prod": "docker-compose up --build",
     "purge": "docker system prune -fa && docker volume prune",
