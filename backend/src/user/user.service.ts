@@ -7,7 +7,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -16,24 +15,18 @@ import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
-import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import { Socket } from 'socket.io';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService, TokenPayload } from 'src/auth/auth.service';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
-import { UserGateway } from './user.gateway';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import { Status, UserInterface } from 'shared/interfaces/UserInterface';
-import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { createReadStream } from 'fs';
-import { join } from 'path';
 import UserProfile from 'shared/interfaces/UserProfile';
-
-// This should be a real class/interface representing a user entity
-export type UserLocal = { userId: number; login42: string; password: string };
+import { Blocked } from 'src/blocked/blocked.entity';
+import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -60,10 +53,28 @@ export class UsersService {
 
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
+    @InjectRepository(Blocked)
+    private blockedRepository: Repository<Blocked>,
+
     private localFilesService: LocalFilesService,
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
   ) {}
+
+  public static userWebsockets: UsersWebsockets[] = [];
+
+  getStatusFromUser(user: User, payload: TokenPayload): ConnectionStatus {
+    let result: ConnectionStatus = ConnectionStatus.Unknown;
+    if (user.isUserFullySignedUp === false)
+      return ConnectionStatus.SignupRequested;
+    if (user.isTwoFactorAuthenticationActivated === false)
+      return ConnectionStatus.Connected;
+    if (user.isTwoFactorAuthenticationActivated === true)
+      if (payload.isTwoFactorAuthenticated) return ConnectionStatus.Connected;
+      else return ConnectionStatus.TwoFactorAuthenticationRequested;
+
+    return result;
+  }
 
   async findOne(login42: string): Promise<User> {
     const user = await this.usersRepository.findOneBy({
@@ -87,6 +98,7 @@ export class UsersService {
       email: dto.email,
       xp: 0,
       isTwoFactorAuthenticationActivated: false,
+      isUserFullySignedUp: false,
     });
 
     try {
@@ -154,17 +166,10 @@ export class UsersService {
   }
 
   async getUserProfile(user: User) {
-    let profilePicture: StreamableFile | null = null;
-    try {
-      const picture_path = await this.getPicture(user);
-      const file = createReadStream(join(process.cwd(), `${picture_path}`));
-      profilePicture = new StreamableFile(file);
-    } catch (error) {}
     const profileElements: UserProfile = {
       pongUsername: user.pongUsername,
       userRank: await await this.getUserRank(user),
       userHistory: await this.getUserHistory(user),
-      profilePicture: profilePicture,
     };
     return profileElements;
   }
@@ -225,7 +230,9 @@ export class UsersService {
       games: games
         .map((game) => {
           return {
-            time: game.createdAt.toString().slice(4, 24),
+            time: game.createdAt.toLocaleString('fr-FR', {
+              timeZone: 'Europe/Paris',
+            }),
             opponent:
               game.player1.id === user.id
                 ? game.player2.pongUsername
@@ -311,14 +318,14 @@ export class UsersService {
 
     return user.isTwoFactorAuthenticationActivated;
   }
-  async setTwoFactorAuthentication(login42: string, value: boolean) {
-    const user = await this.findOne(login42);
 
-    /* We use TypeORM's update function to update our entity */
+  async setTwoFactorAuthentication(user: User, value: boolean) {
     await this.usersRepository.update(user.id, {
       isTwoFactorAuthenticationActivated: value,
+      isUserFullySignedUp: true,
     });
   }
+
   async getPongUsername(login42: string) {
     const user = await this.findOne(login42);
     return { pongUsername: user.pongUsername };
@@ -331,11 +338,11 @@ export class UsersService {
 
   async setPongUsername(dto: pongUsernameDto, login42: string) {
     const user = await this.findOne(login42);
-
     /* We use TypeORM's update function to update our entity */
     try {
       await this.usersRepository.update(user.id, {
         pongUsername: dto.newPongUsername,
+        isUserFullySignedUp: true,
       });
     } catch (e) {
       throw new BadRequestException({ error: 'Nickname already taken' });
@@ -370,6 +377,7 @@ export class UsersService {
     const picture = await this.localFilesService.saveLocalFileData(fileData);
     await this.usersRepository.update(user.id, {
       pictureId: picture.id,
+      isUserFullySignedUp: true,
     });
   }
 
@@ -393,7 +401,7 @@ export class UsersService {
   }
 
   getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
-    return UserGateway.userWebsockets.find(
+    return UsersService.userWebsockets.find(
       (receiver) => receiver.userId === receiverId,
     );
   }
@@ -403,5 +411,64 @@ export class UsersService {
 
     if (isConnected) return Status.ONLINE;
     else return Status.OFFLINE;
+  }
+
+  async addBlockedUser(userToBlock: User, caller: User) {
+    /* Checking if the caller is blocking himself (I think this should never 
+      happen on the front side) */
+    if (caller.id === userToBlock.id) {
+      throw new BadRequestException({
+        error: 'You cannot block yourself',
+      });
+    }
+
+    /* Then we check if the person the caller wants to block is already
+      in our blocked list and throw a 400 if they are */
+    const doubleBlockCheck = await this.blockedRepository.findOne({
+      relations: {
+        blockedUser: true,
+      },
+      where: { blockedId: userToBlock.id, userId: caller.id },
+    });
+
+    if (doubleBlockCheck) {
+      throw new BadRequestException({
+        error: 'User is already blocked',
+      });
+    }
+
+    /* Finally the profile we want to block is registered in our Blocked db */
+    const addBlockedUser = Blocked.create({
+      blockedId: userToBlock.id,
+      userId: caller.id,
+      blockedUser: userToBlock,
+    });
+
+    await addBlockedUser.save();
+  }
+
+  async getBlockedUsersList(caller: User): Promise<
+    | {
+        id: number;
+        pongUsername: string;
+      }[]
+    | undefined
+  > {
+    const rawBlockedList: Blocked[] = await this.blockedRepository.find({
+      relations: {
+        blockedUser: true,
+      },
+      where: { userId: caller.id },
+    });
+
+    const orderedBlockedList: { id: number; pongUsername: string }[] =
+      rawBlockedList.map((blocked: Blocked) => {
+        return {
+          id: blocked.blockedUser.id,
+          pongUsername: blocked.blockedUser.pongUsername,
+        };
+      });
+
+    return orderedBlockedList;
   }
 }

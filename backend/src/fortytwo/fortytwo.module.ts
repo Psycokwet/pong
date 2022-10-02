@@ -5,19 +5,21 @@ import { User } from 'src/user/user.entity';
 import { Friend } from 'src/friend_list/friend.entity';
 import { UsersModule } from 'src/user/user.module';
 import { FortyTwoController } from './fortytwo.controller';
-import { JwtAuthModule } from './jwt.module';
-import { AuthModule } from './auth.module';
 import { FortyTwoStrategy } from './fortytwo.strategy';
+import { JwtAuthModule } from 'src/auth/jwt.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { FortytwoService } from './fortytwo.service';
+import { TwoFactorAuthModule } from 'src/two-factor-auth/two-factor-auth.module';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([User, Game, Friend]),
+    JwtAuthModule,
     UsersModule,
     AuthModule,
-    JwtAuthModule,
-    TypeOrmModule.forFeature([User, Game, Friend]),
+    TwoFactorAuthModule,
   ],
   controllers: [FortyTwoController],
-  providers: [FortyTwoStrategy],
-  exports: [FortyTwoStrategy],
+  providers: [FortyTwoStrategy, FortytwoService],
 })
 export class FortyTwoModule {}

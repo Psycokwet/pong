@@ -17,7 +17,7 @@ const Challenge = ({
   user:UserInterface;
 }) => {
   const challenge = () => {
-    socket?.emit(ROUTES_BASE.CHAT.CREATE_CHALLENGE_REQUEST, user.id)
+    socket?.emit(ROUTES_BASE.GAME.CREATE_CHALLENGE_REQUEST, user.id)
   }
   return (
     <MenuItem className={ menuSettings.challenge ? "" : "hidden" }>

@@ -2,73 +2,126 @@ import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import Position from "/shared/interfaces/Position";
+import { GameStep } from "/src/components/PongGame/GameStep.enum";
 
 const GameLobby = (
   {
     socket,
-    upgradeStep,
-    canvasSize,
+    setStep,
+    setGameRoom,
   }:
   {
-    socket: Socket;
-    upgradeStep: () => void;
-    canvasSize: Position;
+    socket: Socket,
+    setStep: any,
+    setGameRoom: any,
   }
 ) => {
-  
-  const [spectableGames, setSpectableGames] = useState<GameRoom[]>([])
+  const [spectableGameList, setSpectableGameList] = useState<GameRoom[]>([])
+  const [challengeList, setChallangeList] = useState<GameRoom[]>([])
 
   /** GAME JOIN */
   const handleJoinGame = () => {
-    socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST, canvasSize);
-    upgradeStep();
+    socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST);
+    setStep(GameStep.QUEUE);
   }
   /** END GAME JOIN */
 
   const handleCreateGame = () => {
-    socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST, canvasSize);
-    upgradeStep();
+    socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST);
+    setStep(GameStep.QUEUE);
   }
 
   /** SPECTATE */
   const handleSpectate = (roomName: string) => {
     socket?.emit(ROUTES_BASE.GAME.JOIN_SPECTATE_REQUEST, roomName);
-    upgradeStep()
+    setStep(GameStep.QUEUE)
   }
   /** END SPECTACTE */
 
-  useEffect(() => {
-    socket?.emit(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST)
-  }, [socket]);
-
+  /** CHALLENGE */
+  const handleAcceptChallenge = (roomName: string) => {
+    socket?.emit(ROUTES_BASE.GAME.CHALLENGE_ACCEPT_REQUEST, roomName);
+    setStep(GameStep.QUEUE)
+  }
+  /** END CHALLENGE */
+  
   /** UPDATE SPECTABLE GAMES */
-  const updateSpectableGames = (spectableGames: GameRoom[]) => {
-    setSpectableGames(spectableGames);
-  };
   useEffect(() => {
-    socket?.on(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
+    socket?.emit(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST);
+    socket?.emit(ROUTES_BASE.GAME.CHALLENGE_LIST_REQUEST);
+
+    socket?.on(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, (spectableGameList: GameRoom[]) => {
+      setSpectableGameList(spectableGameList);
+    });
+    socket?.on(ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM, (challengeList: GameRoom[]) => {
+      setChallangeList(challengeList);
+    });
     return () => {
-      socket?.off(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, updateSpectableGames);
+      socket?.off(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, (spectableGameList: GameRoom[]) => {
+        setSpectableGameList(spectableGameList);
+      });
+      socket?.off(ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM, (challengeList: GameRoom[]) => {
+        setChallangeList(challengeList);
+      });
     };
-  }, [updateSpectableGames]);
+  }, []);
   /** END UPDATE SPECTABLE GAMES */
 
-  return <div>
-    <h2>PLAY</h2>
-    <button onClick={handleCreateGame}>Create game</button>
-    <div></div>
-    <button onClick={handleJoinGame}>Join game</button>
-    <br />
+  const updateStep = (gameRoom: GameRoom) => {
+    if (gameRoom.started === true)
+      setStep(GameStep.PLAYING);
+    else
+      setStep(GameStep.QUEUE);
+    setGameRoom(gameRoom);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.GAME.UPDATE_GAME, updateStep);
+    return () => {
+      socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, updateStep);
+    };
+  }, []);
 
-    <h2>SPECTATE</h2>
-    {
-      spectableGames.map(tempGameRoom => 
-        <div key={tempGameRoom.roomName}>
-          <button onClick={() => handleSpectate(tempGameRoom.roomName)}>{tempGameRoom.roomName}</button>
-        </div>
-      )
-    }
+  return <div className="h-7/8 w-full grid content-around">
+    <div className="flex justify-around">
+      <button
+        className="h-1/8 bg-sky-500 hover:bg-sky-700 lg:text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50 max-h-20"
+        onClick={handleCreateGame}
+      >Create game</button>
+      <button
+        className="h-1/8 bg-sky-500 hover:bg-sky-700 lg:text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50 max-h-20"
+        onClick={handleJoinGame}
+      >Join game</button>
+    </div>
+    <div className="grid justify-around">
+      <h2 className="text-center">CHALLENGE</h2>
+      <div>
+        {
+          challengeList.map(challenge => 
+            <div key={challenge.roomName}>
+              <button 
+                className="bg-sky-500 hover:bg-sky-700 rounded-3xl shadow-md shadow-blue-500/50"
+                onClick={() => handleAcceptChallenge(challenge.roomName)}
+              >Accept challenge from {challenge.gameData.player1.pongUsername}</button>
+            </div>
+          )
+        }
+      </div>
+    </div>
+    <div className="grid justify-around">
+      <h2 className="text-center">SPECTATE</h2>
+      <div>
+        {
+          spectableGameList.map(gameRoom => 
+            <div key={gameRoom.roomName}>
+              <button 
+                className="bg-sky-500 hover:bg-sky-700 rounded-3xl shadow-md shadow-blue-500/50"
+                onClick={() => handleSpectate(gameRoom.roomName)}
+              >{gameRoom.gameData.player1.pongUsername} VS {gameRoom.gameData.player2.pongUsername}</button>
+            </div>
+          )
+        }
+      </div>
+    </div>
   </div>
 } 
 

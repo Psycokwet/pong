@@ -2,13 +2,12 @@ import { FULL_ROUTE } from "../../shared/httpsRoutes/routes";
 
 export const PREFIX =
   import.meta.env.VITE_CONTEXT == "MOCKUP"
-    ? "http://localhost:8080/api_mockup"
-    : "http://localhost:8080/api";
+    ? import.meta.env.VITE_PONG_URL_BACK_MOCKUP
+    : import.meta.env.VITE_PONG_URL_BACK;
 export enum HeadersFields {
   ContentType = "Content-Type",
   Authorization = "Authorization",
 }
-
 export class Api {
   hello() {
     return fetch(`${PREFIX}${FULL_ROUTE.ROOT.ENDPOINT}`, {
@@ -21,15 +20,23 @@ export class Api {
       method: "GET",
     });
   }
-  
+
   setPicture(data: FormData) {
     return fetch(`${PREFIX}${FULL_ROUTE.USER.SET_PICTURE}`, {
       method: "POST",
       body: data,
     });
   }
-
-  getPicture() {
+  getPicture(pongUsername: string | null) {
+    if (pongUsername)
+      return fetch(
+        `${PREFIX}${FULL_ROUTE.USER.GET_PICTURE}` +
+          "\\?" +
+          new URLSearchParams({ pongUsername }),
+        {
+          method: "GET",
+        }
+      );
     return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_PICTURE}`, {
       method: "GET",
     });
@@ -48,28 +55,6 @@ export class Api {
     });
   }
 
-  addFriend(login42: string, friend_to_add: string) {
-    let headers = new Headers();
-    headers.set(HeadersFields.ContentType, "application/json");
-    return fetch(`${PREFIX}${FULL_ROUTE.USER.ADD_FRIEND}`, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify({ login42, friend_to_add }),
-    });
-  }
-
-  getFriendList() {
-    return fetch(
-      `${PREFIX}${FULL_ROUTE.USER.GET_FRIEND_LIST}` +
-        "?" +
-        new URLSearchParams({ login42 }),
-      {
-        method: "GET",
-        // headers: this._headers,
-      }
-    );
-  }
-
   get_login42() {
     return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_LOGIN42}`, {
       method: "GET",
@@ -78,13 +63,10 @@ export class Api {
   }
 
   get_pong_username() {
-    return fetch(
-      `${PREFIX}${FULL_ROUTE.USER.GET_PONG_USERNAME}` ,
-      {
-        method: "GET",
-        // headers: this._headers,
-      }
-    );
+    return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_PONG_USERNAME}`, {
+      method: "GET",
+      // headers: this._headers,
+    });
   }
   set_pong_username(newPongUsername: string) {
     let headers = new Headers();
@@ -95,7 +77,7 @@ export class Api {
       body: JSON.stringify({ newPongUsername }),
     });
   }
-  
+
   get_user_rank() {
     return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_USER_RANK}`, {
       method: "GET",
@@ -113,6 +95,15 @@ export class Api {
       method: "POST",
       headers: headers,
       body: JSON.stringify({ player1, player2, winner }),
+    });
+  }
+  check_2fa(code: string) {
+    let headers = new Headers();
+    headers.set(HeadersFields.ContentType, "application/json");
+    return fetch(`${PREFIX}${FULL_ROUTE.AUTH.CHECK_2FA}`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({ code }),
     });
   }
   turn_on_2fa(code: string) {
