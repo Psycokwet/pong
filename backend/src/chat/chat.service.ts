@@ -85,6 +85,18 @@ export class ChatService {
     return attachedRoomList;
   }
 
+  public async getAllDMRoomsRaw(user: User): Promise<Room[]> {
+    return await this.roomsRepository
+      .find({
+        where: {
+          members: {
+            id: user.id,
+          },
+          isDM: true,
+        },
+      });
+  }
+
   public async getAllDMRooms(userId: number) {
     const user = await this.userService.getById(userId);
 

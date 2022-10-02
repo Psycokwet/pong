@@ -36,6 +36,7 @@ import RoomId from 'shared/interfaces/JoinChannel';
 import { User } from 'src/user/user.entity';
 import MuteUser from 'shared/interfaces/MuteUser';
 import { SocketReadyState } from 'net';
+import Room from './room.entity';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -52,7 +53,7 @@ async function passwordCompare(
   transport: ['websocket'],
   cors: '*/*',
 })
-export class ChatGateway {
+export class ChatGateway implements OnGatewayConnection {
   private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,
@@ -61,6 +62,19 @@ export class ChatGateway {
 
   @WebSocketServer()
   server: Server;
+
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    try {
+      const user = await this.userService.getUserFromSocket(client);
+      const userDM: Room[] = await this.chatService.getAllDMRoomsRaw(user);
+
+      userDM.forEach((room) => {
+        client.join(room.roomName);
+      })
+    } catch (e) {
+      console.error(e.message);
+    }
+  }
 
   /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
