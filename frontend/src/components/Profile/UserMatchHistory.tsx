@@ -22,17 +22,17 @@ const UserMatchHistory: React.FC<UserMatchHistoryProps> = ({ userHistory }) => {
         </tr>
       </thead>
       <tbody>
-      {userHistory.map((oneGame, id) => {
-        while (id <= MAX_SHOWN_GAME)
-        return (
-          <tr>
-              <td>{oneGame.time}</td>
-              <td>{oneGame.opponent}</td>
-              <td>{oneGame.winner}</td>
-            </tr>
-          );
+        {userHistory.map((oneGame, id) => {
+          while (id <= MAX_SHOWN_GAME)
+            return (
+              <tr>
+                <td>{oneGame.time}</td>
+                <td>{oneGame.opponent}</td>
+                <td>{oneGame.winner}</td>
+              </tr>
+            );
         })}
-        </tbody>
+      </tbody>
     </table>
   );
 };
