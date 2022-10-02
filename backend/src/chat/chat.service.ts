@@ -1,19 +1,16 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
 } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
 import {
   FindOptionsRelations,
-  FindOptionsUtils,
   FindOptionsWhere,
-  RelationQueryBuilder,
   Repository,
 } from 'typeorm';
 import { User } from 'src/user/user.entity';
@@ -23,9 +20,7 @@ import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
-import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import { Muted } from './muted.entity';
-import { filter } from 'rxjs';
 @Injectable()
 export class ChatService {
   constructor(
