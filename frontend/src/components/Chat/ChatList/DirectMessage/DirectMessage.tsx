@@ -21,10 +21,10 @@ const DirectMessage: React.FC<Props> = ({socket, channel, message, connectedChan
   let style:string = "flex flex-row gap-4 text-lg font-semibold py-4 px-10 hover:bg-slate-800 cursor-pointer display-block break-all";
   if (connectedChannel !== undefined && connectedChannel.channelId === channel.channelId)
     style=style + " bg-slate-600";
-  if (connectedChannel !== undefined &&
-        message.roomId === channel.channelId &&
-        lastMessage !== message)
-      setLastMessage(message);
+
+  if (message.roomId === channel.channelId && lastMessage !== message)
+    setLastMessage(message);
+
   return (
     <div className={style}
       onClick={handleClick}>

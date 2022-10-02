@@ -118,7 +118,6 @@ export class ChatGateway {
     userId: number,
   ) {
     const DMList = await this.chatService.getAllDMRooms(userId);
-    console.log("forced :", client.id, userId, DMList)
     client
       .emit(
         ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS,
