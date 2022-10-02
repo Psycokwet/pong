@@ -31,6 +31,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState<CurrentUser>({
     status: ConnectionStatus.Unknown,
   } as CurrentUser);
+
   const [socket, setSocket] = useState<Socket>();
 
   const webPageRoutes = [
@@ -105,10 +106,18 @@ function App() {
         <div className="h-screen">
           <NavBar
             setDisconnected={() =>
-              setCurrentUser((current) => {
+              setCurrentUser((current: CurrentUser) => {
                 return { ...current, status: ConnectionStatus.Disconnected };
               })
             }
+
+            pongUsername={(newPongUsername: string) => {
+              setCurrentUser((current: CurrentUser) => {
+                return { ...current, pongUsername: newPongUsername };
+              });
+              return (currentUser.pongUsername);
+            }}
+
           />
           <FriendList socket={socket} />
 
