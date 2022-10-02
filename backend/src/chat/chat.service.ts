@@ -307,7 +307,7 @@ export class ChatService {
     await room.save();
   }
 
-  async getAttachedUsersInChannel(roomId: number, selfId: number) {
+  async getAttachedUsersInChannel(roomId: number) {
     const room = await this.getRoomWithRelations(
       { id: roomId },
       { members: true },

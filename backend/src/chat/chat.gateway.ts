@@ -268,7 +268,6 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const user: User = await this.userService.getById(payload.userId);
     const room = await this.chatService.getRoomWithRelations(
       { id: roomId },
       {
@@ -306,10 +305,7 @@ export class ChatGateway {
       .in(room.roomName)
       .emit(
         ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        await this.chatService.getAttachedUsersInChannel(
-          roomId,
-          payload.userId,
-        ),
+        await this.chatService.getAttachedUsersInChannel(roomId),
       );
   }
 
@@ -332,18 +328,15 @@ export class ChatGateway {
   /** GET ATTACHED USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
-  async attachedUsersList(
-    @MessageBody() roomId: number,
-    @UserPayload() payload: any,
-  ) {
+  async attachedUsersList(@MessageBody() roomId: number) {
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
 
     this.server
       .in(room.roomName)
-      .emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, await this.chatService.getAttachedUsersInChannel(
-        roomId,
-        payload.userId,
-      ));
+      .emit(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        await this.chatService.getAttachedUsersInChannel(roomId)
+      );
   }
 
   /*MESSAGE LISTENER */
