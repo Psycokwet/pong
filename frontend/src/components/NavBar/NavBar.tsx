@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { CurrentUser } from "../../../../backend/shared/interfaces/CurrentUser";
 
 // Components
 import APage from "./APage";
@@ -19,9 +19,15 @@ type NavBarProps = {
 };
 
 /***************** Component NavBar ******************************************/
-const NavBar: React.FC<NavBarProps> = ({ setDisconnected, pongUsername }) => {
-  
-  
+const NavBar: React.FC<NavBarProps> = ({
+  setDisconnected,
+  pongUsername,
+}) => {
+  const [localPongUsername, setLocalPongUsername] = useState(pongUsername);
+  useEffect(() => {
+    setLocalPongUsername(pongUsername);
+  }, [pongUsername]);
+
   /***************** List of Pages ******************************************/
   const NavBarPageList = [
     {
@@ -40,8 +46,8 @@ const NavBar: React.FC<NavBarProps> = ({ setDisconnected, pongUsername }) => {
       pageIcon: <FaComments size="28" />,
     },
     {
-      url: `/profile/${pongUsername}`, 
-      pageName: `profile ${pongUsername}`,
+      url: `/profile/${localPongUsername}`,
+      pageName: `profile ${localPongUsername}`,
       pageIcon: <FaUser size="26" />,
     },
     {
@@ -55,6 +61,7 @@ const NavBar: React.FC<NavBarProps> = ({ setDisconnected, pongUsername }) => {
       pageIcon: <IoMdSettings size="26" />,
     },
   ];
+
   return (
     <div>
       <nav className="border-b-8 border-sky-600 text-white h-1/8 h-min">

@@ -119,18 +119,11 @@ function App() {
         <div className="h-screen">
           <NavBar
             setDisconnected={() =>
-              setCurrentUser((current: CurrentUser) => {
+              setCurrentUser((current) => {
                 return { ...current, status: ConnectionStatus.Disconnected };
               })
             }
-
-            pongUsername={(newPongUsername: string) => {
-              setCurrentUser((current: CurrentUser) => {
-                return { ...current, pongUsername: newPongUsername };
-              });
-              return (currentUser.pongUsername);
-            }}
-
+            pongUsername={currentUser.pongUsername}
           />
           <FriendList socket={socket} />
 
