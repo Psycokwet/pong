@@ -93,18 +93,37 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const friend = await this.userService.findOneByPongUsername(
       friendToAdd.pongUsername,
     );
-
+    
     if (!friend) {
-      throw new BadRequestException({ error: 'User not found' });
+      throw new WsException({ error: 'User not found' });
+    }
+    /* Checking if the caller is adding himself (I think this should never 
+    happen on the front side) */
+    if (payload.userId === friend.id) {
+      throw new WsException({
+        error: 'You cannot add yourself',
+      });
     }
 
     const caller = await this.userService.getById(payload.userId);
 
     await this.userService.addFriend(friend, caller);
 
-    this.server.in(client.id).emit(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, {
-      newFriend: friendToAdd.pongUsername,
-    });
+    const friendUsersWebsockets: UsersWebsockets = UsersService.userWebsockets
+      .find((usersWebsockets: UsersWebsockets) => usersWebsockets.userId === friend.id);
+
+    let friendStatus: Status = Status.OFFLINE;
+    
+    if (friendUsersWebsockets) {
+      const friendSocket = this.server.sockets.sockets.get(friendUsersWebsockets.socketId);
+      friendStatus = Status.ONLINE;
+    }
+    const newFriend: UserInterface = {
+      id: friend.id,
+      pongUsername: friend.pongUsername,
+      status: friendStatus,
+    };
+    client.emit(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, newFriend);
   }
 
   @UseGuards(JwtWsGuard)
