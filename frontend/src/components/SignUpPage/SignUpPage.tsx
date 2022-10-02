@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { Api } from "../../api/api";
 import ProfilePic from "../Common/ProfilePic";
 
@@ -34,18 +35,25 @@ const SignUpPage: React.FC<SignUpProps> = ({
       fileData.append("file", selectedFile);
       await api.setPicture(fileData).then((res: Response) => {
         if (res.status >= 200 && res.status < 300) {
-          console.log(`Set picture is ok, status is: ${res.status}`);
+          toast.success("Oh this is a nice new profile pic :D");
           should_update = true;
-        } else console.log("set picture is NOT Ok");
+        } else toast.error("Sorry, your picture couldn't be uploaded");
       });
     }
 
-    if (localPongUsername.length <= MAX_CHAR) {
+    if (
+      localPongUsername.length <= MAX_CHAR &&
+      localPongUsername != pongUsername
+    ) {
       await api.set_pong_username(localPongUsername).then((res: Response) => {
         if (res.status >= 200 && res.status < 300) {
-          console.log(`Set pongUsername is ok, status is: ${res.status}`);
+          toast.success(
+            "Hello " +
+              localPongUsername +
+              " ! Nice to get to know you better :D"
+          );
           should_update = true;
-        } else console.log("set pongUsername is NOT Ok");
+        } else toast.error("Sorry, your new username hasn't been accepted");
       });
     }
 
@@ -114,7 +122,6 @@ const SignUpPage: React.FC<SignUpProps> = ({
       {/* Testing Zone - to delete later - don't forget to scroll down */}
       {/* <div>
         <PictureGetter />
-        <NickNameGetter />
       </div> */}
     </div>
   );
