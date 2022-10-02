@@ -91,10 +91,14 @@ export class UserController {
     @Query() query: { pongUsername: string },
   ): Promise<StreamableFile> {
     let user: User = null;
+    console.log(req);
     if (!query.pongUsername)
       user = await this.usersService.findOne(req.user.login42);
     else
       user = await this.usersService.findOneByPongUsername(query.pongUsername);
+    if (!user) {
+      throw new BadRequestException({ error: 'User not found' });
+    }
     const picture_path = await this.usersService.getPicture(user);
 
     // https://docs.nestjs.com/techniques/streaming-files

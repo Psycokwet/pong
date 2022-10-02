@@ -27,7 +27,7 @@ export class Api {
       body: data,
     });
   }
-  getPicture(pongUsername: string | undefined) {
+  getPicture(pongUsername: string | undefined | null) {
     if (pongUsername)
       return fetch(
         `${PREFIX}${FULL_ROUTE.USER.GET_PICTURE}` +
