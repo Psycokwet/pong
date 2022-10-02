@@ -87,16 +87,27 @@ export class TwoFactorAuthController {
     return this.twoFactorAuthService.pipeQrCodeStream(response, otpauthUrl);
   }
 
-  // @Post(ROUTES_BASE.AUTH.CHECK_2FA)
-  // @UseGuards(JwtAuthGuard)
-  // async check_2FA(
-  //   @Res() response: Response,
-  //   @Req() request: RequestWithUser,
-  // ) {
-  //   const { otpauthUrl } =
-  //     await this.twoFactorAuthService.generateTwoFactorAuthenticationSecret(
-  //       request.user,
-  //     );
-  //   return this.twoFactorAuthService.pipeQrCodeStream(response, otpauthUrl);
-  // }
+  @Post(ROUTES_BASE.AUTH.CHECK_2FA)
+  @UseGuards(JwtAuthGuard)
+  async check_2FA(
+    @Res({ passthrough: true }) response,
+    @Body() { code }: TwoFactorAuthCodeDto,
+    @Req() request: RequestWithUser,
+  ) {
+    const isValid = await this.twoFactorAuthService.is2FACodeValid(
+      code,
+      request.user,
+    );
+    if (!isValid) {
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+
+    response.setHeader(
+      'Set-Cookie',
+      await this.twoFactorAuthService.getCookiesWith2FAValue(
+        request.user,
+        isValid,
+      ),
+    );
+  }
 }
