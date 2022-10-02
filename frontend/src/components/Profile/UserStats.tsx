@@ -12,7 +12,7 @@ const UserStats: React.FC<UserStatsProps> = ({ nbGames, nbWins }) => {
   let nbLosts = nbGames - nbWins;
   const dataMock = [
     { title: "Wins", value: nbWins, color: "#158727" },
-    { title: "Looses", value: nbLosts, color: "#8B0000" },
+    { title: "Losses", value: nbLosts, color: "#8B0000" },
   ];
   const data = dataMock.map((entry, i) => {
     if (hovered === i) {
@@ -24,10 +24,8 @@ const UserStats: React.FC<UserStatsProps> = ({ nbGames, nbWins }) => {
     return entry;
   });
 
-  return (
-    nbGames !== 0 ? (
-
-      <PieChart
+  return nbGames !== 0 ? (
+    <PieChart
       data={data}
       lineWidth={40}
       startAngle={75}
@@ -51,8 +49,9 @@ const UserStats: React.FC<UserStatsProps> = ({ nbGames, nbWins }) => {
       onMouseOut={() => {
         setHovered(undefined);
       }}
-      />
-      ) : (<h1>This player has no game yet</h1>)
+    />
+  ) : (
+    <h1>This player has no game yet</h1>
   );
 };
 
