@@ -11,12 +11,13 @@ import { statusList } from "../Common/StatusList"
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { Status } from "/shared/interfaces/UserStatus";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
-import ChannelUserListByStatus from "./ChatList/UserInChannelList/UserListByStatus";
+import ChannelUserListByStatus from "./ChatList/UserInChannelList/ChannelUserListByStatus";
 
 function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
   const [attachedUserList, setAttachedUserList] = useState<ChannelUserInterface[]>([]);
+  const [userPrivilege, setPrivilege] = useState<number>(Privileges.MEMBER);
 
   const addMessage = (newElem:Message) => {
     setMessages(messages => [...messages, newElem]);
@@ -111,9 +112,24 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     setAttachedUserList([]);
   }
 
+  const setupPrivilege = (val: { privilege: Privileges }) => {
+    setPrivilege(val.privilege);
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupPrivilege);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupPrivilege);
+  }}, []);
+
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
-      <ChatList handleLeaveChannel={handleLeaveChannel} msg={messages[messages.length - 1]} socket={socket} connectedChannel={connectedChannel}/>
+      <ChatList
+        handleLeaveChannel={handleLeaveChannel}
+        msg={messages[messages.length - 1]}
+        socket={socket}
+        connectedChannel={connectedChannel}
+        userPrivilege={userPrivilege}
+      />
       <Messages messages={messages}/>
       {
         connectedChannel ?
@@ -125,6 +141,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
         {statusList?.map((aStatusList) => {
           return (
             <ChannelUserListByStatus
+              userPrivilege={userPrivilege}
               key={aStatusList.status}
               userList={attachedUserList}
               inputFilter={""}
@@ -132,10 +149,10 @@ function Chat ({socket}:{socket:Socket|undefined}) {
               socket={socket}
               roomId={connectedChannel?.roomId}
               menuSettings={({
-                challenge:aStatusList.status===Status.ONLINE,
-                watch:aStatusList.status===Status.PLAYING,
-                privileges:Privileges.MEMBER,
-                friend:false,
+                challenge:aStatusList.status === Status.ONLINE,
+                watch:aStatusList.status === Status.PLAYING,
+                privileges: userPrivilege,
+                friend: false,
               })}
             />
           );

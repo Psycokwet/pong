@@ -51,11 +51,13 @@ function App() {
   ];
 
   useEffect(() => {
-    const newSocket = io(import.meta.env.VITE_PONG_URL, {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-    setSocket(newSocket);
+    return () => {
+      const newSocket = io(import.meta.env.VITE_PONG_URL, {
+        transports: ["websocket"],
+        withCredentials: true,
+      });
+      setSocket(newSocket);
+    }
   }, [setSocket]);
 
   useEffect(() => {
