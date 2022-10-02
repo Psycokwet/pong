@@ -8,14 +8,15 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
 import { statusList } from "../Common/StatusList"
-import UserListByStatus from "../FriendList/UserListByStatus";
-import { UserInterface, Status } from "/shared/interfaces/UserInterface";
+import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import { Status } from "/shared/interfaces/UserStatus";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import ChannelUserListByStatus from "./ChatList/UserInChannelList/UserListByStatus";
 
 function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
-  const [attachedUserList, setAttachedUserList] = useState<UserInterface[]>([]);
+  const [attachedUserList, setAttachedUserList] = useState<ChannelUserInterface[]>([]);
 
   const addMessage = (newElem:Message) => {
     setMessages(messages => [...messages, newElem]);
@@ -71,13 +72,13 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   useEffect(() => {
     socket?.on(
       ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, 
-      (userList: UserInterface[]) => setAttachedUserList(userList)
+      (userList: ChannelUserInterface[]) => setAttachedUserList(userList)
     );
 
     return () => {
       socket?.off(
         ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        (userList: UserInterface[]) => setAttachedUserList(userList)
+        (userList: ChannelUserInterface[]) => setAttachedUserList(userList)
       );
     };
   }, []);
@@ -123,7 +124,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
       <div className="row-start-1 row-span-6 col-start-5 p-x-8">
         {statusList?.map((aStatusList) => {
           return (
-            <UserListByStatus
+            <ChannelUserListByStatus
               key={aStatusList.status}
               userList={attachedUserList}
               inputFilter={""}

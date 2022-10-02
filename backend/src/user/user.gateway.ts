@@ -21,8 +21,9 @@ import { Socket } from 'socket.io';
 import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { UsersService } from './user.service';
 import AddFriend from 'shared/interfaces/AddFriend';
-import { Status, UserInterface } from 'shared/interfaces/UserInterface';
+import { UserInterface } from 'shared/interfaces/UserInterface';
 import UserId from 'shared/interfaces/UserId';
+import { Status } from 'shared/interfaces/UserStatus';
 
 @WebSocketGateway({
   transport: ['websocket'],
