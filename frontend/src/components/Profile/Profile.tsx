@@ -10,16 +10,17 @@ const api = new Api();
 const Profile = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>({
     pongUsername: "anonymous",
-    userRank: { level: NaN, userRank: NaN },
+    userRank: { level: 0, userRank: 0 },
     userHistory: {
-      nbGames: NaN,
-      nbWins: NaN,
+      nbGames: 0,
+      nbWins: 0,
       games: [],
     },
   });
   const [avatarUrl, setAvatarUrl] = useState("");
 
   const { pongUsername } = useParams(); // get this from url: /practice/pongUsername
+
   const [localPongUsername, setLocalPongUsername] = useState(pongUsername);
   useEffect(() => {
     setLocalPongUsername(pongUsername);
@@ -27,20 +28,16 @@ const Profile = () => {
 
   useEffect(() => {
     api.get_user_profile(localPongUsername).then((res: Response) => {
-      res.json().then((content) => {
-        console.log(
-          `get_user_profile is OK with localPongUsername = ${localPongUsername}`,
-          content
-        );
-        setUserProfile(content);
-      });
+      if (res.status == 200)
+        res.json().then((content) => {
+          setUserProfile(content);
+        });
     });
 
     api.getPicture(localPongUsername).then((res) => {
       if (res.status == 200)
         res.blob().then((myBlob) => {
           setAvatarUrl((current) => {
-            console.log(`get_picture is Ok with localPongUsername = ${localPongUsername}`);
             if (current) URL.revokeObjectURL(current);
             return URL.createObjectURL(myBlob);
           });
