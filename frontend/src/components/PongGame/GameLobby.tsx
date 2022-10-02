@@ -17,6 +17,7 @@ const GameLobby = (
   }
 ) => {
   const [spectableGameList, setSpectableGameList] = useState<GameRoom[]>([])
+  const [challengeList, setChallangeList] = useState<GameRoom[]>([])
 
   /** GAME JOIN */
   const handleJoinGame = () => {
@@ -36,16 +37,31 @@ const GameLobby = (
     setStep(GameStep.QUEUE)
   }
   /** END SPECTACTE */
+
+  /** CHALLENGE */
+  const handleAcceptChallenge = (roomName: string) => {
+    socket?.emit(ROUTES_BASE.GAME.CHALLENGE_ACCEPT_REQUEST, roomName);
+    setStep(GameStep.QUEUE)
+  }
+  /** END CHALLENGE */
   
   /** UPDATE SPECTABLE GAMES */
   useEffect(() => {
-    socket?.emit(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST)
+    socket?.emit(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST);
+    socket?.emit(ROUTES_BASE.GAME.CHALLENGE_LIST_REQUEST);
+
     socket?.on(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, (spectableGameList: GameRoom[]) => {
       setSpectableGameList(spectableGameList);
+    });
+    socket?.on(ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM, (challengeList: GameRoom[]) => {
+      setChallangeList(challengeList);
     });
     return () => {
       socket?.off(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, (spectableGameList: GameRoom[]) => {
         setSpectableGameList(spectableGameList);
+      });
+      socket?.off(ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM, (challengeList: GameRoom[]) => {
+        setChallangeList(challengeList);
       });
     };
   }, []);
@@ -76,7 +92,21 @@ const GameLobby = (
         onClick={handleJoinGame}
       >Join game</button>
     </div>
-
+    <div className="grid justify-around">
+      <h2 className="text-center">CHALLENGE</h2>
+      <div>
+        {
+          challengeList.map(challenge => 
+            <div key={challenge.roomName}>
+              <button 
+                className="bg-sky-500 hover:bg-sky-700 rounded-3xl shadow-md shadow-blue-500/50"
+                onClick={() => handleAcceptChallenge(challenge.roomName)}
+              >Accept challenge from {challenge.gameData.player1.pongUsername}</button>
+            </div>
+          )
+        }
+      </div>
+    </div>
     <div className="grid justify-around">
       <h2 className="text-center">SPECTATE</h2>
       <div>
@@ -86,7 +116,7 @@ const GameLobby = (
               <button 
                 className="bg-sky-500 hover:bg-sky-700 rounded-3xl shadow-md shadow-blue-500/50"
                 onClick={() => handleSpectate(gameRoom.roomName)}
-              >{gameRoom.gameData.player1.pongUsername} VS {gameRoom.gameData.player1.pongUsername}</button>
+              >{gameRoom.gameData.player1.pongUsername} VS {gameRoom.gameData.player2.pongUsername}</button>
             </div>
           )
         }
