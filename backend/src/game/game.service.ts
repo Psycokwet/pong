@@ -306,4 +306,11 @@ export class GameService {
         gameRoom.gameData.player2.userId === userId,
     );
   }
+
+  public cancelMatchMaking(userId: number) {
+    const gameRoomToErase: GameRoom = this.findPlayerRoom(userId);
+
+    GameService.gameRoomList = GameService.gameRoomList.filter((gameRoom) => gameRoom.roomName !== gameRoomToErase.roomName);
+    console.log(GameService.gameRoomList);
+  }
 }
