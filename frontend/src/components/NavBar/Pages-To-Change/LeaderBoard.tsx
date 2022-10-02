@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Api } from "../../../api/api";
 import { QRCodeImg } from "../../PictureForm/QRCodeImg";
+import { Api } from "../../../api/api";
 
 const api = new Api();
 const LeaderBoard = () => {

@@ -42,11 +42,6 @@ export const NavBarPageList = [
     pageName: "settings",
     pageIcon: <IoMdSettings size="26" />,
   },
-  {
-    url: "/practice",
-    pageName: "practice",
-    pageIcon: <IoMdSettings size="26" />,
-  },
 ];
 
 type DisconnectionButtonProps = {
