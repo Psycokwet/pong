@@ -7,7 +7,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -16,20 +15,15 @@ import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
-import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import { Socket } from 'socket.io';
 import { AuthService, TokenPayload } from 'src/auth/auth.service';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
-import { UserGateway } from './user.gateway';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import { Status, UserInterface } from 'shared/interfaces/UserInterface';
-import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { createReadStream } from 'fs';
-import { join } from 'path';
 import UserProfile from 'shared/interfaces/UserProfile';
 import { Blocked } from 'src/blocked/blocked.entity';
 import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
@@ -71,13 +65,14 @@ export class UsersService {
 
   getStatusFromUser(user: User, payload: TokenPayload): ConnectionStatus {
     let result: ConnectionStatus = ConnectionStatus.Unknown;
+    if (user.isUserFullySignedUp === false)
+      return ConnectionStatus.SignupRequested;
     if (user.isTwoFactorAuthenticationActivated === false)
       return ConnectionStatus.Connected;
     if (user.isTwoFactorAuthenticationActivated === true)
       if (payload.isTwoFactorAuthenticated) return ConnectionStatus.Connected;
       else return ConnectionStatus.TwoFactorAuthenticationRequested;
 
-    //need to add signin
     return result;
   }
 
@@ -103,6 +98,7 @@ export class UsersService {
       email: dto.email,
       xp: 0,
       isTwoFactorAuthenticationActivated: false,
+      isUserFullySignedUp: false,
     });
 
     try {
@@ -318,6 +314,7 @@ export class UsersService {
   async setTwoFactorAuthentication(user: User, value: boolean) {
     await this.usersRepository.update(user.id, {
       isTwoFactorAuthenticationActivated: value,
+      isUserFullySignedUp: true,
     });
   }
 
@@ -333,11 +330,11 @@ export class UsersService {
 
   async setPongUsername(dto: pongUsernameDto, login42: string) {
     const user = await this.findOne(login42);
-
     /* We use TypeORM's update function to update our entity */
     try {
       await this.usersRepository.update(user.id, {
         pongUsername: dto.newPongUsername,
+        isUserFullySignedUp: true,
       });
     } catch (e) {
       throw new BadRequestException({ error: 'Nickname already taken' });
@@ -372,6 +369,7 @@ export class UsersService {
     const picture = await this.localFilesService.saveLocalFileData(fileData);
     await this.usersRepository.update(user.id, {
       pictureId: picture.id,
+      isUserFullySignedUp: true,
     });
   }
 
