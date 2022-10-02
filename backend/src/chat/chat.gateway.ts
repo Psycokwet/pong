@@ -589,7 +589,7 @@ export class ChatGateway {
       });
 
     let hashedPassword = '';
-    if (inputPassword === '') return;
+    if (inputPassword !== '')
       hashedPassword = await crypt(inputPassword);
 
     await this.chatService.changePassword(room, hashedPassword);
