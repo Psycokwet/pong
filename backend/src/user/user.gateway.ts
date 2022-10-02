@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   forwardRef,
   Inject,
   UseGuards,
@@ -23,6 +22,7 @@ import { UsersService } from './user.service';
 import AddFriend from 'shared/interfaces/AddFriend';
 import { Status, UserInterface } from 'shared/interfaces/UserInterface';
 import UserId from 'shared/interfaces/UserId';
+import { GameService } from 'src/game/game.service';
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -32,6 +32,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
+    private readonly gameService: GameService,
   ) {}
 
   @WebSocketServer()
@@ -112,11 +113,10 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const friendUsersWebsockets: UsersWebsockets = UsersService.userWebsockets
       .find((usersWebsockets: UsersWebsockets) => usersWebsockets.userId === friend.id);
 
-    let friendStatus: Status = Status.OFFLINE;
+    let friendStatus: Status = this.userService.getStatus(friend);
     
-    if (friendUsersWebsockets) {
-      const friendSocket = this.server.sockets.sockets.get(friendUsersWebsockets.socketId);
-      friendStatus = Status.ONLINE;
+    if (friendStatus === Status.ONLINE && this.gameService.findPlayerRoom(friend.id)) {
+        friendStatus = Status.PLAYING;
     }
     const newFriend: UserInterface = {
       id: friend.id,
@@ -135,6 +135,13 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const caller = await this.userService.getById(payload.userId);
 
     const orderedFriendsList = await this.userService.getFriendsList(caller);
+
+    orderedFriendsList.map((user: UserInterface) => {
+      if (user.status === Status.ONLINE && this.gameService.findPlayerRoom(user.id)) {
+        user.status = Status.PLAYING;
+      }
+      return user;
+    })
 
     this.server
       .in(client.id)
