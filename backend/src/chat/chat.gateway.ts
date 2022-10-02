@@ -353,7 +353,7 @@ export class ChatGateway {
     @MessageBody() data: { message: string; channelId: number },
     @UserPayload() payload: any,
   ) {
-    if (data.message === '') return;
+    if (data.message === '' || !data.channelId) return;
     const room = await this.chatService.getRoomWithRelations(
       { id: data.channelId },
       { messages: true },
