@@ -7,9 +7,6 @@ import {
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -25,21 +22,15 @@ import SearchChannel from '../../shared/interfaces/SearchChannel';
 import { UserInterface, Status } from 'shared/interfaces/UserInterface';
 
 import * as bcrypt from 'bcrypt';
-import JoinChannel from 'shared/interfaces/JoinChannel';
 import ChannelData from 'shared/interfaces/ChannelData';
-import UserPrivileges from 'shared/interfaces/UserPrivileges';
 import Message from 'shared/interfaces/Message';
 import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
-import roomId from 'shared/interfaces/JoinChannel';
 import RoomId from 'shared/interfaces/JoinChannel';
-import { User } from 'src/user/user.entity';
 import MuteUser from 'shared/interfaces/MuteUser';
-import { SocketReadyState } from 'net';
-import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
-import { ChangeChannelData } from 'shared/interfaces/ChangeChannelData';
 
 async function crypt(password: string): Promise<string> {
+  console.log(password)
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
 }
 
@@ -577,8 +568,8 @@ export class ChatGateway {
   async changePassword(
     @MessageBody() {
       channelName,
-      newPassword,
-    }: ChangeChannelData,
+      inputPassword,
+    }: SearchChannel,
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
@@ -599,8 +590,8 @@ export class ChatGateway {
       });
 
     let hashedPassword = '';
-    if (newPassword === '') return;
-      hashedPassword = await crypt(newPassword);
+    if (inputPassword === '') return;
+      hashedPassword = await crypt(inputPassword);
 
     await this.chatService.changePassword(room, hashedPassword);
 
