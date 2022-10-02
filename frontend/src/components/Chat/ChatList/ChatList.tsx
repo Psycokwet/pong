@@ -8,8 +8,8 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
 
-function ChatList({ msg , socket , connectedChannel} : {
-    msg: Message,
+function ChatList({ lastMessage , socket , connectedChannel} : {
+    lastMessage: Message,
     socket:Socket | undefined,
     connectedChannel: ChannelData | undefined,
 }){
@@ -23,26 +23,22 @@ function ChatList({ msg , socket , connectedChannel} : {
     socket?.emit(ROUTES_BASE.CHAT.JOIN_DM_CHANNEL_LOBBY_REQUEST);
   }, []);
 
-  const resetChanList = (chans:ChannelData[]) => {
-    setChanList(chans);
-  }
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChanList);
+    socket?.on(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, (channels: ChannelData[]) => setChanList(channels));
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, resetChanList);
+      socket?.off(ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS, (channels: ChannelData[]) => setChanList(channels));
     };
-  }, [resetChanList]);
+  }, []);
 
-  const resetDirectMessageList = (chans:any) => {
-    setDirectMessageList(chans);
+  const resetDirectMessageList = (directMessageChannels: ChannelData[]) => {
+    setDirectMessageList(directMessageChannels);
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, resetDirectMessageList);
     return () => {
       socket?.off(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, resetDirectMessageList);
     };
-  }, []);
-
+  }, [resetDirectMessageList]);
 
   return (
     <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end relative">
@@ -68,7 +64,7 @@ function ChatList({ msg , socket , connectedChannel} : {
               <DirectMessage
                 socket={socket}
                 channel={directMessage}
-                message={msg===undefined?"":msg}
+                message={lastMessage === undefined ? "" : lastMessage}
                 connectedChannel={connectedChannel}
               />
             </div>

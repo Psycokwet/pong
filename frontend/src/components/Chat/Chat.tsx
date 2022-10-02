@@ -14,12 +14,12 @@ import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])
-  const [lastMessage, setLastMessage] = useState<Message[]>([])
+  const [lastMessage, setLastMessage] = useState<Message>(undefined)
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
   const [userAttachedList, setUserAttachedList] = useState<UserInterface[]>([]);
 
   const addMessage = (newElem:Message) => {
-    if (newElem.roomId == connectedChannel.channelId)
+    if (connectedChannel && newElem.roomId === connectedChannel.channelId)
       setMessages((current) => [...current, newElem]);
     setLastMessage(newElem);
   }
@@ -91,7 +91,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   }, [ResetUserList]);
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
-      <ChatList msg={lastMessage} socket={socket} connectedChannel={connectedChannel}/>
+      <ChatList lastMessage={lastMessage} socket={socket} connectedChannel={connectedChannel}/>
       <Messages messages={messages}/>
       <TextField socket={socket} chan={connectedChannel} />
       <div className="row-start-1 row-span-6 col-start-5 p-x-8">

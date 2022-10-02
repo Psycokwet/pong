@@ -92,26 +92,26 @@ export class ChatService {
       .find({
         where: {
           members: {
-            id: user.id,
+            id: userId,
           },
           isDM: true,
         },
       });
 
-      const result = [];
-      for (let i = 0; i < rooms.length; i++) {
-        const room = await this.roomsRepository.findOne({
-          relations: {
-            members: true,
-          },
-          where: { id: rooms[i].id }
-        })
-        result[i] = {
-            channelId: room.id,
-            channelName: room.members.filter((user) => user.id !== userId)[0].pongUsername
-        }
+    const result: ChannelData[] = [];
+    for (let i = 0; i < rooms.length; i++) {
+      const room = await this.roomsRepository.findOne({
+        relations: {
+          members: true,
+        },
+        where: { id: rooms[i].id }
+      })
+      result[i] = {
+        channelId: room.id,
+        channelName: room.members.filter((user) => user.id !== userId)[0].pongUsername
       }
-      return result;
+    }
+    return result;
   }
 
 
