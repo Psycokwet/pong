@@ -38,12 +38,6 @@ const Channel = function ({channel, socket, connectedChannel, handleLeaveChannel
     setIsVisible(false);
   }
 
-  // const handleLeaveChannel = () => {
-  //   socket?.emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST, {
-  //     channelName: channel.channelName
-  //   });
-  // }
-
   return (
     <div
       className={("max-w-full truncate text-lg font-semibold self-center py-4 px-10 hover:bg-slate-800 cursor-pointer overflow-visible" + ((connectedChannel !== undefined && connectedChannel.channelId === channel.channelId) ? ' bg-slate-600':''))}

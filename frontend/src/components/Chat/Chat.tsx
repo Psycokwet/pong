@@ -18,7 +18,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   const [attachedUserList, setAttachedUserList] = useState<UserInterface[]>([]);
 
   const addMessage = (newElem:Message) => {
-    setMessages([...messages, newElem]);
+    setMessages(messages => [...messages, newElem]);
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, addMessage);
@@ -114,7 +114,12 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
       <ChatList handleLeaveChannel={handleLeaveChannel} msg={messages[messages.length - 1]} socket={socket} connectedChannel={connectedChannel}/>
       <Messages messages={messages}/>
-      <TextField socket={socket} chan={connectedChannel} />
+      {
+        connectedChannel ?
+        <TextField socket={socket} connectedChannel={connectedChannel} />
+        :
+        <></>
+      }
       <div className="row-start-1 row-span-6 col-start-5 p-x-8">
         {statusList?.map((aStatusList) => {
           return (

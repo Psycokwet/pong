@@ -27,18 +27,18 @@ function ChatList({ msg , socket , connectedChannel, handleLeaveChannel} : {
   useEffect(() => {
     socket?.on(
       ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
-      (chans:ChannelData[]) => setChannelList(chans),
+      (newChannelList:ChannelData[]) => setChannelList(newChannelList),
     );
     return () => {
       socket?.off(
         ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
-        (chans:ChannelData[]) => setChannelList(chans)
+        (newChannelList:ChannelData[]) => setChannelList(newChannelList)
       );
     };
   }, []);
 
-  const resetDirectMessageList = (chans:ChannelData[]) => {
-    setDirectMessageList(chans);
+  const resetDirectMessageList = (directMessageList:ChannelData[]) => {
+    setDirectMessageList(directMessageList);
   }
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, resetDirectMessageList);
@@ -58,7 +58,7 @@ function ChatList({ msg , socket , connectedChannel, handleLeaveChannel} : {
               <Channel
                 handleLeaveChannel={() => {
                   handleLeaveChannel();
-                  setChannelList(current => current.filter(channel => channel.id !== connectedChannel.id))
+                  setChannelList(current => current.filter(channel => channel.channelId !== connectedChannel.channelId))
                 }}
                 channel={channel}
                 socket={socket}
