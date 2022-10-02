@@ -19,7 +19,7 @@ import { UsersService } from 'src/user/user.service';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import CreateChannel from '../../shared/interfaces/CreateChannel';
 import SearchChannel from '../../shared/interfaces/SearchChannel';
-import { UserInterface, Status } from 'shared/interfaces/UserInterface';
+import { UserInterface } from 'shared/interfaces/UserInterface';
 
 import * as bcrypt from 'bcrypt';
 import ChannelData from 'shared/interfaces/ChannelData';
@@ -30,6 +30,7 @@ import RoomId from 'shared/interfaces/JoinChannel';
 import MuteUser from 'shared/interfaces/MuteUser';
 import { ChangeChannelData } from 'shared/interfaces/ChangeChannelData';
 import { User } from 'src/user/user.entity';
+import { Status } from 'shared/interfaces/UserStatus';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -258,6 +259,7 @@ export class ChatGateway {
       ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
       payload.userId,
     );
+    this.attachedUsersList(room.id);
   }
 
   /* JOIN ROOM */

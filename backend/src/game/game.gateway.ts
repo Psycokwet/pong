@@ -16,7 +16,8 @@ import { UsersService } from 'src/user/user.service';
 import { User } from 'src/user/user.entity';
 import GameRoom from 'shared/interfaces/game/GameRoom';
 import PlayerInput from 'shared/interfaces/game/PlayerInput';
-import { Status, UserInterface } from 'shared/interfaces/UserInterface';
+import { UserInterface } from 'shared/interfaces/UserInterface';
+import { Status } from 'shared/interfaces/UserStatus';
 
 @WebSocketGateway({
   transport: ['websocket'],
