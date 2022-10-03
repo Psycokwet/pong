@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { Api } from "../../api/api";
 import ProfilePic from "../Common/ProfilePic";
 
+
 const MAX_CHAR = 15;
 
 export type SignUpProps = {

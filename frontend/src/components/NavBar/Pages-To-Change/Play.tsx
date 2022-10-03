@@ -12,18 +12,27 @@ import GameSettings from "../../PongGame/GameSettings";
 import { HexColorPicker } from "react-colorful";
 
 const Play = ({ socket }: { socket: Socket }) => {
-  const [defaultColor, setDefaultColor] = useState({
-    ball: 'white',
-    paddle: 'white',
-    background: 'white'
-  });
-  
-  const [chosenColor, setChosenColor] = useState(defaultColor);
+  const defaultColor = {
+    ball: "#aabbcc",
+    paddle: "#aabbcc",
+    background: "#000000",
+  };
+  const [ballColor, setBallColor] = useState(defaultColor.ball);
+  const [paddleColor, setPaddleColor] = useState(defaultColor.paddle);
+  const [bgColor, setBgColor] = useState(defaultColor.background);
   
   useEffect(() => {
-    setChosenColor(defaultColor);
-  }, [defaultColor]);
-  
+    setBallColor(ballColor);
+  }, [ballColor]);
+
+  useEffect(() => {
+    setPaddleColor(paddleColor);
+  }, [paddleColor]);
+
+  useEffect(() => {
+    setBgColor(bgColor);
+  }, [bgColor]);
+
   const [step, setStep] = useState<number>(0);
 
   /** WEBSOCKET */
@@ -78,7 +87,9 @@ const Play = ({ socket }: { socket: Socket }) => {
       upgradeStep={upgradeStep}
       gameRoom={gameRoom}
       clientCanvasSize={clientCanvasSize}
-      color={chosenColor}
+      ballColor={ballColor}
+      paddleColor={paddleColor}
+      bgColor={bgColor}
     />,
     <GameOver
       socket={socket}
@@ -92,13 +103,11 @@ const Play = ({ socket }: { socket: Socket }) => {
       {step === GameStep["SETTINGS"] ? (
         <>
         <div>Choose color for Ball</div>
-        <HexColorPicker color={defaultColor.ball} onChange={setDefaultColor((current) => {
-          return {...current, ball: defaultColor.ball}
-        })} />
+        <HexColorPicker color={defaultColor.ball} onChange={setBallColor} />
         <div>Choose color for Paddle</div>
-        <HexColorPicker color={defaultColor.paddle} onChange={setDefaultColor} />
+        <HexColorPicker color={defaultColor.paddle} onChange={setPaddleColor} />
         <div>Choose color for BackGround</div>
-        <HexColorPicker color={defaultColor.background} onChange={setDefaultColor} />
+        <HexColorPicker color={defaultColor.background} onChange={setBgColor} />
         {gameSteps[step]}
         </>
       ) : (
