@@ -11,7 +11,6 @@ import NavBar from "./NavBar/NavBar";
 import FriendList from "./FriendList/FriendList";
 import Loading from "./Common/Loading";
 import NotFound from "./NavBar/Pages-To-Change/NotFound";
-import PracticeJwt from "./PracticeJwt";
 import Play from "./NavBar/Pages-To-Change/Play";
 import Home from "./NavBar/Pages-To-Change/Home";
 import Chat from "./Chat/Chat";
@@ -27,6 +26,7 @@ import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
 import { isSameSimpleObj } from "../../shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 import SignUpPage from "./SignUpPage/SignUpPage";
+import toast, { Toaster } from "react-hot-toast";
 
 const api = new Api();
 
@@ -92,7 +92,7 @@ function App() {
         withCredentials: true,
       });
       setSocket(newSocket);
-    }
+    };
   }, []);
 
   useEffect(() => {
@@ -125,6 +125,7 @@ function App() {
                 return { ...current, status: ConnectionStatus.Disconnected };
               })
             }
+            pongUsername={currentUser.pongUsername}
           />
           <FriendList socket={socket} />
 
@@ -135,35 +136,45 @@ function App() {
               );
             })}
 
-            <Route path="/" element={<Home />} />
-            <Route path="profile" element={<Profile />}>
-              <Route path=":user_login" element={<OneUserProfile />} />
+            <Route path="/" element={<Play socket={socket} />} />
+            <Route path="/profile" element={<Profile />}>
+              <Route path=":pongUsername" element={<OneUserProfile />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Toaster />
         </div>
       );
     case ConnectionStatus.Disconnected:
     case ConnectionStatus.NetworkUnavailable:
       return (
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/false42login" element={<False42Login />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <>
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/false42login" element={<False42Login />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </>
       );
     case ConnectionStatus.SignupRequested:
       return (
-        <SignUpPage
-          updateCurrentUser={updateCurrentUser}
-          pongUsername={currentUser.pongUsername}
-        ></SignUpPage>
+        <>
+          <SignUpPage
+            updateCurrentUser={updateCurrentUser}
+            pongUsername={currentUser.pongUsername}
+          ></SignUpPage>
+          <Toaster />
+        </>
       );
     case ConnectionStatus.TwoFactorAuthenticationRequested:
       return (
-        <TwoStepSigningMockup
-          updateCurrentUser={updateCurrentUser}
-        ></TwoStepSigningMockup>
+        <>
+          <TwoStepSigningMockup
+            updateCurrentUser={updateCurrentUser}
+          ></TwoStepSigningMockup>
+          <Toaster />
+        </>
       );
     default:
       return <>This should never happen.</>;
