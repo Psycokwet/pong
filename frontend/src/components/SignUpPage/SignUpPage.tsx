@@ -14,6 +14,12 @@ const enum twoFactorSteps {
   DONE,
   ERROR,
 }
+const enum validForm {
+  BUTTON,
+  LOADING,
+  DONE,
+  ERROR,
+}
 const MAX_CHAR = 15;
 
 export type SignUpProps = {
@@ -32,6 +38,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
   const [qrCodeImg, setQrCodeImg] = useState<string>("");
   const [code, setCode] = useState<string>("");
   const [status, setStatus] = useState<number>(twoFactorSteps.BUTTON);
+  const [validFormStatus, setValidFormStatus] = useState<number>(validForm.BUTTON);
 
   useEffect(() => {
     setLocalPongUsername(pongUsername);
@@ -56,8 +63,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
   }, [status]);
 
   const handleSubmitForm = async () => {
-    let should_update = false;
-    console.log(`should_update status is set to: ${should_update}`);
+    let should_update:boolean = false;
 
     const fileData = new FormData();
     if (selectedFile) {
@@ -79,8 +85,20 @@ const SignUpPage: React.FC<SignUpProps> = ({
       });
     }
 
-    if (should_update && updateCurrentUser) updateCurrentUser();
+    if (should_update && updateCurrentUser) {
+      setValidFormStatus(validForm.DONE);
+      updateCurrentUser();
+    }
+    else
+      setValidFormStatus(validForm.ERROR);
   };
+  useEffect(() => {
+    if (validFormStatus === validForm.LOADING) {
+      const fun = handleSubmitForm;
+      fun()
+      .catch(console.error)
+    }
+  }, [validFormStatus]);
 
   const handlePreviewPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -88,6 +106,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
     const fileURL = URL.createObjectURL(file);
     setAvatar(fileURL);
     setSelectedFile(file);
+    setValidFormStatus(validForm.BUTTON);
   };
   const submitDownloadForm = (apiCall: () => Promise<Response>) => {
     apiCall()
@@ -105,7 +124,6 @@ const SignUpPage: React.FC<SignUpProps> = ({
       setChecked(false);
     }
   }
-116a8b97-e0bf-44c5-9cb8-80380dadf5a7
   const handleChange = (nextChecked:boolean) => {
     setChecked(nextChecked);
     if (status===twoFactorSteps.DONE)
@@ -116,7 +134,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
       if (qrCodeImg === "")
         submitDownloadForm(() => api.generate_2fa())
     }
-  };
+  }
   return (
     <div className="flex flex-col items-center bg-gray-900 gap-4 h-7/8 text-white">
       <div className="bg-gray-900">
@@ -127,13 +145,13 @@ const SignUpPage: React.FC<SignUpProps> = ({
           <input type="file" onChange={handlePreviewPhoto} />
         </div>
 
-        <div classNam116a8b97-e0bf-44c5-9cb8-80380dadf5a7e="flex flex-col self-center items-center">
+        <div className="flex flex-col self-center items-center">
           <h1>Change your pongUsername</h1>
           <input
             type="text"
             name="pongUsername"
             value={localPongUsername}
-            onChange={(e) => setLocalPongUsername(e.target.value)}
+            onChange={(e) => { setValidFormStatus(validForm.BUTTON); setLocalPongUsername(e.target.value)}}
             placeholder={`name less than ${MAX_CHAR} letters`}
             className="bg-gray-600 placeholder:text-gray-400 placeholder:px-4 outline_none rounded-xl w-60 border-4 border-gray-600"
           />
@@ -201,14 +219,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
           }
         </div>
 
-        <ButtonSubmit />
-        <button
-          type="submit"
-          className="border-4 border-gray-400 bg-gray-400 hover:border-gray-300 hover:bg-gray-300 transition rounded-md"
-          onClick={handleSubmitForm}
-        >
-          Submit modifications
-        </button>
+        <ButtonSubmit validFormStatus={validFormStatus} setValidFormStatus={setValidFormStatus}/>
 
     </div>
   );

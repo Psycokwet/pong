@@ -1,6 +1,5 @@
 import { Puff } from 'react-loading-icons'
 import { BsShieldFillExclamation } from "react-icons/bs"
-import { useState } from "react";
 
 const enum twoFactorSteps {
   BUTTON,
