@@ -83,7 +83,7 @@ export class UserController {
     const user = await this.usersService.findOne(req.user.login42);
     if (!user) throw new NotFoundException({ error: 'User not found' });
 
-    return await this.usersService.getPongUsername(user.login42);
+    return await this.usersService.getPongUsername(user);
   }
 
   @Post(ROUTES_BASE.USER.SET_PONG_USERNAME)
