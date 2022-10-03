@@ -221,7 +221,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
           :
           <Switch
             onChange={turnOffTwofa}
-            checked={checked}
+            checked={true}
             className="react-switch transition"
             onColor="#0cb92a"
           />
