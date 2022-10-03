@@ -1,74 +1,41 @@
 import React from "react";
-import { PictureForm } from "../PictureForm/PictureForm";
-import { Link } from "react-router-dom";
-import { IoStarOutline } from "react-icons/io5";
-import ProfileName from "./ProfileName";
-import Stats from "./Stats/Stats";
+import UserStats from "./UserStats";
+import UserMatchHistory from "./UserMatchHistory";
 
-function MatchHistory() {
-  return (
-    <div className="grid grid-cols-3 place-content-around place-items-center">
-      <div>Date</div>
-      <div>Score</div>
-      <div>Opponent</div>
-      <div>10/09 13:50</div>
-      <div>10-2</div>
-      <div>nickname</div>
-      <div>7</div>
-      <div>8</div>
-      <div>9</div>
-      <div>1</div>
-      <div>2</div>
-      <div>3</div>
-      <div>4</div>
-      <div>5</div>
-      <div>6</div>
-      <div>7</div>
-      <div>8</div>
-      <div>9</div>
-    </div>
-  );
-}
+import UserProfile from "shared/interfaces/UserProfile";
+import Avatar from "../Common/Avatar";
 
 type OneUserProfileProps = {
-  nickname?: string;
+  userProfile?: UserProfile;
+  avatarUrl?: string;
 };
 
-const OneUserProfile: React.FC<OneUserProfileProps> = ({ nickname }) => {
+const OneUserProfile: React.FC<OneUserProfileProps> = ({
+  userProfile,
+  avatarUrl,
+}) => {
   return (
-    <>
-      <div className="row-start-2 row-span-3 col-start-6 col-span-3">
-        <MatchHistory />
-      </div>
-
-      <div className="row-start-3 flex flex-row col-start-2 col-span-3 max-h-[22rem]">
-        <div className="self-center">
-          <Link to="/leaderboard">
-            <IoStarOutline size="40" />
-          </Link>
-        </div>
-
-        <div className="self-center">
-          <Link to="/leaderboard">
-            <h1 className="text-l font-mono font-semibold">1st !</h1>
-          </Link>
+    <div className="flex justify-evenly">
+      <div className="flex items-center">
+        <Avatar url={avatarUrl} size="w-20" />
+        <div className="p-2">
+          <strong>{userProfile.pongUsername}</strong>
+          <div>Level: {Math.floor(userProfile.userRank.level * 100) / 100}</div>
+          <div>Rank : {userProfile.userRank.userRank.rank}</div>
         </div>
       </div>
 
-      <div className="col-span-10" />
-
-      <div className="col-start-2 col-span-3 row-span-3">
-        <Stats />
+      <div className="">
+        <UserMatchHistory userHistory={userProfile.userHistory.games} />
       </div>
 
-      <div className="col-start-6 col-span-3 row-start-5">
-        <ProfileName nickname={nickname} />
+      <div className="">
+        <UserStats
+          nbGames={userProfile.userHistory.nbGames}
+          nbWins={userProfile.userHistory.nbWins}
+        />
       </div>
-
-      <div className="col-span-10" />
-
-      <PictureForm></PictureForm>
-    </>
+    </div>
   );
 };
 
