@@ -7,6 +7,9 @@
     "full_build": "npm run prebuild && npm run build",
     "build": "bash ./build_prod.sh",
     "pre_build": "bash ./pre_build_prod.sh",
-    "clear_build":"rm -rf ./dist_project"
+    "clear_build": "rm -rf ./dist_project"
+  },
+  "dependencies": {
+    "react-colorful": "^5.6.1"
   }
 }

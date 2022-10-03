@@ -9,8 +9,11 @@ import Position from "/shared/interfaces/Position";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { GameStep } from "/src/components/PongGame/GameStep.enum";
 import GameSettings from "../../PongGame/GameSettings";
+import { HexColorPicker } from "react-colorful";
 
 const Play = ({ socket }: { socket: Socket }) => {
+  const [defaultColor, setColor] = useState("#aabbcc");
+  const [chosenColor, setChosenColor] = useState(defaultColor);
   const [step, setStep] = useState<number>(0);
 
   /** WEBSOCKET */
@@ -49,6 +52,10 @@ const Play = ({ socket }: { socket: Socket }) => {
     setStep(step + 1);
   };
 
+  useEffect(() => {
+    setChosenColor(defaultColor);
+  }, [defaultColor]);
+
   const gameSteps = [
     <GameLobby socket={socket} setStep={setStep} setGameRoom={setGameRoom} />,
     <GameSettings setStep={setStep} />,
@@ -64,6 +71,7 @@ const Play = ({ socket }: { socket: Socket }) => {
       upgradeStep={upgradeStep}
       gameRoom={gameRoom}
       clientCanvasSize={clientCanvasSize}
+      color={chosenColor}
     />,
     <GameOver
       socket={socket}
@@ -75,7 +83,14 @@ const Play = ({ socket }: { socket: Socket }) => {
 
   return (
     <div className="bg-black text-white lg:h-7/8 sm:h-6/8 place-content-center">
-      {gameSteps[step]}
+      {step === GameStep["SETTINGS"] ? (
+        <>
+        <HexColorPicker color={defaultColor} onChange={setColor} />
+        {gameSteps[step]}
+        </>
+      ) : (
+        gameSteps[step]
+      )}
     </div>
   );
 };
