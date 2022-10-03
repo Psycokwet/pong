@@ -91,6 +91,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
         error: 'User you want to add as friend not found',
       });
     }
+
     /* Checking if the caller is adding himself (I think this should never 
     happen on the front side) */
     if (payload.userId === friend.id) {
@@ -133,6 +134,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @UserPayload() payload: any,
   ) {
     const caller = await this.userService.getById(payload.userId);
+    if (!caller) throw new WsException({ error: 'User not found' });
 
     const orderedFriendsList = await this.userService.getFriendsList(caller);
 
@@ -184,6 +186,8 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     const caller = await this.userService.getById(payload.userId);
+    if (!caller) throw new WsException({ error: 'User not found' });
+
     const blockedList = this.userService.getBlockedUsersList(caller);
 
     this.server
