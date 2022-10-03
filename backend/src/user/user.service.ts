@@ -53,6 +53,7 @@ export class UsersService {
 
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
+
     @InjectRepository(Blocked)
     private blockedRepository: Repository<Blocked>,
 
@@ -85,13 +86,20 @@ export class UsersService {
   }
 
   async findOneByPongUsername(pongUsername: string): Promise<User> {
-    return await this.usersRepository.findOneBy({
+    const user = await this.usersRepository.findOneBy({
       pongUsername: pongUsername,
     });
+    if (!user) throw new BadRequestException({ error: 'User not found' });
+    return user;
+  }
+
+  async getById(id: number) {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (!user) throw new BadRequestException({ error: 'User not found' });
+    return user;
   }
 
   async signup(dto: UserDto) {
-    // database operation
     const user = User.create({
       login42: dto.login42,
       pongUsername: uuidv4(),
@@ -126,19 +134,8 @@ export class UsersService {
     });
   }
 
-  async getById(id: number) {
-    const user = await this.usersRepository.findOneBy({ id });
-    if (user) {
-      return user;
-    }
-    throw new HttpException(
-      'User with this id does not exist',
-      HttpStatus.NOT_FOUND,
-    );
-  }
-
   async getUserByIdWithMessages(id: number) {
-    return this.usersRepository.findOne({
+    return await this.usersRepository.findOne({
       where: { id },
       relations: {
         messages: true,
@@ -148,6 +145,7 @@ export class UsersService {
 
   async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
     const user = await this.getById(userId);
+    if (!user) throw new BadRequestException({ error: 'User not found' });
 
     const isRefreshTokenMatching = await passwordCompare(
       refreshToken,
@@ -168,7 +166,7 @@ export class UsersService {
   async getUserProfile(user: User) {
     const profileElements: UserProfile = {
       pongUsername: user.pongUsername,
-      userRank: await await this.getUserRank(user),
+      userRank: await this.getUserRank(user),
       userHistory: await this.getUserHistory(user),
     };
     return profileElements;
@@ -354,6 +352,8 @@ export class UsersService {
       where: { login42: dto.login42 },
       relations: { picture: true },
     });
+
+    if (!user) throw new BadRequestException({ error: 'User not found' });
 
     if (!user.picture) {
       throw new NotFoundException();
