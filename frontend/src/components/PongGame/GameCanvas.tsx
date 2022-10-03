@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import Position from "/shared/interfaces/Position";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { virtualGameData } from "/shared/other/virtualGameData";
+import { HexColorPicker } from "react-colorful";
 
 const GameCanvas = (
   {
@@ -12,6 +13,7 @@ const GameCanvas = (
     gameRoom,
     upgradeStep,
     clientCanvasSize,
+    color,
   }:
   {
     socket: Socket,
@@ -19,10 +21,12 @@ const GameCanvas = (
     gameRoom: GameRoom,
     upgradeStep: any,
     clientCanvasSize: Position,
+    color: string,
   }
 ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvasLocation = canvasRef?.current?.getBoundingClientRect();
     if (canvasLocation) {
@@ -53,8 +57,8 @@ const GameCanvas = (
     }
   }
   /** END MOUSE HANDLER */
-
-
+  
+  
   /** GAME LOOP */
   const draw = (canvas: HTMLCanvasElement, gameRoom: GameRoom) => {
     const halfCanvasWidth = clientCanvasSize.x / 2;
@@ -64,7 +68,7 @@ const GameCanvas = (
       context.fillStyle = 'black';
       context.fillRect(0, 0, clientCanvasSize.x, clientCanvasSize.y);
       // Draw middle line
-      context.strokeStyle = 'white';
+      context.strokeStyle = color;
       context.beginPath();
       context.moveTo(halfCanvasWidth, 0);
       context.lineTo(halfCanvasWidth, clientCanvasSize.y);
@@ -72,7 +76,7 @@ const GameCanvas = (
 
 
       // Draw players
-      context.fillStyle = 'white';
+      context.fillStyle = color;
       const playersPaddleHeight = virtualGameData.playerHeight * clientCanvasSize.y / virtualGameData.canvasHeight;
 
       const player1PaddlePosition = gameRoom.gameData.player1.y * clientCanvasSize.y / virtualGameData.canvasHeight;
@@ -86,7 +90,7 @@ const GameCanvas = (
       }
       // Draw ball
       context.beginPath();
-      context.fillStyle = 'white';
+      context.fillStyle = color;
       const clientBallRayon = gameRoom.gameData.ball.rayon / virtualGameData.canvasHeight * clientCanvasSize.y;
       context.arc(ballPosition.x, ballPosition.y, clientBallRayon , 0, Math.PI * 2, false);
       context.fill();
@@ -98,6 +102,7 @@ const GameCanvas = (
     if (canvas) draw(canvas, gameRoom);
     setGameRoom(gameRoom)
   };
+
   useEffect(() => {
     socket?.on(ROUTES_BASE.GAME.UPDATE_GAME, handleGameUpdate);
     return () => {
@@ -105,7 +110,7 @@ const GameCanvas = (
     };
   }, []);
   /** END GAME LOOP */
-
+  
   /** GAMEOVER */
   useEffect(() => {
     socket?.on(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, upgradeStep);
@@ -114,10 +119,10 @@ const GameCanvas = (
     };
   }, []);
   /** END GAMEOVER */
-
+  
   return (
     <div
-      className="w-full h-7/8"
+    className="w-full h-7/8"
     >
       <div><h1 className="text-3xl text-center p-2">RANKED MATCH</h1></div>
       <div><h2 className="lg:text-3xl text-center p-2">First to 10 points win</h2> </div>

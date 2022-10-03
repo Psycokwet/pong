@@ -15,17 +15,18 @@ const GameLobby = (
     setStep: any,
     setGameRoom: any,
   }
-) => {
+  ) => {
+
   const [spectableGameList, setSpectableGameList] = useState<GameRoom[]>([])
   const [challengeList, setChallangeList] = useState<GameRoom[]>([])
-
+  
   /** GAME JOIN */
   const handleJoinGame = () => {
     socket?.emit(ROUTES_BASE.GAME.JOIN_GAME_REQUEST);
     setStep(GameStep.QUEUE);
   }
   /** END GAME JOIN */
-
+  
   const handleCreateGame = () => {
     socket?.emit(ROUTES_BASE.GAME.CREATE_GAME_REQUEST);
     setStep(GameStep.QUEUE);
@@ -41,7 +42,7 @@ const GameLobby = (
     setStep(GameStep.QUEUE)
   }
   /** END SPECTACTE */
-
+  
   /** CHALLENGE */
   const handleAcceptChallenge = (roomName: string) => {
     socket?.emit(ROUTES_BASE.GAME.CHALLENGE_ACCEPT_REQUEST, roomName);
@@ -53,7 +54,7 @@ const GameLobby = (
   useEffect(() => {
     socket?.emit(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST);
     socket?.emit(ROUTES_BASE.GAME.CHALLENGE_LIST_REQUEST);
-
+    
     socket?.on(ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES, (spectableGameList: GameRoom[]) => {
       setSpectableGameList(spectableGameList);
     });
@@ -75,7 +76,7 @@ const GameLobby = (
     if (gameRoom.started === true)
       setStep(GameStep.PLAYING);
     else
-      setStep(GameStep.QUEUE);
+    setStep(GameStep.QUEUE);
     setGameRoom(gameRoom);
   }
   useEffect(() => {
@@ -84,7 +85,7 @@ const GameLobby = (
       socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, updateStep);
     };
   }, []);
-
+  
   return <div className="h-7/8 w-full grid content-around">
     <div className="flex justify-around">
       <button
