@@ -81,7 +81,6 @@ export class UsersService {
     const user = await this.usersRepository.findOneBy({
       login42: login42,
     });
-    if (!user) throw new BadRequestException({ error: 'User not found' });
     return user;
   }
 
@@ -89,13 +88,11 @@ export class UsersService {
     const user = await this.usersRepository.findOneBy({
       pongUsername: pongUsername,
     });
-    if (!user) throw new BadRequestException({ error: 'User not found' });
     return user;
   }
 
   async getById(id: number) {
     const user = await this.usersRepository.findOneBy({ id });
-    if (!user) throw new BadRequestException({ error: 'User not found' });
     return user;
   }
 
@@ -114,10 +111,10 @@ export class UsersService {
     } catch (e) {
       throw new HttpException(
         {
-          status: HttpStatus.BAD_REQUEST,
+          status: HttpStatus.NOT_FOUND,
           error: 'Username or Email already used',
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.NOT_FOUND,
       );
     }
   }
@@ -145,7 +142,7 @@ export class UsersService {
 
   async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
     const user = await this.getById(userId);
-    if (!user) throw new BadRequestException({ error: 'User not found' });
+    if (!user) throw new NotFoundException({ error: 'User not found' });
 
     const isRefreshTokenMatching = await passwordCompare(
       refreshToken,
@@ -296,6 +293,7 @@ export class UsersService {
 
   async setTwoFactorAuthenticationSecret(secret: string, login42: string) {
     const user = await this.findOne(login42);
+    if (!user) throw new NotFoundException({ error: 'User not found' });
 
     /* We use TypeORM's update function to update our entity */
     await this.usersRepository.update(user.id, {
@@ -305,6 +303,7 @@ export class UsersService {
 
   async getTwoFactorAuthentication(login42: string) {
     const user = await this.findOne(login42);
+    if (!user) throw new NotFoundException({ error: 'User not found' });
 
     return user.isTwoFactorAuthenticationActivated;
   }
@@ -326,8 +325,7 @@ export class UsersService {
     return { login42: user.login42 };
   }
 
-  async setPongUsername(dto: pongUsernameDto, login42: string) {
-    const user = await this.findOne(login42);
+  async setPongUsername(dto: pongUsernameDto, user: User) {
     /* We use TypeORM's update function to update our entity */
     try {
       await this.usersRepository.update(user.id, {
@@ -345,7 +343,7 @@ export class UsersService {
       relations: { picture: true },
     });
 
-    if (!user) throw new BadRequestException({ error: 'User not found' });
+    if (!user) throw new NotFoundException({ error: 'User not found' });
 
     if (!user.picture) {
       throw new NotFoundException();
