@@ -401,10 +401,11 @@ export class ChatGateway implements OnGatewayConnection {
       roomId: room.id,
     };
 
-    if (room)
+    if (room) {
       this.server
         .in(room.roomName)
         .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageForFront);
+    }
   }
 
   /** SET / UNSET ADMIN */
@@ -491,7 +492,7 @@ export class ChatGateway implements OnGatewayConnection {
 
     if (!room) throw new BadRequestException('Channel does not exist');
 
-    const privilege = await this.chatService.getUserPrivileges(
+    const privilege = this.chatService.getUserPrivileges(
       room,
       payload.userId,
     );
