@@ -4,16 +4,15 @@ import { IoSend } from "react-icons/io5"
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 
-
-function TextField ({socket , chan}:{
+function TextField ({socket , connectedChannel}:{
     socket:Socket|undefined,
-    chan:ChannelData,
+    connectedChannel:ChannelData,
 }){
   const [message, setValue] = useState<string>('')
 
   const sendMessage = () => {
     socket?.emit(ROUTES_BASE.CHAT.SEND_MESSAGE, {
-      channelId: chan?.channelId,
+      channelId: connectedChannel?.channelId,
       message,
     });
     setValue('');

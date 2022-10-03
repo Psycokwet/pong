@@ -1,19 +1,16 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
 } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
 import {
   FindOptionsRelations,
-  FindOptionsUtils,
   FindOptionsWhere,
-  RelationQueryBuilder,
   Repository,
 } from 'typeorm';
 import { User } from 'src/user/user.entity';
@@ -23,7 +20,6 @@ import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
-import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import { Muted } from './muted.entity';
 @Injectable()
 export class ChatService {
@@ -51,6 +47,7 @@ export class ChatService {
           return {
             channelId: room.id,
             channelName: room.channelName,
+            currentUserPrivileges: Privileges.MEMBER,
           };
         }),
       );
@@ -232,13 +229,11 @@ export class ChatService {
   }
 
   async unattachMemberToChannel(userId: number, room: Room) {
-    const leavingUser = await this.userService.getById(userId);
-
     room.members = room.members.filter(
-      (member: User) => member.login42 !== leavingUser.login42,
+      (member: User) => member.id !== userId,
     );
 
-    room.save();
+    await room.save();
   }
 
   async addMutedUser(mutedUser: User, room: Room, muteTime: number) {
@@ -326,16 +321,16 @@ export class ChatService {
     return userInterfaceMembers;
   }
 
-  getUserPrivileges(room: Room, userId: number): { privilege: Privileges } {
-    if (room.isDM === true) return { privilege: Privileges.MEMBER };
+  getUserPrivileges(room: Room, userId: number): Privileges {
+    if (room.isDM === true) return Privileges.MEMBER;
 
-    if (userId === room.owner.id) return { privilege: Privileges.OWNER };
+    if (userId === room.owner.id) return Privileges.OWNER;
 
-    if (room.admins.filter((admin) => admin.id === userId).length) {
-      return { privilege: Privileges.ADMIN };
+    if (room.admins.find(admin => admin.id === userId)) {
+      return Privileges.ADMIN;
     }
 
-    return { privilege: Privileges.MEMBER };
+    return Privileges.MEMBER;
   }
 
   async changePassword(room: Room, newPassword: string) {

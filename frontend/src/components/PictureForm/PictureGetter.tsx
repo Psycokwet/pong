@@ -13,9 +13,8 @@ export const PictureGetter = () => {
       .then((res) => res.blob())
       .then((myBlob) => {
         setUserPicture(URL.createObjectURL(myBlob));
-        console.log("get_picture is Ok");
       })
-      .catch((err) => alert(`File Download Error ${err}`));
+      .catch((err) => console.log(`File Download Error ${err}`));
   };
 
   return (
