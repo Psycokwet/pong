@@ -39,8 +39,8 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleConnection(@ConnectedSocket() client: Socket) {
     try {
       const user = await this.userService.getUserFromSocket(client);
-
       if (!user) return;
+
       const isRegistered = UsersService.userWebsockets.find(
         (element) => element.userId === user.id,
       );
@@ -66,6 +66,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleDisconnect(@ConnectedSocket() client: Socket) {
     try {
       const user = await this.userService.getUserFromSocket(client);
+      if (!user) return;
 
       UsersService.userWebsockets = UsersService.userWebsockets.filter(
         (websocket) => websocket.socketId !== client.id,
@@ -94,11 +95,13 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       friendToAdd.pongUsername,
     );
 
-    if (!friend) {
-      throw new BadRequestException({ error: 'User not found' });
-    }
+    if (!friend)
+      throw new WsException({
+        error: 'User you want to add as a friend was not found',
+      });
 
     const caller = await this.userService.getById(payload.userId);
+    if (!caller) throw new WsException({ error: 'User not found' });
 
     await this.userService.addFriend(friend, caller);
 
