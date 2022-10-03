@@ -12,8 +12,18 @@ import GameSettings from "../../PongGame/GameSettings";
 import { HexColorPicker } from "react-colorful";
 
 const Play = ({ socket }: { socket: Socket }) => {
-  const [defaultColor, setColor] = useState("#aabbcc");
+  const [defaultColor, setDefaultColor] = useState({
+    ball: 'white',
+    paddle: 'white',
+    background: 'white'
+  });
+  
   const [chosenColor, setChosenColor] = useState(defaultColor);
+  
+  useEffect(() => {
+    setChosenColor(defaultColor);
+  }, [defaultColor]);
+  
   const [step, setStep] = useState<number>(0);
 
   /** WEBSOCKET */
@@ -52,9 +62,6 @@ const Play = ({ socket }: { socket: Socket }) => {
     setStep(step + 1);
   };
 
-  useEffect(() => {
-    setChosenColor(defaultColor);
-  }, [defaultColor]);
 
   const gameSteps = [
     <GameLobby socket={socket} setStep={setStep} setGameRoom={setGameRoom} />,
@@ -80,12 +87,18 @@ const Play = ({ socket }: { socket: Socket }) => {
       clientCanvasSize={clientCanvasSize}
     />,
   ];
-
   return (
     <div className="bg-black text-white lg:h-7/8 sm:h-6/8 place-content-center">
       {step === GameStep["SETTINGS"] ? (
         <>
-        <HexColorPicker color={defaultColor} onChange={setColor} />
+        <div>Choose color for Ball</div>
+        <HexColorPicker color={defaultColor.ball} onChange={setDefaultColor((current) => {
+          return {...current, ball: defaultColor.ball}
+        })} />
+        <div>Choose color for Paddle</div>
+        <HexColorPicker color={defaultColor.paddle} onChange={setDefaultColor} />
+        <div>Choose color for BackGround</div>
+        <HexColorPicker color={defaultColor.background} onChange={setDefaultColor} />
         {gameSteps[step]}
         </>
       ) : (

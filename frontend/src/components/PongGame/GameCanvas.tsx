@@ -4,24 +4,29 @@ import Position from "/shared/interfaces/Position";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { virtualGameData } from "/shared/other/virtualGameData";
-import { HexColorPicker } from "react-colorful";
 
-const GameCanvas = (
+type GameCanvasProps = {
+  socket: Socket,
+  setGameRoom: any,
+  gameRoom: GameRoom,
+  upgradeStep: any,
+  clientCanvasSize: Position,
+  chosenColors: {
+    ball: string,
+    paddle: string,
+    background: string,
+  },
+
+}
+
+const GameCanvas: React.FC<GameCanvasProps> = (
   {
     socket,
     setGameRoom,
     gameRoom,
     upgradeStep,
     clientCanvasSize,
-    color,
-  }:
-  {
-    socket: Socket,
-    setGameRoom: any,
-    gameRoom: GameRoom,
-    upgradeStep: any,
-    clientCanvasSize: Position,
-    color: string,
+    chosenColors,
   }
 ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -65,10 +70,10 @@ const GameCanvas = (
     const context = canvas.getContext('2d')
     if (context) {
       // Draw field
-      context.fillStyle = 'black';
+      context.fillStyle = chosenColors.background;
       context.fillRect(0, 0, clientCanvasSize.x, clientCanvasSize.y);
       // Draw middle line
-      context.strokeStyle = color;
+      context.strokeStyle = chosenColors.paddle;
       context.beginPath();
       context.moveTo(halfCanvasWidth, 0);
       context.lineTo(halfCanvasWidth, clientCanvasSize.y);
@@ -76,7 +81,7 @@ const GameCanvas = (
 
 
       // Draw players
-      context.fillStyle = color;
+      context.fillStyle = chosenColors.paddle;
       const playersPaddleHeight = virtualGameData.playerHeight * clientCanvasSize.y / virtualGameData.canvasHeight;
 
       const player1PaddlePosition = gameRoom.gameData.player1.y * clientCanvasSize.y / virtualGameData.canvasHeight;
@@ -90,7 +95,7 @@ const GameCanvas = (
       }
       // Draw ball
       context.beginPath();
-      context.fillStyle = color;
+      context.fillStyle = chosenColors.ball;
       const clientBallRayon = gameRoom.gameData.ball.rayon / virtualGameData.canvasHeight * clientCanvasSize.y;
       context.arc(ballPosition.x, ballPosition.y, clientBallRayon , 0, Math.PI * 2, false);
       context.fill();
