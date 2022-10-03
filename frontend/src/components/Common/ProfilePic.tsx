@@ -13,12 +13,11 @@ const api = new Api();
 const ProfilePic: React.FC<ProfilePicProps> = ({ avatar, setAvatar }) => {
   useEffect(() => {
     api
-      .getPicture()
+      .getPicture(null)
       .then((res) => {
         if (res.status == 200)
           res.blob().then((myBlob) => {
             setAvatar((current) => {
-              console.log("get_picture is Ok");
               if (current) URL.revokeObjectURL(current); // to avoid memory leaks
               return URL.createObjectURL(myBlob);
             });

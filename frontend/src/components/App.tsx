@@ -26,6 +26,7 @@ import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
 import { isSameSimpleObj } from "../../shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 import SignUpPage from "./SignUpPage/SignUpPage";
+import toast, { Toaster } from "react-hot-toast";
 
 const api = new Api();
 
@@ -141,29 +142,39 @@ function App() {
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Toaster />
         </div>
       );
     case ConnectionStatus.Disconnected:
     case ConnectionStatus.NetworkUnavailable:
       return (
-        <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/false42login" element={<False42Login />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <>
+          <Routes>
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/false42login" element={<False42Login />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </>
       );
     case ConnectionStatus.SignupRequested:
       return (
-        <SignUpPage
-          updateCurrentUser={updateCurrentUser}
-          pongUsername={currentUser.pongUsername}
-        ></SignUpPage>
+        <>
+          <SignUpPage
+            updateCurrentUser={updateCurrentUser}
+            pongUsername={currentUser.pongUsername}
+          ></SignUpPage>
+          <Toaster />
+        </>
       );
     case ConnectionStatus.TwoFactorAuthenticationRequested:
       return (
-        <TwoStepSigningMockup
-          updateCurrentUser={updateCurrentUser}
-        ></TwoStepSigningMockup>
+        <>
+          <TwoStepSigningMockup
+            updateCurrentUser={updateCurrentUser}
+          ></TwoStepSigningMockup>
+          <Toaster />
+        </>
       );
     default:
       return <>This should never happen.</>;
