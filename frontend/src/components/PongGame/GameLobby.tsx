@@ -31,6 +31,10 @@ const GameLobby = (
     setStep(GameStep.QUEUE);
   }
 
+  const handleGameSettings = () => {
+    setStep(GameStep.SETTINGS);
+  }
+
   /** SPECTATE */
   const handleSpectate = (roomName: string) => {
     socket?.emit(ROUTES_BASE.GAME.JOIN_SPECTATE_REQUEST, roomName);
@@ -91,6 +95,10 @@ const GameLobby = (
         className="h-1/8 bg-sky-500 hover:bg-sky-700 lg:text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50 max-h-20"
         onClick={handleJoinGame}
       >Join game</button>
+      <button
+        className="h-1/8 bg-red-500 hover:bg-red-700 lg:text-3xl rounded-3xl p-4 shadow-md shadow-red-500/50 max-h-20"
+        onClick={handleGameSettings}
+      >Game Settings</button>
     </div>
     <div className="grid justify-around">
       <h2 className="text-center">CHALLENGE</h2>
