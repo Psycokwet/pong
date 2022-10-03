@@ -91,7 +91,7 @@ function App() {
         withCredentials: true,
       });
       setSocket(newSocket);
-    }
+    };
   }, []);
 
   useEffect(() => {
@@ -135,7 +135,7 @@ function App() {
               );
             })}
 
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Play socket={socket} />} />
             <Route path="/profile" element={<Profile />}>
               <Route path=":pongUsername" element={<OneUserProfile />} />
             </Route>
