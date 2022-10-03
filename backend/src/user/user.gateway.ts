@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   forwardRef,
   Inject,
   UseGuards,
@@ -23,6 +22,7 @@ import { UsersService } from './user.service';
 import AddFriend from 'shared/interfaces/AddFriend';
 import { Status, UserInterface } from 'shared/interfaces/UserInterface';
 import UserId from 'shared/interfaces/UserId';
+import { GameService } from 'src/game/game.service';
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -32,6 +32,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
+    private readonly gameService: GameService,
   ) {}
 
   @WebSocketServer()
@@ -41,23 +42,19 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = await this.userService.getUserFromSocket(client);
 
       if (!user) return;
-      const isRegistered = UsersService.userWebsockets.find(
-        (element) => element.userId === user.id,
-      );
 
-      if (!isRegistered) {
-        const newWebsocket = { userId: user.id, socketId: client.id };
-        UsersService.userWebsockets = [
-          ...UsersService.userWebsockets,
-          newWebsocket,
-        ];
-        const newUserConnected: UserInterface = {
-          id: user.id,
-          pongUsername: user.pongUsername,
-          status: Status.ONLINE,
-        };
-        this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, newUserConnected);
-      }
+      const newWebsocket = { userId: user.id, socketId: client.id };
+      UsersService.userWebsockets = [
+        ...UsersService.userWebsockets,
+        newWebsocket,
+      ];
+      const newUserConnected: UserInterface = {
+        id: user.id,
+        pongUsername: user.pongUsername,
+        status: Status.ONLINE,
+      };
+      this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, newUserConnected);
+      
     } catch (e) {
       console.error(e.message);
     }
@@ -93,18 +90,36 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const friend = await this.userService.findOneByPongUsername(
       friendToAdd.pongUsername,
     );
-
+    
     if (!friend) {
-      throw new BadRequestException({ error: 'User not found' });
+      throw new WsException({ error: 'User not found' });
+    }
+    /* Checking if the caller is adding himself (I think this should never 
+    happen on the front side) */
+    if (payload.userId === friend.id) {
+      throw new WsException({
+        error: 'You cannot add yourself',
+      });
     }
 
     const caller = await this.userService.getById(payload.userId);
 
     await this.userService.addFriend(friend, caller);
 
-    this.server.in(client.id).emit(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, {
-      newFriend: friendToAdd.pongUsername,
-    });
+    const friendUsersWebsockets: UsersWebsockets = UsersService.userWebsockets
+      .find((usersWebsockets: UsersWebsockets) => usersWebsockets.userId === friend.id);
+
+    let friendStatus: Status = this.userService.getStatus(friend);
+    
+    if (friendStatus === Status.ONLINE && this.gameService.findPlayerRoom(friend.id)) {
+        friendStatus = Status.PLAYING;
+    }
+    const newFriend: UserInterface = {
+      id: friend.id,
+      pongUsername: friend.pongUsername,
+      status: friendStatus,
+    };
+    client.emit(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, newFriend);
   }
 
   @UseGuards(JwtWsGuard)
@@ -117,9 +132,15 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const orderedFriendsList = await this.userService.getFriendsList(caller);
 
-    this.server
-      .in(client.id)
-      .emit(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, orderedFriendsList);
+    console.log(orderedFriendsList)
+    orderedFriendsList.map((user: UserInterface) => {
+      if (user.status === Status.ONLINE && this.gameService.findPlayerRoom(user.id)) {
+        user.status = Status.PLAYING;
+      }
+      return user;
+    })
+
+    client.emit(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, orderedFriendsList);
   }
 
   @UseGuards(JwtWsGuard)
