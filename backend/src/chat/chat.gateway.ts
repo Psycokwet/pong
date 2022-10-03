@@ -108,7 +108,7 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     if (data.channelName === '') {
-      throw new BadRequestException({
+      throw new WsException({
         error: 'You must input a channel name',
       });
     }
@@ -394,7 +394,7 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     if (data.userIdToUpdate === payload.userId)
-      throw new BadRequestException('You cannot update yourself');
+      throw new WsException('You cannot update yourself');
 
     const newAdmin = await this.userService.getById(data.userIdToUpdate);
     if (!newAdmin) throw new WsException('User does not exist');
