@@ -1,21 +1,55 @@
-import React from "react";
-import "./Profile.css";
-
+import React, { useState, useEffect } from "react";
+import { Api } from "../../api/api";
 import { useParams } from "react-router-dom";
-import ProfileName from "./ProfileName";
+
+import UserProfile from "shared/interfaces/UserProfile";
 import OneUserProfile from "./OneUserProfile";
+import NotFound from "../NavBar/Pages-To-Change/NotFound";
+
+const api = new Api();
 
 const Profile = () => {
-  const { user_login } = useParams();
+  const [userNotFound, setUserNotFound] = useState<boolean>(false);
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    pongUsername: "anonymous",
+    userRank: { level: 0, userRank: 0 },
+    userHistory: {
+      nbGames: 0,
+      nbWins: 0,
+      games: [],
+    },
+  });
+  const [avatarUrl, setAvatarUrl] = useState("");
+
+  const { pongUsername } = useParams(); // get this from url: /practice/pongUsername
+
+  useEffect(() => {
+    api.get_user_profile(pongUsername).then((res: Response) => {
+      if (res.status == 200)
+        res.json().then((content) => {
+          setUserProfile(content);
+        });
+      else setUserNotFound(true);
+    });
+
+    api.getPicture(pongUsername).then((res) => {
+      if (res.status == 200)
+        res.blob().then((myBlob) => {
+          setAvatarUrl((current) => {
+            if (current) URL.revokeObjectURL(current);
+            return URL.createObjectURL(myBlob);
+          });
+        });
+    });
+  }, [pongUsername]);
 
   return (
-    <div className="bg-black text-white h-screen flex grid grid-cols-10 grid-rows-6 gap-8">
-      <div className="col-start-2 col-span-3 row-start-2">
-        <ProfileName nickname={user_login} />
-      </div>
-
-      {/* This part will change according to each user. Need to look into how to pass data */}
-      <OneUserProfile nickname={user_login} />
+    <div className="bg-black text-white h-screen">
+      {userNotFound ? (
+        <NotFound />
+      ) : (
+        <OneUserProfile userProfile={userProfile} avatarUrl={avatarUrl} />
+      )}
     </div>
   );
 };

@@ -16,7 +16,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])
   // const [lastMessage, setLastMessage] = useState<Message>(undefined)
   const [connectedChannel, setConnectedChannel] = useState<ChannelData>(undefined);
-  const [userAttachedList, setUserAttachedList] = useState<UserInterface[]>([]);
+  const [attachedUserList, setAttachedUserList] = useState<UserInterface[]>([]);
 
   const addMessage = (newElem:Message) => {
     if (connectedChannel && newElem.roomId === connectedChannel.channelId)
@@ -28,7 +28,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     return () => {
       socket?.off(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, addMessage);
     };
-  }, [addMessage]);
+  }, []);
   const resetMessages = (msgs:Message[]) => {
     setMessages(msgs);
     // setLastMessage(msgs.at(-1));
@@ -73,40 +73,75 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     return () => {
       socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
     };
-  }, [disconnect]);
+  }, []);
 
-
-  const ResetUserList = (list:UserInterface[]) => {
-    setUserAttachedList(list);
-  }
   useEffect(() => {
     if (connectedChannel)
       socket?.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST, connectedChannel.roomId)
   }, [connectedChannel]);
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, ResetUserList);
+    socket?.on(
+      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, 
+      (userList: UserInterface[]) => setAttachedUserList(userList)
+    );
+
     return () => {
-      socket?.off(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, ResetUserList);
+      socket?.off(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        (userList: UserInterface[]) => setAttachedUserList(userList)
+      );
     };
-  }, [ResetUserList]);
+  }, []);
+
+  /** UNATTACH FROM CHANNEL */
+  useEffect(() => {
+    socket?.on(
+      ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
+      (unattachedUserId: number) => setAttachedUserList(
+        (current) => current.filter((user) => user.id !== unattachedUserId)
+      )
+    );
+    return () => {
+      socket?.off(
+        ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
+        (unattachedUserId: number) => setAttachedUserList(
+          (current) => current.filter((user) => user.id !== unattachedUserId)
+        )
+      );
+    };
+  }, []);
+  /** END UNATTACH FROM CHANNEL */
+
+  const handleLeaveChannel = () => {
+    socket?.emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST, {
+      channelName: connectedChannel.channelName
+    });
+    setConnectedChannel(undefined);
+    setMessages([]);
+    setAttachedUserList([]);
+  }
+
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
       <ChatList
         // lastMessage={lastMessage}
+        handleLeaveChannel={handleLeaveChannel} 
         socket={socket}
         connectedChannel={connectedChannel}
       />
       <Messages messages={messages}/>
-      <TextField
-        socket={socket}
-        chan={connectedChannel}
-      />
+      {
+        connectedChannel ?
+        <TextField socket={socket} connectedChannel={connectedChannel} />
+        :
+        <></>
+      }
       <div className="row-start-1 row-span-6 col-start-5 p-x-8">
         {statusList?.map((aStatusList) => {
           return (
             <UserListByStatus
               key={aStatusList.status}
-              userList={userAttachedList}
+              userList={attachedUserList}
               inputFilter={""}
               statusList={aStatusList}
               socket={socket}
