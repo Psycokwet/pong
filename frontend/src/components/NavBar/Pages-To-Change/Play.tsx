@@ -21,18 +21,6 @@ const Play = ({ socket }: { socket: Socket }) => {
   const [paddleColor, setPaddleColor] = useState(defaultColor.paddle);
   const [bgColor, setBgColor] = useState(defaultColor.background);
 
-  useEffect(() => {
-    setBallColor(ballColor);
-  }, [ballColor]);
-
-  useEffect(() => {
-    setPaddleColor(paddleColor);
-  }, [paddleColor]);
-
-  useEffect(() => {
-    setBgColor(bgColor);
-  }, [bgColor]);
-
   const [step, setStep] = useState<number>(0);
 
   /** WEBSOCKET */
