@@ -118,7 +118,7 @@ export class ChatGateway {
       await this.chatService.getRoomByNameWithRelations(data.channelName);
 
     if (duplicateRoomCheck) {
-      throw new BadRequestException({
+      throw new WsException({
         error: 'Channel name is already taken',
       });
     }
@@ -166,10 +166,13 @@ export class ChatGateway {
     @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
-    const newDMRoom = await this.chatService.saveDMRoom(
-      friendId,
-      payload.userId,
-    );
+    const receiver = await this.userService.getById(friendId);
+    if (!receiver) throw new WsException('User does not exist');
+
+    const sender = await this.userService.getById(payload.userId);
+    if (!sender) throw new WsException('User does not exist');
+
+    const newDMRoom = await this.chatService.saveDMRoom(receiver, sender);
 
     await client.join(newDMRoom.roomName);
 
@@ -212,7 +215,7 @@ export class ChatGateway {
       },
     );
     if (!room) {
-      throw new BadRequestException({
+      throw new WsException({
         error: 'You must specify which channel you want to join',
       });
     }
@@ -223,7 +226,7 @@ export class ChatGateway {
         room.password,
       );
       if (!isGoodPassword)
-        throw new UnauthorizedException({
+        throw new WsException({
           error:
             'A password has been set for this channel. Please enter the correct password.',
         });
@@ -394,18 +397,17 @@ export class ChatGateway {
       throw new BadRequestException('You cannot update yourself');
 
     const newAdmin = await this.userService.getById(data.userIdToUpdate);
+    if (!newAdmin) throw new WsException('User does not exist');
 
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
       { owner: true, admins: true },
     );
 
-    if (!room) throw new BadRequestException('Channel does not exist');
+    if (!room) throw new WsException('Channel does not exist');
 
     if (room.owner.id !== payload.userId)
-      throw new ForbiddenException(
-        'You do not have the rights to set an admin',
-      );
+      throw new WsException('You do not have the rights to set an admin');
 
     this.chatService.setAdmin(room, newAdmin);
 
@@ -426,20 +428,19 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     if (data.userIdToUpdate === payload.userId)
-      throw new BadRequestException('You cannot update yourself');
+      throw new WsException('You cannot change your own privileges');
 
     const oldAdmin = await this.userService.getById(data.userIdToUpdate);
+    if (!oldAdmin) throw new WsException('User does not exist');
 
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
       { owner: true, admins: true },
     );
-    if (!room) throw new BadRequestException('Channel does not exist');
+    if (!room) throw new WsException('Channel does not exist');
 
     if (room.owner.id !== payload.userId)
-      throw new ForbiddenException(
-        'You do not have the rights to unset an admin',
-      );
+      throw new WsException('You do not have the rights to unset an admin');
 
     this.chatService.unsetAdmin(room, oldAdmin);
 
@@ -465,7 +466,7 @@ export class ChatGateway {
       { owner: true, admins: true, members: true },
     );
 
-    if (!room) throw new BadRequestException('Channel does not exist');
+    if (!room) throw new WsException('Channel does not exist');
 
     const privilege = await this.chatService.getUserPrivileges(
       room,
@@ -486,22 +487,23 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     const userToBan = await this.userService.getById(data.userIdToUpdate);
+    if (!userToBan) throw new WsException('User does not exist');
 
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
       { owner: true, admins: true, members: true },
     );
 
-    if (!room) throw new BadRequestException('Channel does not exist');
+    if (!room) throw new WsException('Channel does not exist');
 
     if (
       payload.userId !== room.owner.id &&
       room.admins.filter((admin) => payload.userId === admin.id).length === 0
     )
-      throw new ForbiddenException('You do not have the rights to ban a user');
+      throw new WsException('You do not have the rights to ban a user');
 
     if (userToBan.id === room.owner.id)
-      throw new ForbiddenException('An owner cannot be banned');
+      throw new WsException('An owner cannot be banned');
 
     /** The person who wants to ban is not an owner (so he's an admin) and wants to ban
      *  another user */
@@ -527,6 +529,7 @@ export class ChatGateway {
   @SubscribeMessage(ROUTES_BASE.CHAT.MUTE_USER_REQUEST)
   async muteUser(@MessageBody() data: MuteUser, @UserPayload() payload: any) {
     const userToMute = await this.userService.getById(data.userIdToMute);
+    if (!userToMute) throw new WsException('User does not exist');
 
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
@@ -566,6 +569,8 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     const caller = await this.userService.getById(payload.userId);
+    if (!caller) throw new WsException('User does not exist');
+
     const room = await this.chatService.getRoomWithRelations(
       { channelName: channelName },
       { owner: true },
