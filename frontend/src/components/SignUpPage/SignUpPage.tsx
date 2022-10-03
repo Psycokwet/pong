@@ -57,8 +57,14 @@ const SignUpPage: React.FC<SignUpProps> = ({
     }
     api.get_2fa().then((res: Response) => {
       res.json().then((content) => {
-        if (content === true)
+        if (content === true){
+          setChecked(true);
           setStatus(twoFactorSteps.DONE);
+        }
+        else if (status === twoFactorSteps.DONE) {
+          setChecked(false)
+          setStatus(twoFactorSteps.BUTTON);
+        }
       });
     });
   }, [status]);
@@ -221,7 +227,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
           :
           <Switch
             onChange={turnOffTwofa}
-            checked={true}
+            checked={checked}
             className="react-switch transition"
             onColor="#0cb92a"
           />
