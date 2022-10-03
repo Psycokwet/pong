@@ -1,18 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
-import {
-  FindOptionsRelations,
-  FindOptionsWhere,
-  Repository,
-} from 'typeorm';
+import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
@@ -55,6 +48,7 @@ export class ChatService {
 
   public async getAllAttachedRooms(userId: number) {
     const user = await this.userService.getById(userId);
+    if (!user) throw new WsException('User does not exist');
 
     const attachedRoomList = await this.roomsRepository
       .find({
@@ -80,6 +74,7 @@ export class ChatService {
 
   public async getAllDMRooms(userId: number) {
     const user = await this.userService.getById(userId);
+    if (!user) throw new WsException('User does not exist');
 
     return this.roomsRepository
       .find({
@@ -148,6 +143,7 @@ export class ChatService {
     password: string;
   }) {
     const user = await this.userService.getById(userId);
+    if (!user) throw new WsException('User does not exist');
 
     const newRoom = await Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
@@ -164,20 +160,19 @@ export class ChatService {
     return newRoom;
   }
 
-  async saveDMRoom(receiverId: number, senderId: number) {
-    if (receiverId === senderId) {
-      throw new BadRequestException({
+  async saveDMRoom(receiver: User, sender: User) {
+    if (receiver.id === sender.id) {
+      throw new WsException({
         error: "You're trying to send a DM to yourself",
       });
     }
-    const receiver = await this.userService.getById(receiverId);
-    const sender = await this.userService.getById(senderId);
+
     const roomName = 'DM_' + uuidv4();
 
     /** Making sure a DM channel between the receiver and the sender does not already exist, throws
      * a Bad Request if there is
      */
-    await this.doesDMChannelExist(receiverId, senderId);
+    await this.doesDMChannelExist(receiver.id, sender.id);
 
     const newRoom = await Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
@@ -209,7 +204,7 @@ export class ChatService {
     });
 
     if (DMExists.length !== 0) {
-      throw new BadRequestException({
+      throw new WsException({
         error: 'DM already exists',
       });
     }
@@ -217,6 +212,7 @@ export class ChatService {
 
   async attachMemberToChannel(userId: number, room: Room) {
     const newMember = await this.userService.getById(userId);
+    if (!newMember) throw new WsException('User does not exist');
 
     if (
       !room.members.filter(
@@ -229,9 +225,7 @@ export class ChatService {
   }
 
   async unattachMemberToChannel(userId: number, room: Room) {
-    room.members = room.members.filter(
-      (member: User) => member.id !== userId,
-    );
+    room.members = room.members.filter((member: User) => member.id !== userId);
 
     await room.save();
   }
@@ -309,7 +303,7 @@ export class ChatService {
     );
 
     if (!room) {
-      throw new BadRequestException('Channel does not exist');
+      throw new WsException('Channel does not exist');
     }
 
     const userInterfaceMembers = room.members.map((member) => ({
@@ -326,7 +320,7 @@ export class ChatService {
 
     if (userId === room.owner.id) return Privileges.OWNER;
 
-    if (room.admins.find(admin => admin.id === userId)) {
+    if (room.admins.find((admin) => admin.id === userId)) {
       return Privileges.ADMIN;
     }
 
