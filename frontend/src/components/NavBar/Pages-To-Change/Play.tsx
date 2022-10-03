@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import GameCanvas from "/src/components/PongGame/GameCanvas";
 import GameLobby from "/src/components/PongGame/GameLobby";
@@ -11,16 +11,23 @@ import { GameStep } from "/src/components/PongGame/GameStep.enum";
 import GameSettings from "../../PongGame/GameSettings";
 import { HexColorPicker } from "react-colorful";
 
-const Play = ({ socket }: { socket: Socket }) => {
-  const defaultColor = {
-    ball: "#aabbcc",
-    paddle: "#aabbcc",
-    background: "#000000",
-  };
-  const [ballColor, setBallColor] = useState(defaultColor.ball);
-  const [paddleColor, setPaddleColor] = useState(defaultColor.paddle);
-  const [bgColor, setBgColor] = useState(defaultColor.background);
+export type GameColors = {
+  ball: string;
+  paddle: string;
+  background: string;
+};
+export const defaultColor: GameColors = {
+  ball: "#aabbcc",
+  paddle: "#aabbcc",
+  background: "#000000",
+};
 
+type PlayProps = {
+  socket: Socket | undefined;
+  colors: GameColors;
+  setColors: Dispatch<SetStateAction<GameColors>>;
+};
+const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
   const [step, setStep] = useState<number>(0);
 
   /** WEBSOCKET */
@@ -59,6 +66,13 @@ const Play = ({ socket }: { socket: Socket }) => {
     setStep(step + 1);
   };
 
+  const setRightColor = (key: string) => (newColor: string) => {
+    setColors((current: GameColors) => {
+      current[key as keyof GameColors] = newColor;
+      return { ...current };
+    });
+  };
+
   const gameSteps = [
     <GameLobby socket={socket} setStep={setStep} setGameRoom={setGameRoom} />,
     <GameSettings setStep={setStep} />,
@@ -74,9 +88,9 @@ const Play = ({ socket }: { socket: Socket }) => {
       upgradeStep={upgradeStep}
       gameRoom={gameRoom}
       clientCanvasSize={clientCanvasSize}
-      ballColor={ballColor}
-      paddleColor={paddleColor}
-      bgColor={bgColor}
+      ballColor={colors.ball}
+      paddleColor={colors.paddle}
+      bgColor={colors.background}
     />,
     <GameOver
       socket={socket}
@@ -91,20 +105,23 @@ const Play = ({ socket }: { socket: Socket }) => {
         <div className="grid grid-cols-3 gap-4">
           <div>
             Ball
-            <HexColorPicker color={defaultColor.ball} onChange={setBallColor} />
+            <HexColorPicker
+              color={defaultColor.ball}
+              onChange={setRightColor("ball")}
+            />
           </div>
           <div>
             Paddle
             <HexColorPicker
               color={defaultColor.paddle}
-              onChange={setPaddleColor}
+              onChange={setRightColor("paddle")}
             />
           </div>
           <div>
             Background
             <HexColorPicker
               color={defaultColor.background}
-              onChange={setBgColor}
+              onChange={setRightColor("background")}
             />
           </div>
           {gameSteps[step]}
