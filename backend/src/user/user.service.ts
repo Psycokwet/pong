@@ -315,8 +315,7 @@ export class UsersService {
     });
   }
 
-  async getPongUsername(login42: string) {
-    const user = await this.findOne(login42);
+  async getPongUsername(user: User) {
     return { pongUsername: user.pongUsername };
   }
 
