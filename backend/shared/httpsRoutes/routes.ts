@@ -3,11 +3,8 @@ import { generate_full_routes } from '../utils';
 export const ROUTES_BASE = {
   USER: {
     ENDPOINT: '/user/',
-    SIGNOUT: 'signout',
     SET_PICTURE: 'set_picture',
     GET_PICTURE: 'get_picture',
-    ADD_FRIEND: 'add_friend',
-    GET_FRIEND_LIST: 'get_friends_list',
     GET_LOGIN42: 'get_login42',
     SET_PONG_USERNAME: 'set_pong_username',
     GET_PONG_USERNAME: 'get_pong_username',
@@ -30,8 +27,6 @@ export const ROUTES_BASE = {
   ROOT: {
     ENDPOINT: '/',
     PROTECTED: 'protected',
-    REFRESH: 'refresh',
-    REDIRECT: 'redirect',
   },
 };
 export const FULL_ROUTE = generate_full_routes(ROUTES_BASE);
