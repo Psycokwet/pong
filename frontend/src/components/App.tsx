@@ -87,7 +87,6 @@ function App() {
 
   useEffect(() => {
     return () => {
-      console.log("~~~~~~~~~~~~~~~~~ new socket created");
       const newSocket = io(import.meta.env.VITE_PONG_URL, {
         transports: ["websocket"],
         withCredentials: true,

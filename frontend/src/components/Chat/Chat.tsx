@@ -19,7 +19,6 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   const [attachedUserList, setAttachedUserList] = useState<UserInterface[]>([]);
 
   const addMessage = (newElem:Message) => {
-    console.log("addMessage :", newElem);
     if (connectedChannel && newElem.roomId == connectedChannel.channelId)
       setMessages((current) => [...current, newElem]);
     // setLastMessage(newElem);
@@ -43,7 +42,6 @@ function Chat ({socket}:{socket:Socket|undefined}) {
 
 
   const channelListener = (channel: ChannelData) => {
-    console.log("set connectedChannel to : ", channel);
     setConnectedChannel(channel);
   };
   useEffect(() => {
