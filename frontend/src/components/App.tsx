@@ -11,7 +11,7 @@ import NavBar from "./NavBar/NavBar";
 import FriendList from "./FriendList/FriendList";
 import Loading from "./Common/Loading";
 import NotFound from "./NavBar/Pages-To-Change/NotFound";
-import Play from "./NavBar/Pages-To-Change/Play";
+import Play, { defaultColor, GameColors } from "./NavBar/Pages-To-Change/Play";
 import Home from "./NavBar/Pages-To-Change/Home";
 import Chat from "./Chat/Chat";
 import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
@@ -31,6 +31,7 @@ import toast, { Toaster } from "react-hot-toast";
 const api = new Api();
 
 function App() {
+  const [colors, setColors] = useState<GameColors>(defaultColor);
   const [currentUser, setCurrentUser] = useState<CurrentUserFrontInterface>(
     createCurrentUserFrontInterface()
   );
@@ -62,7 +63,7 @@ function App() {
   const init_webPageRoutes = () => [
     {
       url: "/play",
-      element: <Play socket={socket} />,
+      element: <Play socket={socket} colors={colors} setColors={setColors} />,
     },
     {
       url: "/leaderboard",
@@ -136,7 +137,7 @@ function App() {
               );
             })}
 
-            <Route path="/" element={<Play socket={socket} />} />
+            <Route path="/" element={webPageRoutes[0].element} />
             <Route path="/profile" element={<Profile />}>
               <Route path=":pongUsername" element={<OneUserProfile />} />
             </Route>
