@@ -247,14 +247,6 @@ export class UsersService {
   }
 
   async addFriend(friend: User, caller: User) {
-    /* Checking if the caller is adding himself (I think this should never 
-      happen on the front side) */
-    if (caller.id === friend.id) {
-      throw new BadRequestException({
-        error: 'You cannot add yourself',
-      });
-    }
-
     /* Then we check if the person the caller wants to add as a friend is already
     in our friend list and throw a 400 if they are */
     const doubleAddCheck = await this.friendRepository.findOne({
