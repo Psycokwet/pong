@@ -11,7 +11,6 @@ import NavBar from "./NavBar/NavBar";
 import FriendList from "./FriendList/FriendList";
 import Loading from "./Common/Loading";
 import NotFound from "./NavBar/Pages-To-Change/NotFound";
-import PracticeJwt from "./PracticeJwt";
 import Play from "./NavBar/Pages-To-Change/Play";
 import Home from "./NavBar/Pages-To-Change/Home";
 import Chat from "./Chat/Chat";
@@ -126,6 +125,7 @@ function App() {
                 return { ...current, status: ConnectionStatus.Disconnected };
               })
             }
+            pongUsername={currentUser.pongUsername}
           />
           <FriendList socket={socket} />
 
@@ -136,9 +136,9 @@ function App() {
               );
             })}
 
-            <Route path="/" element={<Home />} />
-            <Route path="profile" element={<Profile />}>
-              <Route path=":user_login" element={<OneUserProfile />} />
+            <Route path="/" element={<Play socket={socket} />} />
+            <Route path="/profile" element={<Profile />}>
+              <Route path=":pongUsername" element={<OneUserProfile />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
