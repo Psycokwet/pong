@@ -19,7 +19,8 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   const [attachedUserList, setAttachedUserList] = useState<UserInterface[]>([]);
 
   const addMessage = (newElem:Message) => {
-    if (connectedChannel && newElem.roomId === connectedChannel.channelId)
+    console.log("addMessage :", newElem);
+    if (connectedChannel && newElem.roomId == connectedChannel.channelId)
       setMessages((current) => [...current, newElem]);
     // setLastMessage(newElem);
   }
@@ -28,7 +29,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     return () => {
       socket?.off(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, addMessage);
     };
-  }, []);
+  }, [addMessage]);
   const resetMessages = (msgs:Message[]) => {
     setMessages(msgs);
     // setLastMessage(msgs.at(-1));
@@ -42,6 +43,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
 
 
   const channelListener = (channel: ChannelData) => {
+    console.log("set connectedChannel to : ", channel);
     setConnectedChannel(channel);
   };
   useEffect(() => {
@@ -73,11 +75,11 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     return () => {
       socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
     };
-  }, []);
+  }, [disconnect]);
 
   useEffect(() => {
     if (connectedChannel)
-      socket?.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST, connectedChannel.roomId)
+      socket?.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST, connectedChannel.channelId)
   }, [connectedChannel]);
   useEffect(() => {
     socket?.on(
@@ -91,7 +93,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
         (userList: UserInterface[]) => setAttachedUserList(userList)
       );
     };
-  }, []);
+  }, [setAttachedUserList]);
 
   /** UNATTACH FROM CHANNEL */
   useEffect(() => {
@@ -145,7 +147,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
               inputFilter={""}
               statusList={aStatusList}
               socket={socket}
-              roomId={connectedChannel?.roomId}
+              roomId={connectedChannel?.channelId}
               menuSettings={({
                 challenge:aStatusList.status===Status.ONLINE,
                 watch:aStatusList.status===Status.PLAYING,

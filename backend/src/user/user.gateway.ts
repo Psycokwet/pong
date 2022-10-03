@@ -132,7 +132,6 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     const orderedFriendsList = await this.userService.getFriendsList(caller);
 
-    console.log(orderedFriendsList)
     orderedFriendsList.map((user: UserInterface) => {
       if (user.status === Status.ONLINE && this.gameService.findPlayerRoom(user.id)) {
         user.status = Status.PLAYING;
