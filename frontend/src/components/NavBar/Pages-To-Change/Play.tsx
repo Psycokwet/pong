@@ -20,7 +20,7 @@ const Play = ({ socket }: { socket: Socket }) => {
   const [ballColor, setBallColor] = useState(defaultColor.ball);
   const [paddleColor, setPaddleColor] = useState(defaultColor.paddle);
   const [bgColor, setBgColor] = useState(defaultColor.background);
-  
+
   useEffect(() => {
     setBallColor(ballColor);
   }, [ballColor]);
@@ -71,7 +71,6 @@ const Play = ({ socket }: { socket: Socket }) => {
     setStep(step + 1);
   };
 
-
   const gameSteps = [
     <GameLobby socket={socket} setStep={setStep} setGameRoom={setGameRoom} />,
     <GameSettings setStep={setStep} />,
@@ -101,15 +100,27 @@ const Play = ({ socket }: { socket: Socket }) => {
   return (
     <div className="bg-black text-white lg:h-7/8 sm:h-6/8 place-content-center">
       {step === GameStep["SETTINGS"] ? (
-        <>
-        <div>Choose color for Ball</div>
-        <HexColorPicker color={defaultColor.ball} onChange={setBallColor} />
-        <div>Choose color for Paddle</div>
-        <HexColorPicker color={defaultColor.paddle} onChange={setPaddleColor} />
-        <div>Choose color for BackGround</div>
-        <HexColorPicker color={defaultColor.background} onChange={setBgColor} />
-        {gameSteps[step]}
-        </>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            Ball
+            <HexColorPicker color={defaultColor.ball} onChange={setBallColor} />
+          </div>
+          <div>
+            Paddle
+            <HexColorPicker
+              color={defaultColor.paddle}
+              onChange={setPaddleColor}
+            />
+          </div>
+          <div>
+            Background
+            <HexColorPicker
+              color={defaultColor.background}
+              onChange={setBgColor}
+            />
+          </div>
+          {gameSteps[step]}
+        </div>
       ) : (
         gameSteps[step]
       )}
