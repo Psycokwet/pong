@@ -209,7 +209,7 @@ export class ChatGateway implements OnGatewayConnection {
       const receiverSocket = this.server.sockets.sockets.get(
         receiverSocketId.socketId,
       );
-      
+
       await receiverSocket.join(newDMRoom.roomName);
       this.forceJoinDMChannelLobby(receiverSocket, friendId);
     }
@@ -220,6 +220,8 @@ export class ChatGateway implements OnGatewayConnection {
         channelName: newDMRoom.channelName,
       });
     this.joinDMChannelLobby(client, payload);
+    client
+      .emit(ROUTES_BASE.CHAT.MESSAGE_HISTORY, []);
   }
 
   /* ATTACH USER TO CHANNEL */
