@@ -7,11 +7,11 @@ import { Game } from 'src/game/game.entity';
 import { Friend } from 'src/friend_list/friend.entity';
 import { UserController } from './user.controller';
 import { LocalFilesModule } from 'src/localFiles/localFiles.module';
-import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import LocalFile from 'src/localFiles/localFile.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserGateway } from './user.gateway';
 import { Blocked } from 'src/blocked/blocked.entity';
+import { GameService } from 'src/game/game.service';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { Blocked } from 'src/blocked/blocked.entity';
     forwardRef(() => AuthModule),
   ],
   controllers: [UserController],
-  providers: [UserGateway, UsersService],
+  providers: [UserGateway, UsersService, GameService],
   exports: [UserGateway, UsersService],
 })
 export class UsersModule {}

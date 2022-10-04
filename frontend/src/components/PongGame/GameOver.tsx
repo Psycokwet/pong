@@ -35,7 +35,7 @@ const GameOver = ({
       <div><h1 className="text-3xl text-center p-2">RANKED MATCH</h1></div>
       <div><h2 className="lg:text-3xl text-center p-2">First to 10 points win</h2></div>
       <div className="grid sm:grid-cols-5 content-center sm:flex sm:justify-around">
-        <div className="self-center text-center hidden sm:block">
+        <div className="self-center text-center hidden sm:block w-2/12">
           <p>{gameRoom.gameData.player1.pongUsername}</p>
           <p className="text-6xl p-4">{gameRoom.gameData.player1.score}</p>
         </div>
@@ -79,7 +79,7 @@ const GameOver = ({
           </div>
         </div>
 
-        <div className="self-center text-center hidden sm:block">
+        <div className="self-center text-center hidden sm:block w-2/12">
           <p>{gameRoom.gameData.player2.pongUsername}</p>
           <p className="text-6xl p-4">{gameRoom.gameData.player2.score}</p>
         </div>
