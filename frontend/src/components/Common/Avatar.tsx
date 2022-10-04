@@ -12,7 +12,7 @@ const Avatar: React.FC<AvatarProps> = ({ url, size }) => {
   return (
     <div className="bg-gray-900">
       {url ? (
-        <img src={url} className={`rounded-full ${size}`} />
+        <img src={url} className={`rounded-full object-cover ${size}`} />
       ) : (
         <img
           src={DEFAULT_AVATAR}
