@@ -5,12 +5,13 @@ import { KeyboardEvent, useState, useEffect } from "react";
 import { SearchChannel } from "/shared/interfaces/SearchChannel";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
-const Channel = function ({channel, socket, connectedChannel, handleLeaveChannel, userPrivilege}:{
+const Channel = function ({channel, socket, connectedChannel, handleLeaveChannel, userPrivilege, handleDisconnectChannel}:{
   channel:ChannelData,
   socket:Socket|undefined,
   connectedChannel:ChannelData|undefined,
   handleLeaveChannel: any,
   userPrivilege: Privileges;
+  handleDisconnectChannel: any;
 }){
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [newChanPassword, setNewChanPassword] = useState<string>("");
@@ -21,6 +22,7 @@ const Channel = function ({channel, socket, connectedChannel, handleLeaveChannel
 
   const handleClick = () => {
     if (connectedChannel?.channelId !== channel.channelId) {
+      handleDisconnectChannel();
       if (connectedChannel)
         socket?.emit(
           ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST,
