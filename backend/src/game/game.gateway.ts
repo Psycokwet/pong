@@ -222,7 +222,7 @@ export class GameGateway implements OnGatewayConnection {
   ) {
     if (payload.userId === opponentId) return;
     const opponent = await this.userService.getById(opponentId);
-    const user = await this.userService.getById(payload.opponentId);
+    const user = await this.userService.getById(payload.userId);
     if (!user || !opponent) {
       throw new WsException(GameGateway.UserNotFound);
     }
