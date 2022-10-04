@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 // Components
 import APage from "./APage";
@@ -60,13 +60,18 @@ const NavBar: React.FC<NavBarProps> = ({ setDisconnected, pongUsername }) => {
           </li>
           {NavBarPageList.map((onePage, i) => {
             return (
-              <li key={i} className="navbar-icon group">
+              <NavLink
+                to={onePage.url}
+                style={({ isActive }) => ({ color: isActive ? "green" : "white" })}
+                key={i} 
+                className="navbar-icon group"
+              >
                 <APage
                   url={onePage.url}
                   pageName={onePage.pageName}
                   pageIcon={onePage.pageIcon}
                 />
-              </li>
+              </NavLink>
             );
           })}
           <li className="navbar-icon group">
