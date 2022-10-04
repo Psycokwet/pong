@@ -12,7 +12,6 @@ import FriendList from "./FriendList/FriendList";
 import Loading from "./Common/Loading";
 import NotFound from "./NavBar/Pages-To-Change/NotFound";
 import Play, { defaultColor, GameColors } from "./NavBar/Pages-To-Change/Play";
-import Home from "./NavBar/Pages-To-Change/Home";
 import Chat from "./Chat/Chat";
 import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
 import Profile from "./Profile/Profile";
@@ -26,11 +25,12 @@ import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
 import { isSameSimpleObj } from "../../shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 import SignUpPage from "./SignUpPage/SignUpPage";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 const api = new Api();
 
 function App() {
+  const [colors, setColors] = useState<GameColors>(defaultColor);
   const [currentUser, setCurrentUser] = useState<CurrentUserFrontInterface>(
     createCurrentUserFrontInterface()
   );
@@ -59,31 +59,6 @@ function App() {
   };
 
   const [socket, setSocket] = useState<Socket>();
-  const init_webPageRoutes = () => [
-    {
-      url: "/play",
-      element: <Play socket={socket} />,
-    },
-    {
-      url: "/leaderboard",
-      element: <LeaderBoard />,
-    },
-    {
-      url: "/chat",
-      element: <Chat socket={socket} />,
-    },
-    {
-      url: "/settings",
-      element: (
-        <SignUpPage
-          updateCurrentUser={updateCurrentUser}
-          pongUsername={currentUser.pongUsername}
-        />
-      ),
-    },
-  ];
-
-  const [webPageRoutes, setWebPagesRoutes] = useState(init_webPageRoutes());
 
   useEffect(() => {
     return () => {
@@ -94,10 +69,6 @@ function App() {
       setSocket(newSocket);
     };
   }, []);
-
-  useEffect(() => {
-    setWebPagesRoutes(init_webPageRoutes());
-  }, [socket, currentUser]);
 
   useEffect(() => {
     if (currentUser.status == ConnectionStatus.Unknown) {
@@ -121,7 +92,7 @@ function App() {
         <div className="h-screen">
           <NavBar
             setDisconnected={() =>
-              setCurrentUser((current) => {
+              setCurrentUser((current: CurrentUserFrontInterface) => {
                 return { ...current, status: ConnectionStatus.Disconnected };
               })
             }
@@ -130,13 +101,42 @@ function App() {
           <FriendList socket={socket} />
 
           <Routes>
-            {webPageRoutes.map((onePage, i) => {
+            {[
+              {
+                url: "/play",
+                element: (
+                  <Play socket={socket} colors={colors} setColors={setColors} />
+                ),
+              },
+              {
+                url: "/leaderboard",
+                element: <LeaderBoard />,
+              },
+              {
+                url: "/chat",
+                element: <Chat socket={socket} />,
+              },
+              {
+                url: "/settings",
+                element: (
+                  <SignUpPage
+                    updateCurrentUser={updateCurrentUser}
+                    pongUsername={currentUser.pongUsername}
+                  />
+                ),
+              },
+            ].map((onePage, i) => {
               return (
                 <Route key={i} path={onePage.url} element={onePage.element} />
               );
             })}
 
-            <Route path="/" element={webPageRoutes[0].element} />
+            <Route
+              path="/"
+              element={
+                <Play socket={socket} colors={colors} setColors={setColors} />
+              }
+            />
             <Route path="/profile" element={<Profile />}>
               <Route path=":pongUsername" element={<OneUserProfile />} />
             </Route>
