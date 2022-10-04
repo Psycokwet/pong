@@ -1,18 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
-import {
-  FindOptionsRelations,
-  FindOptionsWhere,
-  Repository,
-} from 'typeorm';
+import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
@@ -21,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
 import { Muted } from './muted.entity';
+import { Banned } from './banned.entity';
 @Injectable()
 export class ChatService {
   constructor(
@@ -33,6 +27,8 @@ export class ChatService {
     private usersRepository: Repository<User>,
     @InjectRepository(Muted)
     private mutedRepository: Repository<Muted>,
+    @InjectRepository(Banned)
+    private bannedRepository: Repository<Banned>,
     private userService: UsersService,
   ) {}
   public static userWebsockets: UsersWebsockets[] = [];
@@ -136,6 +132,12 @@ export class ChatService {
     });
   }
 
+  public async getBannedUser(sender: User, room: Room) {
+    return await this.bannedRepository.findOne({
+      where: { bannedUserId: sender.id, roomId: room.id },
+    });
+  }
+
   async saveRoom({
     roomName,
     userId,
@@ -229,9 +231,7 @@ export class ChatService {
   }
 
   async unattachMemberToChannel(userId: number, room: Room) {
-    room.members = room.members.filter(
-      (member: User) => member.id !== userId,
-    );
+    room.members = room.members.filter((member: User) => member.id !== userId);
 
     await room.save();
   }
@@ -249,6 +249,23 @@ export class ChatService {
   async unmuteUser(userIdToUnmute: number, roomId: number) {
     return await Muted.delete({
       mutedUserId: userIdToUnmute,
+      roomId: roomId,
+    });
+  }
+
+  async addBannedUser(bannedUser: User, room: Room, banTime: number) {
+    const addBanned = Banned.create({
+      roomId: room.id,
+      bannedUserId: bannedUser.id,
+      unbanAt: Date.now() + banTime,
+    });
+
+    await addBanned.save();
+  }
+
+  async unbanUser(userIdToUnban: number, roomId: number) {
+    return await Banned.delete({
+      bannedUserId: userIdToUnban,
       roomId: roomId,
     });
   }
@@ -326,7 +343,7 @@ export class ChatService {
 
     if (userId === room.owner.id) return Privileges.OWNER;
 
-    if (room.admins.find(admin => admin.id === userId)) {
+    if (room.admins.find((admin) => admin.id === userId)) {
       return Privileges.ADMIN;
     }
 
