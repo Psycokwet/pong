@@ -22,11 +22,12 @@ import { AuthService, TokenPayload } from 'src/auth/auth.service';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
-import { Status, UserInterface } from 'shared/interfaces/UserInterface';
+import { UserInterface } from 'shared/interfaces/UserInterface';
 import { v4 as uuidv4 } from 'uuid';
 import UserProfile from 'shared/interfaces/UserProfile';
 import { Blocked } from 'src/blocked/blocked.entity';
 import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
+import { Status } from 'shared/interfaces/UserStatus';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));

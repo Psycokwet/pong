@@ -5,17 +5,14 @@ import { KeyboardEvent, useState, useEffect } from "react";
 import { SearchChannel } from "/shared/interfaces/SearchChannel";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
-const Channel = function ({
-  channel,
-  socket,
-  connectedChannel,
-  handleLeaveChannel,
-}: {
-  channel: ChannelData;
-  socket: Socket | undefined;
-  connectedChannel: ChannelData | undefined;
-  handleLeaveChannel: any;
-}) {
+const Channel = function ({channel, socket, connectedChannel, handleLeaveChannel, userPrivilege, handleDisconnectChannel}:{
+  channel:ChannelData,
+  socket:Socket|undefined,
+  connectedChannel:ChannelData|undefined,
+  handleLeaveChannel: any,
+  userPrivilege: Privileges;
+  handleDisconnectChannel: any;
+}){
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [newChanPassword, setNewChanPassword] = useState<string>("");
 
@@ -25,6 +22,7 @@ const Channel = function ({
 
   const handleClick = () => {
     if (connectedChannel?.channelId !== channel.channelId) {
+      handleDisconnectChannel();
       if (connectedChannel)
         socket?.emit(
           ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST,
@@ -48,6 +46,7 @@ const Channel = function ({
     setIsVisible(false);
   };
 
+  console.log(userPrivilege);
   return (
     <div
       className={
@@ -60,29 +59,29 @@ const Channel = function ({
       onClick={handleClick}
     >
       <p>{channel.channelName}</p>
-      {isVisible &&
-      connectedChannel.currentUserPrivileges === Privileges.OWNER ? (
-        <div className="flex flex-col gap-2">
-          <input
-            className="bg-slate-600"
-            type="text"
-            autoFocus={true}
-            placeholder="Change password"
-            value={newChanPassword}
-            onClick={(e) => e.stopPropagation()}
-            onChange={(e) => setNewChanPassword(e.target.value)}
-            onKeyDown={handleKeyDownPassword}
-          ></input>
-          <button onClick={changePassword}>Validate</button>
-        </div>
-      ) : (
-        <></>
-      )}
-      {isVisible ? (
-        <button onClick={handleLeaveChannel}>Leave channel</button>
-      ) : (
-        <></>
-      )}
+      {
+        isVisible && userPrivilege === Privileges.OWNER ?
+          <div className="flex flex-col gap-2">
+            <input
+              className="bg-slate-600"
+              type="text"
+              autoFocus={true}
+              placeholder="Change password"
+              value={newChanPassword}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => setNewChanPassword(e.target.value)}
+              onKeyDown={handleKeyDownPassword}
+            ></input>
+            <button onClick={changePassword}>Validate</button>
+          </div>
+          : <></>
+        }
+        {
+          isVisible ?
+          <button
+            onClick={handleLeaveChannel}
+          >Leave channel</button> : <></>
+        }
     </div>
   );
 };
