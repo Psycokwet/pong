@@ -59,35 +59,6 @@ function App() {
   };
 
   const [socket, setSocket] = useState<Socket>();
-  const init_webPageRoutes = () => [
-    {
-      url: "/play",
-      element: <Play socket={socket} />,
-    },
-    {
-      url: "/leaderboard",
-      element: <LeaderBoard />,
-    },
-    {
-      url: "/chat",
-      element: <Chat socket={socket} />,
-    },
-    {
-      url: "/friendlist",
-      element: <FriendList socket={socket} />,
-    },
-    {
-      url: "/settings",
-      element: (
-        <SignUpPage
-          updateCurrentUser={updateCurrentUser}
-          pongUsername={currentUser.pongUsername}
-        />
-      ),
-    },
-  ];
-
-  const [webPageRoutes, setWebPagesRoutes] = useState(init_webPageRoutes());
 
   useEffect(() => {
     return () => {
