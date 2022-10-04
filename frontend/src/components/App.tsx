@@ -31,7 +31,6 @@ import toast, { Toaster } from "react-hot-toast";
 const api = new Api();
 
 function App() {
-  const [colors, setColors] = useState<GameColors>(defaultColor);
   const [currentUser, setCurrentUser] = useState<CurrentUserFrontInterface>(
     createCurrentUserFrontInterface()
   );
@@ -63,7 +62,7 @@ function App() {
   const init_webPageRoutes = () => [
     {
       url: "/play",
-      element: <Play socket={socket} colors={colors} setColors={setColors} />,
+      element: <Play socket={socket} />,
     },
     {
       url: "/leaderboard",

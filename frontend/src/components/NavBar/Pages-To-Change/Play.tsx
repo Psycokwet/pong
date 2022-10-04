@@ -24,12 +24,11 @@ export const defaultColor: GameColors = {
 
 type PlayProps = {
   socket: Socket | undefined;
-  colors: GameColors;
-  setColors: Dispatch<SetStateAction<GameColors>>;
 };
-const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
-  const [step, setStep] = useState<number>(0);
 
+const Play: React.FC<PlayProps> = ({ socket }) => {
+  const [step, setStep] = useState<number>(0);
+  const [colors, setColors] = useState<GameColors>(defaultColor);
   /** WEBSOCKET */
   const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined);
   const [clientCanvasSize, setClientCanvasSize] = useState<Position>({
@@ -73,6 +72,15 @@ const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
     });
   };
 
+  // const setDefaultColors = () => {
+  //   setColors((current: GameColors) => {
+  //     current.ball = defaultColor.ball;
+  //     current.paddle = defaultColor.paddle;
+  //     current.background = defaultColor.background;
+  //     return { ...current };
+  //   });
+  // };
+
   const gameSteps = [
     <GameLobby socket={socket} setStep={setStep} setGameRoom={setGameRoom} />,
     <GameSettings setStep={setStep} />,
@@ -104,25 +112,35 @@ const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
       {step === GameStep["SETTINGS"] ? (
         <div className="grid grid-cols-3 gap-4">
           <div>
-            Ball
-            <HexColorPicker
-              color={defaultColor.ball}
-              onChange={setRightColor("ball")}
-            />
-          </div>
-          <div>
-            Paddle
-            <HexColorPicker
-              color={defaultColor.paddle}
-              onChange={setRightColor("paddle")}
-            />
-          </div>
-          <div>
-            Background
-            <HexColorPicker
-              color={defaultColor.background}
-              onChange={setRightColor("background")}
-            />
+            <div>
+              Ball
+              <HexColorPicker
+                color={defaultColor.ball}
+                onChange={setRightColor("ball")}
+              />
+            </div>
+            <div>
+              Paddle
+              <HexColorPicker
+                color={defaultColor.paddle}
+                onChange={setRightColor("paddle")}
+              />
+            </div>
+            <div>
+              Background
+              <HexColorPicker
+                color={defaultColor.background}
+                onChange={setRightColor("background")}
+              />
+            </div>
+            <div>
+              <button
+                className="bg-sky-500 hover:bg-sky-700 text-xl rounded-2xl p-4 shadow-md shadow-blue-500/50 max-w-xs place-self-center"
+                // onClick={setDefaultColors}
+              >
+                Reset Default Colors
+              </button>
+            </div>
           </div>
           {gameSteps[step]}
         </div>
