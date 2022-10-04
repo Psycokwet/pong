@@ -114,13 +114,17 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   }, []);
   /** END UNATTACH FROM CHANNEL */
 
+  const handleDisconnectChannel = () => {
+    setConnectedChannel(undefined);
+    setMessages([]);
+    setAttachedUserList([]);
+    setPrivilege(Privileges.MEMBER)
+  }
   const handleLeaveChannel = () => {
     socket?.emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST, {
       channelName: connectedChannel.channelName
     });
-    setConnectedChannel(undefined);
-    setMessages([]);
-    setAttachedUserList([]);
+    handleDisconnectChannel();
   }
 
   const setupPrivilege = (val: { privilege: Privileges }) => {
@@ -140,6 +144,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
         socket={socket}
         connectedChannel={connectedChannel}
         userPrivilege={userPrivilege}
+        handleDisconnectChannel={handleDisconnectChannel}
         // lastMessage={lastMessage}
       />
       <Messages messages={messages}/>
