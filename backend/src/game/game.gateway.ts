@@ -223,6 +223,7 @@ export class GameGateway implements OnGatewayConnection {
     if (payload.userId === opponentId) return;
     const opponent = await this.userService.getById(opponentId);
     const user = await this.userService.getById(payload.opponentId);
+    console.log(opponent.id, user.id, payload)
     if (!user || !opponent) {
       throw new WsException(GameGateway.UserNotFound);
     }
@@ -234,6 +235,22 @@ export class GameGateway implements OnGatewayConnection {
 
     client.join(newChallengeRoom.roomName);
     client.emit(ROUTES_BASE.GAME.UPDATE_GAME, newChallengeRoom);
+
+    const opponentIdWebsocket = this.userService.getUserIdWebsocket(opponent.id);
+
+    if (opponent) {
+      /** Retrieve receiver's socket with the socket ID
+       * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
+       */
+
+      const opponentSocket = this.server.sockets.sockets.get(
+        opponentIdWebsocket.socketId,
+      );
+      const challengeRooms: GameRoom[] = this.gameService.findUserChallengeRoom(
+        opponentIdWebsocket.userId,
+      );
+      opponentSocket.emit(ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM, challengeRooms);
+    }
   }
 
   @UseGuards(JwtWsGuard)
