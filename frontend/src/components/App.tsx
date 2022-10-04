@@ -12,7 +12,6 @@ import FriendList from "./FriendList/FriendList";
 import Loading from "./Common/Loading";
 import NotFound from "./NavBar/Pages-To-Change/NotFound";
 import Play from "./NavBar/Pages-To-Change/Play";
-import Home from "./NavBar/Pages-To-Change/Home";
 import Chat from "./Chat/Chat";
 import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
 import Profile from "./Profile/Profile";
@@ -21,9 +20,9 @@ import False42Login from "./LoginPage/False42Login";
 import {
   createCurrentUserFrontInterface,
   CurrentUserFrontInterface,
-} from "../../shared/interfaces/CurrentUserFrontInterface";
-import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
-import { isSameSimpleObj } from "../../shared/utils";
+} from "/shared/interfaces/CurrentUserFrontInterface";
+import { ConnectionStatus } from "/shared/enumerations/ConnectionStatus";
+import { isSameSimpleObj } from "/shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 import SignUpPage from "./SignUpPage/SignUpPage";
 import toast, { Toaster } from "react-hot-toast";
@@ -71,6 +70,10 @@ function App() {
     {
       url: "/chat",
       element: <Chat socket={socket} />,
+    },
+    {
+      url: "/friendlist",
+      element: <FriendList socket={socket} />,
     },
     {
       url: "/settings",
@@ -127,7 +130,6 @@ function App() {
             }
             pongUsername={currentUser.pongUsername}
           />
-          <FriendList socket={socket} />
 
           <Routes>
             {webPageRoutes.map((onePage, i) => {
