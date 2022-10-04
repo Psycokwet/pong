@@ -10,7 +10,7 @@ import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 import { MenuSettingsType } from "./MenuSettings";
 import Watch from "./MenuComponents/Watch";
-import AddFriend from "./MenuComponents/AddFriend";
+import AddFriendButton from "./MenuComponents/AddFriendButton";
 import Ban from "./MenuComponents/Ban";
 import Block from "./MenuComponents/Block";
 import Challenge from "./MenuComponents/Challenge";
@@ -71,7 +71,7 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
         <Profile user={user}/>
         <Challenge menuSettings={menuSettings} socket={socket} user={user}/>
         <Watch menuSettings={menuSettings}/>
-        <AddFriend menuSettings={menuSettings} socket={socket} user={user}/>
+        <AddFriendButton menuSettings={menuSettings} socket={socket} user={user}/>
         <Block />
         <Mute menuSettings={menuSettings} userOwnership={userOwnership} />
         <Ban menuSettings={menuSettings} userOwnership={userOwnership} />

@@ -3,10 +3,11 @@ import { Socket } from "socket.io-client";
 
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { UserInterface } from "/shared/interfaces/UserInterface";
+import { AddFriend } from "/shared/interfaces/AddFriend";
 
 import { MenuSettingsType } from "../MenuSettings";
 
-const AddFriend = ({
+const AddFriendButton = ({
   menuSettings,
   socket,
   user,
@@ -15,14 +16,17 @@ const AddFriend = ({
   socket: Socket|undefined;
   user: UserInterface;
 })=>{
-  const addFriend = () => {
-    socket?.emit(ROUTES_BASE.USER.ADD_FRIEND_REQUEST, user.pongUsername);
+  const handleAddFriend = () => {
+    const addFriend: AddFriend = {
+      pongUsername: user.pongUsername
+    }
+    socket?.emit(ROUTES_BASE.USER.ADD_FRIEND_REQUEST, addFriend);
   }
   return (
-    <MenuItem className={ menuSettings.friend ? "hidden" : "" }>
-      <div onClick={addFriend}>Add as Friend</div>
+    <MenuItem onClick={handleAddFriend} className={ menuSettings.friend ? "hidden" : "" }>
+      Add as Friend
     </MenuItem>
   );
 }
 
-export default AddFriend
+export default AddFriendButton

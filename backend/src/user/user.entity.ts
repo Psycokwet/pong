@@ -73,6 +73,11 @@ export class User extends BaseEntity {
   public isTwoFactorAuthenticationActivated: boolean;
 
   @Column({
+    nullable: false,
+  })
+  public isUserFullySignedUp: boolean;
+
+  @Column({
     nullable: true,
   })
   public twoFactorAuthenticationSecret?: string;

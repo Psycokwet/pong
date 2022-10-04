@@ -7,7 +7,6 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  StreamableFile,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
@@ -16,20 +15,15 @@ import { Game } from 'src/game/game.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Friend } from 'src/friend_list/friend.entity';
-import { AddFriendDto } from './add-friend.dto';
 import { pongUsernameDto } from './set-pongusername.dto';
 import { LocalFilesService } from 'src/localFiles/localFiles.service';
 import { Socket } from 'socket.io';
 import { AuthService, TokenPayload } from 'src/auth/auth.service';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
-import { UserGateway } from './user.gateway';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import { UserInterface } from 'shared/interfaces/UserInterface';
-import { JwtService } from '@nestjs/jwt';
 import { v4 as uuidv4 } from 'uuid';
-import { createReadStream } from 'fs';
-import { join } from 'path';
 import UserProfile from 'shared/interfaces/UserProfile';
 import { Blocked } from 'src/blocked/blocked.entity';
 import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
@@ -72,13 +66,14 @@ export class UsersService {
 
   getStatusFromUser(user: User, payload: TokenPayload): ConnectionStatus {
     let result: ConnectionStatus = ConnectionStatus.Unknown;
+    if (user.isUserFullySignedUp === false)
+      return ConnectionStatus.SignupRequested;
     if (user.isTwoFactorAuthenticationActivated === false)
       return ConnectionStatus.Connected;
     if (user.isTwoFactorAuthenticationActivated === true)
       if (payload.isTwoFactorAuthenticated) return ConnectionStatus.Connected;
       else return ConnectionStatus.TwoFactorAuthenticationRequested;
 
-    //need to add signin
     return result;
   }
 
@@ -104,6 +99,7 @@ export class UsersService {
       email: dto.email,
       xp: 0,
       isTwoFactorAuthenticationActivated: false,
+      isUserFullySignedUp: false,
     });
 
     try {
@@ -254,14 +250,6 @@ export class UsersService {
   }
 
   async addFriend(friend: User, caller: User) {
-    /* Checking if the caller is adding himself (I think this should never 
-      happen on the front side) */
-    if (caller.id === friend.id) {
-      throw new BadRequestException({
-        error: 'You cannot add yourself',
-      });
-    }
-
     /* Then we check if the person the caller wants to add as a friend is already
     in our friend list and throw a 400 if they are */
     const doubleAddCheck = await this.friendRepository.findOne({
@@ -327,35 +315,33 @@ export class UsersService {
   async setTwoFactorAuthentication(user: User, value: boolean) {
     await this.usersRepository.update(user.id, {
       isTwoFactorAuthenticationActivated: value,
+      isUserFullySignedUp: true,
     });
   }
 
-  async getPongUsername(login42: string) {
-    const user = await this.findOne(login42);
+  async getPongUsername(user: User) {
     return { pongUsername: user.pongUsername };
   }
 
-  async getLogin42(login42: string) {
-    const user = await this.findOne(login42);
+  async getLogin42(user: User) {
     return { login42: user.login42 };
   }
 
-  async setPongUsername(dto: pongUsernameDto, login42: string) {
-    const user = await this.findOne(login42);
-
+  async setPongUsername(dto: pongUsernameDto, user: User) {
     /* We use TypeORM's update function to update our entity */
     try {
       await this.usersRepository.update(user.id, {
         pongUsername: dto.newPongUsername,
+        isUserFullySignedUp: true,
       });
     } catch (e) {
       throw new BadRequestException({ error: 'Nickname already taken' });
     }
   }
 
-  async getPicture(dto: User) {
+  async getPicture(login42: string) {
     const user = await this.usersRepository.findOne({
-      where: { login42: dto.login42 },
+      where: { login42: login42 },
       relations: { picture: true },
     });
 
@@ -370,7 +356,7 @@ export class UsersService {
   async setPicture(user: User, fileData: LocalFileDto) {
     // delete old file
     try {
-      const old_file_path = await this.getPicture(user);
+      const old_file_path = await this.getPicture(user.login42);
       this.localFilesService.delete_file(old_file_path);
     } catch (e) {
       this.logger.error('No existing picture file');
@@ -381,6 +367,7 @@ export class UsersService {
     const picture = await this.localFilesService.saveLocalFileData(fileData);
     await this.usersRepository.update(user.id, {
       pictureId: picture.id,
+      isUserFullySignedUp: true,
     });
   }
 

@@ -1,51 +1,65 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { Api } from "../../api/api";
-import { PictureGetter } from "../PictureForm/PictureGetter";
-import NickNameGetter from "../PictureForm/NickNameGetter";
 import ProfilePic from "../Common/ProfilePic";
 
 const MAX_CHAR = 15;
 
+export type SignUpProps = {
+  updateCurrentUser: () => void;
+  pongUsername: string;
+};
 const api = new Api();
-const SignInPage = () => {
-  const [pongUsername, setPongUsername] = useState<string>("anonymous");
+const SignUpPage: React.FC<SignUpProps> = ({
+  updateCurrentUser,
+  pongUsername,
+}) => {
   const [selectedFile, setSelectedFile] = useState<File>();
+  const [localPongUsername, setLocalPongUsername] = useState(pongUsername);
   const [avatar, setAvatar] = useState("");
   const [twoFactor, setTwoFactor] = useState("off");
 
   useEffect(() => {
-    api.get_pong_username().then((res: Response) => {
-      res.json().then((content) => {
-        setPongUsername(content.pongUsername);
-      });
-    });
-  }, []);
+    setLocalPongUsername(pongUsername);
+  }, [pongUsername]);
 
-  const handleSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     if (event === undefined) return; //not sure it may happen
     event.preventDefault();
+    let should_update = false;
+    console.log(`should_update status is set to: ${should_update}`);
 
     const fileData = new FormData();
     if (selectedFile) {
       fileData.append("file", selectedFile);
-      api.setPicture(fileData).then((res: Response) => {
-        if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
-          console.log("set picture is NOT Ok");
-        else console.log(`Set picture is ok, status is: ${res.status}`);
+      await api.setPicture(fileData).then((res: Response) => {
+        if (res.status >= 200 && res.status < 300) {
+          toast.success("Oh this is a nice new profile pic :D");
+          should_update = true;
+        } else toast.error("Sorry, your picture couldn't be uploaded");
       });
     }
 
-    if (pongUsername.length <= MAX_CHAR) {
-      api.set_pong_username(pongUsername).then((res: Response) => {
-        if (!(res.status / 200 >= 1 && res.status / 200 <= 2))
-          console.log("set pongUsername is NOT Ok");
-        else console.log(`Set pongUsername is ok, status is: ${res.status}`);
+    if (
+      localPongUsername.length <= MAX_CHAR &&
+      localPongUsername != pongUsername
+    ) {
+      await api.set_pong_username(localPongUsername).then((res: Response) => {
+        if (res.status >= 200 && res.status < 300) {
+          toast.success(
+            "Hello " +
+              localPongUsername +
+              " ! Nice to get to know you better :D"
+          );
+          should_update = true;
+        } else toast.error("Sorry, your new username hasn't been accepted");
       });
     }
 
     // Todo: set 2Factor through api.
     console.log(`twoFactor status is set to: ${twoFactor}`);
+    if (should_update && updateCurrentUser) updateCurrentUser();
   };
 
   const handlePreviewPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,12 +87,12 @@ const SignInPage = () => {
         <input
           type="text"
           name="pongUsername"
-          value={pongUsername}
-          onChange={(e) => setPongUsername(e.target.value)}
+          value={localPongUsername}
+          onChange={(e) => setLocalPongUsername(e.target.value)}
           placeholder={`name less than ${MAX_CHAR} letters`}
           className="text-gray-900 placeholder:text-gray-400 placeholder:px-4 outline_none rounded-xl w-60"
         />
-        {pongUsername.length > MAX_CHAR ? (
+        {localPongUsername.length > MAX_CHAR ? (
           <label className="text-yellow-400">
             * Nickname can't be over {MAX_CHAR} characters
           </label>
@@ -108,10 +122,9 @@ const SignInPage = () => {
       {/* Testing Zone - to delete later - don't forget to scroll down */}
       {/* <div>
         <PictureGetter />
-        <NickNameGetter />
       </div> */}
     </div>
   );
 };
 
-export default SignInPage;
+export default SignUpPage;
