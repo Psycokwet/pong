@@ -6,16 +6,16 @@ import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 const Mute = ({
   menuSettings,
-  userOwnership,
+  userPrivilege,
 }:{
   menuSettings:MenuSettingsType;
-  userOwnership:number;
+  userPrivilege:number;
 }) => {
   const mute = () => {
   }
   return (
     <MenuItem className={ menuSettings.privileges === Privileges.MEMBER ? "hidden" : "" }
-      disabled={ userOwnership >= menuSettings.privileges }
+      disabled={ userPrivilege >= menuSettings.privileges }
     >
       <div onClick={mute}>Mute</div>
     </MenuItem>

@@ -1,9 +1,4 @@
-export enum Status {
-  OFFLINE,
-  PLAYING,
-  ONLINE,
-}
-
+import { Status } from "./UserStatus";
 export interface UserInterface {
   id: number;
   pongUsername: string;
