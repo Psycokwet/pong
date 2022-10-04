@@ -1,8 +1,4 @@
-import {
-  forwardRef,
-  Inject,
-  UseGuards,
-} from '@nestjs/common';
+import { forwardRef, Inject, UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -40,7 +36,6 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleConnection(@ConnectedSocket() client: Socket) {
     try {
       const user = await this.userService.getUserFromSocket(client);
-
       if (!user) return;
 
       const newWebsocket = { userId: user.id, socketId: client.id };
@@ -54,7 +49,6 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
         status: Status.ONLINE,
       };
       this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, newUserConnected);
-      
     } catch (e) {
       console.error(e.message);
     }
@@ -63,6 +57,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleDisconnect(@ConnectedSocket() client: Socket) {
     try {
       const user = await this.userService.getUserFromSocket(client);
+      if (!user) return;
 
       UsersService.userWebsockets = UsersService.userWebsockets.filter(
         (websocket) => websocket.socketId !== client.id,
@@ -90,10 +85,13 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const friend = await this.userService.findOneByPongUsername(
       friendToAdd.pongUsername,
     );
-    
+
     if (!friend) {
-      throw new WsException({ error: 'User not found' });
+      throw new WsException({
+        error: 'User you want to add as friend not found',
+      });
     }
+
     /* Checking if the caller is adding himself (I think this should never 
     happen on the front side) */
     if (payload.userId === friend.id) {
@@ -103,16 +101,23 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const caller = await this.userService.getById(payload.userId);
+    if (!caller) throw new WsException({ error: 'User not found' });
 
     await this.userService.addFriend(friend, caller);
 
-    const friendUsersWebsockets: UsersWebsockets = UsersService.userWebsockets
-      .find((usersWebsockets: UsersWebsockets) => usersWebsockets.userId === friend.id);
+    const friendUsersWebsockets: UsersWebsockets =
+      UsersService.userWebsockets.find(
+        (usersWebsockets: UsersWebsockets) =>
+          usersWebsockets.userId === friend.id,
+      );
 
     let friendStatus: Status = this.userService.getStatus(friend);
-    
-    if (friendStatus === Status.ONLINE && this.gameService.findPlayerRoom(friend.id)) {
-        friendStatus = Status.PLAYING;
+
+    if (
+      friendStatus === Status.ONLINE &&
+      this.gameService.findPlayerRoom(friend.id)
+    ) {
+      friendStatus = Status.PLAYING;
     }
     const newFriend: UserInterface = {
       id: friend.id,
@@ -129,15 +134,19 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @UserPayload() payload: any,
   ) {
     const caller = await this.userService.getById(payload.userId);
+    if (!caller) throw new WsException({ error: 'User not found' });
 
     const orderedFriendsList = await this.userService.getFriendsList(caller);
 
     orderedFriendsList.map((user: UserInterface) => {
-      if (user.status === Status.ONLINE && this.gameService.findPlayerRoom(user.id)) {
+      if (
+        user.status === Status.ONLINE &&
+        this.gameService.findPlayerRoom(user.id)
+      ) {
         user.status = Status.PLAYING;
       }
       return user;
-    })
+    });
 
     client.emit(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, orderedFriendsList);
   }
@@ -177,6 +186,8 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     const caller = await this.userService.getById(payload.userId);
+    if (!caller) throw new WsException({ error: 'User not found' });
+
     const blockedList = this.userService.getBlockedUsersList(caller);
 
     this.server
