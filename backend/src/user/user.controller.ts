@@ -12,6 +12,9 @@ import {
   Param,
   BadRequestException,
   Query,
+  ParseFilePipe,
+  FileTypeValidator,
+  ParseFilePipeBuilder,
   NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
@@ -116,11 +119,21 @@ export class UserController {
       path: '/avatars',
     }),
   )
-  async uploadFile(@Request() req, @UploadedFile() file: Express.Multer.File) {
-    return this.usersService.setPicture(req.user, {
-      path: file.path,
-      filename: file.originalname,
-      mimetype: file.mimetype,
-    });
+  async uploadFile(
+    @Request() req,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new FileTypeValidator({ fileType: 'image' })],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return {
+      picture: this.usersService.setPicture(req.user, {
+        path: file.path,
+        filename: file.originalname,
+        mimetype: file.mimetype,
+      }),
+    };
   }
 }

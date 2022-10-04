@@ -7,6 +7,7 @@ import {
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -45,7 +46,7 @@ async function passwordCompare(
   transport: ['websocket'],
   cors: '*/*',
 })
-export class ChatGateway {
+export class ChatGateway implements OnGatewayConnection {
   private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,
@@ -54,6 +55,19 @@ export class ChatGateway {
 
   @WebSocketServer()
   server: Server;
+
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    // try { // this code is for DM notifications
+    //   const user = await this.userService.getUserFromSocket(client);
+    //   const userDM: Room[] = await this.chatService.getAllDMRoomsRaw(user);
+
+    //   userDM.forEach((room) => {
+    //     client.join(room.roomName);
+    //   })
+    // } catch (e) {
+    //   console.error(e.message);
+    // }
+  }
 
   /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
@@ -91,11 +105,23 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    this.server
-      .in(client.id)
+    client
       .emit(
         ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS,
         await this.chatService.getAllDMRooms(payload.userId),
+      );
+  }
+
+  @UseGuards(JwtWsGuard)
+  async forceJoinDMChannelLobby(
+    @ConnectedSocket() client: Socket,
+    userId: number,
+  ) {
+    const DMList = await this.chatService.getAllDMRooms(userId);
+    client
+      .emit(
+        ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS,
+        DMList
       );
   }
 
@@ -188,15 +214,17 @@ export class ChatGateway {
       );
 
       await receiverSocket.join(newDMRoom.roomName);
+      this.forceJoinDMChannelLobby(receiverSocket, friendId);
     }
 
-    this.server
-      .in(newDMRoom.roomName)
+    client
       .emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_CREATION, {
         channelId: newDMRoom.id,
         channelName: newDMRoom.channelName,
       });
     this.joinDMChannelLobby(client, payload);
+    client
+      .emit(ROUTES_BASE.CHAT.MESSAGE_HISTORY, []);
   }
 
   /* ATTACH USER TO CHANNEL */
@@ -284,10 +312,6 @@ export class ChatGateway {
     const channelData: ChannelData = {
       channelId: room.id,
       channelName: room.channelName,
-      currentUserPrivileges: this.chatService.getUserPrivileges(
-        room,
-        payload.userId,
-      ),
     };
     client.emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, channelData);
 
@@ -299,6 +323,7 @@ export class ChatGateway {
           author: message.author.pongUsername,
           time: message.createdAt,
           content: message.content,
+          roomId: room.id
         };
         return messageForFront;
       }),
@@ -379,12 +404,14 @@ export class ChatGateway {
       author: newMessage.author.pongUsername,
       time: newMessage.createdAt,
       content: newMessage.content,
+      roomId: room.id,
     };
 
-    if (room)
+    if (room) {
       this.server
         .in(room.roomName)
         .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageForFront);
+    }
   }
 
   /** SET / UNSET ADMIN */
@@ -469,7 +496,7 @@ export class ChatGateway {
 
     if (!room) throw new WsException('Channel does not exist');
 
-    const privilege = await this.chatService.getUserPrivileges(
+    const privilege = this.chatService.getUserPrivileges(
       room,
       payload.userId,
     );

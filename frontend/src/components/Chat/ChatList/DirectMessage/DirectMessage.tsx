@@ -1,41 +1,61 @@
 import React, { useEffect, useState } from "react";
-import UserPicture from "../../../UserPicture/UserPicture";
+import Avatar from "../../../Common/Avatar";
+import { Api } from "../../../../api/api";
 import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
 
+const api = new Api();
+
 type Props = {
   socket: Socket|undefined;
   channel: ChannelData;
-  message: Message
+  // message: Message
   connectedChannel: ChannelData|undefined
 };
 
-const DirectMessage: React.FC<Props> = ({socket, channel, message, connectedChannel}) => {
-  const [lastMessage, setLastMessage] = useState<Message>();
+const DirectMessage: React.FC<Props> = ({
+  socket, 
+  channel, 
+  // message, 
+  connectedChannel
+}) => {
+  // const [lastMessage, setLastMessage] = useState<Message>();
+  const [avatarUrl, setAvatarUrl] = useState("");
   const handleClick = () => {
     socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST, {roomId: channel.channelId});
   }
 
-  let style:string = "max-w-full truncate text-lg font-semibold self-center py-4 px-10 hover:bg-slate-800 cursor-pointer";
-  if (connectedChannel !== undefined && connectedChannel.channelId === channel.channelId) {
-    if (lastMessage !== message)
-      setLastMessage(message);
-    style=style + "bg-slate-600";
-  }
+  let style:string = "flex flex-row gap-4 text-lg font-semibold py-4 px-10 hover:bg-slate-800 cursor-pointer display-block break-all";
+  if (connectedChannel !== undefined && connectedChannel.channelId === channel.channelId)
+    style=style + " bg-slate-600";
+
+  // if (message.roomId === channel.channelId && lastMessage !== message)
+  //   setLastMessage(message);
+  useEffect(() => {
+    api.getPicture(channel.channelName).then((res) => {
+      if (res.status == 200)
+        res.blob().then((myBlob) => {
+          setAvatarUrl((current) => {
+            if (current) URL.revokeObjectURL(current);
+            return URL.createObjectURL(myBlob);
+          });
+        });
+    });
+  }, []);
 
   return (
     <div className={style}
       onClick={handleClick}>
-      <UserPicture width="50px"/>
-      <div className="max-width-full">
-        <div className="max-w-full truncate text-lg font-semibold self-center">
+      <Avatar url={avatarUrl} size="w-12 h-12"/>
+      <div className="flex flex-col">
+        <h4 className="text-lg font-semibold truncate">
           {channel.channelName}
-        </div>
-        <div className="max-w-full truncate text-sm">
-          {lastMessage}
-        </div>
+        </h4>
+        {/* <p className="text-sm font-normal truncate text-gray-300 max-w-full">
+          {lastMessage?.content}
+        </p> */}
       </div>
     </div>
   )
