@@ -4,6 +4,7 @@ import Position from "/shared/interfaces/Position";
 import GameRoom from "/shared/interfaces/GameRoom";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { virtualGameData } from "/shared/other/virtualGameData";
+import { GameColors } from "../NavBar/Pages-To-Change/Play";
 
 type GameCanvasProps = {
   socket: Socket;
@@ -11,9 +12,7 @@ type GameCanvasProps = {
   gameRoom: GameRoom;
   upgradeStep: any;
   clientCanvasSize: Position;
-  ballColor: string;
-  paddleColor: string;
-  bgColor: string;
+  colors: GameColors;
 };
 
 const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -22,9 +21,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   gameRoom,
   upgradeStep,
   clientCanvasSize,
-  ballColor,
-  paddleColor,
-  bgColor,
+  colors,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -73,17 +70,17 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
     const context = canvas.getContext("2d");
     if (context) {
       // Draw field
-      context.fillStyle = bgColor;
+      context.fillStyle = colors.background;
       context.fillRect(0, 0, clientCanvasSize.x, clientCanvasSize.y);
       // Draw middle line
-      context.strokeStyle = paddleColor;
+      context.strokeStyle = colors.paddle;
       context.beginPath();
       context.moveTo(halfCanvasWidth, 0);
       context.lineTo(halfCanvasWidth, clientCanvasSize.y);
       context.stroke();
 
       // Draw players
-      context.fillStyle = paddleColor;
+      context.fillStyle = colors.paddle;
       const playersPaddleHeight =
         (virtualGameData.playerHeight * clientCanvasSize.y) /
         virtualGameData.canvasHeight;
@@ -117,7 +114,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
       };
       // Draw ball
       context.beginPath();
-      context.fillStyle = ballColor;
+      context.fillStyle = colors.ball;
       const clientBallRayon =
         (gameRoom.gameData.ball.rayon / virtualGameData.canvasHeight) *
         clientCanvasSize.y;
@@ -140,6 +137,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   };
 
   useEffect(() => {
+    console.log(colors.ball, colors.paddle, colors.background);
     socket?.on(ROUTES_BASE.GAME.UPDATE_GAME, handleGameUpdate);
     return () => {
       socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, handleGameUpdate);

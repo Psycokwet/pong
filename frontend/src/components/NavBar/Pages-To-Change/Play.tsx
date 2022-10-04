@@ -9,7 +9,7 @@ import Position from "/shared/interfaces/Position";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { GameStep } from "/src/components/PongGame/GameStep.enum";
 import GameSettings from "../../PongGame/GameSettings";
-import { HexColorPicker } from "react-colorful";
+import { HexColorPicker, HexColorInput } from "react-colorful";
 
 export type GameColors = {
   ball: string;
@@ -24,11 +24,12 @@ export const defaultColor: GameColors = {
 
 type PlayProps = {
   socket: Socket | undefined;
+  colors: GameColors;
+  setColors: Dispatch<SetStateAction<GameColors>>;
 };
 
-const Play: React.FC<PlayProps> = ({ socket }) => {
+const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
   const [step, setStep] = useState<number>(0);
-  const [colors, setColors] = useState<GameColors>(defaultColor);
   /** WEBSOCKET */
   const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined);
   const [clientCanvasSize, setClientCanvasSize] = useState<Position>({
@@ -67,8 +68,9 @@ const Play: React.FC<PlayProps> = ({ socket }) => {
 
   const setRightColor = (key: string) => (newColor: string) => {
     setColors((current: GameColors) => {
-      current[key as keyof GameColors] = newColor;
-      return { ...current };
+      let newColors = { ...current };
+      newColors[key as keyof GameColors] = newColor;
+      return newColors;
     });
   };
 
@@ -91,9 +93,7 @@ const Play: React.FC<PlayProps> = ({ socket }) => {
       upgradeStep={upgradeStep}
       gameRoom={gameRoom}
       clientCanvasSize={clientCanvasSize}
-      ballColor={colors.ball}
-      paddleColor={colors.paddle}
-      bgColor={colors.background}
+      colors={colors}
     />,
     <GameOver
       socket={socket}
@@ -105,29 +105,19 @@ const Play: React.FC<PlayProps> = ({ socket }) => {
   return (
     <div className="bg-black text-white lg:h-7/8 sm:h-6/8 place-content-center">
       {step === GameStep["SETTINGS"] ? (
-        <div >
+        <div>
           <div className="grid grid-cols-3 gap-4">
-            <div>
-              Ball
-              <HexColorPicker
-                color={defaultColor.ball}
-                onChange={setRightColor("ball")}
-              />
-            </div>
-            <div>
-              Paddle
-              <HexColorPicker
-                color={defaultColor.paddle}
-                onChange={setRightColor("paddle")}
-              />
-            </div>
-            <div>
-              Background
-              <HexColorPicker
-                color={defaultColor.background}
-                onChange={setRightColor("background")}
-              />
-            </div>
+            {Object.keys(colors).map((key) => {
+              return (
+                <div key={key}>
+                  {key}
+                  <HexColorPicker
+                    color={colors[key as keyof GameColors]}
+                    onChange={setRightColor(key)}
+                  />
+                </div>
+              );
+            })}
             <div>
               <button
                 className="bg-red-500 hover:bg-red-700 text-xl rounded-2xl p-4 shadow-md shadow-red-500/50 max-w-xs place-self-center"
@@ -136,7 +126,7 @@ const Play: React.FC<PlayProps> = ({ socket }) => {
                 Reset Default Colors
               </button>
             </div>
-          {gameSteps[step]}
+            {gameSteps[step]}
           </div>
         </div>
       ) : (
