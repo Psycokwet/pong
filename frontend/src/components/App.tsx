@@ -122,6 +122,7 @@ function App() {
           <NavBar
             setDisconnected={() =>
               setCurrentUser((current) => {
+                socket?.disconnect();
                 return { ...current, status: ConnectionStatus.Disconnected };
               })
             }
