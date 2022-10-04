@@ -9,8 +9,8 @@ import { Game } from './game.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { virtualGameData } from 'shared/other/virtualGameData';
-import { GameGateway } from './game.gateway';
 import { WsException } from '@nestjs/websockets';
+
 @Injectable()
 export class GameService {
   constructor(
