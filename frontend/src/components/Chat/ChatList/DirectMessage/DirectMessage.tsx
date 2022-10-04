@@ -48,7 +48,7 @@ const DirectMessage: React.FC<Props> = ({
   return (
     <div className={style}
       onClick={handleClick}>
-      <Avatar url={avatarUrl} size="w-12"/>
+      <Avatar url={avatarUrl} size="w-12 h-12"/>
       <div className="flex flex-col">
         <h4 className="text-lg font-semibold truncate">
           {channel.channelName}
