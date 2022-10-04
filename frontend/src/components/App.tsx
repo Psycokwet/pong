@@ -125,6 +125,10 @@ function App() {
                   />
                 ),
               },
+              {
+                url: "/friendlist",
+                element: <FriendList socket={socket} />,
+              },
             ].map((onePage, i) => {
               return (
                 <Route key={i} path={onePage.url} element={onePage.element} />
