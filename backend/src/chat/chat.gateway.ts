@@ -366,6 +366,7 @@ export class ChatGateway {
     const author = await this.userService.getUserByIdWithMessages(
       payload.userId,
     );
+    if (!author) throw new WsException('Author does not exist');
 
     const newMessage = await this.chatService.saveMessage(
       data.message,
