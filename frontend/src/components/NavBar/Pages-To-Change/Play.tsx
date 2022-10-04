@@ -72,14 +72,9 @@ const Play: React.FC<PlayProps> = ({ socket }) => {
     });
   };
 
-  // const setDefaultColors = () => {
-  //   setColors((current: GameColors) => {
-  //     current.ball = defaultColor.ball;
-  //     current.paddle = defaultColor.paddle;
-  //     current.background = defaultColor.background;
-  //     return { ...current };
-  //   });
-  // };
+  const setDefaultColors = () => {
+    setColors(defaultColor);
+  };
 
   const gameSteps = [
     <GameLobby socket={socket} setStep={setStep} setGameRoom={setGameRoom} />,
@@ -110,8 +105,8 @@ const Play: React.FC<PlayProps> = ({ socket }) => {
   return (
     <div className="bg-black text-white lg:h-7/8 sm:h-6/8 place-content-center">
       {step === GameStep["SETTINGS"] ? (
-        <div className="grid grid-cols-3 gap-4">
-          <div>
+        <div >
+          <div className="grid grid-cols-3 gap-4">
             <div>
               Ball
               <HexColorPicker
@@ -135,14 +130,14 @@ const Play: React.FC<PlayProps> = ({ socket }) => {
             </div>
             <div>
               <button
-                className="bg-sky-500 hover:bg-sky-700 text-xl rounded-2xl p-4 shadow-md shadow-blue-500/50 max-w-xs place-self-center"
-                // onClick={setDefaultColors}
+                className="bg-red-500 hover:bg-red-700 text-xl rounded-2xl p-4 shadow-md shadow-red-500/50 max-w-xs place-self-center"
+                onClick={setDefaultColors}
               >
                 Reset Default Colors
               </button>
             </div>
-          </div>
           {gameSteps[step]}
+          </div>
         </div>
       ) : (
         gameSteps[step]
