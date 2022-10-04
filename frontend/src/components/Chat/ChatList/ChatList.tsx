@@ -9,12 +9,12 @@ import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
 
 function ChatList({
-  msg,
+  // lastMessage ,
   socket,
   connectedChannel,
   handleLeaveChannel,
 }: {
-  msg: Message;
+    // lastMessage: Message,
   socket: Socket | undefined;
   connectedChannel: ChannelData | undefined;
   handleLeaveChannel: any;
@@ -79,17 +79,19 @@ function ChatList({
         ))}
       </div>
       <div>
-        <DirectMessageMenu socket={socket} />
-        {directMessageList.map((channel) => (
-          <div key={channel.channelname}>
-            <DirectMessage
-              socket={socket}
-              channel={channel}
-              message={msg === undefined ? "" : msg}
-              connectedChannel={connectedChannel}
-            />
-          </div>
-        ))}
+        <DirectMessageMenu socket={socket}/>
+        {directMessageList.map((directMessage) => {
+          return (
+            <div key={directMessage.channelId}>
+              <DirectMessage
+                socket={socket}
+                channel={directMessage}
+                // message={lastMessage === undefined ? "" : lastMessage}
+                connectedChannel={connectedChannel}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

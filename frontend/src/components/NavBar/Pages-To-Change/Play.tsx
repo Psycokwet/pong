@@ -12,7 +12,7 @@ import { GameStep } from "/src/components/PongGame/GameStep.enum";
 const Play = ({
   socket,
 }:{
-  socket: Socket;
+  socket: Socket | undefined;
 }) => {
   const [step, setStep] = useState<number>(0);
 
