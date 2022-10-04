@@ -95,7 +95,10 @@ export class UserController {
     const user = await this.usersService.findOne(req.user.login42);
     if (!user) throw new NotFoundException({ error: 'User not found' });
 
-    return await this.usersService.setPongUsername(newPongUsername, user);
+    return await this.usersService.setPongUsername(
+      newPongUsername,
+      user.login42,
+    );
   }
 
   @Get(ROUTES_BASE.USER.GET_PICTURE)

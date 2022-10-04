@@ -53,7 +53,6 @@ export class UsersService {
 
     @InjectRepository(Friend)
     private friendRepository: Repository<Friend>,
-
     @InjectRepository(Blocked)
     private blockedRepository: Repository<Blocked>,
 
@@ -81,22 +80,18 @@ export class UsersService {
     const user = await this.usersRepository.findOneBy({
       login42: login42,
     });
+    if (!user) throw new BadRequestException({ error: 'User not found' });
     return user;
   }
 
   async findOneByPongUsername(pongUsername: string): Promise<User> {
-    const user = await this.usersRepository.findOneBy({
+    return await this.usersRepository.findOneBy({
       pongUsername: pongUsername,
     });
-    return user;
-  }
-
-  async getById(id: number) {
-    const user = await this.usersRepository.findOneBy({ id });
-    return user;
   }
 
   async signup(dto: UserDto) {
+    // database operation
     const user = User.create({
       login42: dto.login42,
       pongUsername: uuidv4(),
@@ -111,10 +106,10 @@ export class UsersService {
     } catch (e) {
       throw new HttpException(
         {
-          status: HttpStatus.NOT_FOUND,
+          status: HttpStatus.BAD_REQUEST,
           error: 'Username or Email already used',
         },
-        HttpStatus.NOT_FOUND,
+        HttpStatus.BAD_REQUEST,
       );
     }
   }
@@ -131,8 +126,19 @@ export class UsersService {
     });
   }
 
+  async getById(id: number) {
+    const user = await this.usersRepository.findOneBy({ id });
+    if (user) {
+      return user;
+    }
+    throw new HttpException(
+      'User with this id does not exist',
+      HttpStatus.NOT_FOUND,
+    );
+  }
+
   async getUserByIdWithMessages(id: number) {
-    return await this.usersRepository.findOne({
+    return this.usersRepository.findOne({
       where: { id },
       relations: {
         messages: true,
@@ -142,7 +148,6 @@ export class UsersService {
 
   async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
     const user = await this.getById(userId);
-    if (!user) throw new NotFoundException({ error: 'User not found' });
 
     const isRefreshTokenMatching = await passwordCompare(
       refreshToken,
@@ -163,7 +168,7 @@ export class UsersService {
   async getUserProfile(user: User) {
     const profileElements: UserProfile = {
       pongUsername: user.pongUsername,
-      userRank: await this.getUserRank(user),
+      userRank: await await this.getUserRank(user),
       userHistory: await this.getUserHistory(user),
     };
     return profileElements;
@@ -293,7 +298,6 @@ export class UsersService {
 
   async setTwoFactorAuthenticationSecret(secret: string, login42: string) {
     const user = await this.findOne(login42);
-    if (!user) throw new NotFoundException({ error: 'User not found' });
 
     /* We use TypeORM's update function to update our entity */
     await this.usersRepository.update(user.id, {
@@ -303,7 +307,6 @@ export class UsersService {
 
   async getTwoFactorAuthentication(login42: string) {
     const user = await this.findOne(login42);
-    if (!user) throw new NotFoundException({ error: 'User not found' });
 
     return user.isTwoFactorAuthenticationActivated;
   }
@@ -324,7 +327,8 @@ export class UsersService {
     return { login42: user.login42 };
   }
 
-  async setPongUsername(dto: pongUsernameDto, user: User) {
+  async setPongUsername(dto: pongUsernameDto, login42: string) {
+    const user = await this.findOne(login42);
     /* We use TypeORM's update function to update our entity */
     try {
       await this.usersRepository.update(user.id, {
@@ -341,8 +345,6 @@ export class UsersService {
       where: { login42: dto.login42 },
       relations: { picture: true },
     });
-
-    if (!user) throw new NotFoundException({ error: 'User not found' });
 
     if (!user.picture) {
       throw new NotFoundException();
