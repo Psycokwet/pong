@@ -322,13 +322,11 @@ export class UsersService {
     return { pongUsername: user.pongUsername };
   }
 
-  async getLogin42(login42: string) {
-    const user = await this.findOne(login42);
+  async getLogin42(user: User) {
     return { login42: user.login42 };
   }
 
-  async setPongUsername(dto: pongUsernameDto, login42: string) {
-    const user = await this.findOne(login42);
+  async setPongUsername(dto: pongUsernameDto, user: User) {
     /* We use TypeORM's update function to update our entity */
     try {
       await this.usersRepository.update(user.id, {
@@ -340,9 +338,9 @@ export class UsersService {
     }
   }
 
-  async getPicture(dto: User) {
+  async getPicture(login42: string) {
     const user = await this.usersRepository.findOne({
-      where: { login42: dto.login42 },
+      where: { login42: login42 },
       relations: { picture: true },
     });
 
@@ -357,7 +355,7 @@ export class UsersService {
   async setPicture(user: User, fileData: LocalFileDto) {
     // delete old file
     try {
-      const old_file_path = await this.getPicture(user);
+      const old_file_path = await this.getPicture(user.login42);
       this.localFilesService.delete_file(old_file_path);
     } catch (e) {
       this.logger.error('No existing picture file');
