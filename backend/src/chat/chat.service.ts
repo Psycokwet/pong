@@ -1,18 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { InjectRepository } from '@nestjs/typeorm';
 import Message from './message.entity';
-import {
-  FindOptionsRelations,
-  FindOptionsWhere,
-  Repository,
-} from 'typeorm';
+import { FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
@@ -229,11 +222,12 @@ export class ChatService {
   }
 
   async unattachMemberToChannel(userId: number, room: Room) {
-    room.members = room.members.filter(
-      (member: User) => member.id !== userId,
-    );
+    room.members = room.members.filter((member: User) => member.id !== userId);
 
-    await room.save();
+    console.log(room.members);
+
+    if (room.members.length === 0) await room.remove();
+    else await room.save();
   }
 
   async addMutedUser(mutedUser: User, room: Room, muteTime: number) {
@@ -326,7 +320,7 @@ export class ChatService {
 
     if (userId === room.owner.id) return Privileges.OWNER;
 
-    if (room.admins.find(admin => admin.id === userId)) {
+    if (room.admins.find((admin) => admin.id === userId)) {
       return Privileges.ADMIN;
     }
 
