@@ -20,9 +20,9 @@ import False42Login from "./LoginPage/False42Login";
 import {
   createCurrentUserFrontInterface,
   CurrentUserFrontInterface,
-} from "../../shared/interfaces/CurrentUserFrontInterface";
-import { ConnectionStatus } from "../../shared/enumerations/ConnectionStatus";
-import { isSameSimpleObj } from "../../shared/utils";
+} from "/shared/interfaces/CurrentUserFrontInterface";
+import { ConnectionStatus } from "/shared/enumerations/ConnectionStatus";
+import { isSameSimpleObj } from "/shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 import SignUpPage from "./SignUpPage/SignUpPage";
 import { Toaster } from "react-hot-toast";
@@ -59,6 +59,35 @@ function App() {
   };
 
   const [socket, setSocket] = useState<Socket>();
+  const init_webPageRoutes = () => [
+    {
+      url: "/play",
+      element: <Play socket={socket} />,
+    },
+    {
+      url: "/leaderboard",
+      element: <LeaderBoard />,
+    },
+    {
+      url: "/chat",
+      element: <Chat socket={socket} />,
+    },
+    {
+      url: "/friendlist",
+      element: <FriendList socket={socket} />,
+    },
+    {
+      url: "/settings",
+      element: (
+        <SignUpPage
+          updateCurrentUser={updateCurrentUser}
+          pongUsername={currentUser.pongUsername}
+        />
+      ),
+    },
+  ];
+
+  const [webPageRoutes, setWebPagesRoutes] = useState(init_webPageRoutes());
 
   useEffect(() => {
     return () => {
@@ -92,13 +121,13 @@ function App() {
         <div className="h-screen">
           <NavBar
             setDisconnected={() =>
-              setCurrentUser((current: CurrentUserFrontInterface) => {
+              setCurrentUser((current) => {
+                socket?.disconnect();
                 return { ...current, status: ConnectionStatus.Disconnected };
               })
             }
             pongUsername={currentUser.pongUsername}
           />
-          <FriendList socket={socket} />
 
           <Routes>
             {[
