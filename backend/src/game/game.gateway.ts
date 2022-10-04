@@ -43,8 +43,10 @@ export class GameGateway implements OnGatewayConnection {
       const gameRoom: GameRoom = this.gameService.findUserRoom(user.id);
 
       if (!gameRoom) return;
-      client.join(gameRoom.roomName);
-      this.updateUserStatus(user, Status.PLAYING);
+      if (user.id === gameRoom.gameData.player1.userId || gameRoom.started === true) {
+        client.join(gameRoom.roomName);
+        this.updateUserStatus(user, Status.PLAYING);
+      }
     } catch (e) {
       console.error(e.message);
     }
@@ -187,9 +189,11 @@ export class GameGateway implements OnGatewayConnection {
       return;
     }
 
-    this.server
-      .in(gameRoom.roomName)
-      .emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
+    if (gameRoom.gameData.player1.userId === payload.userId || gameRoom.started === true) {
+      this.server
+        .in(gameRoom.roomName)
+        .emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
+    }
   }
 
   private async updateUserStatus(user: User, status: Status) {
@@ -237,7 +241,7 @@ export class GameGateway implements OnGatewayConnection {
 
     const opponentIdWebsocket = this.userService.getUserIdWebsocket(opponent.id);
 
-    if (opponent) {
+    if (opponentIdWebsocket) {
       /** Retrieve receiver's socket with the socket ID
        * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
        */
@@ -299,6 +303,23 @@ export class GameGateway implements OnGatewayConnection {
     @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
-    this.gameService.cancelMatchMaking(payload.userId);
+    const game: GameRoom = this.gameService.cancelMatchMaking(payload.userId);
+    if (game.isChallenge === true) {
+      const opponentIdWebsocket = this.userService.getUserIdWebsocket(game.gameData.player2.userId);
+
+      if (opponentIdWebsocket) {
+        /** Retrieve receiver's socket with the socket ID
+         * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
+         */
+  
+        const opponentSocket = this.server.sockets.sockets.get(
+          opponentIdWebsocket.socketId,
+        );
+        const challengeRooms: GameRoom[] = this.gameService.findUserChallengeRoom(
+          opponentIdWebsocket.userId,
+        );
+        opponentSocket.emit(ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM, challengeRooms);
+      }
+    }
   }
 }

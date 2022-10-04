@@ -317,6 +317,7 @@ export class GameService {
     GameService.gameRoomList = GameService.gameRoomList.filter(
       (gameRoom) => gameRoom.roomName !== gameRoomToErase.roomName,
     );
-    console.log(GameService.gameRoomList);
+
+    return gameRoomToErase;
   }
 }
