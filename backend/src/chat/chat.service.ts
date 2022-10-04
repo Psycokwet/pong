@@ -224,8 +224,6 @@ export class ChatService {
   async unattachMemberToChannel(userId: number, room: Room) {
     room.members = room.members.filter((member: User) => member.id !== userId);
 
-    console.log(room.members);
-
     if (room.members.length === 0) await room.remove();
     else await room.save();
   }
