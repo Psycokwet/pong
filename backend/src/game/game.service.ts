@@ -9,6 +9,8 @@ import { Game } from './game.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { virtualGameData } from 'shared/other/virtualGameData';
+import { WsException } from '@nestjs/websockets';
+
 @Injectable()
 export class GameService {
   constructor(
@@ -48,7 +50,7 @@ export class GameService {
 
   createEmptyGame(): GameRoom {
     const newGameRoom: GameRoom = {
-      roomName: "",
+      roomName: '',
       started: false,
       isChallenge: false,
       gameData: structuredClone(GameService.defaultGameData), // deep clone
@@ -101,7 +103,7 @@ export class GameService {
       (gameRoom) =>
         gameRoom.gameData.player1.userId === userId ||
         gameRoom.gameData.player2.userId === userId ||
-        gameRoom.spectatorsId.includes(userId)
+        gameRoom.spectatorsId.includes(userId),
     );
     return GameService.gameRoomList[index]; // can be -1, so undefined
   }
@@ -110,7 +112,7 @@ export class GameService {
     let index = GameService.gameRoomList.findIndex(
       (gameRoom) =>
         gameRoom.gameData.player1.userId === userId ||
-        gameRoom.gameData.player2.userId === userId
+        gameRoom.gameData.player2.userId === userId,
     );
     return GameService.gameRoomList[index]; // can be -1, so undefined
   }
@@ -163,7 +165,9 @@ export class GameService {
     const minimumSpeed: number = 2;
     const direction: number = Math.random() > 0.5 ? 1 : -1;
     const speedMinimumCoefficiant = 0.5;
-    return (speedMinimumCoefficiant + Math.random()) * (direction * minimumSpeed)
+    return (
+      (speedMinimumCoefficiant + Math.random()) * (direction * minimumSpeed)
+    );
   }
 
   private changeDirection(game: GameData, playerPosition: number) {
@@ -214,7 +218,10 @@ export class GameService {
       newGame.ball.speed.y = -newGame.ball.speed.y;
     }
 
-    if (newGame.ball.x > virtualGameData.canvasWidth - virtualGameData.playerWidth) {
+    if (
+      newGame.ball.x >
+      virtualGameData.canvasWidth - virtualGameData.playerWidth
+    ) {
       newGame = this.collide(newGame.player2, newGame);
     } else if (newGame.ball.x < virtualGameData.playerWidth) {
       newGame = this.collide(newGame.player1, newGame);
@@ -234,10 +241,9 @@ export class GameService {
 
   isGameFinished(gameRoom: GameRoom): boolean {
     return (
-      gameRoom.gameData.player1.score >= this.ENDGAME_POINT
-      ||
+      gameRoom.gameData.player1.score >= this.ENDGAME_POINT ||
       gameRoom.gameData.player2.score >= this.ENDGAME_POINT
-    )
+    );
   }
 
   public async handleGameOver(gameRoom: GameRoom): Promise<void> {
@@ -249,7 +255,7 @@ export class GameService {
     );
 
     if (!player1 || !player2) {
-      throw 'User doesn\'t exists';
+      throw new WsException('User not found');
     }
     const isPlayer1Won =
       gameRoom.gameData.player1.score > gameRoom.gameData.player2.score;
@@ -298,11 +304,9 @@ export class GameService {
 
   public findUserChallengeRoom(userId): GameRoom[] {
     return GameService.gameRoomList.filter(
-      (gameRoom) => 
-        !gameRoom.started
-        &&
-        gameRoom.isChallenge
-        &&
+      (gameRoom) =>
+        !gameRoom.started &&
+        gameRoom.isChallenge &&
         gameRoom.gameData.player2.userId === userId,
     );
   }
@@ -310,7 +314,9 @@ export class GameService {
   public cancelMatchMaking(userId: number) {
     const gameRoomToErase: GameRoom = this.findPlayerRoom(userId);
 
-    GameService.gameRoomList = GameService.gameRoomList.filter((gameRoom) => gameRoom.roomName !== gameRoomToErase.roomName);
+    GameService.gameRoomList = GameService.gameRoomList.filter(
+      (gameRoom) => gameRoom.roomName !== gameRoomToErase.roomName,
+    );
     console.log(GameService.gameRoomList);
   }
 }

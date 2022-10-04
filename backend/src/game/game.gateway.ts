@@ -23,12 +23,12 @@ import { Status, UserInterface } from 'shared/interfaces/UserInterface';
   cors: '*/*',
 })
 export class GameGateway implements OnGatewayConnection {
-
   constructor(
     private userService: UsersService,
     private gameService: GameService,
   ) {}
 
+  private static UserNotFound = { error: 'User not found' };
 
   @WebSocketServer()
   server: Server;
@@ -37,7 +37,7 @@ export class GameGateway implements OnGatewayConnection {
     try {
       const user = await this.userService.getUserFromSocket(client);
       if (!user) {
-        throw new WsException('User doesn\'t exists');
+        throw new WsException(GameGateway.UserNotFound);
       }
 
       const gameRoom: GameRoom = this.gameService.findUserRoom(user.id);
@@ -67,13 +67,15 @@ export class GameGateway implements OnGatewayConnection {
   ) {
     const user: User = await this.userService.getById(payload.userId);
     if (!user) {
-      throw new WsException('User doesn\'t exists');
+      throw new WsException(GameGateway.UserNotFound);
     }
     const gameRoom: GameRoom = this.gameService.createGame(user);
 
     client.join(gameRoom.roomName);
 
-    this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
+    this.server
+      .in(gameRoom.roomName)
+      .emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
   }
 
   @UseGuards(JwtWsGuard)
@@ -82,74 +84,80 @@ export class GameGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-
     const user: User = await this.userService.getById(payload.userId);
     if (!user) {
-      throw new WsException('User doesn\'t exists');
+      throw new WsException(GameGateway.UserNotFound);
     }
     const gameRoom: GameRoom = this.gameService.matchMaking(user);
 
     client.join(gameRoom.roomName);
 
-    this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
+    this.server
+      .in(gameRoom.roomName)
+      .emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
 
-    this.gameloop(gameRoom, user);    
+    this.gameloop(gameRoom, user);
   }
 
   private async gameloop(gameRoom: GameRoom, player2: User) {
     if (gameRoom.started === true) {
-      const opponent = await this.userService.getById(gameRoom.gameData.player1.userId);
+      const opponent = await this.userService.getById(
+        gameRoom.gameData.player1.userId,
+      );
+      if (!opponent) throw new WsException(GameGateway.UserNotFound);
+
       this.updateUserStatus(player2, Status.PLAYING);
       this.updateUserStatus(opponent, Status.PLAYING);
       this.server.emit(
         ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
         this.gameService.getSpectableGames(),
       );
-      const interval = setInterval(
-        () => {
-          const newGameRoom = this.gameService.gameLoop(gameRoom.roomName);
+      const interval = setInterval(() => {
+        const newGameRoom = this.gameService.gameLoop(gameRoom.roomName);
 
-          this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, newGameRoom);
-          if (this.gameService.isGameFinished(newGameRoom))
-          {
-            clearInterval(interval);
-            try {
-              this.gameService.handleGameOver(newGameRoom);
-            } catch (e) {
-              throw new WsException(e);
-            }
-            this.updateUserStatus(player2, Status.ONLINE);
-            this.updateUserStatus(opponent, Status.ONLINE);
-            this.gameService.removeGameFromGameRoomList(newGameRoom);
-            this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, newGameRoom);
-
-            // get all idSocket from a room
-            this.server.sockets.adapter.rooms
-              .get(gameRoom.roomName)
-              .forEach(
-                // make all socket leave the room
-                idSocket => this.server.sockets.sockets
-                  .get(idSocket)
-                  .leave(gameRoom.roomName)
-              );
-            this.server.emit(
-              ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
-              this.gameService.getSpectableGames(),
-            );
+        this.server
+          .in(gameRoom.roomName)
+          .emit(ROUTES_BASE.GAME.UPDATE_GAME, newGameRoom);
+        if (this.gameService.isGameFinished(newGameRoom)) {
+          clearInterval(interval);
+          try {
+            this.gameService.handleGameOver(newGameRoom);
+          } catch (e) {
+            throw new WsException(e);
           }
-        }, 5);
+          this.updateUserStatus(player2, Status.ONLINE);
+          this.updateUserStatus(opponent, Status.ONLINE);
+          this.gameService.removeGameFromGameRoomList(newGameRoom);
+          this.server
+            .in(gameRoom.roomName)
+            .emit(ROUTES_BASE.GAME.GAMEOVER_CONFIRM, newGameRoom);
+
+          // get all idSocket from a room
+          this.server.sockets.adapter.rooms.get(gameRoom.roomName).forEach(
+            // make all socket leave the room
+            (idSocket) =>
+              this.server.sockets.sockets
+                .get(idSocket)
+                .leave(gameRoom.roomName),
+          );
+          this.server.emit(
+            ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
+            this.gameService.getSpectableGames(),
+          );
+        }
+      }, 5);
     }
   }
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.GET_SPECTABLE_GAMES_REQUEST)
-  async getSpectableGames(
-    @ConnectedSocket() client: Socket,
-  ) {
-    this.server.in(client.id).emit(
-      ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
-      this.gameService.getSpectableGames(),
-    );
+  async getSpectableGames(@ConnectedSocket() client: Socket) {
+    this.server
+      .in(client.id)
+      .emit(
+        ROUTES_BASE.GAME.UPDATE_SPECTABLE_GAMES,
+        this.gameService.getSpectableGames(),
+      );
   }
 
   @UseGuards(JwtWsGuard)
@@ -172,16 +180,16 @@ export class GameGateway implements OnGatewayConnection {
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.RECONNECT_GAME_REQUEST)
-  async reconnectGame(
-    @UserPayload() payload: any,
-  ) {
+  async reconnectGame(@UserPayload() payload: any) {
     const gameRoom: GameRoom = this.gameService.findUserRoom(payload.userId);
 
     if (gameRoom === undefined) {
       return;
     }
 
-    this.server.in(gameRoom.roomName).emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
+    this.server
+      .in(gameRoom.roomName)
+      .emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
   }
 
   private async updateUserStatus(user: User, status: Status) {
@@ -212,14 +220,17 @@ export class GameGateway implements OnGatewayConnection {
     @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
-      if (payload.userId === opponentId) return ;
+    if (payload.userId === opponentId) return;
     const opponent = await this.userService.getById(opponentId);
     const user = await this.userService.getById(payload.opponentId);
-    const newChallengeRoom: GameRoom = this.gameService.createChallenge(user, opponent);
-
     if (!user || !opponent) {
-      throw new WsException('Player not found');
+      throw new WsException(GameGateway.UserNotFound);
     }
+
+    const newChallengeRoom: GameRoom = this.gameService.createChallenge(
+      user,
+      opponent,
+    );
 
     client.join(newChallengeRoom.roomName);
     client.emit(ROUTES_BASE.GAME.UPDATE_GAME, newChallengeRoom);
@@ -231,7 +242,9 @@ export class GameGateway implements OnGatewayConnection {
     @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
-    const challengeRooms: GameRoom[] = this.gameService.findUserChallengeRoom(payload.userId);
+    const challengeRooms: GameRoom[] = this.gameService.findUserChallengeRoom(
+      payload.userId,
+    );
 
     if (!challengeRooms) {
       return;
@@ -248,16 +261,19 @@ export class GameGateway implements OnGatewayConnection {
     @ConnectedSocket() client: Socket,
   ) {
     const challenge: GameRoom = this.gameService.findByRoomName(roomName);
-    const player2: User = await this.userService.getById(payload.userId);
-
-    if (!challenge || !player2) {
-      throw new WsException('Challenge or Player2 not found');
+    if (!challenge) {
+      throw new WsException('Challenge room not found');
     }
-    
+
+    const player2: User = await this.userService.getById(payload.userId);
+    if (!player2) {
+      throw new WsException('Player2 not found');
+    }
+
     challenge.started = true;
     this.gameService.gameStart(challenge.gameData);
-    client.join(challenge.roomName)
-    this.gameloop(challenge, player2); 
+    client.join(challenge.roomName);
+    this.gameloop(challenge, player2);
   }
   /** END CHALLENGE */
 
