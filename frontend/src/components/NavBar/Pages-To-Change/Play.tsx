@@ -17,8 +17,8 @@ export type GameColors = {
   background: string;
 };
 export const defaultColor: GameColors = {
-  ball: "#aabbcc",
-  paddle: "#aabbcc",
+  ball: "#B1FACE",
+  paddle: "#DE1E7E",
   background: "#000000",
 };
 
