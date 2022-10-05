@@ -124,12 +124,9 @@ const SignUpPage: React.FC<SignUpProps> = ({
     if (status===buttonSteps.DONE) {
       setStatus(buttonSteps.BUTTON);
       api.turn_off_2fa().then((res: Response) => {
-        console.log("turn_off_2fa", res);
-        res.json().then((content) => {
-          console.log("turn_off_2fa", content);
-        });
-      });
-      setChecked(false);
+        if(res.status == 200)
+          setChecked(false);
+      }) 
     }
   }
   const handleChange = (nextChecked:boolean) => {
