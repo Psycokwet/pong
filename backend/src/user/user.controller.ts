@@ -29,6 +29,7 @@ import { TwoFactorAuthGuard } from 'src/two-factor-auth/two-factor-auth.guard';
 import { User } from './user.entity';
 import RequestWithUser from 'src/auth/requestWithUser.interface';
 import { AddFriendDto } from './add-friend.dto';
+import { GameColors } from 'shared/types/GameColors';
 
 @Controller(ROUTES_BASE.USER.ENDPOINT)
 export class UserController {
@@ -37,7 +38,7 @@ export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get(ROUTES_BASE.USER.GET_USER_PROFILE)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(TwoFactorAuthGuard)
   async getUserProfile(
     @Request() req: RequestWithUser,
     @Query() query: { pongUsername: string },
@@ -80,6 +81,23 @@ export class UserController {
     return await this.usersService.getLogin42(user);
   }
 
+  @Get(ROUTES_BASE.USER.GET_GAME_COLORS)
+  @UseGuards(TwoFactorAuthGuard)
+  async getGameColors(@Request() req) {
+    const user = await this.usersService.findOne(req.user.login42);
+    if (!user) throw new NotFoundException({ error: 'User not found' });
+
+    return { gameColors: JSON.parse(user.gameColors) };
+  }
+
+  @Post(ROUTES_BASE.USER.SET_GAME_COLORS)
+  @UseGuards(TwoFactorAuthGuard)
+  async setGameColors(@Body() gameColors: GameColors, @Request() req) {
+    const user = await this.usersService.findOne(req.user.login42);
+    if (!user) throw new NotFoundException({ error: 'User not found' });
+
+    return await this.usersService.setGameColors(gameColors, user);
+  }
   @Get(ROUTES_BASE.USER.GET_PONG_USERNAME)
   @UseGuards(TwoFactorAuthGuard)
   async getPongUsername(@Request() req) {
@@ -103,8 +121,19 @@ export class UserController {
 
   @Get(ROUTES_BASE.USER.GET_PICTURE)
   @UseGuards(TwoFactorAuthGuard)
-  async getPicture(@Request() req: RequestWithUser): Promise<StreamableFile> {
-    const picture_path = await this.usersService.getPicture(req.user.login42);
+  async getPicture(
+    @Request() req: RequestWithUser,
+    @Query() query: { pongUsername: string },
+  ): Promise<StreamableFile> {
+    let user: User = null;
+    if (!query.pongUsername)
+      user = await this.usersService.findOne(req.user.login42);
+    else
+      user = await this.usersService.findOneByPongUsername(query.pongUsername);
+    if (!user) {
+      throw new BadRequestException({ error: 'User not found' });
+    }
+    const picture_path = await this.usersService.getPicture(user.login42);
 
     // https://docs.nestjs.com/techniques/streaming-files
     const file = createReadStream(join(process.cwd(), `${picture_path}`));

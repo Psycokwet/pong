@@ -11,6 +11,8 @@ export const ROUTES_BASE = {
     GET_USER_RANK: 'get_user_rank',
     GET_USER_HISTORY: 'get_user_history',
     GET_USER_PROFILE: 'get_user_profile',
+    GET_GAME_COLORS: 'get_game_colors',
+    SET_GAME_COLORS: 'set_game_colors',
   },
   AUTH: {
     ENDPOINT: '/auth/42/',
