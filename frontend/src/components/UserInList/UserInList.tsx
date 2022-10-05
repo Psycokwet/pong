@@ -44,20 +44,20 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
           });
         });
     });
-  }, []);
+    },[]);
 
-  //! call API for pongUsername then call for picture
   const setupOwnership = (val:number) => {
     setOwnership(val);
   }
+
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupOwnership);
     return () => {
       socket?.off(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupOwnership);
   }}, []);
-  if (!user)
-    return <></>
+
   return (
+    user ? (
     <div
       key={user.id}
       onContextMenu={(e) => {
@@ -91,7 +91,7 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
         <Ban menuSettings={menuSettings} userOwnership={userOwnership} />
         <SetAdmin menuSettings={menuSettings}/>
       </ControlledMenu>
-    </div>
+    </div>) : <></>
   )
 }
 
