@@ -20,10 +20,10 @@ import False42Login from "./LoginPage/False42Login";
 import {
   createCurrentUserFrontInterface,
   CurrentUserFrontInterface,
-} from "/shared/interfaces/CurrentUserFrontInterface";
-import { ConnectionStatus } from "/shared/enumerations/ConnectionStatus";
-import { GameColors } from "/shared/types/GameColors";
-import { isSameSimpleObj } from "/shared/utils";
+} from "shared/interfaces/CurrentUserFrontInterface";
+import { ConnectionStatus } from "shared/enumerations/ConnectionStatus";
+import { GameColors } from "shared/types/GameColors";
+import { isSameSimpleObj } from "shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 import SignUpPage from "./SignUpPage/SignUpPage";
 import { Toaster } from "react-hot-toast";
@@ -189,9 +189,7 @@ function App() {
     case ConnectionStatus.TwoFactorAuthenticationRequested:
       return (
         <>
-          <TwoStepSigningMockup 
-            updateCurrentUser={updateCurrentUser}
-          />
+          <TwoStepSigningMockup updateCurrentUser={updateCurrentUser} />
           <Toaster />
         </>
       );

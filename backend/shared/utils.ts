@@ -11,7 +11,7 @@ export const generate_full_routes = (routes_base: { [key: string]: any }) => {
   return accumulator;
 };
 
-export const isSameSimpleObj = (o1, o2) => {
+export const isSameSimpleObj = (o1: any, o2: any) => {
   let o1Keys = Object.keys(o1);
   let o2Keys = Object.keys(o2);
   if (o1Keys.length !== o2Keys.length) return false;

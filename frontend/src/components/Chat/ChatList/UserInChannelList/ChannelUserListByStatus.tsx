@@ -1,18 +1,17 @@
 import React from "react";
 import { BsCircleFill } from "react-icons/bs";
-import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
-import { MenuSettingsType } from "../UserInList/MenuSettings"
-import { UserStatus } from "../Common/StatusList"
+import { ChannelUserInterface } from "shared/interfaces/ChannelUserInterface";
 import { Socket } from "socket.io-client";
 import ChannelUserMenu from "./UserInChannelList";
-import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import { Privileges } from "shared/interfaces/UserPrivilegesEnum";
+import { MenuSettingsType } from "../../../UserInList/MenuSettings";
+import { UserStatus } from "../../../Common/StatusList";
 
 type ChannelUserListByStatusProps = {
   userList: ChannelUserInterface[];
   inputFilter: string;
   statusList: UserStatus;
   socket: Socket | undefined;
-  roomId: number;
   menuSettings: MenuSettingsType;
   userPrivilege: Privileges;
 };
@@ -22,7 +21,6 @@ const ChannelUserListByStatus: React.FC<ChannelUserListByStatusProps> = ({
   inputFilter,
   statusList,
   socket,
-  roomId,
   menuSettings,
   userPrivilege,
 }) => {
@@ -36,18 +34,20 @@ const ChannelUserListByStatus: React.FC<ChannelUserListByStatusProps> = ({
         <p>{statusList.groupName}</p>
       </div>
 
-      {userList?.filter((value) => value.status === statusList.status).map((user) => {
-        return (
-          <ChannelUserMenu
-            userPrivilege={userPrivilege}
-            key={user.id}
-            user={user}
-            inputFilter={inputFilter}
-            socket={socket}
-            menuSettings={menuSettings}
-          />
-        );
-      })}
+      {userList
+        ?.filter((value) => value.status === statusList.status)
+        .map((user) => {
+          return (
+            <ChannelUserMenu
+              userPrivilege={userPrivilege}
+              key={user.id}
+              user={user}
+              inputFilter={inputFilter}
+              socket={socket}
+              menuSettings={menuSettings}
+            />
+          );
+        })}
     </>
   );
 };
