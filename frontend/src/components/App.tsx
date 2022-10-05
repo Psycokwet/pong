@@ -170,9 +170,9 @@ function App() {
     case ConnectionStatus.TwoFactorAuthenticationRequested:
       return (
         <>
-          <TwoStepSigningMockup
+          <TwoStepSigningMockup 
             updateCurrentUser={updateCurrentUser}
-          ></TwoStepSigningMockup>
+          />
           <Toaster />
         </>
       );
