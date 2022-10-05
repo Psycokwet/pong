@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "moduleResolution": "node",
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
@@ -10,15 +11,24 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
-    "moduleResolution": "Node",
+    // "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
-      "@back/*": [ "../back/src/*" ],
+      "src/*": ["./src/*"],
+      "components/*": ["./src/components/*"],
+      "api/*": ["./src/api/*"],
+      "shared/*": ["./shared/*"],
+      "enumerations/*": ["./shared/enumerations/*"],
+      "httpsRoutes/*": ["./shared/httpsRoutes/*"],
+      "interfaces/*": ["./shared/interfaces/*"],
+      "other/*": ["./shared/other/*"],
+      "types/*": ["./shared/types/*"],
+      "websocketRoutes/*": ["./shared/websocketRoutes/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "shared"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -4,20 +4,27 @@ import Channel from "./Channel/Channel";
 import DirectMessage from "./DirectMessage/DirectMessage";
 import ChannelMenu from "./ChannelMenu/ChannelMenu";
 import DirectMessageMenu from "./DirectMessageMenu/DirectMessageMenu";
-import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import { ChannelData } from "/shared/interfaces/ChannelData";
-import { Message } from "/shared/interfaces/Message";
-import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import { ROUTES_BASE } from "shared/websocketRoutes/routes";
+import ChannelData from "shared/interfaces/ChannelData";
+import Message from "shared/interfaces/Message";
+import { Privileges } from "shared/interfaces/UserPrivilegesEnum";
 
-function ChatList({ msg , socket , connectedChannel, handleLeaveChannel, userPrivilege, handleDisconnectChannel, /* lastMessage ,*/} : {
-    msg: Message,
-    socket:Socket | undefined,
-    connectedChannel: ChannelData | undefined,
-    handleLeaveChannel: any;
-    userPrivilege: Privileges;
-    handleDisconnectChannel: any;
-    /*lastMessage: Message;*/
-}){
+function ChatList({
+  msg,
+  socket,
+  connectedChannel,
+  handleLeaveChannel,
+  userPrivilege,
+  handleDisconnectChannel /* lastMessage ,*/,
+}: {
+  msg: Message;
+  socket: Socket | undefined;
+  connectedChannel: ChannelData | undefined;
+  handleLeaveChannel: any;
+  userPrivilege: Privileges;
+  handleDisconnectChannel: any;
+  /*lastMessage: Message;*/
+}) {
   const [channelList, setChannelList] = useState<ChannelData[]>([]);
   const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
 
@@ -58,26 +65,29 @@ function ChatList({ msg , socket , connectedChannel, handleLeaveChannel, userPri
     <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end relative">
       <div>
         <ChannelMenu socket={socket} />
-        {
-        channelList.map((channel, i) => (
+        {channelList.map((channel, i) => (
           <div key={i}>
-              <Channel
-                userPrivilege={userPrivilege}
-                handleLeaveChannel={() => {
-                  handleLeaveChannel();
-                  setChannelList(current => current.filter(channel => channel.channelId !== connectedChannel.channelId))
-                }}
-                channel={channel}
-                socket={socket}
-                connectedChannel={connectedChannel}
-                handleDisconnectChannel={handleDisconnectChannel}
-              />
-            </div>
-          ))
-        }
+            <Channel
+              userPrivilege={userPrivilege}
+              handleLeaveChannel={() => {
+                handleLeaveChannel();
+                setChannelList((current) =>
+                  current.filter(
+                    (channel) =>
+                      channel.channelId !== connectedChannel.channelId
+                  )
+                );
+              }}
+              channel={channel}
+              socket={socket}
+              connectedChannel={connectedChannel}
+              handleDisconnectChannel={handleDisconnectChannel}
+            />
+          </div>
+        ))}
       </div>
       <div>
-        <DirectMessageMenu socket={socket}/>
+        <DirectMessageMenu socket={socket} />
         {directMessageList.map((directMessage) => {
           return (
             <div key={directMessage.channelId}>

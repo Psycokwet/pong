@@ -1,5 +1,3 @@
-import { StreamableFile } from '@nestjs/common';
-
 export default interface UserProfile {
   pongUsername: string;
   userRank: { level: number; userRank: number };

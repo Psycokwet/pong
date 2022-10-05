@@ -287,7 +287,7 @@ export class ChatGateway implements OnGatewayConnection {
     );
 
     if (!room)
-      return client.emit(ROUTES_BASE.ERROR, {
+      return client.emit(ROUTES_BASE.ERROR.ENDPOINT, {
         message: 'You must specify which channel you want to leave',
       });
 
@@ -666,12 +666,12 @@ export class ChatGateway implements OnGatewayConnection {
     );
 
     if (!caller || !room)
-      return this.server.in(client.id).emit(ROUTES_BASE.ERROR, {
+      return this.server.in(client.id).emit(ROUTES_BASE.ERROR.ENDPOINT, {
         message: 'Room or User not found',
       });
 
     if (room.owner.id !== caller.id)
-      return this.server.in(client.id).emit(ROUTES_BASE.ERROR, {
+      return this.server.in(client.id).emit(ROUTES_BASE.ERROR.ENDPOINT, {
         message: 'You are not the owner of the channel',
       });
 
