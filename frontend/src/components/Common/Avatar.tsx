@@ -10,7 +10,7 @@ type AvatarProps = {
 
 const Avatar: React.FC<AvatarProps> = ({ url, size }) => {
   return (
-    <div className="bg-gray-900">
+    <div className="bg-opacity-0">
       {url ? (
         <img src={url} className={`rounded-full object-cover ${size}`} />
       ) : (
