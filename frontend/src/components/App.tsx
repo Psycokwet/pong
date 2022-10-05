@@ -22,10 +22,11 @@ import {
   CurrentUserFrontInterface,
 } from "/shared/interfaces/CurrentUserFrontInterface";
 import { ConnectionStatus } from "/shared/enumerations/ConnectionStatus";
+import { GameColors } from "/shared/types/GameColors";
 import { isSameSimpleObj } from "/shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 import SignUpPage from "./SignUpPage/SignUpPage";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 const api = new Api();
 
@@ -33,6 +34,13 @@ function App() {
   const [currentUser, setCurrentUser] = useState<CurrentUserFrontInterface>(
     createCurrentUserFrontInterface()
   );
+  const setColors = (setRightColor: (colors: GameColors) => GameColors) => {
+    setCurrentUser((current: CurrentUserFrontInterface) => {
+      let newCurrentUser = { ...current };
+      newCurrentUser.gameColors = setRightColor(newCurrentUser.gameColors);
+      return newCurrentUser;
+    });
+  };
   const updateCurrentUser = () => {
     api.refreshToken().then((res: Response) => {
       if (res.status != 200) {
@@ -58,35 +66,6 @@ function App() {
   };
 
   const [socket, setSocket] = useState<Socket>();
-  const init_webPageRoutes = () => [
-    {
-      url: "/play",
-      element: <Play socket={socket} />,
-    },
-    {
-      url: "/leaderboard",
-      element: <LeaderBoard />,
-    },
-    {
-      url: "/chat",
-      element: <Chat socket={socket} />,
-    },
-    {
-      url: "/friendlist",
-      element: <FriendList socket={socket} />,
-    },
-    {
-      url: "/settings",
-      element: (
-        <SignUpPage
-          updateCurrentUser={updateCurrentUser}
-          pongUsername={currentUser.pongUsername}
-        />
-      ),
-    },
-  ];
-
-  const [webPageRoutes, setWebPagesRoutes] = useState(init_webPageRoutes());
 
   useEffect(() => {
     return () => {
@@ -97,10 +76,6 @@ function App() {
       setSocket(newSocket);
     };
   }, []);
-
-  useEffect(() => {
-    setWebPagesRoutes(init_webPageRoutes());
-  }, [socket, currentUser]);
 
   useEffect(() => {
     if (currentUser.status == ConnectionStatus.Unknown) {
@@ -124,7 +99,7 @@ function App() {
         <div className="h-screen">
           <NavBar
             setDisconnected={() =>
-              setCurrentUser((current) => {
+              setCurrentUser((current: CurrentUserFrontInterface) => {
                 socket?.disconnect();
                 return { ...current, status: ConnectionStatus.Disconnected };
               })
@@ -133,13 +108,54 @@ function App() {
           />
 
           <Routes>
-            {webPageRoutes.map((onePage, i) => {
+            {[
+              {
+                url: "/play",
+                element: (
+                  <Play
+                    socket={socket}
+                    colors={currentUser.gameColors}
+                    setColors={setColors}
+                  />
+                ),
+              },
+              {
+                url: "/leaderboard",
+                element: <LeaderBoard />,
+              },
+              {
+                url: "/chat",
+                element: <Chat socket={socket} />,
+              },
+              {
+                url: "/settings",
+                element: (
+                  <SignUpPage
+                    updateCurrentUser={updateCurrentUser}
+                    pongUsername={currentUser.pongUsername}
+                  />
+                ),
+              },
+              {
+                url: "/friendlist",
+                element: <FriendList socket={socket} />,
+              },
+            ].map((onePage, i) => {
               return (
                 <Route key={i} path={onePage.url} element={onePage.element} />
               );
             })}
 
-            <Route path="/" element={<Play socket={socket} />} />
+            <Route
+              path="/"
+              element={
+                <Play
+                  socket={socket}
+                  colors={currentUser.gameColors}
+                  setColors={setColors}
+                />
+              }
+            />
             <Route path="/profile" element={<Profile />}>
               <Route path=":pongUsername" element={<OneUserProfile />} />
             </Route>
@@ -173,9 +189,9 @@ function App() {
     case ConnectionStatus.TwoFactorAuthenticationRequested:
       return (
         <>
-          <TwoStepSigningMockup
+          <TwoStepSigningMockup 
             updateCurrentUser={updateCurrentUser}
-          ></TwoStepSigningMockup>
+          />
           <Toaster />
         </>
       );
