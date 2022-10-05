@@ -103,8 +103,19 @@ export class UserController {
 
   @Get(ROUTES_BASE.USER.GET_PICTURE)
   @UseGuards(TwoFactorAuthGuard)
-  async getPicture(@Request() req: RequestWithUser): Promise<StreamableFile> {
-    const picture_path = await this.usersService.getPicture(req.user.login42);
+  async getPicture(
+    @Request() req: RequestWithUser,
+    @Query() query: { pongUsername: string },
+  ): Promise<StreamableFile> {
+    let user: User = null;
+    if (!query.pongUsername)
+      user = await this.usersService.findOne(req.user.login42);
+    else
+      user = await this.usersService.findOneByPongUsername(query.pongUsername);
+    if (!user) {
+      throw new BadRequestException({ error: 'User not found' });
+    }
+    const picture_path = await this.usersService.getPicture(user.login42);
 
     // https://docs.nestjs.com/techniques/streaming-files
     const file = createReadStream(join(process.cwd(), `${picture_path}`));
