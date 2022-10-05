@@ -1,4 +1,5 @@
 import { FULL_ROUTE } from "../../shared/httpsRoutes/routes";
+import { GameColors } from "/shared/types/GameColors";
 
 export const PREFIX =
   import.meta.env.VITE_CONTEXT == "MOCKUP"
@@ -75,6 +76,22 @@ export class Api {
       method: "POST",
       headers: headers,
       body: JSON.stringify({ newPongUsername }),
+    });
+  }
+
+  get_game_colors() {
+    return fetch(`${PREFIX}${FULL_ROUTE.USER.GET_GAME_COLORS}`, {
+      method: "GET",
+      // headers: this._headers,
+    });
+  }
+  set_game_colors(gameColors: GameColors) {
+    let headers = new Headers();
+    headers.set(HeadersFields.ContentType, "application/json");
+    return fetch(`${PREFIX}${FULL_ROUTE.USER.SET_GAME_COLORS}`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(gameColors),
     });
   }
 
