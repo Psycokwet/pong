@@ -18,6 +18,10 @@ import Mute from "./MenuComponents/Mute";
 import Profile from "./MenuComponents/Profile";
 import SendDirectMessage from "./MenuComponents/SendDirectMessage";
 import SetAdmin from "./MenuComponents/SetAdmin";
+import { Api } from "../../api/api"
+import Avatar from "../Common/Avatar";
+
+const api = new Api();
 
 const UserInList = ({user, inputFilter, socket, menuSettings} :{
   user: UserInterface,
@@ -28,7 +32,21 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
   const [userOwnership, setOwnership] = useState<number>(Privileges.MEMBER);
+  const [avatarUrl, setAvatarUrl] = useState("");
 
+  useEffect(() => {
+    api.getPicture(user.pongUsername).then((res) => {
+      if (res.status == 200)
+        res.blob().then((myBlob) => {
+          setAvatarUrl((current) => {
+            if (current) URL.revokeObjectURL(current);
+            return URL.createObjectURL(myBlob);
+          });
+        });
+    });
+  }, []);
+
+  //! call API for pongUsername then call for picture
   const setupOwnership = (val:number) => {
     setOwnership(val);
   }
@@ -55,11 +73,7 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
       <div
         className="grid grid-cols-2 m-2"
       >
-        <img
-          src={user.image_url}
-          alt="Avatar"
-          className="w-10 rounded-3xl"
-        />
+        <Avatar url={avatarUrl} size="w-20" />
         <strong>{user.pongUsername}</strong>
       </div>
       {/* Right click menu */}
