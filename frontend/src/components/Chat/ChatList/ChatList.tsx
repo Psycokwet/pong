@@ -9,8 +9,7 @@ import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
-function ChatList({ msg , socket , connectedChannel, handleLeaveChannel, userPrivilege, handleDisconnectChannel, /* lastMessage ,*/} : {
-    msg: Message,
+function ChatList({ socket , connectedChannel, handleLeaveChannel, userPrivilege, handleDisconnectChannel, /* lastMessage ,*/} : {
     socket:Socket | undefined,
     connectedChannel: ChannelData | undefined,
     handleLeaveChannel: any;
