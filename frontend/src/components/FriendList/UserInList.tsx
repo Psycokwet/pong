@@ -2,22 +2,16 @@ import { useState, useEffect } from "react";
 import { MenuItem, ControlledMenu, useMenuState } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
 import { Socket } from "socket.io-client";
-import { Link } from "react-router-dom";
 
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { UserInterface } from "/shared/interfaces/UserInterface";
-import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 import { MenuSettingsType } from "../UserInList/MenuSettings";
 import Watch from "../UserInList/MenuComponents/Watch";
-import AddFriendButton from "../UserInList/MenuComponents/AddFriendButton";
-import Ban from "../UserInList/MenuComponents/Ban";
 import Block from "../UserInList/MenuComponents/Block";
 import Challenge from "../UserInList/MenuComponents/Challenge";
-import Mute from "../UserInList/MenuComponents/Mute";
 import Profile from "../UserInList/MenuComponents/Profile";
 import SendDirectMessage from "../UserInList/MenuComponents/SendDirectMessage";
-import SetAdmin from "../UserInList/MenuComponents/SetAdmin";
 import { Api } from "../../api/api"
 import Avatar from "../Common/Avatar";
 
@@ -31,7 +25,6 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
 }) => {
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
-  const [userOwnership, setOwnership] = useState<number>(Privileges.MEMBER);
   const [avatarUrl, setAvatarUrl] = useState("");
 
   useEffect(() => {
@@ -46,16 +39,6 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
         });
     });
   },[]);
-
-  const setupOwnership = (val:number) => {
-    setOwnership(val);
-  }
-
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupOwnership);
-    return () => {
-      socket?.off(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupOwnership);
-  }}, []);
 
   return (
     user ? (
