@@ -1,12 +1,7 @@
 import { Puff } from 'react-loading-icons'
 import { BsShieldFillExclamation } from "react-icons/bs"
+import buttonSteps from "./ButtonSteps"
 
-const enum twoFactorSteps {
-  BUTTON,
-  LOADING,
-  DONE,
-  ERROR,
-}
 const Button2fa = ({
   status,
   setStatus,
@@ -15,7 +10,7 @@ const Button2fa = ({
   setStatus: (status: number) => void,
 })=>{
   const validateClick = () => {
-    setStatus(twoFactorSteps.LOADING);
+    setStatus(buttonSteps.LOADING);
   };
   const result:JSX.Element[] = [
       <button
@@ -36,7 +31,10 @@ const Button2fa = ({
           Done !
       </button>,
 
-      <BsShieldFillExclamation className="w-20 h-12 transition text-red-600"/>
+      <BsShieldFillExclamation
+        onClick={() => setStatus(buttonSteps.BUTTON)}
+        className="w-20 h-12 transition text-red-600"
+      />
   ];
   return result[status];
 }

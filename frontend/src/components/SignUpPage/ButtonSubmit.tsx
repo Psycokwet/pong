@@ -1,12 +1,7 @@
 import { BsShieldFillExclamation } from "react-icons/bs"
 import { Puff } from 'react-loading-icons'
+import buttonSteps from "./ButtonSteps"
 
-const enum validForm {
-  BUTTON,
-  LOADING,
-  DONE,
-  ERROR,
-}
 const ButtonSubmit = ({
   validFormStatus,
   setValidFormStatus,
@@ -15,7 +10,7 @@ const ButtonSubmit = ({
   setValidFormStatus: (status: number) => void,
 })=>{
   const validateClick = () => {
-    setValidFormStatus(validForm.LOADING);
+    setValidFormStatus(buttonSteps.LOADING);
   };
   const result:JSX.Element[] = [
       <button
@@ -37,7 +32,7 @@ const ButtonSubmit = ({
       </button>,
 
       <BsShieldFillExclamation
-        onClick={() => setValidFormStatus(validForm.BUTTON)}
+        onClick={() => setValidFormStatus(buttonSteps.BUTTON)}
         className="w-20 h-12 transition text-red-600"
       />
   ];
