@@ -64,7 +64,9 @@ const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
   };
 
   const setDefaultColors = () => {
-    setColors(defaultColor);
+    setColors((current: GameColors) => {
+      return { ...defaultColor };
+    });
   };
 
   const gameSteps = [
