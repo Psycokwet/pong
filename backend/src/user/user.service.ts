@@ -27,6 +27,7 @@ import { v4 as uuidv4 } from 'uuid';
 import UserProfile from 'shared/interfaces/UserProfile';
 import { Blocked } from 'src/blocked/blocked.entity';
 import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
+import { GameColors } from 'shared/types/GameColors';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -332,6 +333,16 @@ export class UsersService {
       await this.usersRepository.update(user.id, {
         pongUsername: dto.newPongUsername,
         isUserFullySignedUp: true,
+      });
+    } catch (e) {
+      throw new BadRequestException({ error: 'Nickname already taken' });
+    }
+  }
+  async setGameColors(colors: GameColors, user: User) {
+    /* We use TypeORM's update function to update our entity */
+    try {
+      await this.usersRepository.update(user.id, {
+        gameColors: JSON.stringify(colors),
       });
     } catch (e) {
       throw new BadRequestException({ error: 'Nickname already taken' });

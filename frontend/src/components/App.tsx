@@ -11,7 +11,7 @@ import NavBar from "./NavBar/NavBar";
 import FriendList from "./FriendList/FriendList";
 import Loading from "./Common/Loading";
 import NotFound from "./NavBar/Pages-To-Change/NotFound";
-import Play, { defaultColor, GameColors } from "./NavBar/Pages-To-Change/Play";
+import Play from "./NavBar/Pages-To-Change/Play";
 import Chat from "./Chat/Chat";
 import LeaderBoard from "./NavBar/Pages-To-Change/LeaderBoard";
 import Profile from "./Profile/Profile";
@@ -30,7 +30,6 @@ import { Toaster } from "react-hot-toast";
 const api = new Api();
 
 function App() {
-  const [colors, setColors] = useState<GameColors>(defaultColor);
   const [currentUser, setCurrentUser] = useState<CurrentUserFrontInterface>(
     createCurrentUserFrontInterface()
   );
@@ -92,7 +91,7 @@ function App() {
         <div className="h-screen">
           <NavBar
             setDisconnected={() =>
-              setCurrentUser((current) => {
+              setCurrentUser((current: CurrentUserFrontInterface) => {
                 socket?.disconnect();
                 return { ...current, status: ConnectionStatus.Disconnected };
               })
@@ -105,7 +104,17 @@ function App() {
               {
                 url: "/play",
                 element: (
-                  <Play socket={socket} colors={colors} setColors={setColors} />
+                  <Play
+                    socket={socket}
+                    colors={currentUser.gameColors}
+                    setColors={(newColors) => {
+                      setCurrentUser((current: CurrentUserFrontInterface) => {
+                        let newCurrentUser = { ...current };
+                        newCurrentUser.gameColors = newColors;
+                        return newCurrentUser;
+                      });
+                    }}
+                  />
                 ),
               },
               {
@@ -138,7 +147,19 @@ function App() {
             <Route
               path="/"
               element={
-                <Play socket={socket} colors={colors} setColors={setColors} />
+                <Play
+                  socket={socket}
+                  colors={currentUser.gameColors}
+                  setColors={(setRightColor) => {
+                    setCurrentUser((current: CurrentUserFrontInterface) => {
+                      let newCurrentUser = { ...current };
+                      newCurrentUser.gameColors = setRightColor(
+                        newCurrentUser.gameColors
+                      );
+                      return newCurrentUser;
+                    });
+                  }}
+                />
               }
             />
             <Route path="/profile" element={<Profile />}>

@@ -7,20 +7,10 @@ import GameQueue from "/src/components/PongGame/GameQueue";
 import GameRoom from "/shared/interfaces/GameRoom";
 import Position from "/shared/interfaces/Position";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { GameColors, defaultColor } from "/shared/types/GameColors";
 import { GameStep } from "/src/components/PongGame/GameStep.enum";
 import GameSettings from "../../PongGame/GameSettings";
-import { HexColorPicker, HexColorInput } from "react-colorful";
-
-export type GameColors = {
-  ball: string;
-  paddle: string;
-  background: string;
-};
-export const defaultColor: GameColors = {
-  ball: "#B1FACE",
-  paddle: "#DE1E7E",
-  background: "#000000",
-};
+import { HexColorPicker } from "react-colorful";
 
 type PlayProps = {
   socket: Socket | undefined;
@@ -68,9 +58,8 @@ const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
 
   const setRightColor = (key: string) => (newColor: string) => {
     setColors((current: GameColors) => {
-      let newColors = { ...current };
-      newColors[key as keyof GameColors] = newColor;
-      return newColors;
+      current[key as keyof GameColors] = newColor;
+      return current;
     });
   };
 
@@ -80,7 +69,7 @@ const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
 
   const gameSteps = [
     <GameLobby socket={socket} setStep={setStep} setGameRoom={setGameRoom} />,
-    <GameSettings setStep={setStep} />,
+    <GameSettings setStep={setStep} colors={colors} />,
     <GameQueue
       socket={socket}
       setStep={setStep}
