@@ -6,6 +6,7 @@ import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import Avatar from "../../../Common/Avatar"
 
 import { MenuSettingsType } from "./MenuSettings";
 import Watch from "/src/components/UserInList/MenuComponents/Watch";
@@ -19,6 +20,7 @@ import SendDirectMessage from "/src/components/UserInList/MenuComponents/SendDir
 import SetAdmin from "/src/components/UserInList/MenuComponents/SetAdmin";
 import { FaCrown } from "react-icons/fa";
 import { AiFillTool } from "react-icons/ai";
+import { Api } from "../../../../api/api";
 
 const ChannelUserMenu = ({user, inputFilter, socket, menuSettings, userPrivilege} :{
   user: ChannelUserInterface,
@@ -29,7 +31,20 @@ const ChannelUserMenu = ({user, inputFilter, socket, menuSettings, userPrivilege
 }) => {
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
+  const [imageUrl, setImageUrl] = useState<string>("");
+const api = new Api();
 
+  useEffect(() => {
+    api.getPicture(user.pongUsername).then((res) => {
+      if (res.status == 200)
+        res.blob().then((myBlob) => {
+          setImageUrl((current) => {
+            if (current) URL.revokeObjectURL(current);
+            return URL.createObjectURL(myBlob);
+          });
+        });
+    });
+  }, []);
   const icons = [
     <></>,
     <AiFillTool/>,
@@ -52,12 +67,11 @@ const ChannelUserMenu = ({user, inputFilter, socket, menuSettings, userPrivilege
     >
       {/* Avatar and Nickname */}
       <div
-        className="grid grid-cols-3 m-2"
+        className="flex flex-row gap-2 "
       >
-        <img
-          src={user.image_url}
-          alt="Avatar"
-          className="w-10 rounded-3xl"
+        <Avatar
+          url={imageUrl}
+          size="w-10 h-10"
         />
         <strong>{user.pongUsername}</strong>
         {icons[user.privileges]}

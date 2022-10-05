@@ -1,9 +1,10 @@
 import { Privileges } from "./UserPrivilegesEnum";
 import { Status } from "./UserStatus";
 
-export interface ChannelUserInterface {
+interface ChannelUserInterface {
   id: number;
   pongUsername: string;
   status: Status;
   privileges: Privileges;
 }
+export default ChannelUserInterface;

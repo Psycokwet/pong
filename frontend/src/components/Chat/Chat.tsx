@@ -81,12 +81,12 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     if (connectedChannel)
       socket?.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST, connectedChannel.channelId)
   }, [connectedChannel]);
+
   useEffect(() => {
     socket?.on(
       ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, 
       (userList: ChannelUserInterface[]) => setAttachedUserList(userList)
     );
-
     return () => {
       socket?.off(
         ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
@@ -174,7 +174,6 @@ function Chat ({socket}:{socket:Socket|undefined}) {
             />
           );
         })}
-        <UserPicture />
       </div>
     </div>
   )
