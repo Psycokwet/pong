@@ -19,12 +19,7 @@ import JwtRefreshGuard from 'src/auth/jwtRefresh.guard';
 import { FortytwoService } from './fortytwo.service';
 import { User } from 'src/user/user.entity';
 import { TwoFactorAuthService } from 'src/two-factor-auth/two-factor-auth.service';
-import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
-import { UserInterface } from 'shared/interfaces/UserInterface';
-import {
-  CurrentUserFrontInterface,
-  currentUserToFrontInterface,
-} from 'shared/interfaces/CurrentUserFrontInterface';
+import { currentUserToFrontInterface } from 'shared/interfaces/CurrentUserFrontInterface';
 
 @Injectable()
 @Controller(ROUTES_BASE.AUTH.ENDPOINT)
