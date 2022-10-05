@@ -55,7 +55,7 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
       <h1 className="text-4xl font-bold self-center">Friend List</h1>
 
       {/************************* Dropdown Menu **************************/}
-      <div className="bg-gray-700 mt-2 max-h-60 overflow-y-auto">
+      <div className="bg-gray-700 mt-2 h-screen overflow-y-auto">
         <DropDownFriendList socket={socket} userFriendList={userFriendList} />
       </div>
     </div>
