@@ -24,11 +24,6 @@ export const QRCodeImg: React.FC<QRCodeImgProps> = ({ apiCall }) => {
       >
         get QrCode to activate 2 fa !
       </button>
-      <img
-        src={userPicture ? userPicture : ""}
-        alt="user picture"
-        hidden={Boolean(userPicture)}
-      />
     </div>
   );
 };

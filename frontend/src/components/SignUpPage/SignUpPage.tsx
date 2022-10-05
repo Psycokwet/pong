@@ -3,6 +3,12 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { Api } from "../../api/api";
 import ProfilePic from "../Common/ProfilePic";
+import Button2fa from "./Button2fa";
+import ButtonSubmit from "./ButtonSubmit";
+import Switch from "react-switch";
+import { MenuItem, Menu, MenuButton, FocusableItem } from '@szhsin/react-menu';
+import '@szhsin/react-menu/dist/index.css';
+import buttonSteps from "./ButtonSteps"
 
 const MAX_CHAR = 15;
 
@@ -18,17 +24,42 @@ const SignUpPage: React.FC<SignUpProps> = ({
   const [selectedFile, setSelectedFile] = useState<File>();
   const [localPongUsername, setLocalPongUsername] = useState(pongUsername);
   const [avatar, setAvatar] = useState("");
-  const [twoFactor, setTwoFactor] = useState("off");
+  const [checked, setChecked] = useState<boolean>(false);
+  const [qrCodeImg, setQrCodeImg] = useState<string>("");
+  const [code, setCode] = useState<string>("");
+  const [status, setStatus] = useState<number>(buttonSteps.BUTTON);
+  const [validFormStatus, setValidFormStatus] = useState<number>(buttonSteps.BUTTON);
 
   useEffect(() => {
     setLocalPongUsername(pongUsername);
   }, [pongUsername]);
+  useEffect(() => {
+    if (status === buttonSteps.LOADING) {
+      const tmpCode:string = code;
+      setCode("");
+      api.turn_on_2fa(tmpCode).then((res: Response) => {
+        if (res.status === 401)
+          setStatus(buttonSteps.ERROR);
+        if (res.status === 201)
+          setStatus(buttonSteps.DONE);
+      });
+    }
+    api.get_2fa().then((res: Response) => {
+      res.json().then((content) => {
+        if (content === true){
+          setChecked(true);
+          setStatus(buttonSteps.DONE);
+        }
+        else if (status === buttonSteps.DONE) {
+          setChecked(false)
+          setStatus(buttonSteps.BUTTON);
+        }
+      });
+    });
+  }, [status]);
 
-  const handleSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
-    if (event === undefined) return; //not sure it may happen
-    event.preventDefault();
-    let should_update = false;
-    console.log(`should_update status is set to: ${should_update}`);
+  const handleSubmitForm = async () => {
+    let should_update:boolean = false;
 
     const fileData = new FormData();
     if (selectedFile) {
@@ -57,10 +88,20 @@ const SignUpPage: React.FC<SignUpProps> = ({
       });
     }
 
-    // Todo: set 2Factor through api.
-    console.log(`twoFactor status is set to: ${twoFactor}`);
-    if (should_update && updateCurrentUser) updateCurrentUser();
+    if (should_update && updateCurrentUser) {
+      setValidFormStatus(buttonSteps.DONE);
+      updateCurrentUser();
+    }
+    else {
+      setValidFormStatus(buttonSteps.ERROR);
+    }
   };
+  useEffect(() => {
+    if (validFormStatus === buttonSteps.LOADING) {
+      handleSubmitForm()
+      .catch(console.error)
+    }
+  }, [validFormStatus]);
 
   const handlePreviewPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -68,61 +109,123 @@ const SignUpPage: React.FC<SignUpProps> = ({
     const fileURL = URL.createObjectURL(file);
     setAvatar(fileURL);
     setSelectedFile(file);
+    setValidFormStatus(buttonSteps.BUTTON);
+  };
+  const submitDownloadForm = (apiCall: () => Promise<Response>) => {
+    apiCall()
+      .then((res: Response) => res.blob())
+      .then((myBlob: Blob) => {
+        setQrCodeImg(URL.createObjectURL(myBlob));
+      })
+      .catch((err: Error) => alert(`File Download Error ${err}`));
   };
 
+  const turnOffTwofa = () => {
+    if (status===buttonSteps.DONE) {
+      setStatus(buttonSteps.BUTTON);
+      api.turn_off_2fa().then((res: Response) => {
+        if(res.status == 200)
+          setChecked(false);
+      }) 
+    }
+  }
+  const handleChange = (nextChecked:boolean) => {
+    setChecked(nextChecked);
+    if (status===buttonSteps.DONE)
+      setChecked(false);
+    if (status===buttonSteps.ERROR)
+      setStatus(buttonSteps.BUTTON);
+    if (nextChecked) {
+      if (qrCodeImg === "")
+        submitDownloadForm(() => api.generate_2fa())
+    }
+  }
   return (
-    <div>
+    <div className="flex flex-col items-center bg-gray-900 gap-4 h-7/8 text-white">
       <div className="bg-gray-900">
         <ProfilePic avatar={avatar} setAvatar={setAvatar}></ProfilePic>
       </div>
-
-      <form
-        className="text-white bg-gray-900 h-screen flex flex-col"
-        onSubmit={handleSubmitForm}
-      >
-        <h1>Change your avatar</h1>
-        <input type="file" onChange={handlePreviewPhoto} />
-
-        <h1>Change your pongUsername</h1>
-        <input
-          type="text"
-          name="pongUsername"
-          value={localPongUsername}
-          onChange={(e) => setLocalPongUsername(e.target.value)}
-          placeholder={`name less than ${MAX_CHAR} letters`}
-          className="text-gray-900 placeholder:text-gray-400 placeholder:px-4 outline_none rounded-xl w-60"
-        />
-        {localPongUsername.length > MAX_CHAR ? (
-          <label className="text-yellow-400">
-            * Nickname can't be over {MAX_CHAR} characters
-          </label>
-        ) : (
-          ""
-        )}
-
-        <div className="flex flex-row">
-          <span>Activate Two-Factor Authentication</span>
-          <select
-            onChange={(e) => setTwoFactor(e.target.value)}
-            className="text-gray-800 mx-4"
-          >
-            <option value="on">On</option>
-            <option value="off">Off</option>
-          </select>
+        <div className="flex flex-col self-center items-center">
+          <h1>Change your avatar :</h1>
+          <input type="file" onChange={handlePreviewPhoto} />
         </div>
 
-        <button
-          type="submit"
-          className="w-fit bg-sky-500 hover:bg-sky-700 text-xl rounded-3xl p-4 shadow-md shadow-blue-500/50"
-        >
-          Submit
-        </button>
-      </form>
+        <div className="flex flex-col self-center items-center">
+          <h1>Change your pongUsername</h1>
+          <input
+            type="text"
+            name="pongUsername"
+            value={localPongUsername}
+            onChange={(e) => { setValidFormStatus(buttonSteps.BUTTON); setLocalPongUsername(e.target.value)}}
+            placeholder={`name less than ${MAX_CHAR} letters`}
+            className="bg-gray-600 placeholder:text-gray-400 placeholder:px-4 outline_none rounded-xl w-60 border-4 border-gray-600"
+          />
+          {localPongUsername.length > MAX_CHAR ? (
+            <label className="text-yellow-400">
+              * Nickname can't be over {MAX_CHAR} characters
+            </label>
+          ) : (
+            ""
+          )}
+        </div>
 
-      {/* Testing Zone - to delete later - don't forget to scroll down */}
-      {/* <div>
-        <PictureGetter />
-      </div> */}
+        <div className="flex flex-row gap-2">
+          <span>Enable Two-Factor Authentication : </span>
+          { status!==buttonSteps.DONE ?
+          <div>
+            <Menu menuButton={
+              <MenuButton><Switch
+                onChange={()=>{}}
+                checked={checked || status===buttonSteps.DONE}
+                className="react-switch"
+                onColor={(status!==buttonSteps.DONE ? "#bc391c" : "#0cb92a")}
+              /></MenuButton>
+              }
+              key={"top"}
+              position={"anchor"}
+              align={"end"}
+              direction={"top"}
+              arrow={true}
+              transition={{open:true, close:true}}
+              onMenuChange={(open) =>handleChange(open.open)}
+            >
+              <MenuItem
+                className="items-center"
+                disabled={true}>
+                <img
+                  className="self-center"
+                  src={qrCodeImg ? qrCodeImg : ""}
+                  alt="user picture"
+                  hidden={Boolean(qrCodeImg)}
+                />
+              </MenuItem>
+              <FocusableItem>
+                {({ ref }) => (
+                  <div className="flex flex-row gap-2">
+                    <input ref={ref} type="text" placeholder="Enter Code"
+                        value={code} onChange={e => {
+                          if (status===buttonSteps.ERROR)
+                            setStatus(buttonSteps.BUTTON);
+                          setCode(e.target.value)
+                        }} />
+                    <Button2fa status={status} setStatus={setStatus}/>
+                  </div>
+                )}
+              </FocusableItem>
+            </Menu>
+          </div>
+          :
+          <Switch
+            onChange={turnOffTwofa}
+            checked={checked}
+            className="react-switch transition"
+            onColor="#0cb92a"
+          />
+          }
+        </div>
+
+        <ButtonSubmit validFormStatus={validFormStatus} setValidFormStatus={setValidFormStatus}/>
+
     </div>
   );
 };
