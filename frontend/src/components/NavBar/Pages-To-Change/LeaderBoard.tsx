@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QRCodeImg } from "../../PictureForm/QRCodeImg";
 import { Api } from "../../../api/api";
+import { HexColorPicker } from "react-colorful";
+
 
 
 const api = new Api();
