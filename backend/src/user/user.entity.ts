@@ -15,7 +15,7 @@ import LocalFile from 'src/localFiles/localFile.entity';
 import Room from 'src/chat/room.entity';
 import Message from 'src/chat/message.entity';
 import { Blocked } from 'src/blocked/blocked.entity';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, Length } from 'class-validator';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -28,6 +28,7 @@ export class User extends BaseEntity {
 
   @Column({ nullable: false, unique: true })
   @IsNotEmpty({ message: 'pongUsername is mandatory' })
+  @Length(1, 15)
   pongUsername: string;
 
   @Column({ length: 128, unique: true })
