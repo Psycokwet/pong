@@ -98,8 +98,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
   };
   useEffect(() => {
     if (validFormStatus === buttonSteps.LOADING) {
-      const fun = handleSubmitForm;
-      fun()
+      handleSubmitForm()
       .catch(console.error)
     }
   }, [validFormStatus]);
@@ -124,7 +123,12 @@ const SignUpPage: React.FC<SignUpProps> = ({
   const turnOffTwofa = () => {
     if (status===buttonSteps.DONE) {
       setStatus(buttonSteps.BUTTON);
-      api.turn_off_2fa();
+      api.turn_off_2fa().then((res: Response) => {
+        console.log("turn_off_2fa", res);
+        res.json().then((content) => {
+          console.log("turn_off_2fa", content);
+        });
+      });
       setChecked(false);
     }
   }
