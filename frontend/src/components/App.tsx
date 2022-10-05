@@ -22,6 +22,7 @@ import {
   CurrentUserFrontInterface,
 } from "/shared/interfaces/CurrentUserFrontInterface";
 import { ConnectionStatus } from "/shared/enumerations/ConnectionStatus";
+import { GameColors } from "/shared/types/GameColors";
 import { isSameSimpleObj } from "/shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 import SignUpPage from "./SignUpPage/SignUpPage";
@@ -33,6 +34,13 @@ function App() {
   const [currentUser, setCurrentUser] = useState<CurrentUserFrontInterface>(
     createCurrentUserFrontInterface()
   );
+  const setColors = (setRightColor: (colors: GameColors) => GameColors) => {
+    setCurrentUser((current: CurrentUserFrontInterface) => {
+      let newCurrentUser = { ...current };
+      newCurrentUser.gameColors = setRightColor(newCurrentUser.gameColors);
+      return newCurrentUser;
+    });
+  };
   const updateCurrentUser = () => {
     api.refreshToken().then((res: Response) => {
       if (res.status != 200) {
@@ -107,13 +115,7 @@ function App() {
                   <Play
                     socket={socket}
                     colors={currentUser.gameColors}
-                    setColors={(newColors) => {
-                      setCurrentUser((current: CurrentUserFrontInterface) => {
-                        let newCurrentUser = { ...current };
-                        newCurrentUser.gameColors = newColors;
-                        return newCurrentUser;
-                      });
-                    }}
+                    setColors={setColors}
                   />
                 ),
               },
@@ -150,15 +152,7 @@ function App() {
                 <Play
                   socket={socket}
                   colors={currentUser.gameColors}
-                  setColors={(setRightColor) => {
-                    setCurrentUser((current: CurrentUserFrontInterface) => {
-                      let newCurrentUser = { ...current };
-                      newCurrentUser.gameColors = setRightColor(
-                        newCurrentUser.gameColors
-                      );
-                      return newCurrentUser;
-                    });
-                  }}
+                  setColors={setColors}
                 />
               }
             />
