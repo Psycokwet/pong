@@ -29,6 +29,7 @@ import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 import RoomId from 'shared/interfaces/JoinChannel';
 import MuteUser from 'shared/interfaces/MuteUser';
+import BanUser from 'shared/interfaces/BanUser';
 import { Status } from 'shared/interfaces/UserStatus';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
@@ -242,6 +243,9 @@ export class ChatGateway implements OnGatewayConnection {
       });
     }
 
+    const user = await this.userService.getById(payload.userId);
+    if (!user) throw new WsException('User not found');
+
     if (room.password !== '') {
       const isGoodPassword = await passwordCompare(
         data.inputPassword,
@@ -253,6 +257,17 @@ export class ChatGateway implements OnGatewayConnection {
             'A password has been set for this channel. Please enter the correct password.',
         });
     }
+
+    const isUserBanned = await this.chatService.getBannedUser(user, room);
+
+    if (isUserBanned) {
+      if (isUserBanned.unbanAt > Date.now()) {
+        throw new WsException(
+          `You have been banned from the channel ${room.roomName}`,
+        );
+      } else this.chatService.unbanUser(payload.userId, room.id);
+    }
+
     await this.chatService.attachMemberToChannel(payload.userId, room);
     await this.joinAttachedChannelLobby(client, payload);
     await this.joinRoom({ roomId: room.id }, client, payload);
@@ -415,8 +430,11 @@ export class ChatGateway implements OnGatewayConnection {
     const isUserMuted = await this.chatService.getMutedUser(sender, room);
 
     if (isUserMuted) {
-      if (isUserMuted.unmuteAt > Date.now()) return;
-      else this.chatService.unmuteUser(payload.userId, room.id);
+      if (isUserMuted.unmuteAt > Date.now()) {
+        throw new WsException(
+          `You have been muted from the channel ${room.roomName}`,
+        );
+      } else this.chatService.unmuteUser(payload.userId, room.id);
     }
 
     const author = await this.userService.getUserByIdWithMessages(
@@ -517,7 +535,6 @@ export class ChatGateway implements OnGatewayConnection {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
   async getUserPrivileges(
-    // unused ?
     @MessageBody() data: RoomId,
     @UserPayload() payload: any,
   ) {
@@ -539,11 +556,8 @@ export class ChatGateway implements OnGatewayConnection {
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.BAN_USER_REQUEST)
-  async banUser(
-    @MessageBody() data: ActionOnUser,
-    @UserPayload() payload: any,
-  ) {
-    const userToBan = await this.userService.getById(data.userIdToUpdate);
+  async banUser(@MessageBody() data: BanUser, @UserPayload() payload: any) {
+    const userToBan = await this.userService.getById(data.userIdToBan);
     if (!userToBan) throw new WsException('User does not exist');
 
     const room = await this.chatService.getRoomWithRelations(
@@ -563,23 +577,41 @@ export class ChatGateway implements OnGatewayConnection {
       throw new WsException('An owner cannot be banned');
 
     /** The person who wants to ban is not an owner (so he's an admin) and wants to ban
-     *  another user */
+     *  another admin */
     if (
       payload.userId !== room.owner.id &&
       room.admins.filter((admin) => admin.id === userToBan.id).length !== 0
     )
       throw new WsException('Another admin cannot be banned');
 
-    this.chatService.unattachMemberToChannel(userToBan.id, room);
+    await this.chatService.unattachMemberToChannel(userToBan.id, room);
 
-    const bannedSocketId = this.chatService.getUserIdWebsocket(userToBan.id);
+    const bannedSocketId = this.userService.getUserIdWebsocket(userToBan.id);
 
     if (bannedSocketId) {
       const bannedSocket = this.server.sockets.sockets.get(
         bannedSocketId.socketId,
       );
       this.disconnectFromChannel(room.id, bannedSocket);
+
+      /** Channel disappears from the banned user's attached channel list */
+      bannedSocket.emit(
+        ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
+        await this.chatService.getAllAttachedRooms(userToBan.id),
+      );
+
+      /** Banned users attached members list is reset */
+      bannedSocket.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION);
     }
+
+    this.server
+      .in(room.roomName)
+      .emit(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        await this.chatService.getAttachedUsersInChannel(room.id),
+      );
+
+    this.chatService.addBannedUser(userToBan, room, data.banTime);
   }
 
   @UseGuards(JwtWsGuard)

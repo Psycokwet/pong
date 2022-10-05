@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
 import { Muted } from './muted.entity';
+import { Banned } from './banned.entity';
 @Injectable()
 export class ChatService {
   constructor(
@@ -26,6 +27,8 @@ export class ChatService {
     private usersRepository: Repository<User>,
     @InjectRepository(Muted)
     private mutedRepository: Repository<Muted>,
+    @InjectRepository(Banned)
+    private bannedRepository: Repository<Banned>,
     private userService: UsersService,
   ) {}
   public static userWebsockets: UsersWebsockets[] = [];
@@ -147,6 +150,12 @@ export class ChatService {
   public async getMutedUser(sender: User, room: Room) {
     return await this.mutedRepository.findOne({
       where: { mutedUserId: sender.id, roomId: room.id },
+    });
+  }
+
+  public async getBannedUser(sender: User, room: Room) {
+    return await this.bannedRepository.findOne({
+      where: { bannedUserId: sender.id, roomId: room.id },
     });
   }
 
@@ -282,6 +291,23 @@ export class ChatService {
   async unmuteUser(userIdToUnmute: number, roomId: number) {
     return await Muted.delete({
       mutedUserId: userIdToUnmute,
+      roomId: roomId,
+    });
+  }
+
+  async addBannedUser(bannedUser: User, room: Room, banTime: number) {
+    const addBanned = Banned.create({
+      roomId: room.id,
+      bannedUserId: bannedUser.id,
+      unbanAt: Date.now() + banTime,
+    });
+
+    await addBanned.save();
+  }
+
+  async unbanUser(userIdToUnban: number, roomId: number) {
+    return await Banned.delete({
+      bannedUserId: userIdToUnban,
       roomId: roomId,
     });
   }
