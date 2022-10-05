@@ -29,7 +29,6 @@ import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 import RoomId from 'shared/interfaces/JoinChannel';
 import MuteUser from 'shared/interfaces/MuteUser';
-import { User } from 'src/user/user.entity';
 import { Status } from 'shared/interfaces/UserStatus';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
@@ -278,6 +277,14 @@ export class ChatGateway implements OnGatewayConnection {
       });
 
     await this.chatService.unattachMemberToChannel(payload.userId, room);
+
+    //Update public channel lobbies
+    this.server
+      .in(this.channelLobby)
+      .emit(
+        ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
+        await this.chatService.getAllPublicRooms(),
+      );
     if (room.members.length !== 0) {
       client.leave(room.roomName);
       this.server
