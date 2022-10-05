@@ -44,6 +44,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
         ...UsersService.userWebsockets,
         newWebsocket,
       ];
+      console.log(UsersService.userWebsockets);
       const newUserConnected: UserInterface = {
         id: user.id,
         pongUsername: user.pongUsername,
