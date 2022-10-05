@@ -7,6 +7,7 @@ import {
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -19,7 +20,7 @@ import { UsersService } from 'src/user/user.service';
 import { ROUTES_BASE } from 'shared/websocketRoutes/routes';
 import CreateChannel from '../../shared/interfaces/CreateChannel';
 import SearchChannel from '../../shared/interfaces/SearchChannel';
-import { UserInterface, Status } from 'shared/interfaces/UserInterface';
+import { UserInterface } from 'shared/interfaces/UserInterface';
 
 import * as bcrypt from 'bcrypt';
 import ChannelData from 'shared/interfaces/ChannelData';
@@ -28,6 +29,10 @@ import ActionOnUser from 'shared/interfaces/ActionOnUser';
 import UnattachFromChannel from 'shared/interfaces/UnattachFromChannel';
 import RoomId from 'shared/interfaces/JoinChannel';
 import MuteUser from 'shared/interfaces/MuteUser';
+import { User } from 'src/user/user.entity';
+import { Status } from 'shared/interfaces/UserStatus';
+import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
+import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -44,7 +49,7 @@ async function passwordCompare(
   transport: ['websocket'],
   cors: '*/*',
 })
-export class ChatGateway {
+export class ChatGateway implements OnGatewayConnection {
   private channelLobby = 'channelLobby';
   constructor(
     private readonly chatService: ChatService,
@@ -53,6 +58,18 @@ export class ChatGateway {
 
   @WebSocketServer()
   server: Server;
+
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    // try { // this code is for DM notifications
+    //   const user = await this.userService.getUserFromSocket(client);
+    //   const userDM: Room[] = await this.chatService.getAllDMRoomsRaw(user);
+    //   userDM.forEach((room) => {
+    //     client.join(room.roomName);
+    //   })
+    // } catch (e) {
+    //   console.error(e.message);
+    // }
+  }
 
   /* JOIN CHANNEL LOBBY */
   @UseGuards(JwtWsGuard)
@@ -90,12 +107,19 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    this.server
-      .in(client.id)
-      .emit(
-        ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS,
-        await this.chatService.getAllDMRooms(payload.userId),
-      );
+    client.emit(
+      ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS,
+      await this.chatService.getAllDMRooms(payload.userId),
+    );
+  }
+
+  @UseGuards(JwtWsGuard)
+  async forceJoinDMChannelLobby(
+    @ConnectedSocket() client: Socket,
+    userId: number,
+  ) {
+    const DMList = await this.chatService.getAllDMRooms(userId);
+    client.emit(ROUTES_BASE.CHAT.LIST_ALL_DM_CHANNELS, DMList);
   }
 
   /* CREATE ROOM */
@@ -107,7 +131,7 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     if (data.channelName === '') {
-      throw new BadRequestException({
+      throw new WsException({
         error: 'You must input a channel name',
       });
     }
@@ -117,7 +141,7 @@ export class ChatGateway {
       await this.chatService.getRoomByNameWithRelations(data.channelName);
 
     if (duplicateRoomCheck) {
-      throw new BadRequestException({
+      throw new WsException({
         error: 'Channel name is already taken',
       });
     }
@@ -165,10 +189,13 @@ export class ChatGateway {
     @UserPayload() payload: any,
     @ConnectedSocket() client: Socket,
   ) {
-    const newDMRoom = await this.chatService.saveDMRoom(
-      friendId,
-      payload.userId,
-    );
+    const receiver = await this.userService.getById(friendId);
+    if (!receiver) throw new WsException('User does not exist');
+
+    const sender = await this.userService.getById(payload.userId);
+    if (!sender) throw new WsException('User does not exist');
+
+    const newDMRoom = await this.chatService.saveDMRoom(receiver, sender);
 
     await client.join(newDMRoom.roomName);
 
@@ -184,15 +211,15 @@ export class ChatGateway {
       );
 
       await receiverSocket.join(newDMRoom.roomName);
+      this.forceJoinDMChannelLobby(receiverSocket, friendId);
     }
 
-    this.server
-      .in(newDMRoom.roomName)
-      .emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_CREATION, {
-        channelId: newDMRoom.id,
-        channelName: newDMRoom.channelName,
-      });
+    client.emit(ROUTES_BASE.CHAT.CONFIRM_DM_CHANNEL_CREATION, {
+      channelId: newDMRoom.id,
+      channelName: newDMRoom.channelName,
+    });
     this.joinDMChannelLobby(client, payload);
+    client.emit(ROUTES_BASE.CHAT.MESSAGE_HISTORY, []);
   }
 
   /* ATTACH USER TO CHANNEL */
@@ -211,7 +238,7 @@ export class ChatGateway {
       },
     );
     if (!room) {
-      throw new BadRequestException({
+      throw new WsException({
         error: 'You must specify which channel you want to join',
       });
     }
@@ -222,7 +249,7 @@ export class ChatGateway {
         room.password,
       );
       if (!isGoodPassword)
-        throw new UnauthorizedException({
+        throw new WsException({
           error:
             'A password has been set for this channel. Please enter the correct password.',
         });
@@ -240,7 +267,7 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
-    const room = await this.chatService.getRoomWithRelations(
+    let room = await this.chatService.getRoomWithRelations(
       { channelName },
       { admins: true, members: true, owner: true },
     );
@@ -255,6 +282,24 @@ export class ChatGateway {
     this.server
       .in(room.roomName)
       .emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION, payload.userId);
+    this.attachedUsersList(room.id);
+
+    const ownerWebsocket: UsersWebsockets = UsersService.userWebsockets.find(
+      (user) => user.userId === room.owner.id,
+    );
+    if (
+      ownerWebsocket &&
+      this.server.sockets.adapter.rooms
+        .get(room.roomName)
+        .has(ownerWebsocket.socketId)
+    ) {
+      // if owner is connected and is joined to this room
+      this.server.sockets.sockets
+        .get(ownerWebsocket.socketId)
+        .emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
+          privilege: Privileges.OWNER,
+        });
+    }
   }
 
   /* JOIN ROOM */
@@ -280,10 +325,6 @@ export class ChatGateway {
     const channelData: ChannelData = {
       channelId: room.id,
       channelName: room.channelName,
-      currentUserPrivileges: this.chatService.getUserPrivileges(
-        room,
-        payload.userId,
-      ),
     };
     client.emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, channelData);
 
@@ -295,6 +336,7 @@ export class ChatGateway {
           author: message.author.pongUsername,
           time: message.createdAt,
           content: message.content,
+          roomId: room.id,
         };
         return messageForFront;
       }),
@@ -306,6 +348,12 @@ export class ChatGateway {
         ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
         await this.chatService.getAttachedUsersInChannel(roomId),
       );
+
+    if (room.owner.id === payload.userId) {
+      client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
+        privilege: Privileges.OWNER,
+      });
+    }
   }
 
   /* DISCONNECT FROM CHANNEL */
@@ -362,6 +410,7 @@ export class ChatGateway {
     const author = await this.userService.getUserByIdWithMessages(
       payload.userId,
     );
+    if (!author) throw new WsException('Author does not exist');
 
     const newMessage = await this.chatService.saveMessage(
       data.message,
@@ -374,12 +423,14 @@ export class ChatGateway {
       author: newMessage.author.pongUsername,
       time: newMessage.createdAt,
       content: newMessage.content,
+      roomId: room.id,
     };
 
-    if (room)
+    if (room) {
       this.server
         .in(room.roomName)
         .emit(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, messageForFront);
+    }
   }
 
   /** SET / UNSET ADMIN */
@@ -390,21 +441,20 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     if (data.userIdToUpdate === payload.userId)
-      throw new BadRequestException('You cannot update yourself');
+      throw new WsException('You cannot update yourself');
 
     const newAdmin = await this.userService.getById(data.userIdToUpdate);
+    if (!newAdmin) throw new WsException('User does not exist');
 
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
       { owner: true, admins: true },
     );
 
-    if (!room) throw new BadRequestException('Channel does not exist');
+    if (!room) throw new WsException('Channel does not exist');
 
     if (room.owner.id !== payload.userId)
-      throw new ForbiddenException(
-        'You do not have the rights to set an admin',
-      );
+      throw new WsException('You do not have the rights to set an admin');
 
     this.chatService.setAdmin(room, newAdmin);
 
@@ -425,20 +475,19 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     if (data.userIdToUpdate === payload.userId)
-      throw new BadRequestException('You cannot update yourself');
+      throw new WsException('You cannot change your own privileges');
 
     const oldAdmin = await this.userService.getById(data.userIdToUpdate);
+    if (!oldAdmin) throw new WsException('User does not exist');
 
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
       { owner: true, admins: true },
     );
-    if (!room) throw new BadRequestException('Channel does not exist');
+    if (!room) throw new WsException('Channel does not exist');
 
     if (room.owner.id !== payload.userId)
-      throw new ForbiddenException(
-        'You do not have the rights to unset an admin',
-      );
+      throw new WsException('You do not have the rights to unset an admin');
 
     this.chatService.unsetAdmin(room, oldAdmin);
 
@@ -456,6 +505,7 @@ export class ChatGateway {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
   async getUserPrivileges(
+    // unused ?
     @MessageBody() data: RoomId,
     @UserPayload() payload: any,
   ) {
@@ -464,12 +514,9 @@ export class ChatGateway {
       { owner: true, admins: true, members: true },
     );
 
-    if (!room) throw new BadRequestException('Channel does not exist');
+    if (!room) throw new WsException('Channel does not exist');
 
-    const privilege = await this.chatService.getUserPrivileges(
-      room,
-      payload.userId,
-    );
+    const privilege = this.chatService.getUserPrivileges(room, payload.userId);
 
     this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
       privilege: privilege,
@@ -485,22 +532,23 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     const userToBan = await this.userService.getById(data.userIdToUpdate);
+    if (!userToBan) throw new WsException('User does not exist');
 
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
       { owner: true, admins: true, members: true },
     );
 
-    if (!room) throw new BadRequestException('Channel does not exist');
+    if (!room) throw new WsException('Channel does not exist');
 
     if (
       payload.userId !== room.owner.id &&
       room.admins.filter((admin) => payload.userId === admin.id).length === 0
     )
-      throw new ForbiddenException('You do not have the rights to ban a user');
+      throw new WsException('You do not have the rights to ban a user');
 
     if (userToBan.id === room.owner.id)
-      throw new ForbiddenException('An owner cannot be banned');
+      throw new WsException('An owner cannot be banned');
 
     /** The person who wants to ban is not an owner (so he's an admin) and wants to ban
      *  another user */
@@ -526,6 +574,7 @@ export class ChatGateway {
   @SubscribeMessage(ROUTES_BASE.CHAT.MUTE_USER_REQUEST)
   async muteUser(@MessageBody() data: MuteUser, @UserPayload() payload: any) {
     const userToMute = await this.userService.getById(data.userIdToMute);
+    if (!userToMute) throw new WsException('User does not exist');
 
     const room = await this.chatService.getRoomWithRelations(
       { channelName: data.channelName },
@@ -565,6 +614,8 @@ export class ChatGateway {
     @UserPayload() payload: any,
   ) {
     const caller = await this.userService.getById(payload.userId);
+    if (!caller) throw new WsException('User does not exist');
+
     const room = await this.chatService.getRoomWithRelations(
       { channelName: channelName },
       { owner: true },

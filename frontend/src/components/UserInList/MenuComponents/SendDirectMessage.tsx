@@ -18,8 +18,8 @@ const SendDirectMessage = ({
     socket?.emit(ROUTES_BASE.CHAT.CREATE_DM, user.id)
   }
   return (
-    <MenuItem>
-      <Link to="/chat" onClick={sendDirectMessage}>Send a Direct Message</Link>
+    <MenuItem onClick={sendDirectMessage}>
+      <Link to="/chat">Send a Direct Message</Link>
     </MenuItem>
   );
 }
