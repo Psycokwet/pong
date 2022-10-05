@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 // Components
 import APage from "./APage";
 
 // Icon
 import { FaComments } from "react-icons/fa";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaUserFriends } from "react-icons/fa";
 import { HiChartBar } from "react-icons/hi";
 import { RiPingPongFill } from "react-icons/ri";
 import { IoMdSettings } from "react-icons/io";
@@ -43,6 +43,11 @@ const NavBar: React.FC<NavBarProps> = ({ setDisconnected, pongUsername }) => {
       pageIcon: <FaUser size="26" />,
     },
     {
+      url: "/friendlist",
+      pageName: "friendlist",
+      pageIcon: <FaUserFriends size="26" />,
+    },
+    {
       url: "/settings",
       pageName: "settings",
       pageIcon: <IoMdSettings size="26" />,
@@ -60,13 +65,18 @@ const NavBar: React.FC<NavBarProps> = ({ setDisconnected, pongUsername }) => {
           </li>
           {NavBarPageList.map((onePage, i) => {
             return (
-              <li key={i} className="navbar-icon group">
+              <NavLink
+                to={onePage.url}
+                style={({ isActive }) => ({ color: isActive ? "green" : "white" })}
+                key={i} 
+                className="navbar-icon group"
+              >
                 <APage
                   url={onePage.url}
                   pageName={onePage.pageName}
                   pageIcon={onePage.pageIcon}
                 />
-              </li>
+              </NavLink>
             );
           })}
           <li className="navbar-icon group">
