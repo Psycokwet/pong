@@ -248,7 +248,22 @@ export class ChatService {
   async unattachMemberToChannel(userId: number, room: Room) {
     room.members = room.members.filter((member: User) => member.id !== userId);
 
-    await room.save();
+    room.admins = room.admins.filter(
+      (admin: User) => admin.id !== userId,
+    );
+
+    if (room.owner.id === userId) {
+      let newOwner: User = room.admins.length ?
+        room.admins.find(admin => admin.id !== userId):
+        undefined;
+      if (!newOwner) newOwner = room.members.length ?
+          room.members.find(member => member.id !== userId):
+          undefined;
+      if (newOwner) 
+        room.owner = newOwner;
+    }
+
+    return await room.save();
   }
 
   async addMutedUser(mutedUser: User, room: Room, muteTime: number) {
@@ -320,7 +335,7 @@ export class ChatService {
   async getAttachedUsersInChannel(roomId: number) {
     const room = await this.getRoomWithRelations(
       { id: roomId },
-      { members: true },
+      { members: true, owner: true, admins: true },
     );
 
     if (!room) {
@@ -331,6 +346,7 @@ export class ChatService {
       id: member.id,
       pongUsername: member.pongUsername,
       status: this.userService.getStatus(member),
+      privileges: this.getUserPrivileges(room, member.id),
     }));
 
     return userInterfaceMembers;
