@@ -7,16 +7,16 @@ import { MenuSettingsType } from "../MenuSettings";
 
 const Ban = ({
   menuSettings,
-  userOwnership
+  userPrivilege
 }:{
   menuSettings:MenuSettingsType;
-  userOwnership:number;
+  userPrivilege:number;
 })=>{
   const ban = () => {
   }
   return (
     <MenuItem className={ menuSettings.privileges === Privileges.MEMBER ? "hidden" : "" }
-      disabled={ userOwnership >= menuSettings.privileges }
+      disabled={ userPrivilege >= menuSettings.privileges }
     >
       <div onClick={ban}>Ban from Channel</div>
     </MenuItem>

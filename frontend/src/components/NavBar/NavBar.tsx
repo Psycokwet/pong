@@ -7,7 +7,7 @@ import APage from "./APage";
 
 // Icon
 import { FaComments } from "react-icons/fa";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaUserFriends } from "react-icons/fa";
 import { HiChartBar } from "react-icons/hi";
 import { RiPingPongFill } from "react-icons/ri";
 import { IoMdSettings } from "react-icons/io";
@@ -41,6 +41,11 @@ const NavBar: React.FC<NavBarProps> = ({ setDisconnected, pongUsername }) => {
       url: `/profile/${pongUsername}`,
       pageName: `profile ${pongUsername}`,
       pageIcon: <FaUser size="26" />,
+    },
+    {
+      url: "/friendlist",
+      pageName: "friendlist",
+      pageIcon: <FaUserFriends size="26" />,
     },
     {
       url: "/settings",

@@ -53,21 +53,11 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
   }, []);
 
   return (
-    <div className="absolute top-[120px] right-0 text-white bg-gray-800 rounded-b-md">
-      <div
-        className="p-2 flex flex-row-reverse items-center text-2xl font-bold"
-        onClick={() => setActive(!active)}
-      >
-        <BiChevronDown size={20} className={`${active && "rotate-180"}`} />
-        <span className="px-4">Friend List</span>
-      </div>
+    <div className="h-7/8 text-white bg-gray-900 rounded-b-md">
+      <h1 className="text-4xl font-bold self-center">Friend List</h1>
 
       {/************************* Dropdown Menu **************************/}
-      <div
-        className={
-          active ? "bg-gray-700 mt-2 max-h-60 overflow-y-auto" : "hidden"
-        }
-      >
+      <div className="bg-gray-700 mt-2 max-h-60 overflow-y-auto">
         <DropDownFriendList socket={socket} userFriendList={userFriendList} />
       </div>
     </div>
