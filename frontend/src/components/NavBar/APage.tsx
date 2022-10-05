@@ -10,17 +10,14 @@ type Props = {
 const APage: React.FC<Props> = ({ url, pageName, pageIcon }) => {
   return (
     <>
-      <NavLink
-        to={url}
-        style={({ isActive }) => ({ color: isActive ? "green" : "white" })}
-      >
+      <div>
         <>
           {pageIcon}
           <span className="navbar-page-name group-hover:scale-100">
             {pageName}
           </span>
         </>
-      </NavLink>
+      </div>
     </>
   );
 };
