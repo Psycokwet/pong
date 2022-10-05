@@ -14,6 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
 import { Muted } from './muted.entity';
+import { Banned } from './banned.entity';
 @Injectable()
 export class ChatService {
   constructor(
@@ -26,6 +27,8 @@ export class ChatService {
     private usersRepository: Repository<User>,
     @InjectRepository(Muted)
     private mutedRepository: Repository<Muted>,
+    @InjectRepository(Banned)
+    private bannedRepository: Repository<Banned>,
     private userService: UsersService,
   ) {}
   public static userWebsockets: UsersWebsockets[] = [];
@@ -77,30 +80,28 @@ export class ChatService {
   }
 
   public async getAllDMRoomsRaw(user: User): Promise<Room[]> {
-    return await this.roomsRepository
-      .find({
-        where: {
-          members: {
-            id: user.id,
-          },
-          isDM: true,
+    return await this.roomsRepository.find({
+      where: {
+        members: {
+          id: user.id,
         },
-      });
+        isDM: true,
+      },
+    });
   }
 
   public async getAllDMRooms(userId: number) {
     const user = await this.userService.getById(userId);
     if (!user) throw new WsException('User does not exist');
 
-    const rooms: Room[] = await this.roomsRepository
-      .find({
-        where: {
-          members: {
-            id: userId,
-          },
-          isDM: true,
+    const rooms: Room[] = await this.roomsRepository.find({
+      where: {
+        members: {
+          id: userId,
         },
-      });
+        isDM: true,
+      },
+    });
 
     const result: ChannelData[] = [];
     for (let i = 0; i < rooms.length; i++) {
@@ -108,16 +109,16 @@ export class ChatService {
         relations: {
           members: true,
         },
-        where: { id: rooms[i].id }
-      })
+        where: { id: rooms[i].id },
+      });
       result[i] = {
         channelId: room.id,
-        channelName: room.members.filter((user) => user.id !== userId)[0].pongUsername,
-      }
+        channelName: room.members.filter((user) => user.id !== userId)[0]
+          .pongUsername,
+      };
     }
     return result;
   }
-
 
   public async getRoomById(id: number) {
     return this.roomsRepository.findOneBy({ id });
@@ -149,6 +150,12 @@ export class ChatService {
   public async getMutedUser(sender: User, room: Room) {
     return await this.mutedRepository.findOne({
       where: { mutedUserId: sender.id, roomId: room.id },
+    });
+  }
+
+  public async getBannedUser(sender: User, room: Room) {
+    return await this.bannedRepository.findOne({
+      where: { bannedUserId: sender.id, roomId: room.id },
     });
   }
 
@@ -248,19 +255,17 @@ export class ChatService {
   async unattachMemberToChannel(userId: number, room: Room) {
     room.members = room.members.filter((member: User) => member.id !== userId);
 
-    room.admins = room.admins.filter(
-      (admin: User) => admin.id !== userId,
-    );
+    room.admins = room.admins.filter((admin: User) => admin.id !== userId);
 
     if (room.owner.id === userId) {
-      let newOwner: User = room.admins.length ?
-        room.admins.find(admin => admin.id !== userId):
-        undefined;
-      if (!newOwner) newOwner = room.members.length ?
-          room.members.find(member => member.id !== userId):
-          undefined;
-      if (newOwner) 
-        room.owner = newOwner;
+      let newOwner: User = room.admins.length
+        ? room.admins.find((admin) => admin.id !== userId)
+        : undefined;
+      if (!newOwner)
+        newOwner = room.members.length
+          ? room.members.find((member) => member.id !== userId)
+          : undefined;
+      if (newOwner) room.owner = newOwner;
     }
 
     return await room.save();
@@ -279,6 +284,23 @@ export class ChatService {
   async unmuteUser(userIdToUnmute: number, roomId: number) {
     return await Muted.delete({
       mutedUserId: userIdToUnmute,
+      roomId: roomId,
+    });
+  }
+
+  async addBannedUser(bannedUser: User, room: Room, banTime: number) {
+    const addBanned = Banned.create({
+      roomId: room.id,
+      bannedUserId: bannedUser.id,
+      unbanAt: Date.now() + banTime,
+    });
+
+    await addBanned.save();
+  }
+
+  async unbanUser(userIdToUnban: number, roomId: number) {
+    return await Banned.delete({
+      bannedUserId: userIdToUnban,
       roomId: roomId,
     });
   }

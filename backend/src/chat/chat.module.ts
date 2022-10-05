@@ -10,10 +10,11 @@ import { UsersModule } from 'src/user/user.module';
 import { User } from 'src/user/user.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { Muted } from './muted.entity';
+import { Banned } from './banned.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Room, Message, Muted]),
+    TypeOrmModule.forFeature([User, Room, Message, Muted, Banned]),
     AuthModule,
     JwtModule,
     UsersModule,
