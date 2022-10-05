@@ -308,7 +308,7 @@ export class ChatGateway implements OnGatewayConnection {
           ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
           payload.userId,
         );
-      this.attachedUsersList(room.id);
+      this.attachedUsersList(room.id, client);
 
       const ownerWebsocket: UsersWebsockets = UsersService.userWebsockets.find(
         (user) => user.userId === room.owner.id,
@@ -369,12 +369,12 @@ export class ChatGateway implements OnGatewayConnection {
       }),
     );
 
-    this.server
-      .in(room.roomName)
-      .emit(
-        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        await this.chatService.getAttachedUsersInChannel(roomId),
-      );
+    // this.server
+    //   .in(room.roomName)
+    client.emit(
+      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+      await this.chatService.getAttachedUsersInChannel(roomId),
+    );
 
     if (room.owner.id === payload.userId) {
       client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
@@ -401,15 +401,18 @@ export class ChatGateway implements OnGatewayConnection {
   /** GET ATTACHED USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
-  async attachedUsersList(@MessageBody() roomId: number) {
+  async attachedUsersList(
+    @MessageBody() roomId: number,
+    @ConnectedSocket() client: Socket,
+  ) {
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
 
-    this.server
-      .in(room.roomName)
-      .emit(
-        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        await this.chatService.getAttachedUsersInChannel(roomId),
-      );
+    // this.server
+    //   .in(room.roomName)
+    client.emit(
+      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+      await this.chatService.getAttachedUsersInChannel(roomId),
+    );
   }
 
   /*MESSAGE LISTENER */
@@ -556,7 +559,11 @@ export class ChatGateway implements OnGatewayConnection {
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.BAN_USER_REQUEST)
-  async banUser(@MessageBody() data: BanUser, @UserPayload() payload: any) {
+  async banUser(
+    @MessageBody() data: BanUser,
+    @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
+  ) {
     const userToBan = await this.userService.getById(data.userIdToBan);
     if (!userToBan) throw new WsException('User does not exist');
 
@@ -604,12 +611,10 @@ export class ChatGateway implements OnGatewayConnection {
       bannedSocket.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION);
     }
 
-    this.server
-      .in(room.roomName)
-      .emit(
-        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        await this.chatService.getAttachedUsersInChannel(room.id),
-      );
+    client.emit(
+      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+      await this.chatService.getAttachedUsersInChannel(room.id),
+    );
 
     this.chatService.addBannedUser(userToBan, room, data.banTime);
   }
