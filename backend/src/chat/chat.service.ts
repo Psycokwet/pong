@@ -261,8 +261,6 @@ export class ChatService {
         const isNewOwnerAdmin = room.admins.find(
           (admin) => room.owner.id === admin.id,
         );
-        console.log('ownerId', room.owner.id);
-        console.log(isNewOwnerAdmin);
         if (!isNewOwnerAdmin) room.admins = [...room.admins, newOwner];
       }
     }
