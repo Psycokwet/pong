@@ -23,9 +23,11 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
       socket?.off(ROUTES_BASE.USER.FRIEND_LIST_CONFIRMATION, resetFriendList);
     };
   }, []);
-  const appendFriendList = (newUser: UserInterface) => {
-    setUserFriendList((current) => [...current, newUser]);
-  };
+
+  const appendFriendList = (newUser:UserInterface) => {
+    setUserFriendList((current: UserInterface[]) => [...current, newUser]);
+  }
+
   useEffect(() => {
     socket?.on(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, appendFriendList);
     return () => {
@@ -33,21 +35,16 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
     };
   }, []);
 
-  const userStatusChange = (user: UserInterface) => {
-    setUserFriendList((current) => {
-      const old: UserInterface = current.find((val) => val === user);
-      if (old) {
-        return [
-          ...current.filter((value) => {
-            value.pongUsername !== old.pongUsername;
-          }),
-          old,
-        ];
-      } else {
-        return current;
-      }
-    });
-  };
+  const userStatusChange = (newUserData: UserInterface) => {
+    const alreadyExistUser:UserInterface = userFriendList.find(
+      (user: UserInterface) => user.id === newUserData.id
+    );
+    if (alreadyExistUser)
+      setUserFriendList((current: UserInterface[]) => [
+        ...current.filter((user: UserInterface) => user.id !== alreadyExistUser.id),
+        newUserData
+      ])
+  }
   useEffect(() => {
     socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, userStatusChange);
     return () => {
@@ -56,21 +53,11 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
   }, []);
 
   return (
-    <div className="absolute top-[120px] right-0 text-white bg-gray-800 rounded-b-md">
-      <div
-        className="p-2 flex flex-row-reverse items-center text-2xl font-bold"
-        onClick={() => setActive(!active)}
-      >
-        <BiChevronDown size={20} className={`${active && "rotate-180"}`} />
-        <span className="px-4">Friend List</span>
-      </div>
+    <div className="h-7/8 text-white bg-gray-900 rounded-b-md">
+      <h1 className="text-4xl font-bold self-center">Friend List</h1>
 
       {/************************* Dropdown Menu **************************/}
-      <div
-        className={
-          active ? "bg-gray-700 mt-2 max-h-60 overflow-y-auto" : "hidden"
-        }
-      >
+      <div className="bg-gray-700 mt-2 max-h-60 overflow-y-auto">
         <DropDownFriendList socket={socket} userFriendList={userFriendList} />
       </div>
     </div>

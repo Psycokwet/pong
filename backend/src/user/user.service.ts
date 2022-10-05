@@ -22,11 +22,12 @@ import { AuthService, TokenPayload } from 'src/auth/auth.service';
 import { parse } from 'cookie';
 import { WsException } from '@nestjs/websockets';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
-import { Status, UserInterface } from 'shared/interfaces/UserInterface';
+import { UserInterface } from 'shared/interfaces/UserInterface';
 import { v4 as uuidv4 } from 'uuid';
 import UserProfile from 'shared/interfaces/UserProfile';
 import { Blocked } from 'src/blocked/blocked.entity';
 import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
+import { Status } from 'shared/interfaces/UserStatus';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -249,14 +250,6 @@ export class UsersService {
   }
 
   async addFriend(friend: User, caller: User) {
-    /* Checking if the caller is adding himself (I think this should never 
-      happen on the front side) */
-    if (caller.id === friend.id) {
-      throw new BadRequestException({
-        error: 'You cannot add yourself',
-      });
-    }
-
     /* Then we check if the person the caller wants to add as a friend is already
     in our friend list and throw a 400 if they are */
     const doubleAddCheck = await this.friendRepository.findOne({
@@ -326,18 +319,15 @@ export class UsersService {
     });
   }
 
-  async getPongUsername(login42: string) {
-    const user = await this.findOne(login42);
+  async getPongUsername(user: User) {
     return { pongUsername: user.pongUsername };
   }
 
-  async getLogin42(login42: string) {
-    const user = await this.findOne(login42);
+  async getLogin42(user: User) {
     return { login42: user.login42 };
   }
 
-  async setPongUsername(dto: pongUsernameDto, login42: string) {
-    const user = await this.findOne(login42);
+  async setPongUsername(dto: pongUsernameDto, user: User) {
     /* We use TypeORM's update function to update our entity */
     try {
       await this.usersRepository.update(user.id, {
@@ -349,9 +339,9 @@ export class UsersService {
     }
   }
 
-  async getPicture(dto: User) {
+  async getPicture(login42: string) {
     const user = await this.usersRepository.findOne({
-      where: { login42: dto.login42 },
+      where: { login42: login42 },
       relations: { picture: true },
     });
 
@@ -366,7 +356,7 @@ export class UsersService {
   async setPicture(user: User, fileData: LocalFileDto) {
     // delete old file
     try {
-      const old_file_path = await this.getPicture(user);
+      const old_file_path = await this.getPicture(user.login42);
       this.localFilesService.delete_file(old_file_path);
     } catch (e) {
       this.logger.error('No existing picture file');
