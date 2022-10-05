@@ -291,28 +291,41 @@ export class ChatGateway implements OnGatewayConnection {
         message: 'You must specify which channel you want to leave',
       });
 
-    room = await this.chatService.unattachMemberToChannel(payload.userId, room);
-    client.leave(room.roomName);
-    this.server
-      .in(room.roomName)
-      .emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION, payload.userId);
-    this.attachedUsersList(room.id);
+    await this.chatService.unattachMemberToChannel(payload.userId, room);
 
-    const ownerWebsocket: UsersWebsockets = UsersService.userWebsockets.find(
-      (user) => user.userId === room.owner.id,
-    );
-    if (
-      ownerWebsocket &&
-      this.server.sockets.adapter.rooms
-        .get(room.roomName)
-        .has(ownerWebsocket.socketId)
-    ) {
-      // if owner is connected and is joined to this room
-      this.server.sockets.sockets
-        .get(ownerWebsocket.socketId)
-        .emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
-          privilege: Privileges.OWNER,
-        });
+    //Update public channel lobbies
+    this.server
+      .in(this.channelLobby)
+      .emit(
+        ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
+        await this.chatService.getAllPublicRooms(),
+      );
+    if (room.members.length !== 0) {
+      client.leave(room.roomName);
+      this.server
+        .in(room.roomName)
+        .emit(
+          ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
+          payload.userId,
+        );
+      this.attachedUsersList(room.id);
+
+      const ownerWebsocket: UsersWebsockets = UsersService.userWebsockets.find(
+        (user) => user.userId === room.owner.id,
+      );
+      if (
+        ownerWebsocket &&
+        this.server.sockets.adapter.rooms
+          .get(room.roomName)
+          .has(ownerWebsocket.socketId)
+      ) {
+        // if owner is connected and is joined to this room
+        this.server.sockets.sockets
+          .get(ownerWebsocket.socketId)
+          .emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
+            privilege: Privileges.OWNER,
+          });
+      }
     }
   }
 

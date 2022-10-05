@@ -265,10 +265,17 @@ export class ChatService {
         newOwner = room.members.length
           ? room.members.find((member) => member.id !== userId)
           : undefined;
-      if (newOwner) room.owner = newOwner;
+      if (newOwner) {
+        room.owner = newOwner;
+        const isNewOwnerAdmin = room.admins.find(
+          (admin) => room.owner.id === admin.id,
+        );
+        if (!isNewOwnerAdmin) room.admins = [...room.admins, newOwner];
+      }
     }
 
-    return await room.save();
+    if (room.members.length === 0) await room.remove();
+    else await room.save();
   }
 
   async addMutedUser(mutedUser: User, room: Room, muteTime: number) {
