@@ -8,19 +8,8 @@ import ButtonSubmit from "./ButtonSubmit";
 import Switch from "react-switch";
 import { MenuItem, Menu, MenuButton, FocusableItem } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
+import buttonSteps from "./ButtonSteps"
 
-const enum twoFactorSteps {
-  BUTTON,
-  LOADING,
-  DONE,
-  ERROR,
-}
-const enum validForm {
-  BUTTON,
-  LOADING,
-  DONE,
-  ERROR,
-}
 const MAX_CHAR = 15;
 
 export type SignUpProps = {
@@ -38,32 +27,32 @@ const SignUpPage: React.FC<SignUpProps> = ({
   const [checked, setChecked] = useState<boolean>(false);
   const [qrCodeImg, setQrCodeImg] = useState<string>("");
   const [code, setCode] = useState<string>("");
-  const [status, setStatus] = useState<number>(twoFactorSteps.BUTTON);
-  const [validFormStatus, setValidFormStatus] = useState<number>(validForm.BUTTON);
+  const [status, setStatus] = useState<number>(buttonSteps.BUTTON);
+  const [validFormStatus, setValidFormStatus] = useState<number>(buttonSteps.BUTTON);
 
   useEffect(() => {
     setLocalPongUsername(pongUsername);
   }, [pongUsername]);
   useEffect(() => {
-    if (status === twoFactorSteps.LOADING) {
+    if (status === buttonSteps.LOADING) {
       const tmpCode:string = code;
       setCode("");
       api.turn_on_2fa(tmpCode).then((res: Response) => {
         if (res.status === 401)
-          setStatus(twoFactorSteps.ERROR);
+          setStatus(buttonSteps.ERROR);
         if (res.status === 201)
-          setStatus(twoFactorSteps.DONE);
+          setStatus(buttonSteps.DONE);
       });
     }
     api.get_2fa().then((res: Response) => {
       res.json().then((content) => {
         if (content === true){
           setChecked(true);
-          setStatus(twoFactorSteps.DONE);
+          setStatus(buttonSteps.DONE);
         }
-        else if (status === twoFactorSteps.DONE) {
+        else if (status === buttonSteps.DONE) {
           setChecked(false)
-          setStatus(twoFactorSteps.BUTTON);
+          setStatus(buttonSteps.BUTTON);
         }
       });
     });
@@ -100,15 +89,15 @@ const SignUpPage: React.FC<SignUpProps> = ({
     }
 
     if (should_update && updateCurrentUser) {
-      setValidFormStatus(validForm.DONE);
+      setValidFormStatus(buttonSteps.DONE);
       updateCurrentUser();
     }
     else {
-      setValidFormStatus(validForm.ERROR);
+      setValidFormStatus(buttonSteps.ERROR);
     }
   };
   useEffect(() => {
-    if (validFormStatus === validForm.LOADING) {
+    if (validFormStatus === buttonSteps.LOADING) {
       const fun = handleSubmitForm;
       fun()
       .catch(console.error)
@@ -121,7 +110,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
     const fileURL = URL.createObjectURL(file);
     setAvatar(fileURL);
     setSelectedFile(file);
-    setValidFormStatus(validForm.BUTTON);
+    setValidFormStatus(buttonSteps.BUTTON);
   };
   const submitDownloadForm = (apiCall: () => Promise<Response>) => {
     apiCall()
@@ -133,18 +122,18 @@ const SignUpPage: React.FC<SignUpProps> = ({
   };
 
   const turnOffTwofa = () => {
-    if (status===twoFactorSteps.DONE) {
-      setStatus(twoFactorSteps.BUTTON);
+    if (status===buttonSteps.DONE) {
+      setStatus(buttonSteps.BUTTON);
       api.turn_off_2fa();
       setChecked(false);
     }
   }
   const handleChange = (nextChecked:boolean) => {
     setChecked(nextChecked);
-    if (status===twoFactorSteps.DONE)
+    if (status===buttonSteps.DONE)
       setChecked(false);
-    if (status===twoFactorSteps.ERROR)
-      setStatus(twoFactorSteps.BUTTON);
+    if (status===buttonSteps.ERROR)
+      setStatus(buttonSteps.BUTTON);
     if (nextChecked) {
       if (qrCodeImg === "")
         submitDownloadForm(() => api.generate_2fa())
@@ -166,7 +155,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
             type="text"
             name="pongUsername"
             value={localPongUsername}
-            onChange={(e) => { setValidFormStatus(validForm.BUTTON); setLocalPongUsername(e.target.value)}}
+            onChange={(e) => { setValidFormStatus(buttonSteps.BUTTON); setLocalPongUsername(e.target.value)}}
             placeholder={`name less than ${MAX_CHAR} letters`}
             className="bg-gray-600 placeholder:text-gray-400 placeholder:px-4 outline_none rounded-xl w-60 border-4 border-gray-600"
           />
@@ -181,14 +170,14 @@ const SignUpPage: React.FC<SignUpProps> = ({
 
         <div className="flex flex-row gap-2">
           <span>Enable Two-Factor Authentication : </span>
-          { status!==twoFactorSteps.DONE ?
+          { status!==buttonSteps.DONE ?
           <div>
             <Menu menuButton={
               <MenuButton><Switch
                 onChange={()=>{}}
-                checked={checked || status===twoFactorSteps.DONE}
+                checked={checked || status===buttonSteps.DONE}
                 className="react-switch"
-                onColor={(status!==twoFactorSteps.DONE ? "#bc391c" : "#0cb92a")}
+                onColor={(status!==buttonSteps.DONE ? "#bc391c" : "#0cb92a")}
               /></MenuButton>
               }
               key={"top"}
@@ -214,8 +203,8 @@ const SignUpPage: React.FC<SignUpProps> = ({
                   <div className="flex flex-row gap-2">
                     <input ref={ref} type="text" placeholder="Enter Code"
                         value={code} onChange={e => {
-                          if (status===twoFactorSteps.ERROR)
-                            setStatus(twoFactorSteps.BUTTON);
+                          if (status===buttonSteps.ERROR)
+                            setStatus(buttonSteps.BUTTON);
                           setCode(e.target.value)
                         }} />
                     <Button2fa status={status} setStatus={setStatus}/>
