@@ -3,7 +3,8 @@ import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import UserListByStatus from "./UserListByStatus";
 import { Socket } from "socket.io-client";
-import { UserInterface, Status } from "/shared/interfaces/UserInterface";
+import { UserInterface } from "/shared/interfaces/UserInterface";
+import { Status } from "/shared/interfaces/UserStatus";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 import { statusList } from "../Common/StatusList"
 

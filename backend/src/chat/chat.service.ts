@@ -33,7 +33,10 @@ export class ChatService {
   public async getAllPublicRooms(): Promise<ChannelData[]> {
     return this.roomsRepository
       .find({
-        where: { isChannelPrivate: false },
+        where: {
+          isChannelPrivate: false,
+          isDM: false,
+        },
       })
       .then((rooms) =>
         rooms.map((room) => {
@@ -48,6 +51,7 @@ export class ChatService {
 
   public async getAllAttachedRooms(userId: number) {
     const user = await this.userService.getById(userId);
+    if (!user) throw new WsException('User does not exist');
 
     const attachedRoomList = await this.roomsRepository
       .find({
@@ -58,6 +62,7 @@ export class ChatService {
           members: {
             id: user.id,
           },
+          isDM: false,
         },
       })
       .then((rooms) =>
@@ -71,29 +76,45 @@ export class ChatService {
     return attachedRoomList;
   }
 
+  public async getAllDMRoomsRaw(user: User): Promise<Room[]> {
+    return await this.roomsRepository.find({
+      where: {
+        members: {
+          id: user.id,
+        },
+        isDM: true,
+      },
+    });
+  }
+
   public async getAllDMRooms(userId: number) {
     const user = await this.userService.getById(userId);
+    if (!user) throw new WsException('User does not exist');
 
-    return this.roomsRepository
-      .find({
+    const rooms: Room[] = await this.roomsRepository.find({
+      where: {
+        members: {
+          id: userId,
+        },
+        isDM: true,
+      },
+    });
+
+    const result: ChannelData[] = [];
+    for (let i = 0; i < rooms.length; i++) {
+      const room = await this.roomsRepository.findOne({
         relations: {
           members: true,
         },
-        where: {
-          members: {
-            id: user.id,
-          },
-          isDM: true,
-        },
-      })
-      .then((rooms) =>
-        rooms.map((room) => {
-          return {
-            id: room.id,
-            targetName: room.members.find((target) => target.id !== user.id),
-          };
-        }),
-      );
+        where: { id: rooms[i].id },
+      });
+      result[i] = {
+        channelId: room.id,
+        channelName: room.members.filter((user) => user.id !== userId)[0]
+          .pongUsername,
+      };
+    }
+    return result;
   }
 
   public async getRoomById(id: number) {
@@ -141,8 +162,9 @@ export class ChatService {
     password: string;
   }) {
     const user = await this.userService.getById(userId);
+    if (!user) throw new WsException('User does not exist');
 
-    const newRoom = await Room.create({
+    const newRoom = Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: roomName,
       password: password,
@@ -157,22 +179,21 @@ export class ChatService {
     return newRoom;
   }
 
-  async saveDMRoom(receiverId: number, senderId: number) {
-    if (receiverId === senderId) {
-      throw new BadRequestException({
+  async saveDMRoom(receiver: User, sender: User) {
+    if (receiver.id === sender.id) {
+      throw new WsException({
         error: "You're trying to send a DM to yourself",
       });
     }
-    const receiver = await this.userService.getById(receiverId);
-    const sender = await this.userService.getById(senderId);
+
     const roomName = 'DM_' + uuidv4();
 
     /** Making sure a DM channel between the receiver and the sender does not already exist, throws
      * a Bad Request if there is
      */
-    await this.doesDMChannelExist(receiverId, senderId);
+    await this.doesDMChannelExist(receiver.id, sender.id);
 
-    const newRoom = await Room.create({
+    const newRoom = Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
       channelName: uuidv4(),
       isDM: true,
@@ -194,7 +215,7 @@ export class ChatService {
       },
     });
 
-    const DMExists = await senderDMs.filter((room) => {
+    const DMExists = senderDMs.filter((room) => {
       return (
         room.members.find((user) => user.id === receiverId) &&
         room.members.find((user) => user.id === senderId)
@@ -202,7 +223,7 @@ export class ChatService {
     });
 
     if (DMExists.length !== 0) {
-      throw new BadRequestException({
+      throw new WsException({
         error: 'DM already exists',
       });
     }
@@ -210,6 +231,7 @@ export class ChatService {
 
   async attachMemberToChannel(userId: number, room: Room) {
     const newMember = await this.userService.getById(userId);
+    if (!newMember) throw new WsException('User does not exist');
 
     if (
       !room.members.filter(
@@ -224,8 +246,22 @@ export class ChatService {
   async unattachMemberToChannel(userId: number, room: Room) {
     room.members = room.members.filter((member: User) => member.id !== userId);
 
+    room.admins = room.admins.filter((admin: User) => admin.id !== userId);
+
+    if (room.owner.id === userId) {
+      let newOwner: User = room.admins.length
+        ? room.admins.find((admin) => admin.id !== userId)
+        : undefined;
+      if (!newOwner)
+        newOwner = room.members.length
+          ? room.members.find((member) => member.id !== userId)
+          : undefined;
+      if (newOwner) room.owner = newOwner;
+    }
+
     if (room.members.length === 0) await room.remove();
     else await room.save();
+    //return await room.save();
   }
 
   async addMutedUser(mutedUser: User, room: Room, muteTime: number) {
@@ -246,7 +282,7 @@ export class ChatService {
   }
 
   async saveMessage(content: string, author: User, channel: Room) {
-    const newMessage = await this.messagesRepository.create({
+    const newMessage = this.messagesRepository.create({
       content: content,
       author: author,
       room: channel,
@@ -297,17 +333,18 @@ export class ChatService {
   async getAttachedUsersInChannel(roomId: number) {
     const room = await this.getRoomWithRelations(
       { id: roomId },
-      { members: true },
+      { members: true, owner: true, admins: true },
     );
 
     if (!room) {
-      throw new BadRequestException('Channel does not exist');
+      throw new WsException('Channel does not exist');
     }
 
     const userInterfaceMembers = room.members.map((member) => ({
       id: member.id,
       pongUsername: member.pongUsername,
       status: this.userService.getStatus(member),
+      privileges: this.getUserPrivileges(room, member.id),
     }));
 
     return userInterfaceMembers;
