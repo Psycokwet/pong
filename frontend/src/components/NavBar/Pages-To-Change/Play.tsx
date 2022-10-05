@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import GameCanvas from "/src/components/PongGame/GameCanvas";
 import GameLobby from "/src/components/PongGame/GameLobby";
@@ -15,7 +15,7 @@ import { HexColorPicker } from "react-colorful";
 type PlayProps = {
   socket: Socket | undefined;
   colors: GameColors;
-  setColors: Dispatch<SetStateAction<GameColors>>;
+  setColors: (colors: GameColors) => void;
 };
 
 const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
