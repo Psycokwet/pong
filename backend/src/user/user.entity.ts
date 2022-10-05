@@ -16,6 +16,7 @@ import Room from 'src/chat/room.entity';
 import Message from 'src/chat/message.entity';
 import { Blocked } from 'src/blocked/blocked.entity';
 import { IsEmail, IsNotEmpty, Length } from 'class-validator';
+import { GameColors, defaultColor } from 'shared/types/GameColors';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -86,4 +87,7 @@ export class User extends BaseEntity {
     nullable: true,
   })
   public twoFactorAuthenticationSecret?: string;
+
+  @Column({ default: JSON.stringify(defaultColor), nullable: false })
+  gameColors: string;
 }
