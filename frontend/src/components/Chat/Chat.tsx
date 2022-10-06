@@ -11,6 +11,7 @@ import { statusList } from "../Common/StatusList"
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { Status } from "/shared/interfaces/UserStatus";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import { UserInterface } from 'shared/interfaces/UserInterface';
 import ChannelUserListByStatus from "./ChatList/UserInChannelList/ChannelUserListByStatus";
 
 function Chat ({socket}:{socket:Socket|undefined}) {
@@ -77,6 +78,9 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     };
   }, [disconnect]);
 
+  const resetAttachedUserList = (newList:ChannelUserInterface[]) => {
+    setAttachedUserList([...newList]);
+  }
   useEffect(() => {
     if (connectedChannel)
       socket?.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST, connectedChannel.channelId)
@@ -84,16 +88,31 @@ function Chat ({socket}:{socket:Socket|undefined}) {
 
   useEffect(() => {
     socket?.on(
-      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, 
-      (userList: ChannelUserInterface[]) => setAttachedUserList(userList)
+      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, resetAttachedUserList
     );
     return () => {
       socket?.off(
-        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        (userList: ChannelUserInterface[]) => setAttachedUserList(userList)
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, resetAttachedUserList
       );
     };
-  }, [setAttachedUserList]);
+  }, []);
+  const updateUserStatus = (user:UserInterface) => {
+    setAttachedUserList((current) => {
+      const finded:ChannelUserInterface = current.find((attachedUser) => attachedUser.id == user.id);
+      if (finded === undefined)
+        return current;
+      const filteredList = current.filter((attachedUser) => attachedUser.id != user.id);
+      finded.status = user.status;
+      return [...filteredList, finded];
+      }
+    );
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, updateUserStatus);
+    return () => {
+      socket?.off(ROUTES_BASE.USER.CONNECTION_CHANGE, updateUserStatus);
+    };
+  }, [updateUserStatus]);
 
   /** UNATTACH FROM CHANNEL */
   useEffect(() => {

@@ -33,22 +33,23 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
     };
   }, []);
 
-  const userStatusChange = (newUserData: UserInterface) => {
-    const alreadyExistUser:UserInterface = userFriendList.find(
-      (user: UserInterface) => user.id === newUserData.id
+  const updateUserStatus = (user:UserInterface) => {
+    setUserFriendList((current) => {
+      const finded:UserInterface = current.find((attachedUser) => attachedUser.id == user.id);
+      if (finded === undefined)
+        return current;
+      const filteredList = current.filter((attachedUser) => attachedUser.id != user.id);
+      finded.status = user.status;
+      return [...filteredList, finded];
+      }
     );
-    if (alreadyExistUser)
-      setUserFriendList((current: UserInterface[]) => [
-        ...current.filter((user: UserInterface) => user.id !== alreadyExistUser.id),
-        newUserData
-      ])
   }
   useEffect(() => {
-    socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, userStatusChange);
+    socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, updateUserStatus);
     return () => {
-      socket?.off(ROUTES_BASE.USER.CONNECTION_CHANGE, userStatusChange);
+      socket?.off(ROUTES_BASE.USER.CONNECTION_CHANGE, updateUserStatus);
     };
-  }, []);
+  }, [updateUserStatus]);
 
   return (
     <div className="h-7/8 text-white bg-gray-900 rounded-b-md">
