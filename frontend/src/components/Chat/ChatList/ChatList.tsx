@@ -11,7 +11,6 @@ import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 
 function ChatList({
-  msg,
   socket,
   connectedChannel,
   handleLeaveChannel,
@@ -20,7 +19,6 @@ function ChatList({
   /* lastMessage,*/
   blockedUserList,
 } : {
-    msg: Message,
     socket:Socket | undefined,
     connectedChannel: ChannelData | undefined,
     handleLeaveChannel: any;
