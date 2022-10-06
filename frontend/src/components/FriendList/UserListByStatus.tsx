@@ -24,7 +24,7 @@ const UserListByStatus: React.FC<UserListByStatusProps> = ({
   menuSettings,
 }) => {
   return (
-    <>
+    <div className="flex flex-col gap-1">
       {/* Group Name */}
       <div className="flex items-center font-bold">
         <span className="px-2">
@@ -44,7 +44,7 @@ const UserListByStatus: React.FC<UserListByStatusProps> = ({
           />
         );
       })}
-    </>
+    </div>
   );
 };
 
