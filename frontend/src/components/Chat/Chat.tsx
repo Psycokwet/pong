@@ -175,6 +175,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
         connectedChannel={connectedChannel}
         userPrivilege={userPrivilege}
         handleDisconnectChannel={handleDisconnectChannel}
+        blockedUserList={blockedUserList}
         // lastMessage={lastMessage}
       />
       <Messages

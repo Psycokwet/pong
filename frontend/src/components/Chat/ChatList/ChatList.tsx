@@ -8,8 +8,18 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 
-function ChatList({ msg , socket , connectedChannel, handleLeaveChannel, userPrivilege, handleDisconnectChannel, /* lastMessage ,*/} : {
+function ChatList({
+  msg,
+  socket,
+  connectedChannel,
+  handleLeaveChannel,
+  userPrivilege,
+  handleDisconnectChannel,
+  /* lastMessage,*/
+  blockedUserList,
+} : {
     msg: Message,
     socket:Socket | undefined,
     connectedChannel: ChannelData | undefined,
@@ -17,6 +27,7 @@ function ChatList({ msg , socket , connectedChannel, handleLeaveChannel, userPri
     userPrivilege: Privileges;
     handleDisconnectChannel: any;
     /*lastMessage: Message;*/
+    blockedUserList:BlockedUserInterface[];
 }){
   const [channelList, setChannelList] = useState<ChannelData[]>([]);
   const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
@@ -54,6 +65,9 @@ function ChatList({ msg , socket , connectedChannel, handleLeaveChannel, userPri
     };
   }, [resetDirectMessageList]);
 
+  const filteredConversations:ChannelData[] = directMessageList.filter((directMessage) => {
+    return blockedUserList.find((blockedUser) => blockedUser.pongUsername==directMessage.channelName) == undefined
+    })
   return (
     <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end relative">
       <div>
@@ -78,7 +92,7 @@ function ChatList({ msg , socket , connectedChannel, handleLeaveChannel, userPri
       </div>
       <div>
         <DirectMessageMenu socket={socket}/>
-        {directMessageList.map((directMessage) => {
+        {filteredConversations.map((directMessage) => {
           return (
             <div key={directMessage.channelId}>
               <DirectMessage
