@@ -44,6 +44,7 @@ function App() {
   const updateCurrentUser = () => {
     api.refreshToken().then((res: Response) => {
       if (res.status != 200) {
+        console.log("not 200", res.status);
         setCurrentUser((current: CurrentUserFrontInterface) => {
           if (current.status !== ConnectionStatus.NetworkUnavailable)
             return {
@@ -53,11 +54,14 @@ function App() {
           return current;
         });
       } else {
+        console.log("200 !!");
         res.json().then((newCurrentUser: CurrentUserFrontInterface) => {
-          console.log(newCurrentUser);
           setCurrentUser((current: CurrentUserFrontInterface) => {
             if (!isSameSimpleObj(current, newCurrentUser))
+            {
+              console.log("here");
               return newCurrentUser;
+            }
             return current;
           });
         });
@@ -85,7 +89,7 @@ function App() {
       updateCurrentUser();
       socket?.disconnect();
       socket?.connect();
-    }, 600_000);
+    }, 10_000);
     return () => {
       clearInterval(interval);
     };

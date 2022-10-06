@@ -99,12 +99,12 @@ export class FortyTwoController {
 
   @UseGuards(JwtRefreshGuard)
   @Get(ROUTES_BASE.AUTH.REFRESH)
-  refresh(@Req() request: RequestWithUser) {
+  async refresh(@Req() request: RequestWithUser) {
     const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
       request.user.id,
       false,
     );
-    request.res.setHeader('Set-Cookie', accessTokenCookie);
+    await request.res.setHeader('Set-Cookie', accessTokenCookie);
     return currentUserToFrontInterface(request.user);
   }
 }
