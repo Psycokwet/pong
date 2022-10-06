@@ -19,7 +19,7 @@ const Ban = ({
   const ban = (val:number) => {
     console.log(user.id, channelName, val);
     socket?.emit(ROUTES_BASE.CHAT.BAN_USER_REQUEST, {
-      userIdToMute: user.id,
+      userIdToBan: user.id,
       channelName: channelName,
       banTime: val
     });
