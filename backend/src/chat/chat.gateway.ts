@@ -486,7 +486,7 @@ export class ChatGateway implements OnGatewayConnection {
     if (room.owner.id !== payload.userId)
       throw new WsException('You do not have the rights to set an admin');
 
-    this.chatService.setAdmin(room, newAdmin);
+    await this.chatService.setAdmin(room, newAdmin);
 
     const promotedUser: UserInterface = {
       id: newAdmin.id,
@@ -526,7 +526,7 @@ export class ChatGateway implements OnGatewayConnection {
     if (room.owner.id !== payload.userId)
       throw new WsException('You do not have the rights to unset an admin');
 
-    this.chatService.unsetAdmin(room, oldAdmin);
+    await this.chatService.unsetAdmin(room, oldAdmin);
 
     const demotedUser: UserInterface = {
       id: oldAdmin.id,
