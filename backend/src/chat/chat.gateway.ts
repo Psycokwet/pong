@@ -300,6 +300,7 @@ export class ChatGateway implements OnGatewayConnection {
         ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
         await this.chatService.getAllPublicRooms(),
       );
+
     if (room.members.length !== 0) {
       client.leave(room.roomName);
       this.server
@@ -308,11 +309,20 @@ export class ChatGateway implements OnGatewayConnection {
           ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
           payload.userId,
         );
-      this.attachedUsersList(room.id, client);
+
+      client.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION);
 
       const ownerWebsocket: UsersWebsockets = UsersService.userWebsockets.find(
         (user) => user.userId === room.owner.id,
       );
+
+      this.server
+        .in(room.roomName)
+        .emit(
+          ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+          await this.chatService.getAttachedUsersInChannel(room.id),
+        );
+
       if (
         ownerWebsocket &&
         this.server.sockets.adapter.rooms
@@ -369,17 +379,17 @@ export class ChatGateway implements OnGatewayConnection {
       }),
     );
 
-    // this.server
-    //   .in(room.roomName)
     client.emit(
       ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
       await this.chatService.getAttachedUsersInChannel(roomId),
     );
 
-    if (room.owner.id === payload.userId) {
-      client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
-        privilege: Privileges.OWNER,
-      });
+    if (room.isDM === false) {
+      if (room.owner.id === payload.userId) {
+        client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
+          privilege: Privileges.OWNER,
+        });
+      }
     }
   }
 
@@ -407,8 +417,6 @@ export class ChatGateway implements OnGatewayConnection {
   ) {
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
 
-    // this.server
-    //   .in(room.roomName)
     client.emit(
       ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
       await this.chatService.getAttachedUsersInChannel(roomId),
