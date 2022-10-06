@@ -4,7 +4,7 @@ import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { MenuSettingsType } from "../UserInList/MenuSettings"
 import { UserStatus } from "../Common/StatusList"
 import { Socket } from "socket.io-client";
-import ChannelUserMenu from "./UserInChannelList";
+import ChannelUserMenu from "./ChannelUserMenu";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 type ChannelUserListByStatusProps = {
@@ -12,7 +12,7 @@ type ChannelUserListByStatusProps = {
   inputFilter: string;
   statusList: UserStatus;
   socket: Socket | undefined;
-  roomId: number;
+  channelName: string;
   menuSettings: MenuSettingsType;
   userPrivilege: Privileges;
 };
@@ -22,7 +22,7 @@ const ChannelUserListByStatus: React.FC<ChannelUserListByStatusProps> = ({
   inputFilter,
   statusList,
   socket,
-  roomId,
+  channelName,
   menuSettings,
   userPrivilege,
 }) => {
@@ -39,9 +39,10 @@ const ChannelUserListByStatus: React.FC<ChannelUserListByStatusProps> = ({
       {userList?.filter((value) => value.status === statusList.status).map((user) => {
         return (
           <ChannelUserMenu
+            channelName={channelName}
             userPrivilege={userPrivilege}
             key={user.id}
-            user={user}
+            pointedUser={user}
             inputFilter={inputFilter}
             socket={socket}
             menuSettings={menuSettings}
