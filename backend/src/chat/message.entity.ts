@@ -16,10 +16,10 @@ class Message {
   @Column()
   public content: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { cascade: true })
   public author: User;
 
-  @ManyToOne(() => Room)
+  @ManyToOne(() => Room, { cascade: true, onDelete: 'CASCADE' })
   public room: Room;
 
   @CreateDateColumn({
