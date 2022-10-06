@@ -43,7 +43,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     };
   }, [resetMessages]);
 
-
+  /**  Set actual connectedChannel */
   const channelListener = (channel: ChannelData) => {
     setConnectedChannel(channel);
   };
@@ -67,6 +67,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
   }, [channelListener]);
 
 
+  /**  Disconnect and clear page */
   const disconnect = () => {
     setMessages([]);
     setConnectedChannel(undefined);
@@ -78,6 +79,7 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     };
   }, [disconnect]);
 
+  /**  Listen User list for channel */
   useEffect(() => {
     if (connectedChannel)
       socket?.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST, connectedChannel.channelId)
