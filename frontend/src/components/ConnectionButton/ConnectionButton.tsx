@@ -1,4 +1,4 @@
-import { FULL_ROUTE } from "../../../shared/httpsRoutes/routes";
+import { FULL_ROUTE } from "shared/httpsRoutes/routes";
 import { PREFIX } from "../../api/api";
 
 export const ConnectionButton = () => {

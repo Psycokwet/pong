@@ -1,11 +1,11 @@
-import { Status } from "/shared/interfaces/UserStatus";
+import { Status } from "shared/interfaces/UserStatus";
 
 export type UserStatus = {
   status: Status;
   color: string;
   groupName: string;
-}
-export const statusList:UserStatus[] = [
+};
+export const statusList: UserStatus[] = [
   {
     status: Status.ONLINE,
     color: "text-green-400",

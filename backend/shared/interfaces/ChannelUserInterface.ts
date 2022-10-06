@@ -6,4 +6,5 @@ export interface ChannelUserInterface {
   pongUsername: string;
   status: Status;
   privileges: Privileges;
+  image_url: string; //USED BUT NEVER SET ?????? ERRORTSC
 }

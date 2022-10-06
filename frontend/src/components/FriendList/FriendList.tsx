@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import { BiChevronDown } from "react-icons/bi";
 
-import { UserInterface } from "/shared/interfaces/UserInterface";
-import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { UserInterface } from "shared/interfaces/UserInterface";
+import { ROUTES_BASE } from "shared/websocketRoutes/routes";
 
 import DropDownFriendList from "./DropDownFriendList";
 
@@ -24,9 +23,9 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
     };
   }, []);
 
-  const appendFriendList = (newUser:UserInterface) => {
+  const appendFriendList = (newUser: UserInterface) => {
     setUserFriendList((current: UserInterface[]) => [...current, newUser]);
-  }
+  };
 
   useEffect(() => {
     socket?.on(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, appendFriendList);
@@ -36,15 +35,17 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
   }, []);
 
   const userStatusChange = (newUserData: UserInterface) => {
-    const alreadyExistUser:UserInterface = userFriendList.find(
+    const alreadyExistUser: UserInterface = userFriendList.find(
       (user: UserInterface) => user.id === newUserData.id
     );
     if (alreadyExistUser)
       setUserFriendList((current: UserInterface[]) => [
-        ...current.filter((user: UserInterface) => user.id !== alreadyExistUser.id),
-        newUserData
-      ])
-  }
+        ...current.filter(
+          (user: UserInterface) => user.id !== alreadyExistUser.id
+        ),
+        newUserData,
+      ]);
+  };
   useEffect(() => {
     socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, userStatusChange);
     return () => {
