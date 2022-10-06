@@ -154,18 +154,26 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   /** END GAMEOVER */
 
   return (
-    <div className="w-full h-7/8">
-      <div>
-        <h1 className="text-3xl text-center p-2">RANKED MATCH</h1>
+    <div className="w-full h-screen">
+      <h1 className="text-3xl text-center p-2">RANKED MATCH</h1>
+      <h2 className="lg:text-3xl text-center p-2">First to 10 points win</h2>{" "}
+      <div className="grid grid-cols-2 content-between w-full content-center">
+          <div>
+            <p className="text-center">{gameRoom.gameData.player1.pongUsername}</p>
+            <p className="text-6xl p-4 text-center">
+              <b>{gameRoom.gameData.player1.score}</b>
+            </p>
+          </div>
+
+          <div>
+            <p className="text-center">{gameRoom.gameData.player2.pongUsername}</p>
+            <p className="text-6xl p-4 text-center">
+              <b>{gameRoom.gameData.player2.score}</b>
+            </p>
+          </div>
       </div>
-      <div>
-        <h2 className="lg:text-3xl text-center p-2">First to 10 points win</h2>{" "}
-      </div>
+
       <div className="grid sm:grid-cols-5 content-center sm:flex sm:justify-around">
-        <div className="self-center text-center hidden sm:block w-2/12">
-          <p>{gameRoom.gameData.player1.pongUsername}</p>
-          <p className="text-6xl p-4">{gameRoom.gameData.player1.score}</p>
-        </div>
         <div className="flex self-center">
           <canvas
             className="border-x-8 border-y-4 border-white rounded-lg"
@@ -176,31 +184,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
             width={clientCanvasSize.x}
             height={clientCanvasSize.y}
           ></canvas>
-        </div>
-
-        <div className="sm:hidden block grid grid-cols-2 content-between w-full">
-          <div>
-            <p className="text-center">
-              {gameRoom.gameData.player1.pongUsername}{" "}
-            </p>
-            <p className="text-6xl p-4 text-center">
-              <b>{gameRoom.gameData.player1.score}</b>
-            </p>
-          </div>
-
-          <div>
-            <p className="text-center">
-              {gameRoom.gameData.player2.pongUsername}
-            </p>
-            <p className="text-6xl p-4 text-center">
-              <b>{gameRoom.gameData.player2.score}</b>
-            </p>
-          </div>
-        </div>
-
-        <div className="self-center text-center hidden sm:block w-2/12">
-          <p>{gameRoom.gameData.player2.pongUsername}</p>
-          <p className="text-6xl p-4">{gameRoom.gameData.player2.score}</p>
         </div>
       </div>
     </div>
