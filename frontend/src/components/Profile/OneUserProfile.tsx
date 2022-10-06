@@ -4,16 +4,18 @@ import UserMatchHistory from "./UserMatchHistory";
 
 import UserProfile from "/shared/interfaces/UserProfile";
 import Avatar from "../Common/Avatar";
+import NotFound from "../NavBar/Pages-To-Change/NotFound";
 
 type OneUserProfileProps = {
-  userProfile: UserProfile;
-  avatarUrl: string;
+  userProfile?: UserProfile;
+  avatarUrl?: string;
 };
 
 const OneUserProfile: React.FC<OneUserProfileProps> = ({
   userProfile,
   avatarUrl,
 }) => {
+  if (!userProfile || !avatarUrl) return <NotFound></NotFound>;
   return (
     <div className="flex justify-evenly">
       <div className="flex items-center">
