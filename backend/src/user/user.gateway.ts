@@ -116,7 +116,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     if (
       friendStatus === Status.ONLINE &&
-      this.gameService.findPlayerRoom(friend.id)
+      this.gameService.findPlayerRoomForStatus(friend.id)
     ) {
       friendStatus = Status.PLAYING;
     }
@@ -142,7 +142,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     orderedFriendsList.map((user: UserInterface) => {
       if (
         user.status === Status.ONLINE &&
-        this.gameService.findPlayerRoom(user.id)
+        this.gameService.findPlayerRoomForStatus(user.id)
       ) {
         user.status = Status.PLAYING;
       }
