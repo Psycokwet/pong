@@ -1,5 +1,5 @@
 import React from "react";
-import { FULL_ROUTE } from "../../../shared/httpsRoutes/routes";
+import { FULL_ROUTE } from "shared/httpsRoutes/routes";
 import { PREFIX } from "../../api/api";
 const LoginPage = () => {
   const redirectOauth = () => {

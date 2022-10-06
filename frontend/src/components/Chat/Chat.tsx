@@ -131,6 +131,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     setPrivilege(Privileges.MEMBER);
   };
   const handleLeaveChannel = () => {
+    if (!connectedChannel) return;
     socket?.emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST, {
       channelName: connectedChannel.channelName,
     });

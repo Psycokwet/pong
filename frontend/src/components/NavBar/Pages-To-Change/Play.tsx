@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import GameCanvas from "/src/components/PongGame/GameCanvas";
-import GameLobby from "/src/components/PongGame/GameLobby";
-import GameOver from "/src/components/PongGame/GameOver";
-import GameQueue from "/src/components/PongGame/GameQueue";
-import GameRoom from "/shared/interfaces/GameRoom";
-import Position from "/shared/interfaces/Position";
-import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import { GameColors, defaultColor } from "/shared/types/GameColors";
-import { GameStep } from "/src/components/PongGame/GameStep.enum";
+import GameCanvas from "src/components/PongGame/GameCanvas";
+import GameLobby from "src/components/PongGame/GameLobby";
+import GameOver from "src/components/PongGame/GameOver";
+import GameQueue from "src/components/PongGame/GameQueue";
+import GameRoom from "shared/interfaces/game/GameRoom";
+import Position from "shared/interfaces/game/Position";
+import { ROUTES_BASE } from "shared/websocketRoutes/routes";
+import { GameColors, defaultColor } from "shared/types/GameColors";
+import { GameStep } from "src/components/PongGame/GameStep.enum";
 import GameSettings from "../../PongGame/GameSettings";
 import { HexColorPicker } from "react-colorful";
 

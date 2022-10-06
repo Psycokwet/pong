@@ -72,10 +72,11 @@ function ChatList({
               handleLeaveChannel={() => {
                 handleLeaveChannel();
                 setChannelList((current) =>
-                  current.filter(
-                    (channel) =>
-                      channel.channelId !== connectedChannel.channelId
-                  )
+                  current.filter((channel) => {
+                    if (connectedChannel)
+                      return channel.channelId !== connectedChannel.channelId;
+                    return true;
+                  })
                 );
               }}
               channel={channel}

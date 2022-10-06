@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
-import Position from "/shared/interfaces/Position";
-import GameRoom from "/shared/interfaces/GameRoom";
-import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import { virtualGameData } from "/shared/other/virtualGameData";
-import { GameColors } from "../NavBar/Pages-To-Change/Play";
+import Position from "shared/interfaces/game/Position";
+import GameRoom from "shared/interfaces/game/GameRoom";
+import { ROUTES_BASE } from "shared/websocketRoutes/routes";
+import { virtualGameData } from "shared/other/virtualGameData";
+import { GameColors } from "shared/types/GameColors";
 
 type GameCanvasProps = {
-  socket: Socket;
+  socket: Socket | undefined;
   setGameRoom: any;
   gameRoom: GameRoom;
   upgradeStep: any;

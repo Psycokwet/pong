@@ -1,14 +1,14 @@
 import { KeyboardEvent, useState } from "react";
 import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import { CreateChannel } from "shared/websocketRoutes/CreateChannel";
+import CreateChannel from "shared/interfaces/CreateChannel";
 
 function Create({ socket }: { socket: Socket | undefined }) {
   const [newChanName, setNewChanName] = useState<string>("");
   const [newChanPass, setNewChanPass] = useState<string>("");
   const [isPrivate, setIsPrivate] = useState<boolean>(false);
 
-  const handleCreateChannel = (newChannel: { newChannel: CreateChannel }) => {
+  const handleCreateChannel = (newChannel: CreateChannel) => {
     socket?.emit(ROUTES_BASE.CHAT.CREATE_CHANNEL_REQUEST, newChannel);
   };
 

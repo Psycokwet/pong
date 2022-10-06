@@ -1,28 +1,30 @@
 import { Socket } from "socket.io-client";
 import { useState } from "react";
-import { IoSend } from "react-icons/io5"
-import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import { ChannelData } from "/shared/interfaces/ChannelData";
-
-function TextField ({socket , connectedChannel}:{
-    socket:Socket|undefined,
-    connectedChannel:ChannelData,
-}){
-  const [message, setValue] = useState<string>('')
+import { IoSend } from "react-icons/io5";
+import { ROUTES_BASE } from "shared/websocketRoutes/routes";
+import ChannelData from "shared/interfaces/ChannelData";
+function TextField({
+  socket,
+  connectedChannel,
+}: {
+  socket: Socket | undefined;
+  connectedChannel: ChannelData;
+}) {
+  const [message, setValue] = useState<string>("");
 
   const sendMessage = () => {
     socket?.emit(ROUTES_BASE.CHAT.SEND_MESSAGE, {
       channelId: connectedChannel?.channelId,
       message,
     });
-    setValue('');
+    setValue("");
   };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.code == 'Enter') {
+    if (e.code == "Enter") {
       e.preventDefault();
       sendMessage();
     }
-  }
+  };
 
   return (
     <div className="px-12 row-span-1 row-start-9 col-span-3 col-start-2 overflow-hidden">
@@ -37,14 +39,10 @@ function TextField ({socket , connectedChannel}:{
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <IoSend
-          size="40"
-          onClick={sendMessage}
-          className="cursor-pointer"
-          />
+        <IoSend size="40" onClick={sendMessage} className="cursor-pointer" />
       </div>
     </div>
-  )
+  );
 }
 
-export default TextField
+export default TextField;

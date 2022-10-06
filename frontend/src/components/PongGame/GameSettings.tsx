@@ -1,6 +1,6 @@
 import React from "react";
-import { GameStep } from "/src/components/PongGame/GameStep.enum";
-import { GameColors } from "/shared/types/GameColors";
+import { GameStep } from "src/components/PongGame/GameStep.enum";
+import { GameColors } from "shared/types/GameColors";
 import { Api } from "../../api/api";
 const api = new Api();
 type GameSettingsProps = {
