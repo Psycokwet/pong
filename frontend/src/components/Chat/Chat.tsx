@@ -4,6 +4,8 @@ import UserPicture from "../UserPicture/UserPicture";
 import ChatList from "./ChatList/ChatList";
 import TextField from "./TextField/TextField";
 import Messages from "./Messages/Messages";
+import ChannelUserListByStatus from "./UserInChannelList/ChannelUserListByStatus";
+
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
@@ -11,7 +13,6 @@ import { statusList } from "../Common/StatusList"
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { Status } from "/shared/interfaces/UserStatus";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
-import ChannelUserListByStatus from "./ChatList/UserInChannelList/ChannelUserListByStatus";
 
 function Chat ({socket}:{socket:Socket|undefined}) {
   const [messages, setMessages] = useState<Message[]>([])
@@ -155,7 +156,8 @@ function Chat ({socket}:{socket:Socket|undefined}) {
         <></>
       }
       <div className="row-start-1 row-span-6 col-start-5 p-x-8">
-        {statusList?.map((aStatusList) => {
+        {connectedChannel != undefined ?
+        statusList?.map((aStatusList) => {
           return (
             <ChannelUserListByStatus
               userPrivilege={userPrivilege}
@@ -164,16 +166,16 @@ function Chat ({socket}:{socket:Socket|undefined}) {
               inputFilter={""}
               statusList={aStatusList}
               socket={socket}
-              roomId={connectedChannel?.channelId}
+              channelName={connectedChannel.channelName}
               menuSettings={({
                 challenge:aStatusList.status === Status.ONLINE,
                 watch:aStatusList.status === Status.PLAYING,
-                privileges: userPrivilege,
-                friend: false,
               })}
             />
           );
-        })}
+        })
+        : <></>
+        }
         <UserPicture />
       </div>
     </div>

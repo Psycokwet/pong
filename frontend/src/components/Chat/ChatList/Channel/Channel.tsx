@@ -46,7 +46,6 @@ const Channel = function ({channel, socket, connectedChannel, handleLeaveChannel
     setIsVisible(false);
   };
 
-  console.log(userPrivilege);
   return (
     <div
       className={
