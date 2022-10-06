@@ -38,8 +38,9 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
     });
   },[]);
 
+  if (!user)
+    return (<></>)
   return (
-    user ? (
     <div
       key={user.id}
       onContextMenu={(e) => {
@@ -48,15 +49,15 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
           toggleMenu(true);
           socket?.emit(ROUTES_BASE.USER);
       }}
-      className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
+      className={`mx-2 cursor-pointer hover:bg-gray-600
       ${user.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
     >
       {/* Avatar and Nickname */}
       <div
-        className="grid grid-cols-2 m-2"
+        className="flex items-center gap-4 m-2"
       >
-        <Avatar url={avatarUrl} size="w-20" />
-        <strong>{user.pongUsername}</strong>
+        <Avatar url={avatarUrl} size="w-20 h-20" />
+        <strong className="justify-self-start">{user.pongUsername}</strong>
       </div>
       {/* Right click menu */}
       <ControlledMenu {...menuProps}
@@ -68,7 +69,7 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
         <Challenge menuSettings={menuSettings} socket={socket} user={user}/>
         <Watch menuSettings={menuSettings}/>
       </ControlledMenu>
-    </div>) : <></>
+    </div>
   )
 }
 

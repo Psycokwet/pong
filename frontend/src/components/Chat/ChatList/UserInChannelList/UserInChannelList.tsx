@@ -47,8 +47,8 @@ const api = new Api();
   }, []);
   const icons = [
     <></>,
-    <AiFillTool/>,
-    <FaCrown/>,
+    <AiFillTool className="shrink-0"/>,
+    <FaCrown className="shrink-0"/>,
   ]
 
   if (!user)
@@ -62,18 +62,20 @@ const api = new Api();
         toggleMenu(true);
         socket?.emit(ROUTES_BASE.USER);
       }}
-      className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
+      className={`mx-2 cursor-pointer hover:bg-gray-600
       ${user.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
     >
       {/* Avatar and Nickname */}
       <div
-        className="flex flex-row gap-2 "
+        className="flex flex-row items-center gap-2"
       >
-        <Avatar
-          url={imageUrl}
-          size="w-10 h-10"
-        />
-        <strong>{user.pongUsername}</strong>
+        <div className="shrink-0">
+          <Avatar
+            url={imageUrl}
+            size="w-10 h-10"
+          />
+        </div>
+        <strong className="shrink truncate">{user.pongUsername}</strong>
         {icons[user.privileges]}
       </div>
       {/* Right click menu */}
