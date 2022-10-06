@@ -1,4 +1,4 @@
-import { Status } from "shared/interfaces/UserStatus";
+import { Status } from "/shared/interfaces/UserStatus";
 
 export type UserStatus = {
   status: Status;

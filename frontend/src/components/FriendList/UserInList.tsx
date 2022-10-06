@@ -3,8 +3,8 @@ import { ControlledMenu, useMenuState } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import { Socket } from "socket.io-client";
 
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import { UserInterface } from "shared/interfaces/UserInterface";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { UserInterface } from "/shared/interfaces/UserInterface";
 
 import { MenuSettingsType } from "../UserInList/MenuSettings";
 import Watch from "../UserInList/MenuComponents/Watch";

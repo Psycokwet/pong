@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import ChannelData from "shared/interfaces/ChannelData";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import ChannelData from "/shared/interfaces/ChannelData";
 
 function Join({ socket }: { socket: Socket | undefined }) {
   const [joinName, setJoinName] = useState<string>("");

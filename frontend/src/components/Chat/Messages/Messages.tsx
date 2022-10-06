@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import UserPicture from "../../UserPicture/UserPicture";
-import Message from "shared/interfaces/Message";
+import Message from "/shared/interfaces/Message";
 const Messages = ({ messages }: { messages: Message[] }) => {
   const containerRef = useRef();
   const refAssignCallback = (ref: any) => {

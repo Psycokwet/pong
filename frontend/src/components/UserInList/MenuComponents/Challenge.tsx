@@ -2,8 +2,8 @@ import { MenuItem } from "@szhsin/react-menu";
 import { Link } from "react-router-dom";
 import { Socket } from "socket.io-client";
 
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import { UserInterface } from "shared/interfaces/UserInterface";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { UserInterface } from "/shared/interfaces/UserInterface";
 
 import { MenuSettingsType } from "../MenuSettings";
 

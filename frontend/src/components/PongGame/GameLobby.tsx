@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import GameRoom from "shared/interfaces/game/GameRoom";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import { GameStep } from "src/components/PongGame/GameStep.enum";
+import GameRoom from "/shared/interfaces/game/GameRoom";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { GameStep } from "/src/components/PongGame/GameStep.enum";
 
 const GameLobby = ({
   socket,

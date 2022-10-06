@@ -1,5 +1,5 @@
-import { FULL_ROUTE } from "shared/httpsRoutes/routes";
-import { GameColors } from "shared/types/GameColors";
+import { FULL_ROUTE } from "/shared/httpsRoutes/routes";
+import { GameColors } from "/shared/types/GameColors";
 
 export const PREFIX =
   import.meta.env.VITE_CONTEXT == "MOCKUP"

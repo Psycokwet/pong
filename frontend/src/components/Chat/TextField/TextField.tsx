@@ -1,8 +1,8 @@
 import { Socket } from "socket.io-client";
 import { useState } from "react";
 import { IoSend } from "react-icons/io5";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import ChannelData from "shared/interfaces/ChannelData";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import ChannelData from "/shared/interfaces/ChannelData";
 function TextField({
   socket,
   connectedChannel,

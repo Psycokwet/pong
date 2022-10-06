@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FULL_ROUTE } from "shared/httpsRoutes/routes";
+import { FULL_ROUTE } from "/shared/httpsRoutes/routes";
 const False42Login = () => {
   /***************************************************************/
 

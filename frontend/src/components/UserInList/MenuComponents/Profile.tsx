@@ -1,7 +1,7 @@
 import { MenuItem } from "@szhsin/react-menu";
 import { Link } from "react-router-dom";
 
-import { UserInterface } from "shared/interfaces/UserInterface";
+import { UserInterface } from "/shared/interfaces/UserInterface";
 
 import { MenuSettingsType } from "../MenuSettings";
 

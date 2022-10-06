@@ -2,7 +2,7 @@ import React from "react";
 import UserStats from "./UserStats";
 import UserMatchHistory from "./UserMatchHistory";
 
-import UserProfile from "shared/interfaces/UserProfile";
+import UserProfile from "/shared/interfaces/UserProfile";
 import Avatar from "../Common/Avatar";
 
 type OneUserProfileProps = {

@@ -1,7 +1,7 @@
 import { KeyboardEvent, useState } from "react";
 import { Socket } from "socket.io-client";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import CreateChannel from "shared/interfaces/CreateChannel";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import CreateChannel from "/shared/interfaces/CreateChannel";
 
 function Create({ socket }: { socket: Socket | undefined }) {
   const [newChanName, setNewChanName] = useState<string>("");

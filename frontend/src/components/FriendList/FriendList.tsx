@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 
-import { UserInterface } from "shared/interfaces/UserInterface";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
+import { UserInterface } from "/shared/interfaces/UserInterface";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 
 import DropDownFriendList from "./DropDownFriendList";
 
@@ -34,7 +34,7 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
   }, []);
 
   const userStatusChange = (newUserData: UserInterface) => {
-    const alreadyExistUser: UserInterface | undefined= userFriendList.find(
+    const alreadyExistUser: UserInterface | undefined = userFriendList.find(
       (user: UserInterface) => user.id === newUserData.id
     );
     if (alreadyExistUser)
