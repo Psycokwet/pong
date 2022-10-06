@@ -34,10 +34,10 @@ function App() {
   const [currentUser, setCurrentUser] = useState<CurrentUserFrontInterface>(
     createCurrentUserFrontInterface()
   );
-  const setColors = (setRightColor: (colors: GameColors) => GameColors) => {
+  const setColors = (newColors: GameColors) => {
     setCurrentUser((current: CurrentUserFrontInterface) => {
       let newCurrentUser = { ...current };
-      newCurrentUser.gameColors = setRightColor(newCurrentUser.gameColors);
+      newCurrentUser.gameColors = newColors;
       return newCurrentUser;
     });
   };

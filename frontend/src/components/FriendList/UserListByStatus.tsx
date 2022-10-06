@@ -1,7 +1,7 @@
 import React from "react";
 import { BsCircleFill } from "react-icons/bs";
 import { UserInterface } from "/shared/interfaces/UserInterface";
-import UserInList from "../UserInList/UserInList"
+import UserInList from "./UserInList"
 import { MenuSettingsType } from "../UserInList/MenuSettings"
 import { UserStatus } from "../Common/StatusList"
 import { Socket } from "socket.io-client";

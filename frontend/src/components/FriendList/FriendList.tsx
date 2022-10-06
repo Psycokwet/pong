@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
-import { BiChevronDown } from "react-icons/bi";
 
 import { UserInterface } from "/shared/interfaces/UserInterface";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
@@ -8,7 +7,6 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import DropDownFriendList from "./DropDownFriendList";
 
 const FriendList = ({ socket }: { socket: Socket | undefined }) => {
-  const [active, setActive] = useState(false);
   const [userFriendList, setUserFriendList] = useState<UserInterface[]>([]);
 
   const resetFriendList = (list: UserInterface[]) => {
@@ -57,7 +55,7 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
       <h1 className="text-4xl font-bold self-center">Friend List</h1>
 
       {/************************* Dropdown Menu **************************/}
-      <div className="bg-gray-700 mt-2 max-h-60 overflow-y-auto">
+      <div className="bg-gray-700 mt-2 h-screen overflow-y-auto">
         <DropDownFriendList socket={socket} userFriendList={userFriendList} />
       </div>
     </div>
