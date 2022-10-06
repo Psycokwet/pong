@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { CurrentUser } from 'shared/interfaces/CurrentUser';
+import { CurrentUser } from 'src/user/CurrentUser';
 
 interface RequestWithUser extends Request {
   user: CurrentUser;
