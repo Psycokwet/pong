@@ -94,7 +94,9 @@ export class UsersService {
   }
 
   async signup(dto: UserDto): Promise<User> {
-    // database operation
+    // database operation, ugly but it follows TypeORM tutorial
+    // https://orkhan.gitbook.io/typeorm/docs/validation
+
     let userValidation = new User();
     userValidation.login42 = dto.login42;
     userValidation.pongUsername = uuidv4();
