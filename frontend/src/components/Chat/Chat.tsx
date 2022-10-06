@@ -128,9 +128,27 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     handleDisconnectChannel();
   }
 
-  const setupPrivilege = (val: { privilege: Privileges }) => {
-    setPrivilege(val.privilege);
+  const youArePromoted = (privilege:Privileges) => {
+    setPrivilege(privilege);
   }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, youArePromoted);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, youArePromoted);
+  }}, []);
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, youArePromoted);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, youArePromoted);
+  }}, []);
+
+  const setupPrivilege = (privilege: Privileges) => {
+    setPrivilege(privilege);
+  }
+  useEffect(() => {
+    if (connectedChannel)
+      socket?.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST, connectedChannel.channelId);
+  }, []);
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupPrivilege);
     return () => {

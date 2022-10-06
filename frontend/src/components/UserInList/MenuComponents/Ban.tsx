@@ -17,7 +17,6 @@ const Ban = ({
   socket: Socket | undefined;
 }) => {
   const ban = (val:number) => {
-    console.log(user.id, channelName, val);
     socket?.emit(ROUTES_BASE.CHAT.BAN_USER_REQUEST, {
       userIdToBan: user.id,
       channelName: channelName,
@@ -28,7 +27,7 @@ const Ban = ({
     <SubMenu
       label="Ban"
       className={ userPrivilege === Privileges.MEMBER ? "hidden" : "" }
-      disabled={ userPrivilege < user.privileges }
+      disabled={ userPrivilege <= user.privileges }
     >
       <MenuItem onClick={()=>ban(1)}>Kick</MenuItem>
       <MenuItem onClick={()=>ban(10000)}>10 sec</MenuItem>
