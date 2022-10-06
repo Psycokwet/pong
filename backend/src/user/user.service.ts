@@ -29,6 +29,7 @@ import { Blocked } from 'src/blocked/blocked.entity';
 import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
 import { GameColors } from 'shared/types/GameColors';
 import { Status } from 'shared/interfaces/UserStatus';
+import { validate } from 'class-validator';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -92,28 +93,21 @@ export class UsersService {
     });
   }
 
-  async signup(dto: UserDto) {
+  async signup(dto: UserDto): Promise<User> {
     // database operation
-    const user = User.create({
-      login42: dto.login42,
-      pongUsername: uuidv4(),
-      email: dto.email,
-      xp: 0,
-      isTwoFactorAuthenticationActivated: false,
-      isUserFullySignedUp: false,
-    });
+    let userValidation = new User();
+    userValidation.login42 = dto.login42;
+    userValidation.pongUsername = uuidv4();
+    userValidation.email = dto.email;
+    userValidation.isTwoFactorAuthenticationActivated = false;
+    userValidation.isUserFullySignedUp = false;
 
-    try {
-      return await user.save();
-    } catch (e) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Username or Email already used',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const errors = await validate(userValidation);
+    if (errors.length > 0) {
+      throw new BadRequestException({
+        message: errors.map((error) => error.constraints),
+      });
+    } else return await this.dataSource.manager.save(userValidation);
   }
 
   async signin(dto: Omit<UserDto, 'email'>) {
