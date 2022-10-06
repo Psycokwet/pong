@@ -4,7 +4,6 @@ import UserMatchHistory from "./UserMatchHistory";
 
 import UserProfile from "/shared/interfaces/UserProfile";
 import Avatar from "../Common/Avatar";
-import NotFound from "../NavBar/Pages-To-Change/NotFound";
 
 type OneUserProfileProps = {
   userProfile?: UserProfile;
@@ -15,7 +14,7 @@ const OneUserProfile: React.FC<OneUserProfileProps> = ({
   userProfile,
   avatarUrl,
 }) => {
-  if (!userProfile || !avatarUrl) return <NotFound></NotFound>;
+  if (!userProfile) return <></>;
   return (
     <div className="flex justify-evenly">
       <div className="flex items-center">
@@ -23,7 +22,7 @@ const OneUserProfile: React.FC<OneUserProfileProps> = ({
         <div className="p-2">
           <strong>{userProfile.pongUsername}</strong>
           <div>Level: {Math.floor(userProfile.userRank.level * 100) / 100}</div>
-          <div>Rank : {userProfile.userRank.userRank}</div>
+          <div>Rank : {userProfile.userRank.userRank.rank}</div>
         </div>
       </div>
 

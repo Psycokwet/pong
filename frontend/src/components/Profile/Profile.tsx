@@ -12,7 +12,7 @@ const Profile = () => {
   const [userNotFound, setUserNotFound] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile>({
     pongUsername: "anonymous",
-    userRank: { level: 0, userRank: 0 },
+    userRank: { level: 0, userRank: { rank: 0 } },
     userHistory: {
       nbGames: 0,
       nbWins: 0,
