@@ -141,7 +141,7 @@ const SignUpPage: React.FC<SignUpProps> = ({
     }
   }
   return (
-    <div className="flex flex-col items-center bg-gray-900 gap-4 h-7/8 text-white">
+    <div className="flex flex-col items-center bg-gray-900 gap-4 h-screen text-white">
       <div className="bg-gray-900">
         <ProfilePic avatar={avatar} setAvatar={setAvatar}></ProfilePic>
       </div>

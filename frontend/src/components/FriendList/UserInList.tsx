@@ -1,23 +1,20 @@
 import { useState, useEffect } from "react";
-import { MenuItem, ControlledMenu, useMenuState } from '@szhsin/react-menu';
+import { ControlledMenu, useMenuState } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
 import { Socket } from "socket.io-client";
-import { Link } from "react-router-dom";
 
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { UserInterface } from "/shared/interfaces/UserInterface";
-import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
-import { MenuSettingsType } from "./MenuSettings";
-import Watch from "./MenuComponents/Watch";
-import AddFriendButton from "./MenuComponents/AddFriendButton";
-import Ban from "./MenuComponents/Ban";
-import Block from "./MenuComponents/Block";
-import Challenge from "./MenuComponents/Challenge";
-import Mute from "./MenuComponents/Mute";
-import Profile from "./MenuComponents/Profile";
-import SendDirectMessage from "./MenuComponents/SendDirectMessage";
-import SetAdmin from "./MenuComponents/SetAdmin";
+import { MenuSettingsType } from "../UserInList/MenuSettings";
+import Watch from "../UserInList/MenuComponents/Watch";
+import Challenge from "../UserInList/MenuComponents/Challenge";
+import Profile from "../UserInList/MenuComponents/Profile";
+import SendDirectMessage from "../UserInList/MenuComponents/SendDirectMessage";
+import { Api } from "../../api/api"
+import Avatar from "../Common/Avatar";
+
+const api = new Api();
 
 const UserInList = ({user, inputFilter, socket, menuSettings} :{
   user: UserInterface,
@@ -27,19 +24,22 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
 }) => {
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
-  const [userOwnership, setOwnership] = useState<number>(Privileges.MEMBER);
+  const [avatarUrl, setAvatarUrl] = useState("");
 
-  const setupOwnership = (val:number) => {
-    setOwnership(val);
-  }
   useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupOwnership);
-    return () => {
-      socket?.off(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupOwnership);
-  }}, []);
-  if (!user)
-    return <></>
+    api.getPicture(user.pongUsername).then((res) => {
+      if (res.status == 200)
+        res.blob().then((myBlob) => {
+          setAvatarUrl((current) => {
+            if (current) URL.revokeObjectURL(current);
+            return URL.createObjectURL(myBlob);
+          });
+        });
+    });
+  },[]);
+
   return (
+    user ? (
     <div
       key={user.id}
       onContextMenu={(e) => {
@@ -55,11 +55,7 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
       <div
         className="grid grid-cols-2 m-2"
       >
-        <img
-          src={user.image_url}
-          alt="Avatar"
-          className="w-10 rounded-3xl"
-        />
+        <Avatar url={avatarUrl} size="w-20" />
         <strong>{user.pongUsername}</strong>
       </div>
       {/* Right click menu */}
@@ -71,13 +67,8 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
         <Profile user={user}/>
         <Challenge menuSettings={menuSettings} socket={socket} user={user}/>
         <Watch menuSettings={menuSettings}/>
-        <AddFriendButton menuSettings={menuSettings} socket={socket} user={user}/>
-        <Block />
-        <Mute menuSettings={menuSettings} userOwnership={userOwnership} />
-        <Ban menuSettings={menuSettings} userOwnership={userOwnership} />
-        <SetAdmin menuSettings={menuSettings}/>
       </ControlledMenu>
-    </div>
+    </div>) : <></>
   )
 }
 

@@ -140,7 +140,6 @@ function Chat ({socket}:{socket:Socket|undefined}) {
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
       <ChatList
         handleLeaveChannel={handleLeaveChannel}
-        msg={messages[messages.length - 1]}
         socket={socket}
         connectedChannel={connectedChannel}
         userPrivilege={userPrivilege}
