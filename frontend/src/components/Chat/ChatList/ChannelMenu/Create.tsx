@@ -46,7 +46,7 @@ function Create ({socket}:{socket:Socket|undefined})  {
       <input
         className="bg-slate-600"
         type="text"
-        placeholder="Password (optionnal)"
+        placeholder="Password (optional)"
         value={newChanPass}
         onChange={(e) => {
           setNewChanPass(e.target.value);

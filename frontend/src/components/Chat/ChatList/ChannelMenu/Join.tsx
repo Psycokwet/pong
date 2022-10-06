@@ -82,7 +82,7 @@ function Join ({socket} : {
       <input
         className="bg-slate-600"
         type="text"
-        placeholder="Password (optionnal)"
+        placeholder="Password (optional)"
         value={selectPass}
         onChange={(e) => {
           setSelectPass(e.target.value);
