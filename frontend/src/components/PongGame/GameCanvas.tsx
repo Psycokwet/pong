@@ -9,7 +9,7 @@ import { GameColors } from "shared/types/GameColors";
 type GameCanvasProps = {
   socket: Socket | undefined;
   setGameRoom: any;
-  gameRoom: GameRoom;
+  gameRoom: GameRoom | undefined;
   upgradeStep: any;
   clientCanvasSize: Position;
   colors: GameColors;
@@ -23,6 +23,8 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   clientCanvasSize,
   colors,
 }) => {
+  if (gameRoom === undefined)
+    return <></>
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {

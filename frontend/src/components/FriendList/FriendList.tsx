@@ -35,7 +35,7 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
   }, []);
 
   const userStatusChange = (newUserData: UserInterface) => {
-    const alreadyExistUser: UserInterface = userFriendList.find(
+    const alreadyExistUser: UserInterface | undefined= userFriendList.find(
       (user: UserInterface) => user.id === newUserData.id
     );
     if (alreadyExistUser)
