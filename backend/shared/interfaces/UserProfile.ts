@@ -1,6 +1,6 @@
 export default interface UserProfile {
   pongUsername: string;
-  userRank: { level: number; userRank: number };
+  userRank: { level: number; userRank: { rank: number } };
   userHistory: {
     nbGames: number;
     nbWins: number;
