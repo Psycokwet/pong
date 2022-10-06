@@ -11,6 +11,7 @@ import { GameColors, defaultColor } from "/shared/types/GameColors";
 import { GameStep } from "/src/components/PongGame/GameStep.enum";
 import GameSettings from "../../PongGame/GameSettings";
 import { HexColorPicker } from "react-colorful";
+import toast from "react-hot-toast";
 
 type PlayProps = {
   socket: Socket | undefined;
@@ -20,6 +21,10 @@ type PlayProps = {
 
 const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
   const [step, setStep] = useState<number>(0);
+  const [localColors, setLocalColors] = useState<GameColors>(colors);
+  useEffect(() => {
+    setLocalColors(colors);
+  }, [colors]);
   /** WEBSOCKET */
   const [gameRoom, setGameRoom] = useState<GameRoom | undefined>(undefined);
   const [clientCanvasSize, setClientCanvasSize] = useState<Position>({
@@ -57,21 +62,25 @@ const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
   };
 
   const setRightColor = (key: string) => (newColor: string) => {
-    setColors((current: GameColors) => {
-      current[key as keyof GameColors] = newColor;
-      return current;
+    setLocalColors((current: GameColors) => {
+      let newColors = { ...current };
+      newColors[key as keyof GameColors] = newColor;
+      return newColors;
     });
   };
 
   const setDefaultColors = () => {
-    setColors((current: GameColors) => {
-      return { ...defaultColor };
-    });
+    setLocalColors({ ...defaultColor });
+    toast.success("Color reset");
   };
 
   const gameSteps = [
     <GameLobby socket={socket} setStep={setStep} setGameRoom={setGameRoom} />,
-    <GameSettings setStep={setStep} colors={colors} />,
+    <GameSettings
+      setStep={setStep}
+      colors={localColors}
+      setColors={setColors}
+    />,
     <GameQueue
       socket={socket}
       setStep={setStep}
@@ -98,12 +107,12 @@ const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
       {step === GameStep["SETTINGS"] ? (
         <div>
           <div className="grid grid-cols-3 gap-4">
-            {Object.keys(colors).map((key) => {
+            {Object.keys(localColors).map((key) => {
               return (
                 <div key={key}>
                   {key}
                   <HexColorPicker
-                    color={colors[key as keyof GameColors]}
+                    color={localColors[key as keyof GameColors]}
                     onChange={setRightColor(key)}
                   />
                 </div>
