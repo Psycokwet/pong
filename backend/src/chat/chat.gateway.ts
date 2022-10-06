@@ -493,9 +493,14 @@ export class ChatGateway implements OnGatewayConnection {
       pongUsername: newAdmin.pongUsername,
       status: Status.ONLINE,
     };
-    this.server
-      .in(room.roomName)
-      .emit(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, promotedUser);
+    const promotedUserSocketId = this.userService.getUserIdWebsocket(promotedUser.id);
+    if (promotedUserSocketId) {
+      const promotedUserSocket = this.server.sockets.sockets.get(
+        promotedUserSocketId.socketId,
+      );
+      /** Channel disappears from the banned user's attached channel list */
+      promotedUserSocket.emit( ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, Privileges.ADMIN,);
+    }
 
     this.server
       .in(room.roomName)
@@ -533,10 +538,14 @@ export class ChatGateway implements OnGatewayConnection {
       pongUsername: oldAdmin.pongUsername,
       status: Status.ONLINE,
     };
-
-    this.server
-      .in(data.channelName)
-      .emit(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, demotedUser);
+    const demotedUserSocketId = this.userService.getUserIdWebsocket(demotedUser.id);
+    if (demotedUserSocketId) {
+      const demotedUserSocket = this.server.sockets.sockets.get(
+        demotedUserSocketId.socketId,
+      );
+      /** Channel disappears from the banned user's attached channel list */
+      demotedUserSocket.emit( ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, Privileges.ADMIN,);
+    }
 
     this.server
       .in(room.roomName)
@@ -550,6 +559,7 @@ export class ChatGateway implements OnGatewayConnection {
   @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
   async getUserPrivileges(
     @MessageBody() data: RoomId,
+    @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
     const room = await this.chatService.getRoomWithRelations(
@@ -561,9 +571,7 @@ export class ChatGateway implements OnGatewayConnection {
 
     const privilege = this.chatService.getUserPrivileges(room, payload.userId);
 
-    this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
-      privilege: privilege,
-    });
+    client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
   }
 
   /** BAN / KICK / MUTE */

@@ -17,7 +17,6 @@ const Mute = ({
   socket: Socket | undefined;
 }) => {
   const mute = (val:number) => {
-    console.log(user.id, channelName, val);
     socket?.emit(ROUTES_BASE.CHAT.MUTE_USER_REQUEST, {
       userIdToMute: user.id,
       channelName: channelName,
