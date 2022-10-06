@@ -9,22 +9,14 @@ import ChannelData from "shared/interfaces/ChannelData";
 import Message from "shared/interfaces/Message";
 import { Privileges } from "shared/interfaces/UserPrivilegesEnum";
 
-function ChatList({
-  msg,
-  socket,
-  connectedChannel,
-  handleLeaveChannel,
-  userPrivilege,
-  handleDisconnectChannel /* lastMessage ,*/,
-}: {
-  msg: Message;
-  socket: Socket | undefined;
-  connectedChannel: ChannelData | undefined;
-  handleLeaveChannel: any;
-  userPrivilege: Privileges;
-  handleDisconnectChannel: any;
-  /*lastMessage: Message;*/
-}) {
+function ChatList({ socket , connectedChannel, handleLeaveChannel, userPrivilege, handleDisconnectChannel, /* lastMessage ,*/} : {
+    socket:Socket | undefined,
+    connectedChannel: ChannelData | undefined,
+    handleLeaveChannel: any;
+    userPrivilege: Privileges;
+    handleDisconnectChannel: any;
+    /*lastMessage: Message;*/
+}){
   const [channelList, setChannelList] = useState<ChannelData[]>([]);
   const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
 
