@@ -357,7 +357,6 @@ export class UsersService {
       // return null if picture === null
     }
 
-    console.log(user.picture.path);
     return user.picture.path;
   }
 
