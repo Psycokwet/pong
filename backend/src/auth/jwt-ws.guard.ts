@@ -22,7 +22,7 @@ export class JwtWsGuard extends AuthGuard('jwt') implements CanActivate {
     const authToken = req.handshake.headers.cookie
       .split('; ')
       .map((elem) => elem.split('='))
-      .find(elem => elem[0] === 'Authentication')[1];
+      .find((elem) => elem[0] === 'Authentication')[1];
 
     try {
       req.user = this.jwtService.verify(authToken, {
@@ -30,7 +30,7 @@ export class JwtWsGuard extends AuthGuard('jwt') implements CanActivate {
       });
     } catch (e: unknown) {
       if (e instanceof Error) {
-        console.error(`${e.name}: ${e.message}`);
+        console.error(`${e.name}: ${e.message} JE SUIS LA`);
       }
       return false;
     }
@@ -40,12 +40,13 @@ export class JwtWsGuard extends AuthGuard('jwt') implements CanActivate {
 
 export const UserPayload = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
-    const jwtService = new JwtService;
-    const authToken = ctx.switchToWs().getClient()
-      .handshake.headers.cookie
-      .split('; ')
+    const jwtService = new JwtService();
+    const authToken = ctx
+      .switchToWs()
+      .getClient()
+      .handshake.headers.cookie.split('; ')
       .map((elem) => elem.split('='))
-      .find(elem => elem[0] === 'Authentication')[1]
+      .find((elem) => elem[0] === 'Authentication')[1];
 
     return jwtService.decode(authToken);
   },
