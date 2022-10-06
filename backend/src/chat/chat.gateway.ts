@@ -496,6 +496,13 @@ export class ChatGateway implements OnGatewayConnection {
     this.server
       .in(room.roomName)
       .emit(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, promotedUser);
+
+    this.server
+      .in(room.roomName)
+      .emit(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        await this.chatService.getAttachedUsersInChannel(room.id),
+      );
   }
 
   @UseGuards(JwtWsGuard)
@@ -530,6 +537,13 @@ export class ChatGateway implements OnGatewayConnection {
     this.server
       .in(data.channelName)
       .emit(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, demotedUser);
+
+    this.server
+      .in(room.roomName)
+      .emit(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        await this.chatService.getAttachedUsersInChannel(room.id),
+      );
   }
 
   @UseGuards(JwtWsGuard)

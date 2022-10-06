@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { User } from 'src/user/user.entity';
 import Room from './room.entity';
+import { IsNotEmpty } from 'class-validator';
 
 @Entity()
 class Message {
@@ -14,6 +15,7 @@ class Message {
   public id: number;
 
   @Column()
+  @IsNotEmpty({ message: 'Your message must contain something' })
   public content: string;
 
   @ManyToOne(() => User, { cascade: true })
