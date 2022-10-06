@@ -382,7 +382,7 @@ export class ChatService {
       throw new WsException('Channel does not exist');
     }
 
-    const userInterfaceMembers:/*Promise<*/ChannelUserInterface/*>*/[] = room.members.map((member) => ({
+    const userInterfaceMembers:ChannelUserInterface[] = room.members.map((member) => ({
       id: member.id,
       pongUsername: member.pongUsername,
       status: this.userService.getStatus(member),
