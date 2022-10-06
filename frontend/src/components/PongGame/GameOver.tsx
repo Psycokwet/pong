@@ -10,7 +10,7 @@ const GameOver = ({
   setStep,
   clientCanvasSize,
 }: {
-  socket: Socket;
+  socket: Socket | undefined;
   gameRoom: GameRoom;
   setStep: any;
   clientCanvasSize: Position;
