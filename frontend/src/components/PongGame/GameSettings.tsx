@@ -1,6 +1,6 @@
 import React from "react";
-import { GameStep } from "src/components/PongGame/GameStep.enum";
-import { GameColors } from "shared/types/GameColors";
+import { GameStep } from "/src/components/PongGame/GameStep.enum";
+import { GameColors } from "/shared/types/GameColors";
 import { Api } from "../../api/api";
 import toast from "react-hot-toast";
 const api = new Api();

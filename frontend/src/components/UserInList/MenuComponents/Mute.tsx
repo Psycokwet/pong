@@ -1,6 +1,6 @@
 import { MenuItem } from "@szhsin/react-menu";
 import { MenuSettingsType } from "../MenuSettings";
-import { Privileges } from "shared/interfaces/UserPrivilegesEnum";
+import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 const Mute = ({
   menuSettings,

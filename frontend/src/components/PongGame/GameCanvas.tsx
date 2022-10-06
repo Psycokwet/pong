@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
-import Position from "shared/interfaces/game/Position";
-import GameRoom from "shared/interfaces/game/GameRoom";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import { virtualGameData } from "shared/other/virtualGameData";
-import { GameColors } from "shared/types/GameColors";
+import Position from "/shared/interfaces/game/Position";
+import GameRoom from "/shared/interfaces/game/GameRoom";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { virtualGameData } from "/shared/other/virtualGameData";
+import { GameColors } from "/shared/types/GameColors";
 
 type GameCanvasProps = {
   socket: Socket | undefined;
@@ -23,8 +23,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   clientCanvasSize,
   colors,
 }) => {
-  if (gameRoom === undefined)
-    return <></>
+  if (gameRoom === undefined) return <></>;
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {

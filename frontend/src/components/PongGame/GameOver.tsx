@@ -1,8 +1,8 @@
 import { Socket } from "socket.io-client";
-import GameRoom from "shared/interfaces/game/GameRoom";
-import Position from "shared/interfaces/game/Position";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import { GameStep } from "src/components/PongGame/GameStep.enum";
+import GameRoom from "/shared/interfaces/game/GameRoom";
+import Position from "/shared/interfaces/game/Position";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { GameStep } from "/src/components/PongGame/GameStep.enum";
 
 const GameOver = ({
   socket,
@@ -15,8 +15,7 @@ const GameOver = ({
   setStep: any;
   clientCanvasSize: Position;
 }) => {
-  if (gameRoom===undefined)
-    return <></>
+  if (gameRoom === undefined) return <></>;
   const getWinner = () => {
     return gameRoom.gameData.player1.score > gameRoom.gameData.player2.score
       ? gameRoom.gameData.player1.pongUsername

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Api } from "../../api/api";
 import { useParams } from "react-router-dom";
 
-import UserProfile from "shared/interfaces/UserProfile";
+import UserProfile from "/shared/interfaces/UserProfile";
 import OneUserProfile from "./OneUserProfile";
 import NotFound from "../NavBar/Pages-To-Change/NotFound";
 

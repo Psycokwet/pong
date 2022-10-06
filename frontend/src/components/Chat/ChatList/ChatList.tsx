@@ -4,19 +4,25 @@ import Channel from "./Channel/Channel";
 import DirectMessage from "./DirectMessage/DirectMessage";
 import ChannelMenu from "./ChannelMenu/ChannelMenu";
 import DirectMessageMenu from "./DirectMessageMenu/DirectMessageMenu";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import ChannelData from "shared/interfaces/ChannelData";
-import Message from "shared/interfaces/Message";
-import { Privileges } from "shared/interfaces/UserPrivilegesEnum";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import ChannelData from "/shared/interfaces/ChannelData";
+import Message from "/shared/interfaces/Message";
+import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
-function ChatList({ socket , connectedChannel, handleLeaveChannel, userPrivilege, handleDisconnectChannel, /* lastMessage ,*/} : {
-    socket:Socket | undefined,
-    connectedChannel: ChannelData | undefined,
-    handleLeaveChannel: any;
-    userPrivilege: Privileges;
-    handleDisconnectChannel: any;
-    /*lastMessage: Message;*/
-}){
+function ChatList({
+  socket,
+  connectedChannel,
+  handleLeaveChannel,
+  userPrivilege,
+  handleDisconnectChannel /* lastMessage ,*/,
+}: {
+  socket: Socket | undefined;
+  connectedChannel: ChannelData | undefined;
+  handleLeaveChannel: any;
+  userPrivilege: Privileges;
+  handleDisconnectChannel: any;
+  /*lastMessage: Message;*/
+}) {
   const [channelList, setChannelList] = useState<ChannelData[]>([]);
   const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
 

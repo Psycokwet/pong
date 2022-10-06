@@ -4,13 +4,13 @@ import UserPicture from "../UserPicture/UserPicture";
 import ChatList from "./ChatList/ChatList";
 import TextField from "./TextField/TextField";
 import Messages from "./Messages/Messages";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import ChannelData from "shared/interfaces/ChannelData";
-import Message from "shared/interfaces/Message";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import ChannelData from "/shared/interfaces/ChannelData";
+import Message from "/shared/interfaces/Message";
 import { statusList } from "../Common/StatusList";
-import { ChannelUserInterface } from "shared/interfaces/ChannelUserInterface";
-import { Status } from "shared/interfaces/UserStatus";
-import { Privileges } from "shared/interfaces/UserPrivilegesEnum";
+import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import { Status } from "/shared/interfaces/UserStatus";
+import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 import ChannelUserListByStatus from "./ChatList/UserInChannelList/ChannelUserListByStatus";
 
 function Chat({ socket }: { socket: Socket | undefined }) {

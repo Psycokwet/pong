@@ -1,5 +1,5 @@
 import { MenuItem } from "@szhsin/react-menu";
-import { Privileges } from "shared/interfaces/UserPrivilegesEnum";
+import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 import { MenuSettingsType } from "../MenuSettings";
 
 const SetAdmin = ({ menuSettings }: { menuSettings: MenuSettingsType }) => {

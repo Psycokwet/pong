@@ -1,9 +1,9 @@
 import React from "react";
 import { BsCircleFill } from "react-icons/bs";
-import { ChannelUserInterface } from "shared/interfaces/ChannelUserInterface";
+import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { Socket } from "socket.io-client";
 import ChannelUserMenu from "./UserInChannelList";
-import { Privileges } from "shared/interfaces/UserPrivilegesEnum";
+import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 import { MenuSettingsType } from "../../../UserInList/MenuSettings";
 import { UserStatus } from "../../../Common/StatusList";
 

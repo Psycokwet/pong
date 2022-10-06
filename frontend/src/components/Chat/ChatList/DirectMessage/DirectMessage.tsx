@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import Avatar from "../../../Common/Avatar";
 import { Api } from "../../../../api/api";
 import { Socket } from "socket.io-client";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import ChannelData from "shared/interfaces/ChannelData";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import ChannelData from "/shared/interfaces/ChannelData";
 
 const api = new Api();
 

@@ -1,9 +1,9 @@
 import { Socket } from "socket.io-client";
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import ChannelData from "shared/interfaces/ChannelData";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import ChannelData from "/shared/interfaces/ChannelData";
 import { KeyboardEvent, useState, useEffect } from "react";
-import SearchChannel from "shared/interfaces/SearchChannel";
-import { Privileges } from "shared/interfaces/UserPrivilegesEnum";
+import SearchChannel from "/shared/interfaces/SearchChannel";
+import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 const Channel = function ({
   channel,

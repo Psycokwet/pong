@@ -1,9 +1,9 @@
 import { MenuItem } from "@szhsin/react-menu";
 import { Socket } from "socket.io-client";
 
-import { ROUTES_BASE } from "shared/websocketRoutes/routes";
-import { UserInterface } from "shared/interfaces/UserInterface";
-import AddFriend from "shared/interfaces/AddFriend";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+import { UserInterface } from "/shared/interfaces/UserInterface";
+import AddFriend from "/shared/interfaces/AddFriend";
 import { MenuSettingsType } from "../MenuSettings";
 
 const AddFriendButton = ({
