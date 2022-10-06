@@ -26,7 +26,7 @@ import { GameColors } from "/shared/types/GameColors";
 import { isSameSimpleObj } from "/shared/utils";
 import TwoStepSigningMockup from "./Mockup/TwoStepSigningMockup";
 import SignUpPage from "./SignUpPage/SignUpPage";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 const api = new Api();
 
@@ -34,6 +34,8 @@ function App() {
   const [currentUser, setCurrentUser] = useState<CurrentUserFrontInterface>(
     createCurrentUserFrontInterface()
   );
+
+  const [socket, setSocket] = useState<Socket | undefined>(undefined);
   const setColors = (newColors: GameColors) => {
     setCurrentUser((current: CurrentUserFrontInterface) => {
       let newCurrentUser = { ...current };
@@ -42,9 +44,22 @@ function App() {
     });
   };
   const updateCurrentUser = () => {
+    //   newSocket.on("connect_error", () => {
+    //     toast.error("Connect error on websocket");
+    //     setTimeout(() => newSocket.connect(), 1_000);
+    //   });
+    //   newSocket.on("disconnect", (reason) => {
+    //     toast.error("Socket replied a disconnection error :" + reason);
+    //     setTimeout(() => newSocket.connect(), 1_000);
+    //   });
+
     api.refreshToken().then((res: Response) => {
       if (res.status != 200) {
         console.log("not 200", res.status);
+        setSocket((current: Socket | undefined) => {
+          if (current) current.disconnect();
+          return undefined;
+        });
         setCurrentUser((current: CurrentUserFrontInterface) => {
           if (current.status !== ConnectionStatus.NetworkUnavailable)
             return {
@@ -55,10 +70,31 @@ function App() {
         });
       } else {
         console.log("200 !!");
+        setSocket((current: Socket | undefined) => {
+          //   if (current) {
+          //     return current;
+          //     current.disconnect();
+          //     console.log("disconnect");
+          //   }
+          const newSocket = io(import.meta.env.VITE_PONG_URL, {
+            transports: ["websocket"],
+            withCredentials: true,
+          });
+
+          newSocket.on("connect_error", () => {
+            toast.error("Connect error on websocket");
+            setTimeout(() => newSocket.connect(), 1_000);
+          });
+          newSocket.on("disconnect", (reason) => {
+            toast.error("Socket replied a disconnection error :" + reason);
+            setTimeout(() => newSocket.connect(), 1_000);
+          });
+          console.log("connect", newSocket);
+          return newSocket;
+        });
         res.json().then((newCurrentUser: CurrentUserFrontInterface) => {
           setCurrentUser((current: CurrentUserFrontInterface) => {
-            if (!isSameSimpleObj(current, newCurrentUser))
-            {
+            if (!isSameSimpleObj(current, newCurrentUser)) {
               console.log("here");
               return newCurrentUser;
             }
@@ -69,17 +105,24 @@ function App() {
     });
   };
 
-  const [socket, setSocket] = useState<Socket>();
+  //   useEffect(() => {
+  //     return () => {
+  //       const newSocket = io(import.meta.env.VITE_PONG_URL, {
+  //         transports: ["websocket"],
+  //         withCredentials: true,
+  //       });
+  //       //   newSocket.on("connect_error", () => {
+  //       //     toast.error("Connect error on websocket");
+  //       //     setTimeout(() => newSocket.connect(), 1_000);
+  //       //   });
+  //       //   newSocket.on("disconnect", (reason) => {
+  //       //     toast.error("Socket replied a disconnection error :" + reason);
+  //       //     setTimeout(() => newSocket.connect(), 1_000);
+  //       //   });
 
-  useEffect(() => {
-    return () => {
-      const newSocket = io(import.meta.env.VITE_PONG_URL, {
-        transports: ["websocket"],
-        withCredentials: true,
-      });
-      setSocket(newSocket);
-    };
-  }, []);
+  //       setSocket(newSocket);
+  //     };
+  //   }, []);
 
   useEffect(() => {
     if (currentUser.status == ConnectionStatus.Unknown) {
@@ -87,13 +130,11 @@ function App() {
     }
     const interval = setInterval(() => {
       updateCurrentUser();
-      socket?.disconnect();
-      socket?.connect();
     }, 10_000);
     return () => {
       clearInterval(interval);
     };
-  }, [currentUser.status]);
+  }, [currentUser.status, socket]);
 
   switch (currentUser.status) {
     case ConnectionStatus.Unknown:
@@ -193,9 +234,7 @@ function App() {
     case ConnectionStatus.TwoFactorAuthenticationRequested:
       return (
         <>
-          <TwoStepSigningMockup 
-            updateCurrentUser={updateCurrentUser}
-          />
+          <TwoStepSigningMockup updateCurrentUser={updateCurrentUser} />
           <Toaster />
         </>
       );

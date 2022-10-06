@@ -100,11 +100,20 @@ export class FortyTwoController {
   @UseGuards(JwtRefreshGuard)
   @Get(ROUTES_BASE.AUTH.REFRESH)
   async refresh(@Req() request: RequestWithUser) {
-    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
-      request.user.id,
-      false,
+    // const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
+    //   request.user.id,
+    //   request.user.isTwoFactorAuthenticated,
+    // );
+    // console.log('IS 2FA AUTH', request.user);
+    // await request.res.setHeader('Set-Cookie', accessTokenCookie);
+
+    await request.res.setHeader(
+      'Set-Cookie',
+      await this.twoFactorAuthService.getCookiesWith2FAValue(
+        request.user,
+        request.user.isTwoFactorAuthenticated,
+      ),
     );
-    await request.res.setHeader('Set-Cookie', accessTokenCookie);
     return currentUserToFrontInterface(request.user);
   }
 }
