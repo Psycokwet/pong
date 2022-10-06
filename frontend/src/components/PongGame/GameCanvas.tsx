@@ -137,7 +137,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   };
 
   useEffect(() => {
-    console.log(colors.ball, colors.paddle, colors.background);
     socket?.on(ROUTES_BASE.GAME.UPDATE_GAME, handleGameUpdate);
     return () => {
       socket?.off(ROUTES_BASE.GAME.UPDATE_GAME, handleGameUpdate);
