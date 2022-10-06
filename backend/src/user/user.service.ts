@@ -287,6 +287,7 @@ export class UsersService {
           id: friend.user.id,
           pongUsername: friend.user.pongUsername,
           status: this.getStatus(friend.user),
+          image_url: 'TMP_FIX', //To replace later of course...
         };
       },
     );

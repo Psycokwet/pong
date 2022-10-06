@@ -49,6 +49,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
         id: user.id,
         pongUsername: user.pongUsername,
         status: Status.ONLINE,
+        image_url: 'TMP_FIX', //To replace later of course...
       };
       this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, newUserConnected);
     } catch (e) {
@@ -69,6 +70,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
         id: user.id,
         pongUsername: user.pongUsername,
         status: Status.OFFLINE,
+        image_url: 'TMP_FIX', //To replace later of course...
       };
       this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, disconnectingUser);
     } catch (e) {
@@ -125,6 +127,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
       id: friend.id,
       pongUsername: friend.pongUsername,
       status: friendStatus,
+      image_url: 'TMP_FIX', //To replace later of course...
     };
     client.emit(ROUTES_BASE.USER.ADD_FRIEND_CONFIRMATION, newFriend);
   }

@@ -503,6 +503,7 @@ export class ChatGateway implements OnGatewayConnection {
       id: newAdmin.id,
       pongUsername: newAdmin.pongUsername,
       status: Status.ONLINE,
+      image_url: 'TMP_FIX', //To replace later of course...
     };
     this.server
       .in(room.roomName)
@@ -536,6 +537,7 @@ export class ChatGateway implements OnGatewayConnection {
       id: oldAdmin.id,
       pongUsername: oldAdmin.pongUsername,
       status: Status.ONLINE,
+      image_url: 'TMP_FIX', //To replace later of course...
     };
 
     this.server
