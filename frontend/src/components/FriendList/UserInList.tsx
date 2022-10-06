@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MenuItem, ControlledMenu, useMenuState } from '@szhsin/react-menu';
+import { ControlledMenu, useMenuState } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
 import { Socket } from "socket.io-client";
 
@@ -8,7 +8,6 @@ import { UserInterface } from "/shared/interfaces/UserInterface";
 
 import { MenuSettingsType } from "../UserInList/MenuSettings";
 import Watch from "../UserInList/MenuComponents/Watch";
-import Block from "../UserInList/MenuComponents/Block";
 import Challenge from "../UserInList/MenuComponents/Challenge";
 import Profile from "../UserInList/MenuComponents/Profile";
 import SendDirectMessage from "../UserInList/MenuComponents/SendDirectMessage";
@@ -68,7 +67,6 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
         <Profile user={user}/>
         <Challenge menuSettings={menuSettings} socket={socket} user={user}/>
         <Watch menuSettings={menuSettings}/>
-        <Block />
       </ControlledMenu>
     </div>) : <></>
   )
