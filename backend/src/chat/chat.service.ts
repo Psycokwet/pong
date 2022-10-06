@@ -16,6 +16,7 @@ import ChannelData from 'shared/interfaces/ChannelData';
 import ChannelUserInterface from 'shared/interfaces/ChannelUserInterface';
 import { Muted } from './muted.entity';
 import { Banned } from './banned.entity';
+import { validate } from 'class-validator';
 @Injectable()
 export class ChatService {
   constructor(
@@ -173,6 +174,15 @@ export class ChatService {
   }) {
     const user = await this.userService.getById(userId);
     if (!user) throw new WsException('User does not exist');
+
+    let channelNameValidate = new Room();
+    channelNameValidate.channelName = roomName;
+
+    const errors = await validate(channelNameValidate);
+    if (errors.length > 0)
+      throw new WsException({
+        message: errors.map((error) => error.constraints),
+      });
 
     const newRoom = Room.create({
       roomName: `channel:${roomName}:${uuidv4()}`,
