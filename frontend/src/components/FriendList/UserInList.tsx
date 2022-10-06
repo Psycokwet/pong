@@ -2,10 +2,7 @@ import { useState, useEffect } from "react";
 import { ControlledMenu, useMenuState } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import { Socket } from "socket.io-client";
-
-import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { UserInterface } from "/shared/interfaces/UserInterface";
-
 import { MenuSettingsType } from "../UserInList/MenuSettings";
 import Watch from "../UserInList/MenuComponents/Watch";
 import Challenge from "../UserInList/MenuComponents/Challenge";
@@ -48,6 +45,12 @@ const UserInList = ({
 
   return user ? (
     <div
+      key={user.id}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setAnchorPoint({ x: e.clientX, y: e.clientY });
+        toggleMenu(true);
+      }}
       className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
       ${user.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
     >

@@ -1,12 +1,9 @@
-import { useState, useEffect } from "react";
-import { MenuItem, ControlledMenu, useMenuState } from "@szhsin/react-menu";
+import { useState } from "react";
+import { ControlledMenu, useMenuState } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import { Socket } from "socket.io-client";
-
-import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
-
 import Watch from "/src/components/UserInList/MenuComponents/Watch";
 import AddFriendButton from "/src/components/UserInList/MenuComponents/AddFriendButton";
 import Ban from "/src/components/UserInList/MenuComponents/Ban";
@@ -43,7 +40,16 @@ const ChannelUserMenu = ({
 
   if (!user) return <></>;
   return (
-    <div>
+    <div
+      key={user.id}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setAnchorPoint({ x: e.clientX, y: e.clientY });
+        toggleMenu(true);
+      }}
+      className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
+      ${user.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
+    >
       {/* Avatar and Nickname */}
       <div className="grid grid-cols-3 m-2">
         <img src={user.image_url} alt="Avatar" className="w-10 rounded-3xl" />
