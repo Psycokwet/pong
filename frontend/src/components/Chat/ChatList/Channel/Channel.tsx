@@ -53,7 +53,6 @@ const Channel = function ({
     setIsVisible(false);
   };
 
-  console.log(userPrivilege);
   return (
     <div
       className={
