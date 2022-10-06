@@ -28,7 +28,6 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
   const [avatarUrl, setAvatarUrl] = useState("");
 
   useEffect(() => {
-    console.log("call api on pongUsername: ", user.pongUsername);
     api.getPicture(user.pongUsername).then((res) => {
       if (res.status == 200)
         res.blob().then((myBlob) => {
