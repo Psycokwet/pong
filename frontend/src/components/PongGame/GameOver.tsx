@@ -11,10 +11,12 @@ const GameOver = ({
   clientCanvasSize,
 }: {
   socket: Socket | undefined;
-  gameRoom: GameRoom;
+  gameRoom: GameRoom | undefined;
   setStep: any;
   clientCanvasSize: Position;
 }) => {
+  if (gameRoom===undefined)
+    return <></>
   const getWinner = () => {
     return gameRoom.gameData.player1.score > gameRoom.gameData.player2.score
       ? gameRoom.gameData.player1.pongUsername

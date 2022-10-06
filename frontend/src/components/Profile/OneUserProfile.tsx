@@ -6,8 +6,8 @@ import UserProfile from "shared/interfaces/UserProfile";
 import Avatar from "../Common/Avatar";
 
 type OneUserProfileProps = {
-  userProfile?: UserProfile;
-  avatarUrl?: string;
+  userProfile: UserProfile;
+  avatarUrl: string;
 };
 
 const OneUserProfile: React.FC<OneUserProfileProps> = ({
@@ -21,7 +21,7 @@ const OneUserProfile: React.FC<OneUserProfileProps> = ({
         <div className="p-2">
           <strong>{userProfile.pongUsername}</strong>
           <div>Level: {Math.floor(userProfile.userRank.level * 100) / 100}</div>
-          <div>Rank : {userProfile.userRank.userRank.rank}</div>
+          <div>Rank : {userProfile.userRank.userRank}</div>
         </div>
       </div>
 
