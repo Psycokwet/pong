@@ -35,12 +35,12 @@ const FriendList = ({ socket }: { socket: Socket | undefined }) => {
 
   const updateUserStatus = (user:UserInterface) => {
     setUserFriendList((current) => {
-      const finded:UserInterface = current.find((attachedUser) => attachedUser.id == user.id);
-      if (finded === undefined)
+      const found:UserInterface = current.find((attachedUser) => attachedUser.id == user.id);
+      if (found === undefined)
         return current;
       const filteredList = current.filter((attachedUser) => attachedUser.id != user.id);
-      finded.status = user.status;
-      return [...filteredList, finded];
+      found.status = user.status;
+      return [...filteredList, found];
       }
     );
   }
