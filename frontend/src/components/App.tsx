@@ -69,7 +69,6 @@ function App() {
           return current;
         });
       } else {
-        console.log("200 !!");
         setSocket((current: Socket | undefined) => {
           if (current) return current;
           //     current.disconnect();
@@ -94,7 +93,6 @@ function App() {
         res.json().then((newCurrentUser: CurrentUserFrontInterface) => {
           setCurrentUser((current: CurrentUserFrontInterface) => {
             if (!isSameSimpleObj(current, newCurrentUser)) {
-              console.log("here");
               return newCurrentUser;
             }
             return current;
