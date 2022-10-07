@@ -48,20 +48,13 @@ const ChannelUserMenu = ({pointedUser, inputFilter, socket, menuSettings, userPr
         toggleMenu(true);
         socket?.emit(ROUTES_BASE.USER);
       }}
-      className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
+      className={`mx-2 cursor-pointer hover:bg-gray-600
       ${pointedUser.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
     >
       {/* Avatar and Nickname */}
-      <div
-        className="grid grid-cols-3 m-2"
-      >
-        <img
-          src={pointedUser.image_url}
-          alt="Avatar"
-          className="w-10 rounded-3xl"
-        />
-        <strong>{pointedUser.pongUsername}</strong>
+      <div className="p-1">
         {icons[pointedUser.privileges]}
+        <strong>{pointedUser.pongUsername}</strong>
       </div>
       {/* Right click menu */}
       <ControlledMenu {...menuProps}

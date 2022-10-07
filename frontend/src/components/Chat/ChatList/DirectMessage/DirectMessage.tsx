@@ -1,12 +1,7 @@
-import React, { useEffect, useState } from "react";
-import Avatar from "../../../Common/Avatar";
-import { Api } from "../../../../api/api";
+import React from "react";
 import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelData } from "/shared/interfaces/ChannelData";
-import { Message } from "/shared/interfaces/Message";
-
-const api = new Api();
 
 type Props = {
   socket: Socket|undefined;
@@ -22,7 +17,6 @@ const DirectMessage: React.FC<Props> = ({
   connectedChannel
 }) => {
   // const [lastMessage, setLastMessage] = useState<Message>();
-  const [avatarUrl, setAvatarUrl] = useState("");
   const handleClick = () => {
     socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST, {roomId: channel.channelId});
   }
@@ -33,22 +27,10 @@ const DirectMessage: React.FC<Props> = ({
 
   // if (message.roomId === channel.channelId && lastMessage !== message)
   //   setLastMessage(message);
-  useEffect(() => {
-    api.getPicture(channel.channelName).then((res) => {
-      if (res.status == 200)
-        res.blob().then((myBlob) => {
-          setAvatarUrl((current) => {
-            if (current) URL.revokeObjectURL(current);
-            return URL.createObjectURL(myBlob);
-          });
-        });
-    });
-  }, []);
 
   return (
     <div className={style}
       onClick={handleClick}>
-      <Avatar url={avatarUrl} size="w-12 h-12"/>
       <div className="flex flex-col">
         <h4 className="text-lg font-semibold truncate">
           {channel.channelName}

@@ -211,7 +211,6 @@ function Chat({ socket }: { socket: Socket | undefined }) {
         ) : (
           <></>
         )}
-        <UserPicture />
       </div>
     </div>
   );

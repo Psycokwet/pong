@@ -1,5 +1,4 @@
 import { useRef } from "react";
-import UserPicture from "../../UserPicture/UserPicture";
 import { Message } from "/shared/interfaces/Message";
 import { UserInterface } from "/shared/interfaces/UserInterface";
 
@@ -13,7 +12,6 @@ const Messages = ({messages}: {messages:Message[]}) => {
       {messages.map((message, index) => {
       return (
         <div key={index} className="flex gap-3 py-4 px-10">
-          <UserPicture width="50px"/>
           <div className="">
             <h6 className="text-lg font-semibold self-center">
               {message.author}
