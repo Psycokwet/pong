@@ -23,6 +23,6 @@ echo $LINE Copying shared $LINE
 rm -rf dist_project/frontend/shared
 rsync -av dist_project/backend/shared dist_project/frontend
 
-# bash build_prod.sh && cd dist_project && cp ../.env .env  && cp ../backend/.env backend/.env && sudo docker system prune -fa && sudo docker-compose up
+# bash build_prod.sh && cd dist_project && cp ../frontend/.env frontend/.env  && cp ../backend/.env backend/.env && sudo docker system prune -fa && sudo docker-compose up
 # bash build_prod.sh && cd dist_project && cp ../backend/.env backend/.env && sudo docker system prune -fa && sudo docker-compose up
 # bash build_prod.sh && cd dist_project && cp ../backend/.env backend/.env && sudo docker-compose build --no-cache frontend && sudo docker-compose up
