@@ -7,7 +7,7 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
-import Avatar from "../../../Common/Avatar"
+import Avatar from "../../Common/Avatar";
 
 import { MenuSettingsType } from "./MenuSettings";
 import Watch from "/src/components/UserInList/MenuComponents/Watch";
@@ -43,7 +43,7 @@ const ChannelUserMenu = ({
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
   const [imageUrl, setImageUrl] = useState<string>("");
-const api = new Api();
+  const api = new Api();
 
   useEffect(() => {
     api.getPicture(pointedUser.pongUsername).then((res) => {
@@ -74,7 +74,7 @@ const api = new Api();
         socket?.emit(ROUTES_BASE.USER);
       }}
       className={`mx-2 cursor-pointer hover:bg-gray-600
-      ${pointedUser.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
+      ${pointedUser.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}
       ${blockedUserList.find((blockedUser)=>blockedUser.id == pointedUser.id) != undefined ? "hidden":""}`}
     >
       {/* Avatar and Nickname */}
