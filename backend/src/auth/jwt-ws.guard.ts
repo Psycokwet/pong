@@ -30,7 +30,7 @@ export class JwtWsGuard extends AuthGuard('jwt') implements CanActivate {
       });
     } catch (e: unknown) {
       if (e instanceof Error) {
-        console.error(`${e.name}: ${e.message} JE SUIS LA`);
+        console.error(`${e.name}: ${e.message}`);
       }
       return false;
     }
