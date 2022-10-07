@@ -1,28 +1,30 @@
 import { useRef } from "react";
 import UserPicture from "../../UserPicture/UserPicture";
 import { Message } from "/shared/interfaces/Message";
-import { UserInterface } from "/shared/interfaces/UserInterface";
+import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 
-const Messages = ({messages}: {messages:Message[]}) => {
+const Messages = ({
+  messages,
+  blockedUserList,
+}:{
+  messages: Message[];
+  blockedUserList: BlockedUserInterface[];
+}) => {
   const containerRef = useRef();
-  const refAssignCallback = (ref: any) => {
-    if (!containerRef.current && ref) {
-      ref.scrollTop = ref.scrollHeight - ref.getBoundingClientRect().height;
-      containerRef.current = ref;
-    } else {
-      //otherwise just assign/unassigned
-      containerRef.current = ref;
-    }
-  };
 
+  const filteredMessages:Message[] = messages.filter((message) => {
+    return blockedUserList.find((blockedUser) => blockedUser.pongUsername==message.author) == undefined
+    })
   return (
     <div 
-      ref={refAssignCallback}
-      className="row-span-5 col-span-3 scroll-smooth overflow-y-auto"
+      className="flex flex-col-reverse row-span-5 col-span-3 scroll-smooth overflow-y-auto"
     >
-      {messages.map((message, index) => {
+      {filteredMessages.map((message, index) => {
       return (
-        <div key={index} className="flex gap-3 py-4 px-10">
+        <div
+          key={index}
+          className={`flex gap-3 py-4 px-10`}
+        >
           <UserPicture width="50px"/>
           <div className="">
             <h6 className="text-lg font-semibold self-center">
