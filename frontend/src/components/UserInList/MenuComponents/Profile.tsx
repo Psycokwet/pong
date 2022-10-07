@@ -8,7 +8,12 @@ import { MenuSettingsType } from "../MenuSettings";
 const Profile = ({user}:{user:UserInterface}) => {
   return (
     <MenuItem>
-      <Link to={`/profile/${user.pongUsername}`}>SeeProfile</Link>
+      <Link
+        className="h-full w-full"
+        to={`/profile/${user.pongUsername}`}
+      >
+        SeeProfile
+      </Link>
     </MenuItem>
   );
 }
