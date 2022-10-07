@@ -3,20 +3,10 @@ import UserPicture from "../../UserPicture/UserPicture";
 import Message from "/shared/interfaces/Message";
 const Messages = ({ messages }: { messages: Message[] }) => {
   const containerRef = useRef();
-  const refAssignCallback = (ref: any) => {
-    if (!containerRef.current && ref) {
-      ref.scrollTop = ref.scrollHeight - ref.getBoundingClientRect().height;
-      containerRef.current = ref;
-    } else {
-      //otherwise just assign/unassigned
-      containerRef.current = ref;
-    }
-  };
 
   return (
-    <div
-      ref={refAssignCallback}
-      className="row-span-5 col-span-3 scroll-smooth overflow-y-auto"
+    <div 
+      className="flex flex-col-reverse row-span-5 col-span-3 scroll-smooth overflow-y-auto"
     >
       {messages.map((message, index) => {
         return (

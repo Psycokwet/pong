@@ -269,6 +269,14 @@ export class ChatGateway implements OnGatewayConnection {
     }
 
     await this.chatService.attachMemberToChannel(payload.userId, room);
+
+    this.server
+      .in(room.roomName)
+      .emit(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        await this.chatService.getAttachedUsersInChannel(room.id),
+      );
+
     await this.joinAttachedChannelLobby(client, payload);
     await this.joinRoom({ roomId: room.id }, client, payload);
   }
