@@ -28,11 +28,6 @@ const NavBar: React.FC<NavBarProps> = ({ setDisconnected, pongUsername }) => {
       pageIcon: <RiPingPongFill size="28" />,
     },
     {
-      url: "/leaderboard",
-      pageName: "leader board",
-      pageIcon: <HiChartBar size="28" />,
-    },
-    {
       url: "/chat",
       pageName: "chat",
       pageIcon: <FaComments size="28" />,

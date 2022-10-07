@@ -33,7 +33,7 @@ export class TwoFactorAuthStrategy extends PassportStrategy(
       payload.isTwoFactorAuthenticated
     ) {
       const refreshToken = request.cookies?.Refresh;
-      return this.userService.getUserIfRefreshTokenMatches(
+      return await this.userService.getUserIfRefreshTokenMatches(
         refreshToken,
         payload.userId,
       );
