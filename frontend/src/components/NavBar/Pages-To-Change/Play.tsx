@@ -102,7 +102,6 @@ const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
       clientCanvasSize={clientCanvasSize}
     />,
   ];
-  console.log(gameSteps[step]);
   return (
     <div className="bg-black text-white lg:h-7/8 sm:h-6/8 place-content-center">
       {step === GameStep["SETTINGS"] ? (
@@ -127,13 +126,12 @@ const Play: React.FC<PlayProps> = ({ socket, colors, setColors }) => {
                 Reset Default Colors
               </button>
             </div>
-            {gameSteps[step]} coucou pony
+            {gameSteps[step]}
           </div>
         </div>
       ) : (
         gameSteps[step]
       )}
-      coucouc bob
     </div>
   );
 };
