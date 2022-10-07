@@ -29,7 +29,9 @@ import { Blocked } from 'src/blocked/blocked.entity';
 import { ConnectionStatus } from 'shared/enumerations/ConnectionStatus';
 import { GameColors } from 'shared/types/GameColors';
 import { Status } from 'shared/interfaces/UserStatus';
+import {BlockedUserInterface} from 'shared/interfaces/BlockedUserInterface';
 import { validate } from 'class-validator';
+
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -445,13 +447,8 @@ export class UsersService {
     await addBlockedUser.save();
   }
 
-  async getBlockedUsersList(caller: User): Promise<
-    | {
-        id: number;
-        pongUsername: string;
-      }[]
-    | undefined
-  > {
+  async getBlockedUsersList(caller: User): Promise<BlockedUserInterface[] | undefined>
+  {
     const rawBlockedList: Blocked[] = await this.blockedRepository.find({
       relations: {
         blockedUser: true,
