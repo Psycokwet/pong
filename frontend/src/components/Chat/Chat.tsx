@@ -26,7 +26,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
 
   const addMessage = (newElem: Message) => {
     if (connectedChannel && newElem.roomId == connectedChannel.channelId)
-      setMessages((current) => [...current, newElem]);
+      setMessages((current) => [newElem, ...current]);
     // setLastMessage(newElem);
   };
   useEffect(() => {
@@ -35,8 +35,8 @@ function Chat({ socket }: { socket: Socket | undefined }) {
       socket?.off(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, addMessage);
     };
   }, [addMessage]);
-  const resetMessages = (msgs: Message[]) => {
-    setMessages(msgs);
+  const resetMessages = (msgs:Message[]) => {
+    setMessages(msgs.reverse());
     // setLastMessage(msgs.at(-1));
   };
   useEffect(() => {
