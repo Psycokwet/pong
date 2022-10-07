@@ -11,12 +11,14 @@ import { ChannelData } from "/shared/interfaces/ChannelData";
 import { Message } from "/shared/interfaces/Message";
 import { statusList } from "../Common/StatusList";
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Status } from "/shared/interfaces/UserStatus";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 function Chat({ socket }: { socket: Socket | undefined }) {
   const [messages, setMessages] = useState<Message[]>([]);
   // const [lastMessage, setLastMessage] = useState<Message>(undefined)
+  const [blockedUserList, setBlockedUserList] = useState<ChannelUserInterface[]>([]);
   const [connectedChannel, setConnectedChannel] =
     useState<ChannelData>(undefined);
   const [attachedUserList, setAttachedUserList] = useState<
@@ -46,6 +48,8 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, [resetMessages]);
 
+
+  /**  Set actual connectedChannel */
   const channelListener = (channel: ChannelData) => {
     setConnectedChannel(channel);
   };
@@ -71,6 +75,8 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, [channelListener]);
 
+
+  /**  Disconnect and clear page */
   const disconnect = () => {
     setMessages([]);
     setConnectedChannel(undefined);
@@ -82,6 +88,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, [disconnect]);
 
+  /**  Listen User list for channel */
   useEffect(() => {
     if (connectedChannel)
       socket?.emit(
@@ -124,6 +131,31 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   }, []);
   /** END UNATTACH FROM CHANNEL */
 
+  /** Block user list update */
+  const resetBlockUserList = (list:BlockedUserInterface[]) => {
+    setBlockedUserList(list);
+  }
+  useEffect(() => {
+    socket?.emit(ROUTES_BASE.USER.BLOCKED_USERS_LIST_REQUEST);
+  }, []);
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.USER.BLOCKED_USERS_LIST_CONFIRMATION, resetBlockUserList);
+    return () => {
+      socket?.off(ROUTES_BASE.USER.BLOCKED_USERS_LIST_CONFIRMATION, resetBlockUserList)
+    };
+  }, [resetBlockUserList]);
+  const confirmUserBlocked = (user:string) => {
+  //Need a toast here
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.USER.BLOCK_USER_CONFIRMATION, confirmUserBlocked);
+    return () => {
+      socket?.off(ROUTES_BASE.USER.BLOCK_USER_CONFIRMATION, confirmUserBlocked);
+    };
+  }, [confirmUserBlocked]);
+
+
+  /** Other functions (handlers) */
   const handleDisconnectChannel = () => {
     setConnectedChannel(undefined);
     setMessages([]);
@@ -181,9 +213,13 @@ function Chat({ socket }: { socket: Socket | undefined }) {
         connectedChannel={connectedChannel}
         userPrivilege={userPrivilege}
         handleDisconnectChannel={handleDisconnectChannel}
+        blockedUserList={blockedUserList}
         // lastMessage={lastMessage}
       />
-      <Messages messages={messages} />
+      <Messages
+        messages={messages}
+        blockedUserList={blockedUserList}
+      />
       {connectedChannel ? (
         <TextField socket={socket} connectedChannel={connectedChannel} />
       ) : (
@@ -205,6 +241,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
                   challenge: aStatusList.status === Status.ONLINE,
                   watch: aStatusList.status === Status.PLAYING,
                 }}
+                blockedUserList={blockedUserList}
               />
             );
           })
