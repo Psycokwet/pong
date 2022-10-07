@@ -5,6 +5,7 @@ import { Socket } from "socket.io-client";
 
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 
 import { MenuSettingsType } from "./MenuSettings";
@@ -20,12 +21,22 @@ import SetAdmin from "/src/components/UserInList/MenuComponents/SetAdmin";
 import { FaCrown } from "react-icons/fa";
 import { AiFillTool } from "react-icons/ai";
 
-const ChannelUserMenu = ({user, inputFilter, socket, menuSettings, userPrivilege} :{
-  user: ChannelUserInterface,
-  inputFilter: string,
-  socket: Socket|undefined
-  menuSettings: MenuSettingsType,
+const ChannelUserMenu = ({
+  pointedUser,
+  inputFilter,
+  socket,
+  menuSettings,
+  userPrivilege,
+  channelName,
+  blockedUserList,
+} :{
+  pointedUser: ChannelUserInterface;
+  inputFilter: string;
+  socket: Socket|undefined;
+  menuSettings: MenuSettingsType;
   userPrivilege: Privileges;
+  channelName: string;
+  blockedUserList: BlockedUserInterface[];
 }) => {
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
@@ -36,11 +47,11 @@ const ChannelUserMenu = ({user, inputFilter, socket, menuSettings, userPrivilege
     <FaCrown/>,
   ]
 
-  if (!user)
+  if (!pointedUser)
     return <></>
   return (
     <div
-      key={user.id}
+      key={pointedUser.id}
       onContextMenu={(e) => {
         e.preventDefault();
         setAnchorPoint({ x: e.clientX, y: e.clientY });
@@ -48,34 +59,50 @@ const ChannelUserMenu = ({user, inputFilter, socket, menuSettings, userPrivilege
         socket?.emit(ROUTES_BASE.USER);
       }}
       className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
-      ${user.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
+      ${pointedUser.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}
+      ${blockedUserList.find((blockedUser)=>blockedUser.id == pointedUser.id) != undefined ? "hidden":""}`}
     >
       {/* Avatar and Nickname */}
       <div
         className="grid grid-cols-3 m-2"
       >
         <img
-          src={user.image_url}
+          src={pointedUser.image_url}
           alt="Avatar"
           className="w-10 rounded-3xl"
         />
-        <strong>{user.pongUsername}</strong>
-        {icons[user.privileges]}
+        <strong>{pointedUser.pongUsername}</strong>
+        {icons[pointedUser.privileges]}
       </div>
       {/* Right click menu */}
       <ControlledMenu {...menuProps}
         anchorPoint={anchorPoint}
         onClose={() => toggleMenu(false)}
       >
-        <SendDirectMessage socket={socket} user={user}/>
-        <Profile user={user}/>
-        <Challenge menuSettings={menuSettings} socket={socket} user={user}/>
+        <SendDirectMessage socket={socket} user={pointedUser}/>
+        <Profile user={pointedUser}/>
+        <Challenge menuSettings={menuSettings} socket={socket} user={pointedUser}/>
         <Watch menuSettings={menuSettings}/>
-        <AddFriendButton menuSettings={menuSettings} socket={socket} user={user}/>
-        <Block />
-        <Mute menuSettings={menuSettings} userPrivilege={userPrivilege} />
-        <Ban menuSettings={menuSettings} userPrivilege={userPrivilege} />
-        <SetAdmin menuSettings={menuSettings}/>
+        <AddFriendButton menuSettings={menuSettings} socket={socket} user={pointedUser}/>
+        <Block socket={socket} user={pointedUser}/>
+        <Mute
+          userPrivilege={userPrivilege}
+          user={pointedUser}
+          socket={socket}
+          channelName={channelName}
+        />
+        <Ban
+          userPrivilege={userPrivilege}
+          user={pointedUser}
+          socket={socket}
+          channelName={channelName}
+        />
+        <SetAdmin
+          userPrivilege={userPrivilege}
+          pointedUser={pointedUser}
+          socket={socket}
+          channelName={channelName}
+        />
       </ControlledMenu>
     </div>
   )
