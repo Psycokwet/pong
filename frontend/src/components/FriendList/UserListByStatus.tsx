@@ -22,7 +22,7 @@ const UserListByStatus: React.FC<UserListByStatusProps> = ({
   menuSettings,
 }) => {
   return (
-    <>
+    <div className="flex flex-col gap-1">
       {/* Group Name */}
       <div className="flex items-center font-bold">
         <span className="px-2">
@@ -31,20 +31,18 @@ const UserListByStatus: React.FC<UserListByStatusProps> = ({
         <p>{statusList.groupName}</p>
       </div>
 
-      {userList
-        ?.filter((value) => value.status === statusList.status)
-        .map((user) => {
-          return (
-            <UserInList
-              key={user.id}
-              user={user}
-              inputFilter={inputFilter}
-              socket={socket}
-              menuSettings={menuSettings}
-            />
-          );
-        })}
-    </>
+      {userList?.filter((value) => value.status === statusList.status).map((user) => {
+        return (
+          <UserInList
+            key={user.id}
+            user={user}
+            inputFilter={inputFilter}
+            socket={socket}
+            menuSettings={menuSettings}
+          />
+        );
+      })}
+    </div>
   );
 };
 

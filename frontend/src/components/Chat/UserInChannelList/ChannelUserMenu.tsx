@@ -7,6 +7,7 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import Avatar from "../../Common/Avatar";
 
 import Watch from "/src/components/UserInList/MenuComponents/Watch";
 import AddFriendButton from "/src/components/UserInList/MenuComponents/AddFriendButton";
@@ -19,7 +20,7 @@ import SendDirectMessage from "/src/components/UserInList/MenuComponents/SendDir
 import SetAdmin from "/src/components/UserInList/MenuComponents/SetAdmin";
 import { FaCrown } from "react-icons/fa";
 import { AiFillTool } from "react-icons/ai";
-import { MenuSettingsType } from "../../UserInList/MenuSettings";
+import { Api } from "../../../api/api";
 
 const ChannelUserMenu = ({
   pointedUser,
@@ -43,8 +44,25 @@ const ChannelUserMenu = ({
     y: 0,
   });
   const [menuProps, toggleMenu] = useMenuState();
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const api = new Api();
 
-  const icons = [<></>, <AiFillTool />, <FaCrown />];
+  useEffect(() => {
+    api.getPicture(pointedUser.pongUsername).then((res) => {
+      if (res.status == 200)
+        res.blob().then((myBlob) => {
+          setImageUrl((current) => {
+            if (current) URL.revokeObjectURL(current);
+            return URL.createObjectURL(myBlob);
+          });
+        });
+    });
+  }, []);
+  const icons = [
+    <></>,
+    <AiFillTool className="shrink-0"/>,
+    <FaCrown className="shrink-0"/>,
+  ]
 
   if (!pointedUser) return <></>;
   return (
@@ -55,7 +73,7 @@ const ChannelUserMenu = ({
         setAnchorPoint({ x: e.clientX, y: e.clientY });
         toggleMenu(true);
       }}
-      className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
+      className={`mx-2 cursor-pointer hover:bg-gray-600
       ${pointedUser.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}
       ${
         blockedUserList.find(
@@ -66,13 +84,16 @@ const ChannelUserMenu = ({
       }`}
     >
       {/* Avatar and Nickname */}
-      <div className="grid grid-cols-3 m-2">
-        <img
-          src={pointedUser.image_url}
-          alt="Avatar"
-          className="w-10 rounded-3xl"
-        />
-        <strong>{pointedUser.pongUsername}</strong>
+      <div
+        className="flex flex-row items-center gap-2"
+      >
+        <div className="shrink-0">
+          <Avatar
+            url={imageUrl}
+            size="w-10 h-10"
+          />
+        </div>
+        <strong className="shrink truncate">{pointedUser.pongUsername}</strong>
         {icons[pointedUser.privileges]}
       </div>
       {/* Right click menu */}
