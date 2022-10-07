@@ -14,7 +14,14 @@ import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Status } from "/shared/interfaces/UserStatus";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import { UserInterface } from 'shared/interfaces/UserInterface';
+import { Api } from "../../api/api";
+type UserAvatar = {
+  avatarUrl:string|undefined,
+  pongUsername:string,
+}
 
+const api = new Api();
 function Chat({ socket }: { socket: Socket | undefined }) {
   const [messages, setMessages] = useState<Message[]>([]);
   // const [lastMessage, setLastMessage] = useState<Message>(undefined)
@@ -25,6 +32,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     ChannelUserInterface[]
   >([]);
   const [userPrivilege, setPrivilege] = useState<number>(Privileges.MEMBER);
+  const [avatarList, setAvatarList] = useState<UserAvatar[]>([]);
 
   const addMessage = (newElem: Message) => {
     if (connectedChannel && newElem.roomId == connectedChannel.channelId)
@@ -48,6 +56,21 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, [resetMessages]);
 
+  useEffect(() => {
+    attachedUserList.map(async (user:ChannelUserInterface) => {
+      await (api.getPicture(user.pongUsername).then((res) => {
+        if (res.status == 200)
+          res.blob().then((myBlob) => {
+            setAvatarList((current) => [...current, {
+              avatarUrl:URL.createObjectURL(myBlob),
+              pongUsername:user.pongUsername
+            }]);
+          });
+        else
+          return "";
+      }));
+    })
+  }, [attachedUserList]);
 
   /**  Set actual connectedChannel */
   const channelListener = (channel: ChannelData) => {
@@ -89,6 +112,9 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   }, [disconnect]);
 
   /**  Listen User list for channel */
+  const resetAttachedUserList = (newList:ChannelUserInterface[]) => {
+    setAttachedUserList([...newList]);
+  }
   useEffect(() => {
     if (connectedChannel)
       socket?.emit(
@@ -96,19 +122,34 @@ function Chat({ socket }: { socket: Socket | undefined }) {
         connectedChannel.channelId
       );
   }, [connectedChannel]);
+
   useEffect(() => {
     socket?.on(
-      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-      (userList: ChannelUserInterface[]) => setAttachedUserList(userList)
+      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, resetAttachedUserList
     );
-
     return () => {
       socket?.off(
-        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        (userList: ChannelUserInterface[]) => setAttachedUserList(userList)
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION, resetAttachedUserList
       );
     };
-  }, [setAttachedUserList]);
+  }, []);
+  const updateUserStatus = (user:UserInterface) => {
+    setAttachedUserList((current) => {
+      const found:ChannelUserInterface = current.find((attachedUser) => attachedUser.id == user.id);
+      if (found === undefined)
+        return current;
+      const filteredList = current.filter((attachedUser) => attachedUser.id != user.id);
+      found.status = user.status;
+      return [...filteredList, found];
+      }
+    );
+  }
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.USER.CONNECTION_CHANGE, updateUserStatus);
+    return () => {
+      socket?.off(ROUTES_BASE.USER.CONNECTION_CHANGE, updateUserStatus);
+    };
+  }, [updateUserStatus]);
 
   /** UNATTACH FROM CHANNEL */
   useEffect(() => {
@@ -219,6 +260,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
       <Messages
         messages={messages}
         blockedUserList={blockedUserList}
+        avatarList={avatarList}
       />
       {connectedChannel ? (
         <TextField socket={socket} connectedChannel={connectedChannel} />
@@ -248,7 +290,6 @@ function Chat({ socket }: { socket: Socket | undefined }) {
         ) : (
           <></>
         )}
-        <UserPicture />
       </div>
     </div>
   );

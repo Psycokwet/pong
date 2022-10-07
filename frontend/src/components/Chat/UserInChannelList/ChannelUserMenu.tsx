@@ -7,6 +7,7 @@ import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
 import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import Avatar from "../../Common/Avatar";
 
 import { MenuSettingsType } from "./MenuSettings";
 import Watch from "/src/components/UserInList/MenuComponents/Watch";
@@ -20,6 +21,7 @@ import SendDirectMessage from "/src/components/UserInList/MenuComponents/SendDir
 import SetAdmin from "/src/components/UserInList/MenuComponents/SetAdmin";
 import { FaCrown } from "react-icons/fa";
 import { AiFillTool } from "react-icons/ai";
+import { Api } from "../../../api/api";
 
 const ChannelUserMenu = ({
   pointedUser,
@@ -40,11 +42,24 @@ const ChannelUserMenu = ({
 }) => {
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const api = new Api();
 
+  useEffect(() => {
+    api.getPicture(pointedUser.pongUsername).then((res) => {
+      if (res.status == 200)
+        res.blob().then((myBlob) => {
+          setImageUrl((current) => {
+            if (current) URL.revokeObjectURL(current);
+            return URL.createObjectURL(myBlob);
+          });
+        });
+    });
+  }, []);
   const icons = [
     <></>,
-    <AiFillTool/>,
-    <FaCrown/>,
+    <AiFillTool className="shrink-0"/>,
+    <FaCrown className="shrink-0"/>,
   ]
 
   if (!pointedUser)
@@ -58,20 +73,21 @@ const ChannelUserMenu = ({
         toggleMenu(true);
         socket?.emit(ROUTES_BASE.USER);
       }}
-      className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
+      className={`mx-2 cursor-pointer hover:bg-gray-600
       ${pointedUser.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}
       ${blockedUserList.find((blockedUser)=>blockedUser.id == pointedUser.id) != undefined ? "hidden":""}`}
     >
       {/* Avatar and Nickname */}
       <div
-        className="grid grid-cols-3 m-2"
+        className="flex flex-row items-center gap-2"
       >
-        <img
-          src={pointedUser.image_url}
-          alt="Avatar"
-          className="w-10 rounded-3xl"
-        />
-        <strong>{pointedUser.pongUsername}</strong>
+        <div className="shrink-0">
+          <Avatar
+            url={imageUrl}
+            size="w-10 h-10"
+          />
+        </div>
+        <strong className="shrink truncate">{pointedUser.pongUsername}</strong>
         {icons[pointedUser.privileges]}
       </div>
       {/* Right click menu */}
