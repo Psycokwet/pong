@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ControlledMenu, useMenuState } from "@szhsin/react-menu";
 import "@szhsin/react-menu/dist/index.css";
 import { Socket } from "socket.io-client";
 
-import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import ChannelUserInterface from "/shared/interfaces/ChannelUserInterface";
 import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 import Avatar from "../../Common/Avatar";
@@ -21,6 +20,7 @@ import SetAdmin from "/src/components/UserInList/MenuComponents/SetAdmin";
 import { FaCrown } from "react-icons/fa";
 import { AiFillTool } from "react-icons/ai";
 import { Api } from "../../../api/api";
+import { MenuSettingsType } from "../../UserInList/MenuSettings";
 
 const ChannelUserMenu = ({
   pointedUser,
@@ -60,9 +60,9 @@ const ChannelUserMenu = ({
   }, []);
   const icons = [
     <></>,
-    <AiFillTool className="shrink-0"/>,
-    <FaCrown className="shrink-0"/>,
-  ]
+    <AiFillTool className="shrink-0" />,
+    <FaCrown className="shrink-0" />,
+  ];
 
   if (!pointedUser) return <></>;
   return (
@@ -84,14 +84,9 @@ const ChannelUserMenu = ({
       }`}
     >
       {/* Avatar and Nickname */}
-      <div
-        className="flex flex-row items-center gap-2"
-      >
+      <div className="flex flex-row items-center gap-2">
         <div className="shrink-0">
-          <Avatar
-            url={imageUrl}
-            size="w-10 h-10"
-          />
+          <Avatar url={imageUrl} size="w-10 h-10" />
         </div>
         <strong className="shrink truncate">{pointedUser.pongUsername}</strong>
         {icons[pointedUser.privileges]}
@@ -110,10 +105,7 @@ const ChannelUserMenu = ({
           user={pointedUser}
         />
         <Watch menuSettings={menuSettings} />
-        <AddFriendButton
-          socket={socket}
-          user={pointedUser}
-        />
+        <AddFriendButton socket={socket} user={pointedUser} />
         <Block socket={socket} user={pointedUser} />
         <Mute
           userPrivilege={userPrivilege}

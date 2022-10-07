@@ -1,6 +1,6 @@
 import React from "react";
 import { BsCircleFill } from "react-icons/bs";
-import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import ChannelUserInterface from "/shared/interfaces/ChannelUserInterface";
 import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Socket } from "socket.io-client";
 import ChannelUserMenu from "./ChannelUserMenu";
