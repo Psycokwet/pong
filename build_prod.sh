@@ -22,5 +22,6 @@ mv  dist_project/docker-compose-prod.yml  dist_project/docker-compose.yml
 echo $LINE Copying shared $LINE
 rsync -av dist_project/backend/shared dist_project/frontend/shared
 
+# bash build_prod.sh && cd dist_project && cp .env .env  && cp ../backend/.env backend/.env && sudo docker system prune -fa && sudo docker-compose up
 # bash build_prod.sh && cd dist_project && cp ../backend/.env backend/.env && sudo docker system prune -fa && sudo docker-compose up
 # bash build_prod.sh && cd dist_project && cp ../backend/.env backend/.env && sudo docker-compose build --no-cache frontend && sudo docker-compose up
