@@ -6,11 +6,11 @@ import { Socket } from "socket.io-client";
 import { UserInterface } from "/shared/interfaces/UserInterface";
 import { Status } from "/shared/interfaces/UserStatus";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
-import { statusList } from "../Common/StatusList"
+import { statusList } from "../Common/StatusList";
 
 type DropDownFriendListProps = {
-  userFriendList: UserInterface;
-  socket: Socket|undefined;
+  userFriendList: UserInterface[];
+  socket: Socket | undefined;
 };
 
 const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
@@ -45,13 +45,10 @@ const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
               inputFilter={inputFilter}
               statusList={aStatusList}
               socket={socket}
-              roomId={0}
-              menuSettings={({
-                challenge:aStatusList.status===Status.ONLINE,
-                watch:aStatusList.status===Status.PLAYING,
-                privileges:Privileges.MEMBER,
-                friend:true,
-              })}
+              menuSettings={{
+                challenge: aStatusList.status === Status.ONLINE,
+                watch: aStatusList.status === Status.PLAYING,
+              }}
             />
           );
         })}

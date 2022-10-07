@@ -6,7 +6,7 @@ import { TokenPayload } from './auth.service';
 import { UsersService } from '../user/user.service';
 import { Request } from 'express';
 import { User } from 'src/user/user.entity';
-import { CurrentUser } from 'shared/interfaces/CurrentUser';
+import { CurrentUser } from 'src/user/CurrentUser';
 
 //is it still in use ?
 export type JwtPayload = { sub: number; login42: string };

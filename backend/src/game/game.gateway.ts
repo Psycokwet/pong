@@ -214,7 +214,8 @@ export class GameGateway implements OnGatewayConnection {
         const userPlaying: UserInterface = {
           id: user.id,
           pongUsername: user.pongUsername,
-          status: status,
+          status,
+          image_url: 'TMP_FIX', //To replace later of course...
         };
         this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, userPlaying);
       }

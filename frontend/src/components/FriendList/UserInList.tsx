@@ -1,28 +1,33 @@
 import { useState, useEffect } from "react";
-import { ControlledMenu, useMenuState } from '@szhsin/react-menu';
-import '@szhsin/react-menu/dist/index.css';
+import { ControlledMenu, useMenuState } from "@szhsin/react-menu";
+import "@szhsin/react-menu/dist/index.css";
 import { Socket } from "socket.io-client";
-
-import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { UserInterface } from "/shared/interfaces/UserInterface";
-
 import { MenuSettingsType } from "../UserInList/MenuSettings";
 import Watch from "../UserInList/MenuComponents/Watch";
 import Challenge from "../UserInList/MenuComponents/Challenge";
 import Profile from "../UserInList/MenuComponents/Profile";
 import SendDirectMessage from "../UserInList/MenuComponents/SendDirectMessage";
-import { Api } from "../../api/api"
+import { Api } from "../../api/api";
 import Avatar from "../Common/Avatar";
 
 const api = new Api();
 
-const UserInList = ({user, inputFilter, socket, menuSettings} :{
-  user: UserInterface,
-  inputFilter: string,
-  socket: Socket|undefined
-  menuSettings: MenuSettingsType,
+const UserInList = ({
+  user,
+  inputFilter,
+  socket,
+  menuSettings,
+}: {
+  user: UserInterface;
+  inputFilter: string;
+  socket: Socket | undefined;
+  menuSettings: MenuSettingsType;
 }) => {
-  const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
+  const [anchorPoint, setAnchorPoint] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
   const [menuProps, toggleMenu] = useMenuState();
   const [avatarUrl, setAvatarUrl] = useState("");
 
@@ -36,7 +41,7 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
           });
         });
     });
-  },[]);
+  }, []);
 
   if (!user)
     return (<></>)
@@ -44,10 +49,9 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
     <div
       key={user.id}
       onContextMenu={(e) => {
-          e.preventDefault();
-          setAnchorPoint({ x: e.clientX, y: e.clientY });
-          toggleMenu(true);
-          socket?.emit(ROUTES_BASE.USER);
+        e.preventDefault();
+        setAnchorPoint({ x: e.clientX, y: e.clientY });
+        toggleMenu(true);
       }}
       className={`mx-2 cursor-pointer hover:bg-gray-600
       ${user.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
@@ -60,17 +64,18 @@ const UserInList = ({user, inputFilter, socket, menuSettings} :{
         <strong className="justify-self-start">{user.pongUsername}</strong>
       </div>
       {/* Right click menu */}
-      <ControlledMenu {...menuProps}
+      <ControlledMenu
+        {...menuProps}
         anchorPoint={anchorPoint}
         onClose={() => toggleMenu(false)}
       >
-        <SendDirectMessage socket={socket} user={user}/>
-        <Profile user={user}/>
-        <Challenge menuSettings={menuSettings} socket={socket} user={user}/>
-        <Watch menuSettings={menuSettings}/>
+        <SendDirectMessage socket={socket} user={user} />
+        <Profile user={user} />
+        <Challenge menuSettings={menuSettings} socket={socket} user={user} />
+        <Watch menuSettings={menuSettings} />
       </ControlledMenu>
     </div>
   )
 }
 
-export default UserInList
+export default UserInList;

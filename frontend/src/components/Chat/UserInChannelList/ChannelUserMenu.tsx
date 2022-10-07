@@ -1,15 +1,13 @@
-import { useState, useEffect } from "react";
-import { MenuItem, ControlledMenu, useMenuState } from '@szhsin/react-menu';
-import '@szhsin/react-menu/dist/index.css';
+import { useEffect, useState } from "react";
+import { ControlledMenu, useMenuState } from "@szhsin/react-menu";
+import "@szhsin/react-menu/dist/index.css";
 import { Socket } from "socket.io-client";
 
-import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import ChannelUserInterface from "/shared/interfaces/ChannelUserInterface";
 import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 import Avatar from "../../Common/Avatar";
 
-import { MenuSettingsType } from "./MenuSettings";
 import Watch from "/src/components/UserInList/MenuComponents/Watch";
 import AddFriendButton from "/src/components/UserInList/MenuComponents/AddFriendButton";
 import Ban from "/src/components/UserInList/MenuComponents/Ban";
@@ -22,6 +20,7 @@ import SetAdmin from "/src/components/UserInList/MenuComponents/SetAdmin";
 import { FaCrown } from "react-icons/fa";
 import { AiFillTool } from "react-icons/ai";
 import { Api } from "../../../api/api";
+import { MenuSettingsType } from "../../UserInList/MenuSettings";
 
 const ChannelUserMenu = ({
   pointedUser,
@@ -31,16 +30,19 @@ const ChannelUserMenu = ({
   userPrivilege,
   channelName,
   blockedUserList,
-} :{
+}: {
   pointedUser: ChannelUserInterface;
   inputFilter: string;
-  socket: Socket|undefined;
+  socket: Socket | undefined;
   menuSettings: MenuSettingsType;
   userPrivilege: Privileges;
   channelName: string;
   blockedUserList: BlockedUserInterface[];
 }) => {
-  const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
+  const [anchorPoint, setAnchorPoint] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
   const [menuProps, toggleMenu] = useMenuState();
   const [imageUrl, setImageUrl] = useState<string>("");
   const api = new Api();
@@ -58,12 +60,11 @@ const ChannelUserMenu = ({
   }, []);
   const icons = [
     <></>,
-    <AiFillTool className="shrink-0"/>,
-    <FaCrown className="shrink-0"/>,
-  ]
+    <AiFillTool className="shrink-0" />,
+    <FaCrown className="shrink-0" />,
+  ];
 
-  if (!pointedUser)
-    return <></>
+  if (!pointedUser) return <></>;
   return (
     <div
       key={pointedUser.id}
@@ -71,36 +72,41 @@ const ChannelUserMenu = ({
         e.preventDefault();
         setAnchorPoint({ x: e.clientX, y: e.clientY });
         toggleMenu(true);
-        socket?.emit(ROUTES_BASE.USER);
       }}
       className={`mx-2 cursor-pointer hover:bg-gray-600
       ${pointedUser.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}
-      ${blockedUserList.find((blockedUser)=>blockedUser.id == pointedUser.id) != undefined ? "hidden":""}`}
+      ${
+        blockedUserList.find(
+          (blockedUser) => blockedUser.id == pointedUser.id
+        ) != undefined
+          ? "hidden"
+          : ""
+      }`}
     >
       {/* Avatar and Nickname */}
-      <div
-        className="flex flex-row items-center gap-2"
-      >
+      <div className="flex flex-row items-center gap-2">
         <div className="shrink-0">
-          <Avatar
-            url={imageUrl}
-            size="w-10 h-10"
-          />
+          <Avatar url={imageUrl} size="w-10 h-10" />
         </div>
         <strong className="shrink truncate">{pointedUser.pongUsername}</strong>
         {icons[pointedUser.privileges]}
       </div>
       {/* Right click menu */}
-      <ControlledMenu {...menuProps}
+      <ControlledMenu
+        {...menuProps}
         anchorPoint={anchorPoint}
         onClose={() => toggleMenu(false)}
       >
-        <SendDirectMessage socket={socket} user={pointedUser}/>
-        <Profile user={pointedUser}/>
-        <Challenge menuSettings={menuSettings} socket={socket} user={pointedUser}/>
-        <Watch menuSettings={menuSettings}/>
-        <AddFriendButton menuSettings={menuSettings} socket={socket} user={pointedUser}/>
-        <Block socket={socket} user={pointedUser}/>
+        <SendDirectMessage socket={socket} user={pointedUser} />
+        <Profile user={pointedUser} />
+        <Challenge
+          menuSettings={menuSettings}
+          socket={socket}
+          user={pointedUser}
+        />
+        <Watch menuSettings={menuSettings} />
+        <AddFriendButton socket={socket} user={pointedUser} />
+        <Block socket={socket} user={pointedUser} />
         <Mute
           userPrivilege={userPrivilege}
           user={pointedUser}
@@ -121,7 +127,7 @@ const ChannelUserMenu = ({
         />
       </ControlledMenu>
     </div>
-  )
-}
+  );
+};
 
-export default ChannelUserMenu
+export default ChannelUserMenu;

@@ -1,18 +1,17 @@
 import React from "react";
 import { BsCircleFill } from "react-icons/bs";
 import { UserInterface } from "/shared/interfaces/UserInterface";
-import UserInList from "./UserInList"
-import { MenuSettingsType } from "../UserInList/MenuSettings"
-import { UserStatus } from "../Common/StatusList"
+import UserInList from "./UserInList";
+import { MenuSettingsType } from "../UserInList/MenuSettings";
+import { UserStatus } from "../Common/StatusList";
 import { Socket } from "socket.io-client";
 
 type UserListByStatusProps = {
   userList: UserInterface[];
   inputFilter: string;
   statusList: UserStatus;
-  socket: Socket | undefined,
-  roomId: number
-  menuSettings: MenuSettingsType
+  socket: Socket | undefined;
+  menuSettings: MenuSettingsType;
 };
 
 const UserListByStatus: React.FC<UserListByStatusProps> = ({
@@ -20,7 +19,6 @@ const UserListByStatus: React.FC<UserListByStatusProps> = ({
   inputFilter,
   statusList,
   socket,
-  roomId,
   menuSettings,
 }) => {
   return (

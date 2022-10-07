@@ -5,8 +5,8 @@ import DirectMessage from "./DirectMessage/DirectMessage";
 import ChannelMenu from "./ChannelMenu/ChannelMenu";
 import DirectMessageMenu from "./DirectMessageMenu/DirectMessageMenu";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import { ChannelData } from "/shared/interfaces/ChannelData";
-import { Message } from "/shared/interfaces/Message";
+import ChannelData from "/shared/interfaces/ChannelData";
+import Message from "/shared/interfaces/Message";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 
@@ -70,23 +70,27 @@ function ChatList({
     <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end relative">
       <div>
         <ChannelMenu socket={socket} />
-        {
-        channelList.map((channel, i) => (
+        {channelList.map((channel, i) => (
           <div key={i}>
-              <Channel
-                userPrivilege={userPrivilege}
-                handleLeaveChannel={() => {
-                  handleLeaveChannel();
-                  setChannelList(current => current.filter(channel => channel.channelId !== connectedChannel.channelId))
-                }}
-                channel={channel}
-                socket={socket}
-                connectedChannel={connectedChannel}
-                handleDisconnectChannel={handleDisconnectChannel}
-              />
-            </div>
-          ))
-        }
+            <Channel
+              userPrivilege={userPrivilege}
+              handleLeaveChannel={() => {
+                handleLeaveChannel();
+                setChannelList((current) =>
+                  current.filter((channel) => {
+                    if (connectedChannel)
+                      return channel.channelId !== connectedChannel.channelId;
+                    return true;
+                  })
+                );
+              }}
+              channel={channel}
+              socket={socket}
+              connectedChannel={connectedChannel}
+              handleDisconnectChannel={handleDisconnectChannel}
+            />
+          </div>
+        ))}
       </div>
       <div>
         <DirectMessageMenu socket={socket}/>

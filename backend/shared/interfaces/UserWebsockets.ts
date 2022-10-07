@@ -1,4 +1,4 @@
 export class UsersWebsockets {
-  userId: number;
-  socketId: string;
+  userId: number = 0;
+  socketId: string = "";
 }

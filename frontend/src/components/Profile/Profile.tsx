@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Api } from "../../api/api";
 import { useParams } from "react-router-dom";
 
-import UserProfile from "shared/interfaces/UserProfile";
+import UserProfile from "/shared/interfaces/UserProfile";
 import OneUserProfile from "./OneUserProfile";
 import NotFound from "../NavBar/Pages-To-Change/NotFound";
 
@@ -12,7 +12,7 @@ const Profile = () => {
   const [userNotFound, setUserNotFound] = useState<boolean>(false);
   const [userProfile, setUserProfile] = useState<UserProfile>({
     pongUsername: "anonymous",
-    userRank: { level: 0, userRank: 0 },
+    userRank: { level: 0, userRank: { rank: 0 } },
     userHistory: {
       nbGames: 0,
       nbWins: 0,
