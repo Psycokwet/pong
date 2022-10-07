@@ -71,8 +71,7 @@ function App() {
       } else {
         console.log("200 !!");
         setSocket((current: Socket | undefined) => {
-          //   if (current) {
-          //     return current;
+          if (current) return current;
           //     current.disconnect();
           //     console.log("disconnect");
           //   }
