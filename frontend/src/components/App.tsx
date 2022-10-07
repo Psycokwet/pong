@@ -44,18 +44,8 @@ function App() {
     });
   };
   const updateCurrentUser = () => {
-    //   newSocket.on("connect_error", () => {
-    //     toast.error("Connect error on websocket");
-    //     setTimeout(() => newSocket.connect(), 1_000);
-    //   });
-    //   newSocket.on("disconnect", (reason) => {
-    //     toast.error("Socket replied a disconnection error :" + reason);
-    //     setTimeout(() => newSocket.connect(), 1_000);
-    //   });
-
     api.refreshToken().then((res: Response) => {
       if (res.status != 200) {
-        console.log("not 200", res.status);
         setSocket((current: Socket | undefined) => {
           if (current) current.disconnect();
           return undefined;
@@ -71,9 +61,6 @@ function App() {
       } else {
         setSocket((current: Socket | undefined) => {
           if (current) return current;
-          //     current.disconnect();
-          //     console.log("disconnect");
-          //   }
           const newSocket = io(import.meta.env.VITE_PONG_URL, {
             transports: ["websocket"],
             withCredentials: true,
@@ -102,25 +89,6 @@ function App() {
     });
   };
 
-  //   useEffect(() => {
-  //     return () => {
-  //       const newSocket = io(import.meta.env.VITE_PONG_URL, {
-  //         transports: ["websocket"],
-  //         withCredentials: true,
-  //       });
-  //       //   newSocket.on("connect_error", () => {
-  //       //     toast.error("Connect error on websocket");
-  //       //     setTimeout(() => newSocket.connect(), 1_000);
-  //       //   });
-  //       //   newSocket.on("disconnect", (reason) => {
-  //       //     toast.error("Socket replied a disconnection error :" + reason);
-  //       //     setTimeout(() => newSocket.connect(), 1_000);
-  //       //   });
-
-  //       setSocket(newSocket);
-  //     };
-  //   }, []);
-
   useEffect(() => {
     if (currentUser.status == ConnectionStatus.Unknown) {
       updateCurrentUser();
@@ -131,7 +99,7 @@ function App() {
     return () => {
       clearInterval(interval);
     };
-  }, [currentUser.status, socket]);
+  }, [currentUser.status]);
 
   switch (currentUser.status) {
     case ConnectionStatus.Unknown:
