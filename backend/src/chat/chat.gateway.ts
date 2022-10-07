@@ -322,9 +322,7 @@ export class ChatGateway implements OnGatewayConnection {
         // if owner is connected and is joined to this room
         this.server.sockets.sockets
           .get(ownerWebsocket.socketId)
-          .emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
-            privilege: Privileges.OWNER,
-          });
+          .emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, Privileges.OWNER);
       }
     }
   }
@@ -377,9 +375,7 @@ export class ChatGateway implements OnGatewayConnection {
       );
 
     if (room.owner.id === payload.userId) {
-      client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
-        privilege: Privileges.OWNER,
-      });
+      client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, Privileges.OWNER);
     }
   }
 
@@ -569,7 +565,7 @@ export class ChatGateway implements OnGatewayConnection {
 
     if (!room) throw new WsException('Channel does not exist');
 
-    const privilege = this.chatService.getUserPrivileges(room, payload.userId);
+    const privilege:number = this.chatService.getUserPrivileges(room, payload.userId);
 
     client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
   }
