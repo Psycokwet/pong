@@ -13,6 +13,7 @@ import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
+import ChannelUserInterface from 'shared/interfaces/ChannelUserInterface';
 import { Muted } from './muted.entity';
 import { Banned } from './banned.entity';
 import { validate } from 'class-validator';
@@ -381,7 +382,7 @@ export class ChatService {
       throw new WsException('Channel does not exist');
     }
 
-    const userInterfaceMembers = room.members.map((member) => ({
+    const userInterfaceMembers:ChannelUserInterface[] = room.members.map((member) => ({
       id: member.id,
       pongUsername: member.pongUsername,
       status: this.userService.getStatus(member),

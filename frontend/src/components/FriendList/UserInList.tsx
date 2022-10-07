@@ -43,7 +43,9 @@ const UserInList = ({
     });
   }, []);
 
-  return user ? (
+  if (!user)
+    return (<></>)
+  return (
     <div
       key={user.id}
       onContextMenu={(e) => {
@@ -51,13 +53,15 @@ const UserInList = ({
         setAnchorPoint({ x: e.clientX, y: e.clientY });
         toggleMenu(true);
       }}
-      className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
+      className={`mx-2 cursor-pointer hover:bg-gray-600
       ${user.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
     >
       {/* Avatar and Nickname */}
-      <div className="grid grid-cols-2 m-2">
-        <Avatar url={avatarUrl} size="w-20" />
-        <strong>{user.pongUsername}</strong>
+      <div
+        className="flex items-center gap-4 m-2"
+      >
+        <Avatar url={avatarUrl} size="w-20 h-20" />
+        <strong className="justify-self-start">{user.pongUsername}</strong>
       </div>
       {/* Right click menu */}
       <ControlledMenu
@@ -71,9 +75,7 @@ const UserInList = ({
         <Watch menuSettings={menuSettings} />
       </ControlledMenu>
     </div>
-  ) : (
-    <></>
-  );
-};
+  )
+}
 
 export default UserInList;

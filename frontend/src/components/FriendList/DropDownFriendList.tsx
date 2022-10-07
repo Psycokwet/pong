@@ -36,7 +36,7 @@ const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
       </div>
 
       {/* Sub lists */}
-      <div>
+      <div className="flex flex-col gap-8">
         {statusList?.map((aStatusList) => {
           return (
             <UserListByStatus
