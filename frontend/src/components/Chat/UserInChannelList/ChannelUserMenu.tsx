@@ -97,7 +97,12 @@ const ChannelUserMenu = ({
           socket={socket}
           channelName={channelName}
         />
-        <SetAdmin menuSettings={menuSettings}/>
+        <SetAdmin
+          userPrivilege={userPrivilege}
+          pointedUser={pointedUser}
+          socket={socket}
+          channelName={channelName}
+        />
       </ControlledMenu>
     </div>
   )

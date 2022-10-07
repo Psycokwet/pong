@@ -17,7 +17,6 @@ const Mute = ({
   socket: Socket | undefined;
 }) => {
   const mute = (val:number) => {
-    console.log(user.id, channelName, val);
     socket?.emit(ROUTES_BASE.CHAT.MUTE_USER_REQUEST, {
       userIdToMute: user.id,
       channelName: channelName,
@@ -28,7 +27,7 @@ const Mute = ({
     <SubMenu
       label="Mute"
       className={ userPrivilege === Privileges.MEMBER ? "hidden" : "" }
-      disabled={ userPrivilege < user.privileges }
+      disabled={ userPrivilege <= user.privileges }
     >
       <MenuItem onClick={()=>mute(10000)}>10 sec</MenuItem>
       <MenuItem onClick={()=>mute(60000)}>1 min</MenuItem>
