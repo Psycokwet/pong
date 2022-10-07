@@ -11,12 +11,16 @@ import Room from './room.entity';
 import { UsersService } from 'src/user/user.service';
 import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 import { v4 as uuidv4 } from 'uuid';
-import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import ChannelData from 'shared/interfaces/ChannelData';
 import ChannelUserInterface from 'shared/interfaces/ChannelUserInterface';
 import { Muted } from './muted.entity';
 import { Banned } from './banned.entity';
 import { validate } from 'class-validator';
+
+type UserRoom = {
+  userId: number;
+  roomName: string;
+}
 @Injectable()
 export class ChatService {
   constructor(
@@ -33,7 +37,20 @@ export class ChatService {
     private bannedRepository: Repository<Banned>,
     private userService: UsersService,
   ) {}
-  public static userWebsockets: UsersWebsockets[] = [];
+  private static userRooms: UserRoom[] = [];
+
+  findUserRoom(userId: number): UserRoom | undefined {
+    console.log(ChatService.userRooms, ChatService.userRooms.find((userRoom) => userRoom.userId === userId));
+    return ChatService.userRooms.find((userRoom) => userRoom.userId === userId);
+  }
+
+  updateUsersRoom(room: Room, userId: number): void {
+    ChatService.userRooms = [...ChatService.userRooms.filter((userRoom: UserRoom) =>userRoom.userId !== userId), {roomName: room.roomName, userId}];
+  }
+
+  removeFromUserRooms(userId: number): void {
+    ChatService.userRooms = ChatService.userRooms.filter((userRoom: UserRoom) =>userRoom.userId !== userId);
+  }
 
   public async getAllPublicRooms(): Promise<ChannelData[]> {
     return this.roomsRepository
@@ -351,12 +368,6 @@ export class ChatService {
       }
       return user;
     }
-  }
-
-  getUserIdWebsocket(receiverId: number): UsersWebsockets | undefined {
-    return ChatService.userWebsockets.find(
-      (receiver) => receiver.userId === receiverId,
-    );
   }
   /** END ChatRoomConnectedUsers methods */
 

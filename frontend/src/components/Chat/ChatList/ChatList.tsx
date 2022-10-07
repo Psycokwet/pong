@@ -18,6 +18,8 @@ function ChatList({
   handleDisconnectChannel,
   /* lastMessage,*/
   blockedUserList,
+  channelList,
+  setChannelList,
 } : {
     socket:Socket | undefined,
     connectedChannel: ChannelData | undefined,
@@ -26,8 +28,9 @@ function ChatList({
     handleDisconnectChannel: any;
     /*lastMessage: Message;*/
     blockedUserList:BlockedUserInterface[];
+    channelList: any;
+    setChannelList: any;
 }){
-  const [channelList, setChannelList] = useState<ChannelData[]>([]);
   const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
 
   useEffect(() => {
@@ -74,16 +77,7 @@ function ChatList({
           <div key={i}>
             <Channel
               userPrivilege={userPrivilege}
-              handleLeaveChannel={() => {
-                handleLeaveChannel();
-                setChannelList((current) =>
-                  current.filter((channel) => {
-                    if (connectedChannel)
-                      return channel.channelId !== connectedChannel.channelId;
-                    return true;
-                  })
-                );
-              }}
+              handleLeaveChannel={handleLeaveChannel}
               channel={channel}
               socket={socket}
               connectedChannel={connectedChannel}

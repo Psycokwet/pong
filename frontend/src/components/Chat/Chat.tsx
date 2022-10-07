@@ -36,6 +36,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   >([]);
   const [userPrivilege, setPrivilege] = useState<number>(Privileges.MEMBER);
   const [avatarList, setAvatarList] = useState<UserAvatar[]>([]);
+  const [channelList, setChannelList] = useState<ChannelData[]>([]);
 
   const addMessage = (newElem: Message) => {
     if (connectedChannel && newElem.roomId == connectedChannel.channelId)
@@ -211,11 +212,33 @@ function Chat({ socket }: { socket: Socket | undefined }) {
 
   /** Other functions (handlers) */
   const handleDisconnectChannel = () => {
-    setConnectedChannel(undefined);
-    setMessages([]);
-    setAttachedUserList([]);
-    setPrivilege(Privileges.MEMBER);
+    if (connectedChannel) {
+      setMessages([]);
+      setAttachedUserList([]);
+      setPrivilege(Privileges.MEMBER);
+      setChannelList((current: ChannelData[]) =>
+        current.filter((channel) => 
+          connectedChannel && channel.channelId !== connectedChannel.channelId
+        )
+      );
+      setConnectedChannel(undefined);
+    }
   };
+
+  const handleBannedFromChannel = (channelBannedFrom: ChannelData) => {
+    if (connectedChannel && connectedChannel.channelId === channelBannedFrom.channelId) {
+      setMessages([]);
+      setAttachedUserList([]);
+      setPrivilege(Privileges.MEMBER);
+      setConnectedChannel(undefined);
+    }
+    setChannelList((current: ChannelData[]) =>
+      current.filter(
+        (channel) => channel.channelId !== channelBannedFrom.channelId
+      )
+    );
+  }
+
   const handleLeaveChannel = () => {
     if (!connectedChannel) return;
     socket?.emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST, {
@@ -260,6 +283,16 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, []);
 
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.GET_BANNED, handleBannedFromChannel);
+    return () => {
+      socket?.off(
+        ROUTES_BASE.CHAT.GET_BANNED,
+        handleBannedFromChannel,
+      );
+    };
+  }, []);
+
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
       <ChatList
@@ -269,6 +302,8 @@ function Chat({ socket }: { socket: Socket | undefined }) {
         userPrivilege={userPrivilege}
         handleDisconnectChannel={handleDisconnectChannel}
         blockedUserList={blockedUserList}
+        channelList={channelList}
+        setChannelList={setChannelList}
         // lastMessage={lastMessage}
       />
       <Messages
