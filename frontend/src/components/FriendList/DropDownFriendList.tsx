@@ -48,8 +48,6 @@ const DropDownFriendList: React.FC<DropDownFriendListProps> = ({
               menuSettings={{
                 challenge: aStatusList.status === Status.ONLINE,
                 watch: aStatusList.status === Status.PLAYING,
-                privileges: Privileges.MEMBER,
-                friend: true,
               }}
             />
           );

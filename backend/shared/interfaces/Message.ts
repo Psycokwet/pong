@@ -3,6 +3,5 @@ export default interface Message {
   author: string,
   time: Date,
   content: string,
-  roomId: number
+  roomId: number,
 }
- 

@@ -54,7 +54,6 @@ const ChannelUserMenu = ({
         e.preventDefault();
         setAnchorPoint({ x: e.clientX, y: e.clientY });
         toggleMenu(true);
-        socket?.emit(ROUTES_BASE.USER);
       }}
       className={`grid grid-cols-2 grid-flow-col mx-2 cursor-pointer hover:bg-gray-600
       ${pointedUser.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}
@@ -91,7 +90,6 @@ const ChannelUserMenu = ({
         />
         <Watch menuSettings={menuSettings} />
         <AddFriendButton
-          menuSettings={menuSettings}
           socket={socket}
           user={pointedUser}
         />
