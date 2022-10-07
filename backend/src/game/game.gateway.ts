@@ -44,7 +44,10 @@ export class GameGateway implements OnGatewayConnection {
       const gameRoom: GameRoom = this.gameService.findUserRoom(user.id);
 
       if (!gameRoom) return;
-      if (user.id === gameRoom.gameData.player1.userId || gameRoom.started === true) {
+      if (
+        user.id === gameRoom.gameData.player1.userId ||
+        gameRoom.started === true
+      ) {
         client.join(gameRoom.roomName);
         this.updateUserStatus(user, Status.PLAYING);
       }
@@ -190,7 +193,10 @@ export class GameGateway implements OnGatewayConnection {
       return;
     }
 
-    if (gameRoom.gameData.player1.userId === payload.userId || gameRoom.started === true) {
+    if (
+      gameRoom.gameData.player1.userId === payload.userId ||
+      gameRoom.started === true
+    ) {
       this.server
         .in(gameRoom.roomName)
         .emit(ROUTES_BASE.GAME.UPDATE_GAME, gameRoom);
@@ -208,7 +214,7 @@ export class GameGateway implements OnGatewayConnection {
         const userPlaying: UserInterface = {
           id: user.id,
           pongUsername: user.pongUsername,
-          status,
+          status: status,
         };
         this.server.emit(ROUTES_BASE.USER.CONNECTION_CHANGE, userPlaying);
       }
@@ -240,7 +246,9 @@ export class GameGateway implements OnGatewayConnection {
     client.join(newChallengeRoom.roomName);
     client.emit(ROUTES_BASE.GAME.UPDATE_GAME, newChallengeRoom);
 
-    const opponentIdWebsocket = this.userService.getUserIdWebsocket(opponent.id);
+    const opponentIdWebsocket = this.userService.getUserIdWebsocket(
+      opponent.id,
+    );
 
     if (opponentIdWebsocket) {
       /** Retrieve receiver's socket with the socket ID
@@ -253,7 +261,10 @@ export class GameGateway implements OnGatewayConnection {
       const challengeRooms: GameRoom[] = this.gameService.findUserChallengeRoom(
         opponentIdWebsocket.userId,
       );
-      opponentSocket.emit(ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM, challengeRooms);
+      opponentSocket.emit(
+        ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM,
+        challengeRooms,
+      );
     }
   }
 
@@ -306,20 +317,24 @@ export class GameGateway implements OnGatewayConnection {
   ) {
     const game: GameRoom = this.gameService.cancelMatchMaking(payload.userId);
     if (game.isChallenge === true) {
-      const opponentIdWebsocket = this.userService.getUserIdWebsocket(game.gameData.player2.userId);
+      const opponentIdWebsocket = this.userService.getUserIdWebsocket(
+        game.gameData.player2.userId,
+      );
 
       if (opponentIdWebsocket) {
         /** Retrieve receiver's socket with the socket ID
          * https://stackoverflow.com/questions/67361211/socket-io-4-0-1-get-socket-by-id
          */
-  
+
         const opponentSocket = this.server.sockets.sockets.get(
           opponentIdWebsocket.socketId,
         );
-        const challengeRooms: GameRoom[] = this.gameService.findUserChallengeRoom(
-          opponentIdWebsocket.userId,
+        const challengeRooms: GameRoom[] =
+          this.gameService.findUserChallengeRoom(opponentIdWebsocket.userId);
+        opponentSocket.emit(
+          ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM,
+          challengeRooms,
         );
-        opponentSocket.emit(ROUTES_BASE.GAME.CHALLENGE_LIST_CONFIRM, challengeRooms);
       }
     }
   }
