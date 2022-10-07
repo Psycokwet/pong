@@ -340,7 +340,10 @@ export class ChatGateway implements OnGatewayConnection {
         // if owner is connected and is joined to this room
         this.server.sockets.sockets
           .get(ownerWebsocket.socketId)
-          .emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, Privileges.OWNER);
+          .emit(
+            ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION,
+            Privileges.OWNER,
+          );
       }
     }
   }
@@ -392,7 +395,10 @@ export class ChatGateway implements OnGatewayConnection {
 
     if (room.isDM === false) {
       if (room.owner.id === payload.userId) {
-        client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, Privileges.OWNER);
+        client.emit(
+          ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION,
+          Privileges.OWNER,
+        );
       }
     }
   }
@@ -508,13 +514,18 @@ export class ChatGateway implements OnGatewayConnection {
       pongUsername: newAdmin.pongUsername,
       status: Status.ONLINE,
     };
-    const promotedUserSocketId = this.userService.getUserIdWebsocket(promotedUser.id);
+    const promotedUserSocketId = this.userService.getUserIdWebsocket(
+      promotedUser.id,
+    );
     if (promotedUserSocketId) {
       const promotedUserSocket = this.server.sockets.sockets.get(
         promotedUserSocketId.socketId,
       );
       /** Channel disappears from the banned user's attached channel list */
-      promotedUserSocket.emit( ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, Privileges.ADMIN,);
+      promotedUserSocket.emit(
+        ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION,
+        Privileges.ADMIN,
+      );
     }
 
     this.server
@@ -553,13 +564,18 @@ export class ChatGateway implements OnGatewayConnection {
       pongUsername: oldAdmin.pongUsername,
       status: Status.ONLINE,
     };
-    const demotedUserSocketId = this.userService.getUserIdWebsocket(demotedUser.id);
+    const demotedUserSocketId = this.userService.getUserIdWebsocket(
+      demotedUser.id,
+    );
     if (demotedUserSocketId) {
       const demotedUserSocket = this.server.sockets.sockets.get(
         demotedUserSocketId.socketId,
       );
       /** Channel disappears from the banned user's attached channel list */
-      demotedUserSocket.emit( ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, Privileges.ADMIN,);
+      demotedUserSocket.emit(
+        ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION,
+        Privileges.ADMIN,
+      );
     }
 
     this.server
@@ -584,7 +600,10 @@ export class ChatGateway implements OnGatewayConnection {
 
     if (!room) throw new WsException('Channel does not exist');
 
-    const privilege:number = this.chatService.getUserPrivileges(room, payload.userId);
+    const privilege: number = this.chatService.getUserPrivileges(
+      room,
+      payload.userId,
+    );
 
     client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
   }
@@ -645,10 +664,12 @@ export class ChatGateway implements OnGatewayConnection {
       bannedSocket.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION);
     }
 
-    client.emit(
-      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-      await this.chatService.getAttachedUsersInChannel(room.id),
-    );
+    this.server
+      .in(room.roomName)
+      .emit(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        await this.chatService.getAttachedUsersInChannel(room.id),
+      );
 
     this.chatService.addBannedUser(userToBan, room, data.banTime);
   }
