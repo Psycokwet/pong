@@ -39,6 +39,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
     let result: CurrentUser = {
       ...user,
       status: this.userService.getStatusFromUser(user, payload),
+      isTwoFactorAuthenticated: payload.isTwoFactorAuthenticated,
     } as CurrentUser;
     return result;
   }
