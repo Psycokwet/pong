@@ -20,14 +20,15 @@ import SendDirectMessage from "/src/components/UserInList/MenuComponents/SendDir
 import SetAdmin from "/src/components/UserInList/MenuComponents/SetAdmin";
 import { FaCrown } from "react-icons/fa";
 import { AiFillTool } from "react-icons/ai";
-import { Api } from "../../../../api/api";
+import { Api } from "../../../api/api";
 
-const ChannelUserMenu = ({user, inputFilter, socket, menuSettings, userPrivilege} :{
-  user: ChannelUserInterface,
+const ChannelUserMenu = ({pointedUser, inputFilter, socket, menuSettings, userPrivilege, channelName} :{
+  pointedUser: ChannelUserInterface,
   inputFilter: string,
   socket: Socket|undefined
   menuSettings: MenuSettingsType,
   userPrivilege: Privileges;
+  channelName: string
 }) => {
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
@@ -35,7 +36,7 @@ const ChannelUserMenu = ({user, inputFilter, socket, menuSettings, userPrivilege
 const api = new Api();
 
   useEffect(() => {
-    api.getPicture(user.pongUsername).then((res) => {
+    api.getPicture(pointedUser.pongUsername).then((res) => {
       if (res.status == 200)
         res.blob().then((myBlob) => {
           setImageUrl((current) => {
@@ -51,11 +52,11 @@ const api = new Api();
     <FaCrown className="shrink-0"/>,
   ]
 
-  if (!user)
+  if (!pointedUser)
     return <></>
   return (
     <div
-      key={user.id}
+      key={pointedUser.id}
       onContextMenu={(e) => {
         e.preventDefault();
         setAnchorPoint({ x: e.clientX, y: e.clientY });
@@ -63,7 +64,7 @@ const api = new Api();
         socket?.emit(ROUTES_BASE.USER);
       }}
       className={`mx-2 cursor-pointer hover:bg-gray-600
-      ${user.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
+      ${pointedUser.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
     >
       {/* Avatar and Nickname */}
       <div
@@ -75,23 +76,38 @@ const api = new Api();
             size="w-10 h-10"
           />
         </div>
-        <strong className="shrink truncate">{user.pongUsername}</strong>
-        {icons[user.privileges]}
+        <strong className="shrink truncate">{pointedUser.pongUsername}</strong>
+        {icons[pointedUser.privileges]}
       </div>
       {/* Right click menu */}
       <ControlledMenu {...menuProps}
         anchorPoint={anchorPoint}
         onClose={() => toggleMenu(false)}
       >
-        <SendDirectMessage socket={socket} user={user}/>
-        <Profile user={user}/>
-        <Challenge menuSettings={menuSettings} socket={socket} user={user}/>
+        <SendDirectMessage socket={socket} user={pointedUser}/>
+        <Profile user={pointedUser}/>
+        <Challenge menuSettings={menuSettings} socket={socket} user={pointedUser}/>
         <Watch menuSettings={menuSettings}/>
-        <AddFriendButton menuSettings={menuSettings} socket={socket} user={user}/>
+        <AddFriendButton menuSettings={menuSettings} socket={socket} user={pointedUser}/>
         <Block />
-        <Mute menuSettings={menuSettings} userPrivilege={userPrivilege} />
-        <Ban menuSettings={menuSettings} userPrivilege={userPrivilege} />
-        <SetAdmin menuSettings={menuSettings}/>
+        <Mute
+          userPrivilege={userPrivilege}
+          user={pointedUser}
+          socket={socket}
+          channelName={channelName}
+        />
+        <Ban
+          userPrivilege={userPrivilege}
+          user={pointedUser}
+          socket={socket}
+          channelName={channelName}
+        />
+        <SetAdmin
+          userPrivilege={userPrivilege}
+          pointedUser={pointedUser}
+          socket={socket}
+          channelName={channelName}
+        />
       </ControlledMenu>
     </div>
   )
