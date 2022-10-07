@@ -130,10 +130,6 @@ function App() {
                 ),
               },
               {
-                url: "/leaderboard",
-                element: <LeaderBoard />,
-              },
-              {
                 url: "/chat",
                 element: <Chat socket={socket} />,
               },
