@@ -17,6 +17,7 @@ import { JwtWsGuard, UserPayload } from 'src/auth/jwt-ws.guard';
 import { UsersService } from './user.service';
 import AddFriend from 'shared/interfaces/AddFriend';
 import { UserInterface } from 'shared/interfaces/UserInterface';
+import { BlockedUserInterface } from 'shared/interfaces/BlockedUserInterface';
 import UserId from 'shared/interfaces/UserId';
 import { Status } from 'shared/interfaces/UserStatus';
 import { GameService } from 'src/game/game.service';
@@ -190,7 +191,7 @@ export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const caller = await this.userService.getById(payload.userId);
     if (!caller) throw new WsException({ error: 'User not found' });
 
-    const blockedList = this.userService.getBlockedUsersList(caller);
+    const blockedList:BlockedUserInterface[] = await this.userService.getBlockedUsersList(caller);
 
     this.server
       .in(client.id)

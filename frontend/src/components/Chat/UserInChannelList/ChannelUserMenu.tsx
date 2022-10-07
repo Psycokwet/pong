@@ -5,6 +5,7 @@ import { Socket } from "socket.io-client";
 
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 import Avatar from "../../../Common/Avatar"
 
@@ -22,13 +23,22 @@ import { FaCrown } from "react-icons/fa";
 import { AiFillTool } from "react-icons/ai";
 import { Api } from "../../../api/api";
 
-const ChannelUserMenu = ({pointedUser, inputFilter, socket, menuSettings, userPrivilege, channelName} :{
-  pointedUser: ChannelUserInterface,
-  inputFilter: string,
-  socket: Socket|undefined
-  menuSettings: MenuSettingsType,
+const ChannelUserMenu = ({
+  pointedUser,
+  inputFilter,
+  socket,
+  menuSettings,
+  userPrivilege,
+  channelName,
+  blockedUserList,
+} :{
+  pointedUser: ChannelUserInterface;
+  inputFilter: string;
+  socket: Socket|undefined;
+  menuSettings: MenuSettingsType;
   userPrivilege: Privileges;
-  channelName: string
+  channelName: string;
+  blockedUserList: BlockedUserInterface[];
 }) => {
   const [anchorPoint, setAnchorPoint] = useState<{x:number, y:number}>({ x: 0, y: 0 });
   const [menuProps, toggleMenu] = useMenuState();
@@ -65,6 +75,7 @@ const api = new Api();
       }}
       className={`mx-2 cursor-pointer hover:bg-gray-600
       ${pointedUser.pongUsername.startsWith(inputFilter) ? "block" : "hidden"}`}
+      ${blockedUserList.find((blockedUser)=>blockedUser.id == pointedUser.id) != undefined ? "hidden":""}`}
     >
       {/* Avatar and Nickname */}
       <div
@@ -89,7 +100,7 @@ const api = new Api();
         <Challenge menuSettings={menuSettings} socket={socket} user={pointedUser}/>
         <Watch menuSettings={menuSettings}/>
         <AddFriendButton menuSettings={menuSettings} socket={socket} user={pointedUser}/>
-        <Block />
+        <Block socket={socket} user={pointedUser}/>
         <Mute
           userPrivilege={userPrivilege}
           user={pointedUser}
