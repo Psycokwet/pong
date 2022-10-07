@@ -1,15 +1,24 @@
 import { useRef } from "react";
 import { Message } from "/shared/interfaces/Message";
-import { UserInterface } from "/shared/interfaces/UserInterface";
+import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 
-const Messages = ({messages}: {messages:Message[]}) => {
+const Messages = ({
+  messages,
+  blockedUserList,
+}:{
+  messages: Message[];
+  blockedUserList: BlockedUserInterface[];
+}) => {
   const containerRef = useRef();
 
+  const filteredMessages:Message[] = messages.filter((message) => {
+    return blockedUserList.find((blockedUser) => blockedUser.pongUsername==message.author) == undefined
+    })
   return (
     <div 
       className="flex flex-col-reverse row-span-5 col-span-3 scroll-smooth overflow-y-auto"
     >
-      {messages.map((message, index) => {
+      {filteredMessages.map((message, index) => {
       return (
         <div key={index} className="flex gap-3 py-4 px-10">
           <div className="">

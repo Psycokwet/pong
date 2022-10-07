@@ -86,7 +86,7 @@ const GameLobby = (
     };
   }, []);
   
-  return <div className="h-7/8 w-full grid content-around">
+  return <div className="h-screen w-full grid content-around">
     <div className="flex justify-around">
       <button
         className="h-1/8 bg-sky-500 hover:bg-sky-700 lg:text-3xl rounded-3xl p-4 shadow-md shadow-blue-500/50 max-h-20"
@@ -108,7 +108,7 @@ const GameLobby = (
           challengeList.map(challenge => 
             <div key={challenge.roomName}>
               <button 
-                className="bg-sky-500 hover:bg-sky-700 rounded-3xl shadow-md shadow-blue-500/50"
+                className="p-2 bg-sky-500 hover:bg-sky-700 rounded-3xl shadow-md shadow-blue-500/50"
                 onClick={() => handleAcceptChallenge(challenge.roomName)}
               >Accept challenge from {challenge.gameData.player1.pongUsername}</button>
             </div>
@@ -123,7 +123,7 @@ const GameLobby = (
           spectableGameList.map(gameRoom => 
             <div key={gameRoom.roomName}>
               <button 
-                className="bg-sky-500 hover:bg-sky-700 rounded-3xl shadow-md shadow-blue-500/50"
+                className="p-2 bg-sky-500 hover:bg-sky-700 rounded-3xl shadow-md shadow-blue-500/50"
                 onClick={() => handleSpectate(gameRoom.roomName)}
               >{gameRoom.gameData.player1.pongUsername} VS {gameRoom.gameData.player2.pongUsername}</button>
             </div>
