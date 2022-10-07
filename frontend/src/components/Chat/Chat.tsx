@@ -15,7 +15,13 @@ import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Status } from "/shared/interfaces/UserStatus";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
 import { UserInterface } from 'shared/interfaces/UserInterface';
+import { Api } from "../../api/api";
+type UserAvatar = {
+  avatarUrl:string|undefined,
+  pongUsername:string,
+}
 
+const api = new Api();
 function Chat({ socket }: { socket: Socket | undefined }) {
   const [messages, setMessages] = useState<Message[]>([]);
   // const [lastMessage, setLastMessage] = useState<Message>(undefined)
@@ -26,6 +32,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     ChannelUserInterface[]
   >([]);
   const [userPrivilege, setPrivilege] = useState<number>(Privileges.MEMBER);
+  const [avatarList, setAvatarList] = useState<UserAvatar[]>([]);
 
   const addMessage = (newElem: Message) => {
     if (connectedChannel && newElem.roomId == connectedChannel.channelId)
@@ -49,6 +56,21 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, [resetMessages]);
 
+  useEffect(() => {
+    attachedUserList.map(async (user:ChannelUserInterface) => {
+      await (api.getPicture(user.pongUsername).then((res) => {
+        if (res.status == 200)
+          res.blob().then((myBlob) => {
+            setAvatarList((current) => [...current, {
+              avatarUrl:URL.createObjectURL(myBlob),
+              pongUsername:user.pongUsername
+            }]);
+          });
+        else
+          return "";
+      }));
+    })
+  }, [attachedUserList]);
 
   /**  Set actual connectedChannel */
   const channelListener = (channel: ChannelData) => {
@@ -113,12 +135,12 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   }, []);
   const updateUserStatus = (user:UserInterface) => {
     setAttachedUserList((current) => {
-      const finded:ChannelUserInterface = current.find((attachedUser) => attachedUser.id == user.id);
-      if (finded === undefined)
+      const found:ChannelUserInterface = current.find((attachedUser) => attachedUser.id == user.id);
+      if (found === undefined)
         return current;
       const filteredList = current.filter((attachedUser) => attachedUser.id != user.id);
-      finded.status = user.status;
-      return [...filteredList, finded];
+      found.status = user.status;
+      return [...filteredList, found];
       }
     );
   }
@@ -238,6 +260,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
       <Messages
         messages={messages}
         blockedUserList={blockedUserList}
+        avatarList={avatarList}
       />
       {connectedChannel ? (
         <TextField socket={socket} connectedChannel={connectedChannel} />
