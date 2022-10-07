@@ -1,25 +1,19 @@
-FROM node:slim
+FROM nginx:alpine
+RUN apk add nodejs npm
+RUN npm install -g npm@latest
 
 WORKDIR /usr/src/app
 
 COPY . .
 
-RUN npm i --silent
+COPY .env .env
 
-CMD ["npm", "run", "dev"]
+RUN npm ci --silent
 
-# FROM nginx:alpine
+RUN npm run build
 
-# RUN apk add nodejs npm
+WORKDIR /var/www/
 
-# WORKDIR /var/www/frontend
+RUN ln -s /usr/src/app/dist frontend
 
-# COPY . .
-
-# RUN npm install -g npm@latest
-
-# RUN npm ci --silent
-
-# RUN npm run build
-
-# CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
