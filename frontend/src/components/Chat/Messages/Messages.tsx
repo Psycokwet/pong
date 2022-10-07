@@ -11,23 +11,13 @@ const Messages = ({
   blockedUserList: BlockedUserInterface[];
 }) => {
   const containerRef = useRef();
-  const refAssignCallback = (ref: any) => {
-    if (!containerRef.current && ref) {
-      ref.scrollTop = ref.scrollHeight - ref.getBoundingClientRect().height;
-      containerRef.current = ref;
-    } else {
-      //otherwise just assign/unassigned
-      containerRef.current = ref;
-    }
-  };
 
   const filteredMessages:Message[] = messages.filter((message) => {
     return blockedUserList.find((blockedUser) => blockedUser.pongUsername==message.author) == undefined
     })
   return (
     <div 
-      ref={refAssignCallback}
-      className="row-span-5 col-span-3 scroll-smooth overflow-y-auto"
+      className="flex flex-col-reverse row-span-5 col-span-3 scroll-smooth overflow-y-auto"
     >
       {filteredMessages.map((message, index) => {
       return (

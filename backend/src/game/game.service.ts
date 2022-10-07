@@ -73,7 +73,11 @@ export class GameService {
 
   matchMaking(user: User): GameRoom {
     const gameToLaunch: GameRoom = GameService.gameRoomList.find(
-      (gameRoom) => !gameRoom.started && !gameRoom.isChallenge,
+      (gameRoom) =>
+        !gameRoom.started &&
+        !gameRoom.isChallenge &&
+        gameRoom.gameData.player1.userId !== user.id &&
+        gameRoom.gameData.player2.userId !== user.id,
     );
 
     if (!gameToLaunch) return this.createGame(user);
@@ -113,6 +117,16 @@ export class GameService {
       (gameRoom) =>
         gameRoom.gameData.player1.userId === userId ||
         gameRoom.gameData.player2.userId === userId,
+    );
+    return GameService.gameRoomList[index]; // can be -1, so undefined
+  }
+
+  findPlayerRoomForStatus(userId: number): GameRoom | undefined {
+    let index = GameService.gameRoomList.findIndex(
+      (gameRoom) =>
+        (gameRoom.gameData.player1.userId === userId ||
+          gameRoom.gameData.player2.userId === userId) &&
+        gameRoom.started === true,
     );
     return GameService.gameRoomList[index]; // can be -1, so undefined
   }

@@ -269,6 +269,14 @@ export class ChatGateway implements OnGatewayConnection {
     }
 
     await this.chatService.attachMemberToChannel(payload.userId, room);
+
+    this.server
+      .in(room.roomName)
+      .emit(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        await this.chatService.getAttachedUsersInChannel(room.id),
+      );
+
     await this.joinAttachedChannelLobby(client, payload);
     await this.joinRoom({ roomId: room.id }, client, payload);
   }
@@ -300,6 +308,7 @@ export class ChatGateway implements OnGatewayConnection {
         ROUTES_BASE.CHAT.LIST_ALL_CHANNELS,
         await this.chatService.getAllPublicRooms(),
       );
+
     if (room.members.length !== 0) {
       client.leave(room.roomName);
       this.server
@@ -308,11 +317,20 @@ export class ChatGateway implements OnGatewayConnection {
           ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_CONFIRMATION,
           payload.userId,
         );
-      this.attachedUsersList(room.id);
+
+      client.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION);
 
       const ownerWebsocket: UsersWebsockets = UsersService.userWebsockets.find(
         (user) => user.userId === room.owner.id,
       );
+
+      this.server
+        .in(room.roomName)
+        .emit(
+          ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+          await this.chatService.getAttachedUsersInChannel(room.id),
+        );
+
       if (
         ownerWebsocket &&
         this.server.sockets.adapter.rooms
@@ -322,9 +340,10 @@ export class ChatGateway implements OnGatewayConnection {
         // if owner is connected and is joined to this room
         this.server.sockets.sockets
           .get(ownerWebsocket.socketId)
-          .emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
-            privilege: Privileges.OWNER,
-          });
+          .emit(
+            ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION,
+            Privileges.OWNER,
+          );
       }
     }
   }
@@ -369,17 +388,18 @@ export class ChatGateway implements OnGatewayConnection {
       }),
     );
 
-    this.server
-      .in(room.roomName)
-      .emit(
-        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        await this.chatService.getAttachedUsersInChannel(roomId),
-      );
+    client.emit(
+      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+      await this.chatService.getAttachedUsersInChannel(roomId),
+    );
 
-    if (room.owner.id === payload.userId) {
-      client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
-        privilege: Privileges.OWNER,
-      });
+    if (room.isDM === false) {
+      if (room.owner.id === payload.userId) {
+        client.emit(
+          ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION,
+          Privileges.OWNER,
+        );
+      }
     }
   }
 
@@ -401,15 +421,16 @@ export class ChatGateway implements OnGatewayConnection {
   /** GET ATTACHED USERS IN CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_REQUEST)
-  async attachedUsersList(@MessageBody() roomId: number) {
+  async attachedUsersList(
+    @MessageBody() roomId: number,
+    @ConnectedSocket() client: Socket,
+  ) {
     const room = await this.chatService.getRoomWithRelations({ id: roomId });
 
-    this.server
-      .in(room.roomName)
-      .emit(
-        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
-        await this.chatService.getAttachedUsersInChannel(roomId),
-      );
+    client.emit(
+      ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+      await this.chatService.getAttachedUsersInChannel(roomId),
+    );
   }
 
   /*MESSAGE LISTENER */
@@ -486,16 +507,33 @@ export class ChatGateway implements OnGatewayConnection {
     if (room.owner.id !== payload.userId)
       throw new WsException('You do not have the rights to set an admin');
 
-    this.chatService.setAdmin(room, newAdmin);
+    await this.chatService.setAdmin(room, newAdmin);
 
     const promotedUser: UserInterface = {
       id: newAdmin.id,
       pongUsername: newAdmin.pongUsername,
       status: Status.ONLINE,
     };
+    const promotedUserSocketId = this.userService.getUserIdWebsocket(
+      promotedUser.id,
+    );
+    if (promotedUserSocketId) {
+      const promotedUserSocket = this.server.sockets.sockets.get(
+        promotedUserSocketId.socketId,
+      );
+      /** Channel disappears from the banned user's attached channel list */
+      promotedUserSocket.emit(
+        ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION,
+        Privileges.ADMIN,
+      );
+    }
+
     this.server
       .in(room.roomName)
-      .emit(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, promotedUser);
+      .emit(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        await this.chatService.getAttachedUsersInChannel(room.id),
+      );
   }
 
   @UseGuards(JwtWsGuard)
@@ -519,23 +557,40 @@ export class ChatGateway implements OnGatewayConnection {
     if (room.owner.id !== payload.userId)
       throw new WsException('You do not have the rights to unset an admin');
 
-    this.chatService.unsetAdmin(room, oldAdmin);
+    await this.chatService.unsetAdmin(room, oldAdmin);
 
     const demotedUser: UserInterface = {
       id: oldAdmin.id,
       pongUsername: oldAdmin.pongUsername,
       status: Status.ONLINE,
     };
+    const demotedUserSocketId = this.userService.getUserIdWebsocket(
+      demotedUser.id,
+    );
+    if (demotedUserSocketId) {
+      const demotedUserSocket = this.server.sockets.sockets.get(
+        demotedUserSocketId.socketId,
+      );
+      /** Channel disappears from the banned user's attached channel list */
+      demotedUserSocket.emit(
+        ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION,
+        Privileges.ADMIN,
+      );
+    }
 
     this.server
-      .in(data.channelName)
-      .emit(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, demotedUser);
+      .in(room.roomName)
+      .emit(
+        ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION,
+        await this.chatService.getAttachedUsersInChannel(room.id),
+      );
   }
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
   async getUserPrivileges(
     @MessageBody() data: RoomId,
+    @ConnectedSocket() client: Socket,
     @UserPayload() payload: any,
   ) {
     const room = await this.chatService.getRoomWithRelations(
@@ -545,18 +600,23 @@ export class ChatGateway implements OnGatewayConnection {
 
     if (!room) throw new WsException('Channel does not exist');
 
-    const privilege = this.chatService.getUserPrivileges(room, payload.userId);
+    const privilege: number = this.chatService.getUserPrivileges(
+      room,
+      payload.userId,
+    );
 
-    this.server.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, {
-      privilege: privilege,
-    });
+    client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
   }
 
   /** BAN / KICK / MUTE */
 
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.BAN_USER_REQUEST)
-  async banUser(@MessageBody() data: BanUser, @UserPayload() payload: any) {
+  async banUser(
+    @MessageBody() data: BanUser,
+    @UserPayload() payload: any,
+    @ConnectedSocket() client: Socket,
+  ) {
     const userToBan = await this.userService.getById(data.userIdToBan);
     if (!userToBan) throw new WsException('User does not exist');
 
