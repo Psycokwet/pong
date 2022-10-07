@@ -155,7 +155,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   /** END GAMEOVER */
 
   return (
-    <div className="w-full h-7/8">
+    <div className="w-full h-screen">
       <div>
         <h1 className="text-3xl text-center p-2">RANKED MATCH</h1>
       </div>

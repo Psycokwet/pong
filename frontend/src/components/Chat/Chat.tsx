@@ -4,18 +4,23 @@ import UserPicture from "../UserPicture/UserPicture";
 import ChatList from "./ChatList/ChatList";
 import TextField from "./TextField/TextField";
 import Messages from "./Messages/Messages";
+import ChannelUserListByStatus from "./UserInChannelList/ChannelUserListByStatus";
+
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 import ChannelData from "/shared/interfaces/ChannelData";
 import Message from "/shared/interfaces/Message";
 import { statusList } from "../Common/StatusList";
 import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
 import { Status } from "/shared/interfaces/UserStatus";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
-import ChannelUserListByStatus from "./ChatList/UserInChannelList/ChannelUserListByStatus";
 
 function Chat({ socket }: { socket: Socket | undefined }) {
   const [messages, setMessages] = useState<Message[]>([]);
   // const [lastMessage, setLastMessage] = useState<Message>(undefined)
+  const [blockedUserList, setBlockedUserList] = useState<
+    BlockedUserInterface[]
+  >([]);
   const [connectedChannel, setConnectedChannel] = useState<
     ChannelData | undefined
   >(undefined);
@@ -35,7 +40,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
       socket?.off(ROUTES_BASE.CHAT.RECEIVE_MESSAGE, addMessage);
     };
   }, [addMessage]);
-  const resetMessages = (msgs:Message[]) => {
+  const resetMessages = (msgs: Message[]) => {
     setMessages(msgs.reverse());
     // setLastMessage(msgs.at(-1));
   };
@@ -46,6 +51,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, [resetMessages]);
 
+  /**  Set actual connectedChannel */
   const channelListener = (channel: ChannelData) => {
     setConnectedChannel(channel);
   };
@@ -71,6 +77,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, [channelListener]);
 
+  /**  Disconnect and clear page */
   const disconnect = () => {
     setMessages([]);
     setConnectedChannel(undefined);
@@ -82,6 +89,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, [disconnect]);
 
+  /**  Listen User list for channel */
   useEffect(() => {
     if (connectedChannel)
       socket?.emit(
@@ -124,6 +132,36 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   }, []);
   /** END UNATTACH FROM CHANNEL */
 
+  /** Block user list update */
+  const resetBlockUserList = (list: BlockedUserInterface[]) => {
+    setBlockedUserList(list);
+  };
+  useEffect(() => {
+    socket?.emit(ROUTES_BASE.USER.BLOCKED_USERS_LIST_REQUEST);
+  }, []);
+  useEffect(() => {
+    socket?.on(
+      ROUTES_BASE.USER.BLOCKED_USERS_LIST_CONFIRMATION,
+      resetBlockUserList
+    );
+    return () => {
+      socket?.off(
+        ROUTES_BASE.USER.BLOCKED_USERS_LIST_CONFIRMATION,
+        resetBlockUserList
+      );
+    };
+  }, [resetBlockUserList]);
+  const confirmUserBlocked = (user: string) => {
+    //Need a toast here
+  };
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.USER.BLOCK_USER_CONFIRMATION, confirmUserBlocked);
+    return () => {
+      socket?.off(ROUTES_BASE.USER.BLOCK_USER_CONFIRMATION, confirmUserBlocked);
+    };
+  }, [confirmUserBlocked]);
+
+  /** Other functions (handlers) */
   const handleDisconnectChannel = () => {
     setConnectedChannel(undefined);
     setMessages([]);
@@ -138,9 +176,32 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     handleDisconnectChannel();
   };
 
-  const setupPrivilege = (val: { privilege: Privileges }) => {
-    setPrivilege(val.privilege);
+  const youArePromoted = (privilege: Privileges) => {
+    setPrivilege(privilege);
   };
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, youArePromoted);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, youArePromoted);
+    };
+  }, []);
+  useEffect(() => {
+    socket?.on(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, youArePromoted);
+    return () => {
+      socket?.off(ROUTES_BASE.CHAT.UNSET_ADMIN_CONFIRMATION, youArePromoted);
+    };
+  }, []);
+
+  const setupPrivilege = (privilege: Privileges) => {
+    setPrivilege(privilege);
+  };
+  useEffect(() => {
+    if (connectedChannel)
+      socket?.emit(
+        ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST,
+        connectedChannel.channelId
+      );
+  }, [connectedChannel]);
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupPrivilege);
     return () => {
@@ -159,33 +220,38 @@ function Chat({ socket }: { socket: Socket | undefined }) {
         connectedChannel={connectedChannel}
         userPrivilege={userPrivilege}
         handleDisconnectChannel={handleDisconnectChannel}
+        blockedUserList={blockedUserList}
         // lastMessage={lastMessage}
       />
-      <Messages messages={messages} />
+      <Messages messages={messages} blockedUserList={blockedUserList} />
       {connectedChannel ? (
         <TextField socket={socket} connectedChannel={connectedChannel} />
       ) : (
         <></>
       )}
       <div className="row-start-1 row-span-6 col-start-5 p-x-8">
-        {statusList?.map((aStatusList) => {
-          return (
-            <ChannelUserListByStatus
-              userPrivilege={userPrivilege}
-              key={aStatusList.status}
-              userList={attachedUserList}
-              inputFilter={""}
-              statusList={aStatusList}
-              socket={socket}
-              menuSettings={{
-                challenge: aStatusList.status === Status.ONLINE,
-                watch: aStatusList.status === Status.PLAYING,
-                privileges: userPrivilege,
-                friend: false,
-              }}
-            />
-          );
-        })}
+        {connectedChannel != undefined ? (
+          statusList?.map((aStatusList) => {
+            return (
+              <ChannelUserListByStatus
+                userPrivilege={userPrivilege}
+                key={aStatusList.status}
+                userList={attachedUserList}
+                inputFilter={""}
+                statusList={aStatusList}
+                socket={socket}
+                channelName={connectedChannel.channelName}
+                menuSettings={{
+                  challenge: aStatusList.status === Status.ONLINE,
+                  watch: aStatusList.status === Status.PLAYING,
+                }}
+                blockedUserList={blockedUserList}
+              />
+            );
+          })
+        ) : (
+          <></>
+        )}
         <UserPicture />
       </div>
     </div>

@@ -1,22 +1,39 @@
-import { MenuItem } from "@szhsin/react-menu";
-import { MenuSettingsType } from "../MenuSettings";
+import { MenuItem, SubMenu } from '@szhsin/react-menu';
+import { Socket } from "socket.io-client";
+import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
+
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface"
 
 const Mute = ({
-  menuSettings,
   userPrivilege,
-}: {
-  menuSettings: MenuSettingsType;
-  userPrivilege: number;
+  user,
+  socket,
+  channelName,
+}:{
+  channelName: string;
+  user: ChannelUserInterface;
+  userPrivilege:number;
+  socket: Socket | undefined;
 }) => {
-  const do_mute = () => {};
+  const mute = (val:number) => {
+    socket?.emit(ROUTES_BASE.CHAT.MUTE_USER_REQUEST, {
+      userIdToMute: user.id,
+      channelName: channelName,
+      muteTime: val
+    });
+  }
   return (
-    <MenuItem
-      className={menuSettings.privileges === Privileges.MEMBER ? "hidden" : ""}
-      disabled={userPrivilege >= menuSettings.privileges}
+    <SubMenu
+      label="Mute"
+      className={ userPrivilege === Privileges.MEMBER ? "hidden" : "" }
+      disabled={ userPrivilege <= user.privileges }
     >
-      <div onClick={do_mute}>Mute</div>
-    </MenuItem>
+      <MenuItem onClick={()=>mute(10000)}>10 sec</MenuItem>
+      <MenuItem onClick={()=>mute(60000)}>1 min</MenuItem>
+      <MenuItem onClick={()=>mute(600000)}>10 min</MenuItem>
+      <MenuItem onClick={()=>mute(3600000)}>1 hour</MenuItem>
+    </SubMenu>
   );
 };
 
