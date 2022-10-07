@@ -3,33 +3,38 @@ import Avatar from "../../../Common/Avatar";
 import { Api } from "../../../../api/api";
 import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
-import { ChannelData } from "/shared/interfaces/ChannelData";
-import { Message } from "/shared/interfaces/Message";
+import ChannelData from "/shared/interfaces/ChannelData";
 
 const api = new Api();
 
 type Props = {
-  socket: Socket|undefined;
+  socket: Socket | undefined;
   channel: ChannelData;
   // message: Message
-  connectedChannel: ChannelData|undefined
+  connectedChannel: ChannelData | undefined;
 };
 
 const DirectMessage: React.FC<Props> = ({
-  socket, 
-  channel, 
-  // message, 
-  connectedChannel
+  socket,
+  channel,
+  // message,
+  connectedChannel,
 }) => {
   // const [lastMessage, setLastMessage] = useState<Message>();
   const [avatarUrl, setAvatarUrl] = useState("");
   const handleClick = () => {
-    socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST, {roomId: channel.channelId});
-  }
+    socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST, {
+      roomId: channel.channelId,
+    });
+  };
 
-  let style:string = "flex flex-row gap-4 text-lg font-semibold py-4 px-10 hover:bg-slate-800 cursor-pointer display-block break-all";
-  if (connectedChannel !== undefined && connectedChannel.channelId === channel.channelId)
-    style=style + " bg-slate-600";
+  let style: string =
+    "flex flex-row gap-4 text-lg font-semibold py-4 px-10 hover:bg-slate-800 cursor-pointer display-block break-all";
+  if (
+    connectedChannel !== undefined &&
+    connectedChannel.channelId === channel.channelId
+  )
+    style = style + " bg-slate-600";
 
   // if (message.roomId === channel.channelId && lastMessage !== message)
   //   setLastMessage(message);
@@ -46,9 +51,8 @@ const DirectMessage: React.FC<Props> = ({
   }, []);
 
   return (
-    <div className={style}
-      onClick={handleClick}>
-      <Avatar url={avatarUrl} size="w-12 h-12"/>
+    <div className={style} onClick={handleClick}>
+      <Avatar url={avatarUrl} size="w-12 h-12" />
       <div className="flex flex-col">
         <h4 className="text-lg font-semibold truncate">
           {channel.channelName}
@@ -58,7 +62,7 @@ const DirectMessage: React.FC<Props> = ({
         </p> */}
       </div>
     </div>
-  )
+  );
 };
 
-export default DirectMessage
+export default DirectMessage;

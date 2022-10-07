@@ -1,4 +1,4 @@
-import { FULL_ROUTE } from "../../shared/httpsRoutes/routes";
+import { FULL_ROUTE } from "/shared/httpsRoutes/routes";
 import { GameColors } from "/shared/types/GameColors";
 
 export const PREFIX =

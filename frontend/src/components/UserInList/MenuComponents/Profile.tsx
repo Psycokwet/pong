@@ -1,11 +1,11 @@
-import { MenuItem } from '@szhsin/react-menu';
+import { MenuItem } from "@szhsin/react-menu";
 import { Link } from "react-router-dom";
 
 import { UserInterface } from "/shared/interfaces/UserInterface";
 
 import { MenuSettingsType } from "../MenuSettings";
 
-const Profile = ({user}:{user:UserInterface}) => {
+const Profile = ({ user }: { user: UserInterface }) => {
   return (
     <MenuItem>
       <Link
@@ -16,6 +16,6 @@ const Profile = ({user}:{user:UserInterface}) => {
       </Link>
     </MenuItem>
   );
-}
+};
 
-export default Profile
+export default Profile;

@@ -3,14 +3,13 @@ import { Socket } from "socket.io-client";
 import { ROUTES_BASE } from "/shared/websocketRoutes/routes";
 
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
-import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import ChannelUserInterface from "/shared/interfaces/ChannelUserInterface";
 
 const Ban = ({
   userPrivilege,
   user,
   socket,
   channelName,
-
 }: {
   channelName: string;
   user: ChannelUserInterface;

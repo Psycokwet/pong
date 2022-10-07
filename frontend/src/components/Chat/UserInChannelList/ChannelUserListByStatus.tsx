@@ -1,12 +1,12 @@
 import React from "react";
 import { BsCircleFill } from "react-icons/bs";
-import { ChannelUserInterface } from "/shared/interfaces/ChannelUserInterface";
+import ChannelUserInterface from "/shared/interfaces/ChannelUserInterface";
 import { BlockedUserInterface } from "/shared/interfaces/BlockedUserInterface";
-import { MenuSettingsType } from "../UserInList/MenuSettings"
-import { UserStatus } from "../Common/StatusList"
 import { Socket } from "socket.io-client";
 import ChannelUserMenu from "./ChannelUserMenu";
 import { Privileges } from "/shared/interfaces/UserPrivilegesEnum";
+import { MenuSettingsType } from "../../UserInList/MenuSettings";
+import { UserStatus } from "../../Common/StatusList";
 
 type ChannelUserListByStatusProps = {
   userList: ChannelUserInterface[];
@@ -39,20 +39,22 @@ const ChannelUserListByStatus: React.FC<ChannelUserListByStatusProps> = ({
         <p>{statusList.groupName}</p>
       </div>
 
-      {userList?.filter((value) => value.status === statusList.status).map((user) => {
-        return (
-          <ChannelUserMenu
-            channelName={channelName}
-            userPrivilege={userPrivilege}
-            key={user.id}
-            pointedUser={user}
-            inputFilter={inputFilter}
-            socket={socket}
-            menuSettings={menuSettings}
-            blockedUserList={blockedUserList}
-          />
-        );
-      })}
+      {userList
+        ?.filter((value) => value.status === statusList.status)
+        .map((user) => {
+          return (
+            <ChannelUserMenu
+              channelName={channelName}
+              userPrivilege={userPrivilege}
+              key={user.id}
+              pointedUser={user}
+              inputFilter={inputFilter}
+              socket={socket}
+              menuSettings={menuSettings}
+              blockedUserList={blockedUserList}
+            />
+          );
+        })}
     </>
   );
 };

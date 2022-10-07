@@ -2,7 +2,7 @@ import React from "react";
 import UserStats from "./UserStats";
 import UserMatchHistory from "./UserMatchHistory";
 
-import UserProfile from "shared/interfaces/UserProfile";
+import UserProfile from "/shared/interfaces/UserProfile";
 import Avatar from "../Common/Avatar";
 
 type OneUserProfileProps = {
@@ -14,6 +14,7 @@ const OneUserProfile: React.FC<OneUserProfileProps> = ({
   userProfile,
   avatarUrl,
 }) => {
+  if (!userProfile) return <></>;
   return (
     <div className="flex justify-evenly">
       <div className="flex items-center">
