@@ -18,13 +18,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.production
     restart: unless-stopped
+    volumes: 
+      - ./frontend/src:/usr/src/app/src:ro 
+      - ./backend/shared:/usr/src/app/shared:ro 
     environment:
       - VITE_CONTEXT=PRODUCTION
       - VITE_PONG_URL=${PONG_URL}
       - VITE_PONG_URL_BACK=${PONG_URL_BACK}
       - VITE_PONG_URL_BACK_MOCKUP=${PONG_URL_BACK_MOCKUP}
-    ports:
-      - "0.0.0.0:8080:8080"
     depends_on:
       - backend
 
