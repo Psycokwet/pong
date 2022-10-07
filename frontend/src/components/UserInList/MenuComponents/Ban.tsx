@@ -10,6 +10,7 @@ const Ban = ({
   user,
   socket,
   channelName,
+
 }: {
   channelName: string;
   user: ChannelUserInterface;
