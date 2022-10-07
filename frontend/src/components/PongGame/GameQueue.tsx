@@ -38,7 +38,7 @@ const GameQueue = ({
   }
 
   return <div>
-  <div className="w-full h-7/8">
+  <div className="w-full h-screen">
     {/* i didn't know ths size of the text as they are on all pages so the font-color is black... */}
     {/* and black on black... */}
     <div><h1 className="text-black text-3xl text-center p-2">RANKED MATCH</h1></div>
