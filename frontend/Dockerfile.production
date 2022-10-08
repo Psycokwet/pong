@@ -1,15 +1,19 @@
 FROM nginx:alpine
-
 RUN apk add nodejs npm
+RUN npm install -g npm@latest
 
-WORKDIR /var/www/frontend
+WORKDIR /usr/src/app
 
 COPY . .
 
-RUN npm install -g npm@latest
+COPY .env .env
 
 RUN npm ci --silent
 
 RUN npm run build
+
+WORKDIR /var/www/
+
+RUN ln -s /usr/src/app/dist frontend
 
 CMD ["nginx", "-g", "daemon off;"]
