@@ -40,8 +40,20 @@ const ChannelUserListByStatus: React.FC<ChannelUserListByStatusProps> = ({
       </div>
 
       {userList
-        ?.filter((value) => value.status === statusList.status)
-        .map((user) => {
+        ?.sort(
+          (
+            userA: ChannelUserInterface,
+            userB: ChannelUserInterface
+          ): number => {
+            if (userA.id > userB.id) return 1;
+            if (userA.id < userB.id) return -1;
+            return 0;
+          }
+        )
+        .filter(
+          (user: ChannelUserInterface) => user.status === statusList.status
+        )
+        .map((user: ChannelUserInterface) => {
           return (
             <ChannelUserMenu
               channelName={channelName}

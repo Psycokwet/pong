@@ -18,16 +18,19 @@ function ChatList({
   handleDisconnectChannel,
   /* lastMessage,*/
   blockedUserList,
-} : {
-    socket:Socket | undefined,
-    connectedChannel: ChannelData | undefined,
-    handleLeaveChannel: any;
-    userPrivilege: Privileges;
-    handleDisconnectChannel: any;
-    /*lastMessage: Message;*/
-    blockedUserList:BlockedUserInterface[];
-}){
-  const [channelList, setChannelList] = useState<ChannelData[]>([]);
+  channelList,
+  setChannelList,
+}: {
+  socket: Socket | undefined;
+  connectedChannel: ChannelData | undefined;
+  handleLeaveChannel: any;
+  userPrivilege: Privileges;
+  handleDisconnectChannel: any;
+  /*lastMessage: Message;*/
+  blockedUserList: BlockedUserInterface[];
+  channelList: ChannelData[];
+  setChannelList: any;
+}) {
   const [directMessageList, setDirectMessageList] = useState<ChannelData[]>([]);
 
   useEffect(() => {
@@ -63,27 +66,24 @@ function ChatList({
     };
   }, [resetDirectMessageList]);
 
-  const filteredConversations:ChannelData[] = directMessageList.filter((directMessage) => {
-    return blockedUserList.find((blockedUser) => blockedUser.pongUsername==directMessage.channelName) == undefined
-    })
+  const filteredConversations: ChannelData[] = directMessageList.filter(
+    (directMessage) => {
+      return (
+        blockedUserList.find(
+          (blockedUser) => blockedUser.pongUsername == directMessage.channelName
+        ) == undefined
+      );
+    }
+  );
   return (
     <div className="h-full row-start-1 row-span-6 col-start-1 self-center scroll-smooth overflow-y-auto overflow-scroll scroll-pb-96 snap-y snap-end relative">
       <div>
         <ChannelMenu socket={socket} />
-        {channelList.map((channel, i) => (
+        {channelList.map((channel: ChannelData, i: number) => (
           <div key={i}>
             <Channel
               userPrivilege={userPrivilege}
-              handleLeaveChannel={() => {
-                handleLeaveChannel();
-                setChannelList((current) =>
-                  current.filter((channel) => {
-                    if (connectedChannel)
-                      return channel.channelId !== connectedChannel.channelId;
-                    return true;
-                  })
-                );
-              }}
+              handleLeaveChannel={handleLeaveChannel}
               channel={channel}
               socket={socket}
               connectedChannel={connectedChannel}
@@ -93,7 +93,7 @@ function ChatList({
         ))}
       </div>
       <div>
-        <DirectMessageMenu socket={socket}/>
+        <DirectMessageMenu socket={socket} />
         {filteredConversations.map((directMessage) => {
           return (
             <div key={directMessage.channelId}>
