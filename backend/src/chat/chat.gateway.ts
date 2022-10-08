@@ -419,14 +419,22 @@ export class ChatGateway implements OnGatewayConnection {
       await this.chatService.getAttachedUsersInChannel(roomId),
     );
 
-    if (room.isDM === false) {
-      if (room.owner.id === payload.userId) {
-        client.emit(
-          ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION,
-          Privileges.OWNER,
-        );
-      }
+    let privileges = Privileges.MEMBER;
+    if (payload.userId === room.owner.id) {
+      privileges = Privileges.OWNER;
+    } else if (room.admins.includes(payload.userId)) {
+      privileges = Privileges.ADMIN;
     }
+    client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privileges);
+
+    // if (room.isDM === false) {
+    //   if (room.owner.id === payload.userId) {
+    //     client.emit(
+    //       ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION,
+    //       Privileges.OWNER,
+    //     );
+    //   }
+    // }
   }
 
   /* DISCONNECT FROM CHANNEL */
@@ -615,27 +623,27 @@ export class ChatGateway implements OnGatewayConnection {
       );
   }
 
-  @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
-  async getUserPrivileges(
-    @MessageBody() data: RoomId,
-    @ConnectedSocket() client: Socket,
-    @UserPayload() payload: any,
-  ) {
-    const room = await this.chatService.getRoomWithRelations(
-      { id: data.roomId },
-      { owner: true, admins: true, members: true },
-    );
+  // @UseGuards(JwtWsGuard)
+  // @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
+  // async getUserPrivileges(
+  //   @MessageBody() data: RoomId,
+  //   @ConnectedSocket() client: Socket,
+  //   @UserPayload() payload: any,
+  // ) {
+  //   const room = await this.chatService.getRoomWithRelations(
+  //     { id: data.roomId },
+  //     { owner: true, admins: true, members: true },
+  //   );
 
-    if (!room) throw new WsException('Channel does not exist');
+  //   if (!room) throw new WsException('Channel does not exist');
 
-    const privilege: number = this.chatService.getUserPrivileges(
-      room,
-      payload.userId,
-    );
+  //   const privilege: number = this.chatService.getUserPrivileges(
+  //     room,
+  //     payload.userId,
+  //   );
 
-    client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
-  }
+  //   client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
+  // }
 
   /** BAN / KICK / MUTE */
 
