@@ -41,7 +41,9 @@ const ChannelUserListByStatus: React.FC<ChannelUserListByStatusProps> = ({
 
       {
         userList?.sort(
-            (userA: ChannelUserInterface, userB: ChannelUserInterface) => {return userA.pongUsername > userB.pongUsername}
+            (userA: ChannelUserInterface, userB: ChannelUserInterface) => {
+              return userA.id > userB.id;
+            }
           )
           .filter((user: ChannelUserInterface) => user.status === statusList.status)
           .map((user: ChannelUserInterface) => {
