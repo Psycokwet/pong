@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:slim
 
 WORKDIR /app
 
@@ -12,4 +12,4 @@ RUN npm ci --silent
 
 RUN npm run build
 
-CMD ["node", "dist/main"]
+CMD ["nest", "start"] 
