@@ -28,6 +28,7 @@ const Channel = function ({
   }, [connectedChannel]);
 
   const handleClick = () => {
+    console.log(connectedChannel);
     if (connectedChannel?.channelId !== channel.channelId) {
       if (connectedChannel)
         socket?.emit(
