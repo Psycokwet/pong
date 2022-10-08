@@ -33,6 +33,8 @@ import BanUser from 'shared/interfaces/BanUser';
 import { Status } from 'shared/interfaces/UserStatus';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
+import Room from './room.entity';
+import { User } from 'src/user/user.entity';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -45,6 +47,11 @@ async function passwordCompare(
   return bcrypt.compare(password, hash);
 }
 
+type UserRoom = {
+  userId: number;
+  roomName: string;
+};
+
 @WebSocketGateway({
   transport: ['websocket'],
   cors: '*/*',
@@ -56,10 +63,27 @@ export class ChatGateway implements OnGatewayConnection {
     private readonly userService: UsersService,
   ) {}
 
+  private static UserNotFound = { error: 'User not found' };
+
   @WebSocketServer()
   server: Server;
 
   async handleConnection(@ConnectedSocket() client: Socket) {
+    try {
+      const user = await this.userService.getUserFromSocket(client);
+      if (!user) {
+        throw new WsException(ChatGateway.UserNotFound);
+      }
+
+      console.log(user);
+
+      const userRoom: UserRoom = this.chatService.findUserRoom(user.id);
+
+      if (!userRoom) return;
+      client.join(userRoom.roomName);
+    } catch (e) {
+      console.error(e.message);
+    }
     // try { // this code is for DM notifications
     //   const user = await this.userService.getUserFromSocket(client);
     //   const userDM: Room[] = await this.chatService.getAllDMRoomsRaw(user);
@@ -299,6 +323,7 @@ export class ChatGateway implements OnGatewayConnection {
         message: 'You must specify which channel you want to leave',
       });
 
+    this.chatService.removeFromUserRooms(payload.userIdToBan);
     await this.chatService.unattachMemberToChannel(payload.userId, room);
 
     //Update public channel lobbies
@@ -374,6 +399,8 @@ export class ChatGateway implements OnGatewayConnection {
     };
     client.emit(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_ENTRY, channelData);
 
+    this.chatService.updateUsersRoom(room, payload.userId);
+
     client.emit(
       ROUTES_BASE.CHAT.MESSAGE_HISTORY,
       room.messages.map((message) => {
@@ -393,20 +420,29 @@ export class ChatGateway implements OnGatewayConnection {
       await this.chatService.getAttachedUsersInChannel(roomId),
     );
 
-    if (room.isDM === false) {
-      if (room.owner.id === payload.userId) {
-        client.emit(
-          ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION,
-          Privileges.OWNER,
-        );
-      }
+    let privileges = Privileges.MEMBER;
+    if (payload.userId === room.owner?.id) {
+      privileges = Privileges.OWNER;
+    } else if (room.admins.find((user: User) => user.id === payload.userId)) {
+      privileges = Privileges.ADMIN;
     }
+    client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privileges);
+
+    // if (room.isDM === false) {
+    //   if (room.owner.id === payload.userId) {
+    //     client.emit(
+    //       ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION,
+    //       Privileges.OWNER,
+    //     );
+    //   }
+    // }
   }
 
   /* DISCONNECT FROM CHANNEL */
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST)
   async disconnectFromChannel(
+    @UserPayload() payload: any,
     @MessageBody() roomId: number,
     @ConnectedSocket() client: Socket,
   ) {
@@ -588,27 +624,27 @@ export class ChatGateway implements OnGatewayConnection {
       );
   }
 
-  @UseGuards(JwtWsGuard)
-  @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
-  async getUserPrivileges(
-    @MessageBody() data: RoomId,
-    @ConnectedSocket() client: Socket,
-    @UserPayload() payload: any,
-  ) {
-    const room = await this.chatService.getRoomWithRelations(
-      { id: data.roomId },
-      { owner: true, admins: true, members: true },
-    );
+  // @UseGuards(JwtWsGuard)
+  // @SubscribeMessage(ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST)
+  // async getUserPrivileges(
+  //   @MessageBody() data: RoomId,
+  //   @ConnectedSocket() client: Socket,
+  //   @UserPayload() payload: any,
+  // ) {
+  //   const room = await this.chatService.getRoomWithRelations(
+  //     { id: data.roomId },
+  //     { owner: true, admins: true, members: true },
+  //   );
 
-    if (!room) throw new WsException('Channel does not exist');
+  //   if (!room) throw new WsException('Channel does not exist');
 
-    const privilege: number = this.chatService.getUserPrivileges(
-      room,
-      payload.userId,
-    );
+  //   const privilege: number = this.chatService.getUserPrivileges(
+  //     room,
+  //     payload.userId,
+  //   );
 
-    client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
-  }
+  //   client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privilege);
+  // }
 
   /** BAN / KICK / MUTE */
 
@@ -646,7 +682,7 @@ export class ChatGateway implements OnGatewayConnection {
     )
       throw new WsException('Another admin cannot be banned');
 
-    await this.chatService.unattachMemberToChannel(userToBan.id, room);
+    this.chatService.removeFromUserRooms(payload.userIdToBan);
 
     const bannedSocketId = this.userService.getUserIdWebsocket(userToBan.id);
 
@@ -654,17 +690,16 @@ export class ChatGateway implements OnGatewayConnection {
       const bannedSocket = this.server.sockets.sockets.get(
         bannedSocketId.socketId,
       );
-      this.disconnectFromChannel(room.id, bannedSocket);
 
-      /** Channel disappears from the banned user's attached channel list */
-      bannedSocket.emit(
-        ROUTES_BASE.CHAT.LIST_ALL_ATTACHED_CHANNELS,
-        await this.chatService.getAllAttachedRooms(userToBan.id),
-      );
-
-      /** Banned users attached members list is reset */
-      bannedSocket.emit(ROUTES_BASE.CHAT.ATTACHED_USERS_LIST_CONFIRMATION);
+      const channelBannedFrom: ChannelData = {
+        channelName: room.channelName,
+        channelId: room.id,
+      };
+      bannedSocket.emit(ROUTES_BASE.CHAT.GET_BANNED, channelBannedFrom);
+      await bannedSocket.leave(room.roomName);
     }
+
+    await this.chatService.unattachMemberToChannel(userToBan.id, room);
 
     this.server
       .in(room.roomName)

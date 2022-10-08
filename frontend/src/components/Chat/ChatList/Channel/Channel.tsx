@@ -28,13 +28,14 @@ const Channel = function ({
   }, [connectedChannel]);
 
   const handleClick = () => {
+    console.log(connectedChannel);
     if (connectedChannel?.channelId !== channel.channelId) {
-      handleDisconnectChannel();
       if (connectedChannel)
         socket?.emit(
           ROUTES_BASE.CHAT.DISCONNECT_FROM_CHANNEL_REQUEST,
           connectedChannel.channelId
         );
+        // handleDisconnectChannel();
       socket?.emit(ROUTES_BASE.CHAT.JOIN_CHANNEL_REQUEST, {
         roomId: channel.channelId,
       });

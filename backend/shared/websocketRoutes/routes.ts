@@ -50,6 +50,7 @@ export const ROUTES_BASE: { [key: string]: { [key: string]: string } } = {
     USER_PRIVILEGES_CONFIRMATION: "userPrivilegesConfirmation",
     /** BAN USER REQUEST */
     BAN_USER_REQUEST: "banUserRequest",
+    GET_BANNED: "getBanned",
     /** MUTE USER REQUEST */
     MUTE_USER_REQUEST: "muteUserRequest",
     /** CHANGE PASSWORD */

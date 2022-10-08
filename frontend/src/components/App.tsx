@@ -59,24 +59,25 @@ function App() {
           return current;
         });
       } else {
-        setSocket((current: Socket | undefined) => {
-          if (current) return current;
-          const newSocket = io(import.meta.env.VITE_PONG_URL, {
-            transports: ["websocket"],
-            withCredentials: true,
+        if (socket) {
+          socket.disconnect();
+          socket.connect();
+        } else {
+          setSocket((current: Socket | undefined) => {
+            if (current) return current;
+            const newSocket = io(import.meta.env.VITE_PONG_URL, {
+              transports: ["websocket"],
+              withCredentials: true,
+            });
+              
+            newSocket.on("connect_error", () => {
+              toast.error("Connect error on websocket");
+              setTimeout(() => newSocket.connect(), 1_000);
+            });
+            console.log("connect", newSocket);
+            return newSocket;
           });
-
-          newSocket.on("connect_error", () => {
-            toast.error("Connect error on websocket");
-            setTimeout(() => newSocket.connect(), 1_000);
-          });
-          newSocket.on("disconnect", (reason) => {
-            toast.error("Socket replied a disconnection error :" + reason);
-            setTimeout(() => newSocket.connect(), 1_000);
-          });
-          console.log("connect", newSocket);
-          return newSocket;
-        });
+        }
         res.json().then((newCurrentUser: CurrentUserFrontInterface) => {
           setCurrentUser((current: CurrentUserFrontInterface) => {
             if (!isSameSimpleObj(current, newCurrentUser)) {
