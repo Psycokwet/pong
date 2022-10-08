@@ -421,7 +421,7 @@ export class ChatGateway implements OnGatewayConnection {
     );
 
     let privileges = Privileges.MEMBER;
-    if (payload.userId === room.owner.id) {
+    if (payload.userId === room.owner?.id) {
       privileges = Privileges.OWNER;
     } else if (room.admins.find((user: User) => user.id === payload.userId)) {
       privileges = Privileges.ADMIN;
