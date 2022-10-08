@@ -34,7 +34,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   const [attachedUserList, setAttachedUserList] = useState<
     ChannelUserInterface[]
   >([]);
-  const [userPrivilege, setPrivilege] = useState<number>(Privileges.MEMBER);
+  const [userPrivilege, setUserPrivilege] = useState<number>(Privileges.MEMBER);
   const [avatarList, setAvatarList] = useState<UserAvatar[]>([]);
   const [channelList, setChannelList] = useState<ChannelData[]>([]);
 
@@ -216,7 +216,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     if (connectedChannel) {
       setMessages([]);
       setAttachedUserList([]);
-      setPrivilege(Privileges.MEMBER);
+      setUserPrivilege(Privileges.MEMBER);
       setChannelList((current: ChannelData[]) =>
         current.filter((channel) => 
           connectedChannel && channel.channelId !== connectedChannel.channelId
@@ -235,7 +235,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   };
 
   const youArePromoted = (privilege: Privileges) => {
-    setPrivilege(privilege);
+    setUserPrivilege(privilege);
   };
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, youArePromoted);
@@ -250,16 +250,17 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, []);
 
-  const setupPrivilege = (privilege: Privileges) => {
-    setPrivilege(privilege);
+  const setupPrivilege = (inComingPrivilege: Privileges) => {
+    console.log(inComingPrivilege, userPrivilege);
+    setUserPrivilege((current: Privileges) => inComingPrivilege);
   };
-  useEffect(() => {
-    if (connectedChannel)
-      socket?.emit(
-        ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST,
-        connectedChannel.channelId
-      );
-  }, [connectedChannel]);
+  // useEffect(() => {
+  //   if (connectedChannel)
+  //     socket?.emit(
+  //       ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST,
+  //       connectedChannel.channelId
+  //     );
+  // }, [connectedChannel]);
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupPrivilege);
     return () => {
@@ -275,7 +276,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     if (connectedChannel && connectedChannel.channelId === channelBannedFrom.channelId) {
       setMessages([]);
       setAttachedUserList([]);
-      setPrivilege(Privileges.MEMBER);
+      setUserPrivilege(Privileges.MEMBER);
       setConnectedChannel(undefined);
     }
     setChannelList((current: ChannelData[]) =>
