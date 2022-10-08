@@ -79,8 +79,9 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   }, [attachedUserList]);
 
   /**  Set actual connectedChannel */
-  const channelListener = (channel: ChannelData) => {
-    setConnectedChannel(channel);
+  const channelListener = (channel: ChannelData | undefined) => {
+    console.log(channel)
+    setConnectedChannel((current: ChannelData | undefined) => { console.log(current, channel); return channel });
   };
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelListener);
@@ -105,16 +106,16 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   }, [channelListener]);
 
   /**  Disconnect and clear page */
-  const disconnect = () => {
-    setMessages([]);
-    setConnectedChannel(undefined);
-  };
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
-    return () => {
-      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
-    };
-  }, [disconnect]);
+  // const disconnect = () => {
+  //   setMessages([]);
+  //   // setConnectedChannel(undefined);
+  // };
+  // useEffect(() => {
+  //   socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
+  //   return () => {
+  //     socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
+  //   };
+  // }, [disconnect]);
 
   /**  Listen User list for channel */
   const resetAttachedUserList = (newList: ChannelUserInterface[]) => {
@@ -225,20 +226,6 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     }
   };
 
-  const handleBannedFromChannel = (channelBannedFrom: ChannelData) => {
-    if (connectedChannel && connectedChannel.channelId === channelBannedFrom.channelId) {
-      setMessages([]);
-      setAttachedUserList([]);
-      setPrivilege(Privileges.MEMBER);
-      setConnectedChannel(undefined);
-    }
-    setChannelList((current: ChannelData[]) =>
-      current.filter(
-        (channel) => channel.channelId !== channelBannedFrom.channelId
-      )
-    );
-  }
-
   const handleLeaveChannel = () => {
     if (!connectedChannel) return;
     socket?.emit(ROUTES_BASE.CHAT.UNATTACH_TO_CHANNEL_REQUEST, {
@@ -283,6 +270,20 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, []);
 
+  const handleBannedFromChannel = (channelBannedFrom: ChannelData) => {
+    console.log(channelBannedFrom, connectedChannel)
+    if (connectedChannel && connectedChannel.channelId === channelBannedFrom.channelId) {
+      setMessages([]);
+      setAttachedUserList([]);
+      setPrivilege(Privileges.MEMBER);
+      setConnectedChannel(undefined);
+    }
+    setChannelList((current: ChannelData[]) =>
+      current.filter(
+        (channel) => channel.channelId !== channelBannedFrom.channelId
+      )
+    );
+  }
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.GET_BANNED, handleBannedFromChannel);
     return () => {
@@ -291,7 +292,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
         handleBannedFromChannel,
       );
     };
-  }, []);
+  }, [connectedChannel]);
 
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
