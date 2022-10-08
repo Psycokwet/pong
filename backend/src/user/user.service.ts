@@ -315,7 +315,7 @@ export class UsersService {
   async setTwoFactorAuthentication(user: User, value: boolean) {
     await this.usersRepository.update(user.id, {
       isTwoFactorAuthenticationActivated: value,
-      isUserFullySignedUp: true,
+      isUserFullySignedUp: user.isUserFullySignedUp || value,
     });
   }
 

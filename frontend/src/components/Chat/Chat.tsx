@@ -34,7 +34,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   const [attachedUserList, setAttachedUserList] = useState<
     ChannelUserInterface[]
   >([]);
-  const [userPrivilege, setPrivilege] = useState<number>(Privileges.MEMBER);
+  const [userPrivilege, setUserPrivilege] = useState<number>(Privileges.MEMBER);
   const [avatarList, setAvatarList] = useState<UserAvatar[]>([]);
   const [channelList, setChannelList] = useState<ChannelData[]>([]);
 
@@ -79,8 +79,9 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   }, [attachedUserList]);
 
   /**  Set actual connectedChannel */
-  const channelListener = (channel: ChannelData) => {
-    setConnectedChannel(channel);
+  const channelListener = (channel: ChannelData | undefined) => {
+    console.log(channel)
+    setConnectedChannel((current: ChannelData | undefined) => { console.log(current, channel); return channel });
   };
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_CREATION, channelListener);
@@ -105,16 +106,16 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   }, [channelListener]);
 
   /**  Disconnect and clear page */
-  const disconnect = () => {
-    setMessages([]);
-    setConnectedChannel(undefined);
-  };
-  useEffect(() => {
-    socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
-    return () => {
-      socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
-    };
-  }, [disconnect]);
+  // const disconnect = () => {
+  //   setMessages([]);
+  //   // setConnectedChannel(undefined);
+  // };
+  // useEffect(() => {
+  //   socket?.on(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
+  //   return () => {
+  //     socket?.off(ROUTES_BASE.CHAT.CONFIRM_CHANNEL_DISCONNECTION, disconnect);
+  //   };
+  // }, [disconnect]);
 
   /**  Listen User list for channel */
   const resetAttachedUserList = (newList: ChannelUserInterface[]) => {
@@ -215,7 +216,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     if (connectedChannel) {
       setMessages([]);
       setAttachedUserList([]);
-      setPrivilege(Privileges.MEMBER);
+      setUserPrivilege(Privileges.MEMBER);
       setChannelList((current: ChannelData[]) =>
         current.filter((channel) => 
           connectedChannel && channel.channelId !== connectedChannel.channelId
@@ -224,20 +225,6 @@ function Chat({ socket }: { socket: Socket | undefined }) {
       setConnectedChannel(undefined);
     }
   };
-
-  const handleBannedFromChannel = (channelBannedFrom: ChannelData) => {
-    if (connectedChannel && connectedChannel.channelId === channelBannedFrom.channelId) {
-      setMessages([]);
-      setAttachedUserList([]);
-      setPrivilege(Privileges.MEMBER);
-      setConnectedChannel(undefined);
-    }
-    setChannelList((current: ChannelData[]) =>
-      current.filter(
-        (channel) => channel.channelId !== channelBannedFrom.channelId
-      )
-    );
-  }
 
   const handleLeaveChannel = () => {
     if (!connectedChannel) return;
@@ -248,7 +235,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
   };
 
   const youArePromoted = (privilege: Privileges) => {
-    setPrivilege(privilege);
+    setUserPrivilege(privilege);
   };
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.SET_ADMIN_CONFIRMATION, youArePromoted);
@@ -263,16 +250,17 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, []);
 
-  const setupPrivilege = (privilege: Privileges) => {
-    setPrivilege(privilege);
+  const setupPrivilege = (inComingPrivilege: Privileges) => {
+    console.log(inComingPrivilege, userPrivilege);
+    setUserPrivilege((current: Privileges) => inComingPrivilege);
   };
-  useEffect(() => {
-    if (connectedChannel)
-      socket?.emit(
-        ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST,
-        connectedChannel.channelId
-      );
-  }, [connectedChannel]);
+  // useEffect(() => {
+  //   if (connectedChannel)
+  //     socket?.emit(
+  //       ROUTES_BASE.CHAT.USER_PRIVILEGES_REQUEST,
+  //       connectedChannel.channelId
+  //     );
+  // }, [connectedChannel]);
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, setupPrivilege);
     return () => {
@@ -283,6 +271,20 @@ function Chat({ socket }: { socket: Socket | undefined }) {
     };
   }, []);
 
+  const handleBannedFromChannel = (channelBannedFrom: ChannelData) => {
+    console.log(channelBannedFrom, connectedChannel)
+    if (connectedChannel && connectedChannel.channelId === channelBannedFrom.channelId) {
+      setMessages([]);
+      setAttachedUserList([]);
+      setUserPrivilege(Privileges.MEMBER);
+      setConnectedChannel(undefined);
+    }
+    setChannelList((current: ChannelData[]) =>
+      current.filter(
+        (channel) => channel.channelId !== channelBannedFrom.channelId
+      )
+    );
+  }
   useEffect(() => {
     socket?.on(ROUTES_BASE.CHAT.GET_BANNED, handleBannedFromChannel);
     return () => {
@@ -291,7 +293,7 @@ function Chat({ socket }: { socket: Socket | undefined }) {
         handleBannedFromChannel,
       );
     };
-  }, []);
+  }, [connectedChannel]);
 
   return (
     <div className="bg-black text-white h-7/8 grid grid-cols-5 grid-rows-6 gap-4">
