@@ -34,6 +34,7 @@ import { Status } from 'shared/interfaces/UserStatus';
 import { UsersWebsockets } from 'shared/interfaces/UserWebsockets';
 import { Privileges } from 'shared/interfaces/UserPrivilegesEnum';
 import Room from './room.entity';
+import { User } from 'src/user/user.entity';
 
 async function crypt(password: string): Promise<string> {
   return bcrypt.genSalt(10).then((s) => bcrypt.hash(password, s));
@@ -49,7 +50,7 @@ async function passwordCompare(
 type UserRoom = {
   userId: number;
   roomName: string;
-}
+};
 
 @WebSocketGateway({
   transport: ['websocket'],
@@ -74,7 +75,7 @@ export class ChatGateway implements OnGatewayConnection {
         throw new WsException(ChatGateway.UserNotFound);
       }
 
-      console.log(user)
+      console.log(user);
 
       const userRoom: UserRoom = this.chatService.findUserRoom(user.id);
 
@@ -422,7 +423,7 @@ export class ChatGateway implements OnGatewayConnection {
     let privileges = Privileges.MEMBER;
     if (payload.userId === room.owner.id) {
       privileges = Privileges.OWNER;
-    } else if (room.admins.includes(payload.userId)) {
+    } else if (room.admins.find((user: User) => user.id === payload.userId)) {
       privileges = Privileges.ADMIN;
     }
     client.emit(ROUTES_BASE.CHAT.USER_PRIVILEGES_CONFIRMATION, privileges);
@@ -693,7 +694,7 @@ export class ChatGateway implements OnGatewayConnection {
       const channelBannedFrom: ChannelData = {
         channelName: room.channelName,
         channelId: room.id,
-      }
+      };
       bannedSocket.emit(ROUTES_BASE.CHAT.GET_BANNED, channelBannedFrom);
       await bannedSocket.leave(room.roomName);
     }

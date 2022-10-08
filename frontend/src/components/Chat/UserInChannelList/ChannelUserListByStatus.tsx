@@ -39,28 +39,34 @@ const ChannelUserListByStatus: React.FC<ChannelUserListByStatusProps> = ({
         <p>{statusList.groupName}</p>
       </div>
 
-      {
-        userList?.sort(
-            (userA: ChannelUserInterface, userB: ChannelUserInterface) => {
-              return userA.id > userB.id;
-            }
-          )
-          .filter((user: ChannelUserInterface) => user.status === statusList.status)
-          .map((user: ChannelUserInterface) => {
-            return (
-              <ChannelUserMenu
-                channelName={channelName}
-                userPrivilege={userPrivilege}
-                key={user.id}
-                pointedUser={user}
-                inputFilter={inputFilter}
-                socket={socket}
-                menuSettings={menuSettings}
-                blockedUserList={blockedUserList}
-              />
-            );
-          })
-      }
+      {userList
+        ?.sort(
+          (
+            userA: ChannelUserInterface,
+            userB: ChannelUserInterface
+          ): number => {
+            if (userA.id > userB.id) return 1;
+            if (userA.id < userB.id) return -1;
+            return 0;
+          }
+        )
+        .filter(
+          (user: ChannelUserInterface) => user.status === statusList.status
+        )
+        .map((user: ChannelUserInterface) => {
+          return (
+            <ChannelUserMenu
+              channelName={channelName}
+              userPrivilege={userPrivilege}
+              key={user.id}
+              pointedUser={user}
+              inputFilter={inputFilter}
+              socket={socket}
+              menuSettings={menuSettings}
+              blockedUserList={blockedUserList}
+            />
+          );
+        })}
     </>
   );
 };
