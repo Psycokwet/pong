@@ -1,15 +1,18 @@
-import { MenuItem } from '@szhsin/react-menu';
-import { Link } from "react-router-dom";
+import { MenuItem } from "@szhsin/react-menu";
+import { useNavigate } from "react-router-dom";
 
 import { MenuSettingsType } from "../MenuSettings";
 
-const Watch = ({menuSettings}:{menuSettings:MenuSettingsType}) => {
-  const watch = () => {}
+const Watch = ({ menuSettings }: { menuSettings: MenuSettingsType }) => {
+  const navigate = useNavigate();
+  const watch = () => {
+    navigate("/play");
+  };
   return (
-    <MenuItem className={ menuSettings.watch ? "" : "hidden" }>
-      <Link to="/play" onClick={watch}>Watch</Link>
+    <MenuItem className={menuSettings.watch ? "" : "hidden"} onClick={watch}>
+      Watch
     </MenuItem>
   );
-}
+};
 
-export default Watch
+export default Watch;

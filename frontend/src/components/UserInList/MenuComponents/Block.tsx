@@ -13,11 +13,7 @@ const Block = ({
   const blockfunction = () => {
     socket?.emit(ROUTES_BASE.USER.BLOCK_USER_REQUEST, { id: user.id });
   };
-  return (
-    <MenuItem>
-      <div onClick={blockfunction}>Block</div>
-    </MenuItem>
-  );
+  return <MenuItem onClick={blockfunction}>Block</MenuItem>;
 };
 
 export default Block;
