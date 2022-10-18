@@ -39,7 +39,7 @@ export class GameService {
       speed: { x: 0, y: 0 },
     },
   };
-  private static gameRoomList: GameRoom[] = [];
+  public static gameRoomList: GameRoom[] = [];
 
   private MAX_SPEED = 10;
   private ENDGAME_POINT = 10;
@@ -102,31 +102,45 @@ export class GameService {
     return gameData;
   }
 
-  findUserRoom(userId: number): GameRoom | undefined {
-    let index = GameService.gameRoomList.findIndex(
-      (gameRoom) =>
-        gameRoom.gameData.player1.userId === userId ||
-        gameRoom.gameData.player2.userId === userId ||
-        gameRoom.spectatorsId.includes(userId),
-    );
-    return GameService.gameRoomList[index]; // can be -1, so undefined
-  }
-
   findPlayerRoom(userId: number): GameRoom | undefined {
     let index = GameService.gameRoomList.findIndex(
       (gameRoom) =>
-        gameRoom.gameData.player1.userId === userId ||
-        gameRoom.gameData.player2.userId === userId,
+        (
+          gameRoom.gameData.player1.userId === userId
+          ||
+          gameRoom.gameData.player2.userId === userId
+        )
+        &&
+        gameRoom.started === true
+        ,
     );
     return GameService.gameRoomList[index]; // can be -1, so undefined
   }
 
-  findPlayerRoomForStatus(userId: number): GameRoom | undefined {
+  findUserRoom(userId, isChallenge: boolean, isStarted: boolean): GameRoom | undefined {
     let index = GameService.gameRoomList.findIndex(
       (gameRoom) =>
-        (gameRoom.gameData.player1.userId === userId ||
-          gameRoom.gameData.player2.userId === userId) &&
-        gameRoom.started === true,
+        (
+          gameRoom.gameData.player1.userId === userId ||
+          gameRoom.gameData.player2.userId === userId ||
+          gameRoom.spectatorsId.includes(userId)
+        )
+        &&
+        gameRoom.isChallenge === isChallenge
+        &&
+        gameRoom.started === isStarted,
+    );
+    return GameService.gameRoomList[index]; // can be -1, so undefined
+  }
+
+  findChallengerRoom(userId) {
+    let index = GameService.gameRoomList.findIndex(
+      (gameRoom) =>
+        gameRoom.gameData.player1.userId === userId
+        &&
+        gameRoom.isChallenge === true
+        &&
+        gameRoom.started === false,
     );
     return GameService.gameRoomList[index]; // can be -1, so undefined
   }
@@ -326,8 +340,11 @@ export class GameService {
   }
 
   public cancelMatchMaking(userId: number) {
-    const gameRoomToErase: GameRoom = this.findPlayerRoom(userId);
+    let gameRoomToErase: GameRoom = this.findChallengerRoom(userId);
 
+    if (gameRoomToErase === undefined) {
+      gameRoomToErase = this.findUserRoom(userId, false, false);
+    }
     GameService.gameRoomList = GameService.gameRoomList.filter(
       (gameRoom) => gameRoom.roomName !== gameRoomToErase.roomName,
     );
