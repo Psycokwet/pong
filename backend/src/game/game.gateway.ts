@@ -41,9 +41,19 @@ export class GameGateway implements OnGatewayConnection {
         throw new WsException(GameGateway.UserNotFound);
       }
 
-      const gameRoom: GameRoom = this.gameService.findUserRoom(user.id);
+      // console.log(GameService.gameRoomList);
 
-      if (!gameRoom) return;
+      let gameRoom: GameRoom = this.gameService.findPlayerRoom(user.id); // is playing
+      if (!gameRoom)
+        gameRoom = this.gameService.findChallengerRoom(user.id); // is challenging
+      if (!gameRoom)
+        gameRoom = this.gameService.findUserRoom(user.id, false, true); // is watching
+      if (!gameRoom)
+        gameRoom = this.gameService.findUserRoom(user.id, true, true); // is watching
+      if (!gameRoom)
+        gameRoom = this.gameService.findUserRoom(user.id, false, false); // is in matchMaking
+
+      if (!gameRoom) return; // nothing
       if (
         user.id === gameRoom.gameData.player1.userId ||
         gameRoom.started === true
@@ -187,11 +197,17 @@ export class GameGateway implements OnGatewayConnection {
   @UseGuards(JwtWsGuard)
   @SubscribeMessage(ROUTES_BASE.GAME.RECONNECT_GAME_REQUEST)
   async reconnectGame(@UserPayload() payload: any) {
-    const gameRoom: GameRoom = this.gameService.findUserRoom(payload.userId);
+    let gameRoom: GameRoom = this.gameService.findPlayerRoom(payload.userId); // is playing
+    if (!gameRoom)
+      gameRoom = this.gameService.findChallengerRoom(payload.userId); // is challenging
+    if (!gameRoom)
+      gameRoom = this.gameService.findUserRoom(payload.userId, false, true); // is watching
+    if (!gameRoom)
+      gameRoom = this.gameService.findUserRoom(payload.userId, true, true); // is watching
+    if (!gameRoom)
+      gameRoom = this.gameService.findUserRoom(payload.userId, false, false); // is in matchMaking
 
-    if (gameRoom === undefined) {
-      return;
-    }
+    if (!gameRoom) return; // nothing
 
     if (
       gameRoom.gameData.player1.userId === payload.userId ||
