@@ -75,7 +75,7 @@ export class ChatGateway implements OnGatewayConnection {
         throw new WsException(ChatGateway.UserNotFound);
       }
 
-      console.log(user);
+      client.join(this.channelLobby);
 
       const userRoom: UserRoom = this.chatService.findUserRoom(user.id);
 
